@@ -1,0 +1,32 @@
+# Ambiente de prueba. {$DOMINIO} viene del .env.prod; Caddy obtiene y renueva el certificado HTTPS solo.
+# HTTPS es obligatorio: sin él la cámara del celular (lector de código de barras) no funciona.
+{$DOMINIO} {
+	encode zstd gzip
+
+	# API: mismo origen que el frontend, así la cookie de refresco (SameSite=Strict) viaja sola.
+	handle /api/* {
+		reverse_proxy backend:8080
+	}
+
+	# Frontend (SPA): toda ruta desconocida devuelve index.html.
+	handle {
+		root * /srv
+		try_files {path} /index.html
+		file_server
+	}
+
+	header {
+		Strict-Transport-Security "max-age=31536000"
+		X-Content-Type-Options "nosniff"
+		X-Frame-Options "DENY"
+		Referrer-Policy "strict-origin-when-cross-origin"
+		Permissions-Policy "camera=(self), microphone=(), geolocation=()"
+		-Server
+	}
+
+	# El service worker y el index tienen que revalidarse siempre para que las actualizaciones lleguen.
+	@sinCache path /index.html /sw.js /registerSW.js /manifest.webmanifest
+	header @sinCache Cache-Control "no-cache"
+	@assets path /assets/*
+	header @assets Cache-Control "public, max-age=31536000, immutable"
+}

@@ -11,9 +11,9 @@ spring:
 vastio:
   seguridad:
     jwt-secreto: ${VASTIO_JWT_SECRETO:solo-para-desarrollo-local-no-usar-en-otro-lado}
-  dev:
-    admin-usuario: ${VASTIO_ADMIN_USUARIO:direccion}
-    admin-contrasena: ${VASTIO_ADMIN_CONTRASENA:}
+  usuario-inicial:
+    usuario: ${VASTIO_ADMIN_USUARIO:direccion}
+    contrasena: ${VASTIO_ADMIN_CONTRASENA:}
 
 springdoc:
   api-docs:

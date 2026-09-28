@@ -1,0 +1,87 @@
+# Ambiente de prueba: base + backend + frontend con Caddy (HTTPS automático) + respaldo diario.
+# Uso (en el servidor): docker compose -f docker-compose.prod.yml --env-file .env.prod up -d --build
+# Guía completa: docs/despliegue.md
+name: vastio-prueba
+
+services:
+  db:
+    image: postgres:17
+    environment:
+      POSTGRES_DB: ${DB_NAME:-vastio}
+      POSTGRES_USER: ${DB_USER:-vastio}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:?Falta DB_PASSWORD en .env.prod}
+      TZ: America/Argentina/Cordoba
+      PGTZ: America/Argentina/Cordoba
+    volumes:
+      - datos-db:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+    restart: unless-stopped
+    # Sin puertos publicados: la base solo es accesible desde los otros contenedores.
+
+  backend:
+    build: ./backend
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://db:5432/${DB_NAME:-vastio}
+      SPRING_DATASOURCE_USERNAME: ${DB_USER:-vastio}
+      SPRING_DATASOURCE_PASSWORD: ${DB_PASSWORD}
+      VASTIO_JWT_SECRETO: ${VASTIO_JWT_SECRETO:?Falta VASTIO_JWT_SECRETO en .env.prod}
+      # Solo en la primera puesta en marcha: crea el usuario inicial de Dirección (ver docs/despliegue.md).
+      SPRING_PROFILES_ACTIVE: ${SPRING_PROFILES_ACTIVE:-}
+      VASTIO_ADMIN_USUARIO: ${VASTIO_ADMIN_USUARIO:-direccion}
+      VASTIO_ADMIN_CONTRASENA: ${VASTIO_ADMIN_CONTRASENA:-}
+    depends_on:
+      db:
+        condition: service_healthy
+    restart: unless-stopped
+
+  web:
+    build: ./frontend
+    environment:
+      DOMINIO: ${DOMINIO:?Falta DOMINIO en .env.prod}
+    ports:
+      - "80:80"
+      - "443:443"
+      - "443:443/udp"
+    volumes:
+      - ./deploy/Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy-datos:/data
+      - caddy-config:/config
+    depends_on:
+      backend:
+        condition: service_healthy
+    restart: unless-stopped
+
+  # Un pg_dump por día a ./respaldos, se conservan 14. Espera al backend para respaldar la base ya migrada.
+  # Copiarlos fuera del servidor: ver docs/despliegue.md.
+  respaldo:
+    image: postgres:17
+    environment:
+      PGHOST: db
+      PGDATABASE: ${DB_NAME:-vastio}
+      PGUSER: ${DB_USER:-vastio}
+      PGPASSWORD: ${DB_PASSWORD}
+      TZ: America/Argentina/Cordoba
+    volumes:
+      - ./respaldos:/respaldos
+    entrypoint: ["/bin/sh", "-c"]
+    command:
+      - |
+        while true; do
+          archivo=/respaldos/vastio-$$(date +%Y%m%d-%H%M).dump
+          if pg_dump -Fc -f "$$archivo"; then echo "Respaldo $$archivo"; else echo "Falló el respaldo" >&2; rm -f "$$archivo"; fi
+          find /respaldos -name 'vastio-*.dump' -mtime +14 -delete
+          sleep 86400
+        done
+    depends_on:
+      backend:
+        condition: service_healthy
+    restart: unless-stopped
+
+volumes:
+  datos-db:
+  caddy-datos:
+  caddy-config:

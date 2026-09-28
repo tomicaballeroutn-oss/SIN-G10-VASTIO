@@ -22,6 +22,10 @@ springdoc:
   swagger-ui:
     enabled: false
 
+server:
+  # Detrás de Caddy: respeta X-Forwarded-Proto y X-Forwarded-For.
+  forward-headers-strategy: framework
+
 management:
   endpoints:
     web:

@@ -1,0 +1,6 @@
+# Primer arranque del ambiente de prueba: crea el usuario inicial de Dirección (UsuarioInicial).
+# Se activa con SPRING_PROFILES_ACTIVE=puesta-en-marcha y se quita después (ver docs/despliegue.md).
+vastio:
+  usuario-inicial:
+    usuario: ${VASTIO_ADMIN_USUARIO:direccion}
+    contrasena: ${VASTIO_ADMIN_CONTRASENA:}

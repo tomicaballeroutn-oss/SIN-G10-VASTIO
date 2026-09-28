@@ -320,3 +320,11 @@ h2.h2, h3.h3, h3.h4 { margin: 0; color: var(--ink); }
 .v-pip--en-curso { background: radial-gradient(circle at center, var(--surface) 0 2px, var(--s) 2.5px); border: 1.5px solid var(--s); }
 .v-pip--cerrado { background: linear-gradient(135deg, var(--s) 0 40%, var(--surface) 40% 60%, var(--s) 60%); border: 1.5px solid var(--s); }
 .v-pip--liberada { border: 1.5px solid var(--line); background: transparent; }
+
+/* ---------- Logo (agregado en el port) ---------- */
+.v-brand { display: inline-flex; }
+.v-brand img { display: block; width: 100%; height: auto; }
+.v-brand__oscuro { display: none !important; }
+[data-theme="dark"] .v-brand__claro { display: none !important; }
+[data-theme="dark"] .v-brand__oscuro { display: block !important; }
+.v-brand--marca { width: 28px; }

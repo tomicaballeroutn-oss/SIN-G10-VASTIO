@@ -124,6 +124,21 @@ export async function cerrarSesion(): Promise<void> {
   }
 }
 
+/**
+ * Cierre por inactividad (UI-02): borra la cookie en el servidor pero avisa `vencida`, no `cerrada`,
+ * para que la pantalla quede montada y la persona vuelva a ingresar sin perder lo que estaba cargando.
+ */
+export async function vencerSesion(): Promise<void> {
+  tokenAcceso = null;
+  try {
+    await api<void>('/auth/logout', { metodo: 'POST' });
+  } catch {
+    // si no hay conexión, la cookie vence sola
+  } finally {
+    avisar({ tipo: 'vencida' });
+  }
+}
+
 /** Solo para tests. */
 export function _reiniciarCliente() {
   tokenAcceso = null;

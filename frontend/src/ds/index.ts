@@ -18,6 +18,7 @@ export {
   type CardProps, type TableColumn, type TableProps, type TabItem, type TabsProps, type ActorProps, type StatProps, type TimelineItem,
 } from './components/datos';
 export { Nav, type NavItem, type NavProps } from './components/Nav';
+export { Logo, type LogoProps } from './components/Logo';
 export { AgendaGrid, EventCard, type AgendaEvent, type AgendaGridProps, type EventCardProps } from './components/agenda';
 export { StockLevel, MovementCard, type StockLevelProps, type MovementCardProps } from './components/stock';
 export { aplicarTema, temaGuardado, type Tema } from './tema';

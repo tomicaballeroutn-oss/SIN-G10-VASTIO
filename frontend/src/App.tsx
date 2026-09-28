@@ -1,12 +1,13 @@
 import { createBrowserRouter, RouterProvider } from 'react-router';
-import { PaginaDs } from './features/ds/PaginaDs';
-import { Inicio } from './features/inicio/Inicio';
+import { SesionProvider } from './features/sesion/SesionProvider';
+import { rutas } from './rutas';
 
-const router = createBrowserRouter([
-  { path: '/', element: <Inicio /> },
-  { path: '/_ds', element: <PaginaDs /> },
-]);
+const router = createBrowserRouter(rutas);
 
 export function App() {
-  return <RouterProvider router={router} />;
+  return (
+    <SesionProvider>
+      <RouterProvider router={router} />
+    </SesionProvider>
+  );
 }

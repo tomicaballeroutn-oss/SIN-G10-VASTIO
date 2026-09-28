@@ -1,0 +1,15 @@
+/* Solo para la página de catálogo /_ds. Maqueta, no componentes. */
+.ds-pagina { max-width: var(--content-max); margin: 0 auto; padding: var(--space-6) var(--space-4) var(--space-16); display: flex; flex-direction: column; gap: var(--space-8); }
+@media (min-width: 640px) { .ds-pagina { padding-inline: var(--space-6); } }
+.ds-cabecera { display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between; gap: var(--space-4); }
+.ds-seccion { display: flex; flex-direction: column; gap: var(--space-4); padding-top: var(--space-6); border-top: 1px solid var(--line); }
+.ds-muestra { display: flex; flex-wrap: wrap; align-items: flex-start; gap: var(--space-4); }
+.ds-muestra > .v-card, .ds-muestra > .v-stat, .ds-muestra > .v-stock { flex: 1 1 280px; }
+.ds-muestra > .v-table-wrap { flex: 1 1 100%; }
+.ds-columna { display: flex; flex-direction: column; gap: var(--space-3); width: 100%; max-width: 720px; }
+.ds-formulario { display: grid; grid-template-columns: 1fr; gap: var(--space-4); width: 100%; }
+@media (min-width: 640px) { .ds-formulario { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+.ds-icono { display: flex; flex-direction: column; align-items: center; gap: var(--space-1); width: 88px; color: var(--ink); }
+.ds-nav-lateral { height: 360px; }
+.ds-nav-inferior { width: 100%; max-width: 420px; }
+.ds-agenda { width: 100%; max-width: 760px; }

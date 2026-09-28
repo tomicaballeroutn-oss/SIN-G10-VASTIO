@@ -1,0 +1,4 @@
+/* Punto de entrada de estilos del sistema de diseño. Se importa una sola vez en main.tsx. */
+@import './tokens.css';
+@import './tipografia.css';
+@import './componentes.css';

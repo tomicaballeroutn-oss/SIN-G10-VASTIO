@@ -1,0 +1,16 @@
+spring:
+  application:
+    name: vastio
+  jpa:
+    open-in-view: false
+    hibernate:
+      # El esquema lo maneja Flyway; Hibernate solo verifica que las entidades coincidan.
+      ddl-auto: validate
+  flyway:
+    locations: classpath:db/migration
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health

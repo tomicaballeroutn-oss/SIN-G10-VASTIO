@@ -1,0 +1,20 @@
+<!-- @dsCard group="Feedback" height=330 subtitle="Cuando no hay nada para mostrar, decí qué hacer" -->
+<style>
+html,body{margin:0}
+body{padding:20px;background:var(--canvas);color:var(--ink);font:400 16px/24px var(--font-sans)}
+.row{display:flex;flex-wrap:wrap;gap:16px;align-items:center}
+.col{display:flex;flex-direction:column;gap:20px}
+.grid{display:grid;gap:16px;grid-template-columns:repeat(auto-fit,minmax(260px,1fr))}
+.cap{margin:0 0 8px;color:var(--ink-muted)}
+.w-sm{max-width:360px}.w-md{max-width:560px}
+</style>
+
+<div id="root"></div>
+<script>
+const V=window.Vastio,$=React.createElement,{useState}=React;
+const cap=(t)=>$("p",{className:"overline cap"},t);
+
+function App(){return $('div',{style:{background:'var(--surface)',border:'1px solid var(--line)',borderRadius:'var(--radius-lg)'}},
+ $(V.EmptyState,{icon:'clipboard-list',title:'Todavía no hay entregas para este evento',action:$(V.Button,{icon:'plus'},'Registrar entrega')},'Cuando la barra retire bebida del depósito, vas a ver acá cada movimiento con quién lo hizo y a qué hora.'));}
+ReactDOM.createRoot(document.getElementById("root")).render($(App));
+</script>

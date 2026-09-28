@@ -1,0 +1,20 @@
+<!-- @dsCard group="Feedback" height=120 subtitle="Etiqueta corta para un dato; el color es apoyo, no el mensaje" -->
+<style>
+html,body{margin:0}
+body{padding:20px;background:var(--canvas);color:var(--ink);font:400 16px/24px var(--font-sans)}
+.row{display:flex;flex-wrap:wrap;gap:16px;align-items:center}
+.col{display:flex;flex-direction:column;gap:20px}
+.grid{display:grid;gap:16px;grid-template-columns:repeat(auto-fit,minmax(260px,1fr))}
+.cap{margin:0 0 8px;color:var(--ink-muted)}
+.w-sm{max-width:360px}.w-md{max-width:560px}
+</style>
+
+<div id="root"></div>
+<script>
+const V=window.Vastio,$=React.createElement,{useState}=React;
+const cap=(t)=>$("p",{className:"overline cap"},t);
+
+function App(){return $('div',{className:'col'},
+ $('div',{className:'row'},$(V.Badge,null,'Borrador'),$(V.Badge,{tone:'brand'},'Módulo A'),$(V.Badge,{tone:'accent',icon:'sparkles'},'Nuevo'),$(V.Badge,{tone:'success',icon:'check'},'Al día'),$(V.Badge,{tone:'warning',icon:'triangle-alert'},'Sin planner'),$(V.Badge,{tone:'danger',icon:'circle-x'},'Vencido'),$(V.Badge,{tone:'info',icon:'info'},'3 cambios')));}
+ReactDOM.createRoot(document.getElementById("root")).render($(App));
+</script>

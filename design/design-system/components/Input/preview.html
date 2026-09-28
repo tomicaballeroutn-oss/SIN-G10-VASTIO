@@ -1,0 +1,26 @@
+<!-- @dsCard group="Formularios" height=420 subtitle="Campo de texto con etiqueta, ayuda y error" -->
+<style>
+html,body{margin:0}
+body{padding:20px;background:var(--canvas);color:var(--ink);font:400 16px/24px var(--font-sans)}
+.row{display:flex;flex-wrap:wrap;gap:16px;align-items:center}
+.col{display:flex;flex-direction:column;gap:20px}
+.grid{display:grid;gap:16px;grid-template-columns:repeat(auto-fit,minmax(260px,1fr))}
+.cap{margin:0 0 8px;color:var(--ink-muted)}
+.w-sm{max-width:360px}.w-md{max-width:560px}
+</style>
+
+<div id="root"></div>
+<script>
+const V=window.Vastio,$=React.createElement,{useState}=React;
+const cap=(t)=>$("p",{className:"overline cap"},t);
+
+function App(){return $('div',{className:'grid'},
+ $(V.Input,{label:'Cliente',placeholder:'Nombre y apellido',icon:'user'}),
+ $(V.Input,{label:'Cantidad de invitados',type:'number',inputMode:'numeric',defaultValue:'160',suffix:'invitados',hint:'Podés ajustarla hasta el cierre.'}),
+ $(V.Input,{label:'Seña',defaultValue:'0',suffix:'ARS',error:'Ingresá el monto de la seña para confirmar la reserva.'}),
+ $(V.Input,{label:'Observaciones',multiline:true,optional:true,placeholder:'Servicios contratados, pedidos especiales…'}),
+ $(V.Input,{label:'Usuario',defaultValue:'lferreyra',disabled:true}),
+ $(V.Input,{label:'Contraseña',type:'password',size:'lg',defaultValue:'clave-de-prueba'})
+);}
+ReactDOM.createRoot(document.getElementById("root")).render($(App));
+</script>

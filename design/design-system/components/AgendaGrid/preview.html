@@ -1,0 +1,21 @@
+<!-- @dsCard group="Agenda (Módulo A)" height=700 subtitle="Los seis turnos de cada día en una sola celda: salón por columna, turno por fila" -->
+<style>
+html,body{margin:0}
+body{padding:20px;background:var(--canvas);color:var(--ink);font:400 16px/24px var(--font-sans)}
+.row{display:flex;flex-wrap:wrap;gap:16px;align-items:center}
+.col{display:flex;flex-direction:column;gap:20px}
+.grid{display:grid;gap:16px;grid-template-columns:repeat(auto-fit,minmax(260px,1fr))}
+.cap{margin:0 0 8px;color:var(--ink-muted)}
+.w-sm{max-width:360px}.w-md{max-width:560px}
+</style>
+
+<div id="root"></div>
+<script>
+const V=window.Vastio,$=React.createElement,{useState}=React;
+const cap=(t)=>$("p",{className:"overline cap"},t);
+
+const events=[{"date": "2026-09-04", "salon": "avril", "turno": "noche", "status": "confirmado"}, {"date": "2026-09-04", "salon": "club", "turno": "noche", "status": "senado"}, {"date": "2026-09-05", "salon": "avril", "turno": "noche", "status": "confirmado"}, {"date": "2026-09-05", "salon": "santa-barbara", "turno": "noche", "status": "confirmado"}, {"date": "2026-09-05", "salon": "club", "turno": "mediodia", "status": "senado"}, {"date": "2026-09-11", "salon": "club", "turno": "noche", "status": "realizado"}, {"date": "2026-09-12", "salon": "avril", "turno": "noche", "status": "realizado"}, {"date": "2026-09-12", "salon": "club", "turno": "noche", "status": "realizado"}, {"date": "2026-09-12", "salon": "santa-barbara", "turno": "noche", "status": "realizado"}, {"date": "2026-09-18", "salon": "santa-barbara", "turno": "noche", "status": "realizado"}, {"date": "2026-09-19", "salon": "avril", "turno": "noche", "status": "realizado"}, {"date": "2026-09-19", "salon": "club", "turno": "mediodia", "status": "realizado"}, {"date": "2026-09-25", "salon": "avril", "turno": "noche", "status": "confirmado"}, {"date": "2026-09-26", "salon": "avril", "turno": "noche", "status": "confirmado"}, {"date": "2026-09-26", "salon": "club", "turno": "noche", "status": "prereserva"}, {"date": "2026-09-26", "salon": "santa-barbara", "turno": "noche", "status": "senado"}, {"date": "2026-09-27", "salon": "avril", "turno": "mediodia", "status": "senado"}, {"date": "2026-09-30", "salon": "avril", "turno": "noche", "status": "bloqueado"}, {"date": "2026-09-30", "salon": "club", "turno": "noche", "status": "bloqueado"}, {"date": "2026-09-30", "salon": "santa-barbara", "turno": "noche", "status": "bloqueado"}, {"date": "2026-09-22", "salon": "club", "turno": "noche", "status": "confirmado"}, {"date": "2026-09-13", "salon": "santa-barbara", "turno": "mediodia", "status": "realizado"}];
+function App(){const [sel,setSel]=useState('2026-09-26');const [m,setM]=useState(8);
+ return $('div',{style:{maxWidth:760}},$(V.AgendaGrid,{year:2026,month:m,events:m===8?events:[],today:'2026-09-21',selected:sel,onSelectDay:setSel,onPrev:()=>setM((m+11)%12),onNext:()=>setM((m+1)%12)}));}
+ReactDOM.createRoot(document.getElementById("root")).render($(App));
+</script>

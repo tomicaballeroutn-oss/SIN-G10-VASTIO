@@ -1,0 +1,24 @@
+<!-- @dsCard group="Feedback" height=470 subtitle="Aviso en línea: siempre con ícono y texto" -->
+<style>
+html,body{margin:0}
+body{padding:20px;background:var(--canvas);color:var(--ink);font:400 16px/24px var(--font-sans)}
+.row{display:flex;flex-wrap:wrap;gap:16px;align-items:center}
+.col{display:flex;flex-direction:column;gap:20px}
+.grid{display:grid;gap:16px;grid-template-columns:repeat(auto-fit,minmax(260px,1fr))}
+.cap{margin:0 0 8px;color:var(--ink-muted)}
+.w-sm{max-width:360px}.w-md{max-width:560px}
+</style>
+
+<div id="root"></div>
+<script>
+const V=window.Vastio,$=React.createElement,{useState}=React;
+const cap=(t)=>$("p",{className:"overline cap"},t);
+
+function App(){return $('div',{className:'col w-md',style:{maxWidth:640}},
+ $(V.Alert,{tone:'success',title:'Seña registrada'},'El evento pasó a Señado. Quedó a nombre de Lucía Ferreyra, hoy 14:32.'),
+ $(V.Alert,{tone:'info',title:'Pre-reserva activa'},'Avril · sáb 14 nov · noche está apartada. Liberala si el cliente no avanza.',),
+ $(V.Alert,{tone:'warning',title:'Faltan 6 cajones de Fernet',},'La agenda de noviembre necesita más de lo que hay en el depósito.'),
+ $(V.Alert,{tone:'danger',title:'Esa fecha ya está tomada',action:$(V.Button,{variant:'outline',size:'sm',tone:'danger'},'Ver evento')},'Avril · sáb 14 nov · noche ya está señada. Elegí otro salón, otra fecha u otro turno.')
+);}
+ReactDOM.createRoot(document.getElementById("root")).render($(App));
+</script>

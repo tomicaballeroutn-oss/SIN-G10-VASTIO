@@ -1,0 +1,21 @@
+<!-- @dsCard group="Agenda (Módulo A)" height=340 subtitle="Resumen de un evento para listas y búsquedas" -->
+<style>
+html,body{margin:0}
+body{padding:20px;background:var(--canvas);color:var(--ink);font:400 16px/24px var(--font-sans)}
+.row{display:flex;flex-wrap:wrap;gap:16px;align-items:center}
+.col{display:flex;flex-direction:column;gap:20px}
+.grid{display:grid;gap:16px;grid-template-columns:repeat(auto-fit,minmax(260px,1fr))}
+.cap{margin:0 0 8px;color:var(--ink-muted)}
+.w-sm{max-width:360px}.w-md{max-width:560px}
+</style>
+
+<div id="root"></div>
+<script>
+const V=window.Vastio,$=React.createElement,{useState}=React;
+const cap=(t)=>$("p",{className:"overline cap"},t);
+
+function App(){return $('div',{className:'grid',style:{gridTemplateColumns:'repeat(auto-fit,minmax(320px,1fr))'}},
+ $(V.EventCard,{salon:'avril',status:'confirmado',tipo:'Fiesta de quince',title:'Quince de Valentina R.',fecha:'Sáb 26 sep',turno:'Noche · desde 21:00',invitados:160,vendedora:'Lucía Ferreyra',planner:'Julieta Ruiz',onOpen:()=>{}}),
+ $(V.EventCard,{salon:'club',status:'prereserva',tipo:'Casamiento',title:'Casamiento Paz–Ledesma',fecha:'Sáb 26 sep',turno:'Noche · desde 21:00',invitados:120,vendedora:'Carolina Paz',onOpen:()=>{}}));}
+ReactDOM.createRoot(document.getElementById("root")).render($(App));
+</script>

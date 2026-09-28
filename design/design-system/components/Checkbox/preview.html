@@ -1,0 +1,23 @@
+<!-- @dsCard group="Formularios" height=200 subtitle="Casilla con etiqueta y ayuda opcional" -->
+<style>
+html,body{margin:0}
+body{padding:20px;background:var(--canvas);color:var(--ink);font:400 16px/24px var(--font-sans)}
+.row{display:flex;flex-wrap:wrap;gap:16px;align-items:center}
+.col{display:flex;flex-direction:column;gap:20px}
+.grid{display:grid;gap:16px;grid-template-columns:repeat(auto-fit,minmax(260px,1fr))}
+.cap{margin:0 0 8px;color:var(--ink-muted)}
+.w-sm{max-width:360px}.w-md{max-width:560px}
+</style>
+
+<div id="root"></div>
+<script>
+const V=window.Vastio,$=React.createElement,{useState}=React;
+const cap=(t)=>$("p",{className:"overline cap"},t);
+
+function App(){return $('div',{className:'col w-md'},
+ $(V.Checkbox,{label:'Evento de egresados',hint:'Habilita los tres segmentos de asistencia.',defaultChecked:true}),
+ $(V.Checkbox,{label:'Servicio de planner incluido'}),
+ $(V.Checkbox,{label:'Bloqueo por mantenimiento',disabled:true})
+);}
+ReactDOM.createRoot(document.getElementById("root")).render($(App));
+</script>

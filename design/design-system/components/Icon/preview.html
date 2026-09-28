@@ -1,0 +1,23 @@
+<!-- @dsCard group="Fundamentos" height=560 subtitle="Lucide, trazo 2px, hereda el color del texto" -->
+<style>
+html,body{margin:0}
+body{padding:20px;background:var(--canvas);color:var(--ink);font:400 16px/24px var(--font-sans)}
+.row{display:flex;flex-wrap:wrap;gap:16px;align-items:center}
+.col{display:flex;flex-direction:column;gap:20px}
+.grid{display:grid;gap:16px;grid-template-columns:repeat(auto-fit,minmax(260px,1fr))}
+.cap{margin:0 0 8px;color:var(--ink-muted)}
+.w-sm{max-width:360px}.w-md{max-width:560px}
+</style>
+
+<div id="root"></div>
+<script>
+const V=window.Vastio,$=React.createElement,{useState}=React;
+const cap=(t)=>$("p",{className:"overline cap"},t);
+
+const names=["calendar-days", "calendar-check", "calendar-clock", "calendar-x", "calendar-plus", "plus", "minus", "x", "check", "chevron-left", "chevron-right", "chevron-down", "search", "funnel", "user", "users", "log-out", "settings", "warehouse", "boxes", "wine", "glass-water", "arrow-right-left", "undo-2", "truck", "clipboard-list", "chart-column", "triangle-alert", "info", "circle-check", "circle-x", "circle-alert", "clock", "history", "pencil", "trash-2", "ellipsis", "menu", "lock", "banknote", "receipt", "hourglass", "badge-check", "party-popper", "sparkles", "layout-dashboard", "shield-check", "key-round", "eye", "sun", "moon", "circle-dashed"];
+function App(){return $('div',{className:'col'},
+ $('div',{className:'row',style:{gap:24,color:'var(--brand-ink)'}},[16,20,24,32].map(s=>$('div',{key:s,className:'col',style:{alignItems:'center',gap:6}},$(V.Icon,{name:'calendar-days',size:s}),$('span',{className:'caption v-muted'},s+' px')))),
+ $('div',{style:{display:'grid',gridTemplateColumns:'repeat(auto-fill,minmax(112px,1fr))',gap:12}},names.map(n=>$('div',{key:n,style:{display:'flex',flexDirection:'column',alignItems:'center',gap:8,padding:'14px 6px',background:'var(--surface)',border:'1px solid var(--line)',borderRadius:'var(--radius-md)',color:'var(--ink)'}},$(V.Icon,{name:n,size:24}),$('span',{className:'caption',style:{color:'var(--ink-muted)',textAlign:'center',wordBreak:'break-all'}},n)))));}
+
+ReactDOM.createRoot(document.getElementById("root")).render($(App));
+</script>

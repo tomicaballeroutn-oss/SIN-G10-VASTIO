@@ -1,0 +1,78 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<title>Vastio · Inicio — Compras</title>
+<script src="./support.js"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&family=Jost:wght@400;500;600&display=swap">
+<link rel="stylesheet" href="ds/vastio/tokens.css"><link rel="stylesheet" href="ds/vastio/components/bundle.css"><script src="ds/vastio/components/bundle.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<style>
+body{margin:0;font-family:'Poppins',sans-serif;background:#e6e2dd;color:#021226;}
+
+.display{font:500 56px/60px 'Jost',sans-serif;letter-spacing:-0.01em;margin:0}
+.display-sm{font:500 40px/44px 'Jost',sans-serif;letter-spacing:-0.005em;margin:0}
+.overline{font:500 12px/16px 'Jost',sans-serif;letter-spacing:0.28em;text-transform:uppercase;margin:0}
+h1{font:600 32px/40px 'Poppins',sans-serif;letter-spacing:-0.01em;margin:0}
+h2{font:600 24px/32px 'Poppins',sans-serif;letter-spacing:-0.005em;margin:0}
+h3{font:600 20px/28px 'Poppins',sans-serif;margin:0}
+h4{font:600 16px/24px 'Poppins',sans-serif;margin:0}
+.body-lg{font:400 18px/28px 'Poppins',sans-serif}
+.body-sm{font:400 14px/20px 'Poppins',sans-serif}
+.label{font:500 14px/20px 'Poppins',sans-serif}
+.caption{font:500 12px/16px 'Poppins',sans-serif}
+.stat-num{font:500 40px/44px 'Jost',sans-serif;font-variant-numeric:tabular-nums;margin:0}
+.numeral{font:500 18px/24px 'Jost',sans-serif;font-variant-numeric:tabular-nums}
+.numeral-sm{font:500 15px/20px 'Jost',sans-serif;font-variant-numeric:tabular-nums}
+
+
+</style>
+</helmet>
+<div style="width:1280px;height:800px;box-sizing:border-box;background:#e6e2dd;color:#021226;overflow:hidden;">
+
+<div style="display:flex;height:100%;">
+  <div style="width:240px;flex:none;background:#ffffff;border-right:1px solid #d6d1cb;padding:20px 12px;display:flex;flex-direction:column;gap:24px;">
+    <div style="display:flex;align-items:center;gap:10px;padding:0 8px;"><img src="/_blob/0b4fc5affd13f9515bc6c46761452e90" style="width:28px;"><span class="overline" style="color:#153e6c;">Vastio</span></div>
+    <x-import component-from-global-scope="Vastio.Nav" layout="sidebar" items="{{navItems}}" value="inicio" label="Navegación principal"></x-import>
+  </div>
+  <div style="flex-grow:1;padding:48px;display:flex;flex-direction:column;gap:32px;overflow:auto;">
+    <h1>Eventos confirmados próximos</h1>
+    <x-import component-from-global-scope="Vastio.Table" columns="{{evCols}}" rows="{{evRows}}"></x-import>
+    <div>
+      <h2 style="margin-bottom:16px;">Stock por depósito</h2>
+      <div style="display:flex;gap:16px;">
+        <x-import component-from-global-scope="Vastio.StockLevel" name="Fernet Branca" presentacion="cajón x12" ubicacion="Depósito Avril" cantidad="8" comprometido="6" unidad="cajones" status="bajo" style="flex:1;"></x-import>
+        <x-import component-from-global-scope="Vastio.StockLevel" name="Vino tinto malbec" presentacion="cajón x6" ubicacion="Depósito Avril" cantidad="36" comprometido="12" unidad="cajones" status="ok" style="flex:1;"></x-import>
+        <x-import component-from-global-scope="Vastio.StockLevel" name="Cerveza rubia" presentacion="cajón x24" ubicacion="Depósito Avril" cantidad="20" comprometido="18" unidad="cajones" status="ok" style="flex:1;"></x-import>
+      </div>
+    </div>
+  </div>
+</div>
+
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1280,"height":800}}'>
+class Component extends DCLogic {
+  renderVals() {
+    return {
+      navItems: [{"id":"inicio","label":"Inicio","icon":"home"},{"id":"stock","label":"Stock","icon":"package"},{"id":"compra","label":"Compra sugerida","icon":"clipboard-list"}],
+      evCols: [
+        { key: 'evento', header: 'Evento' },
+        { key: 'fecha', header: 'Fecha' },
+        { key: 'salon', header: 'Salón' },
+        { key: 'invitados', header: 'Invitados', numeric: true },
+        { key: 'orden', header: 'Orden de preparación' },
+      ],
+      evRows: [
+        { id: 1, evento: 'Bruno & Martina', fecha: '26/09', salon: 'Avril', invitados: '180', orden: 'Generada' },
+        { id: 2, evento: 'Fiesta fin de año', fecha: '11/12', salon: 'Avril', invitados: '220', orden: 'Pendiente' },
+      ],
+    };
+  }
+}
+</script>
+</body>
+</html>

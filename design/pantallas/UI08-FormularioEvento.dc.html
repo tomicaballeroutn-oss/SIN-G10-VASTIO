@@ -1,0 +1,82 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<title>Vastio · Formulario de evento</title>
+<script src="./support.js"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&family=Jost:wght@400;500;600&display=swap">
+<link rel="stylesheet" href="ds/vastio/tokens.css"><link rel="stylesheet" href="ds/vastio/components/bundle.css"><script src="ds/vastio/components/bundle.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<style>
+body{margin:0;font-family:'Poppins',sans-serif;background:#e6e2dd;color:#021226;}
+
+.display{font:500 56px/60px 'Jost',sans-serif;letter-spacing:-0.01em;margin:0}
+.display-sm{font:500 40px/44px 'Jost',sans-serif;letter-spacing:-0.005em;margin:0}
+.overline{font:500 12px/16px 'Jost',sans-serif;letter-spacing:0.28em;text-transform:uppercase;margin:0}
+h1{font:600 32px/40px 'Poppins',sans-serif;letter-spacing:-0.01em;margin:0}
+h2{font:600 24px/32px 'Poppins',sans-serif;letter-spacing:-0.005em;margin:0}
+h3{font:600 20px/28px 'Poppins',sans-serif;margin:0}
+h4{font:600 16px/24px 'Poppins',sans-serif;margin:0}
+.body-lg{font:400 18px/28px 'Poppins',sans-serif}
+.body-sm{font:400 14px/20px 'Poppins',sans-serif}
+.label{font:500 14px/20px 'Poppins',sans-serif}
+.caption{font:500 12px/16px 'Poppins',sans-serif}
+.stat-num{font:500 40px/44px 'Jost',sans-serif;font-variant-numeric:tabular-nums;margin:0}
+.numeral{font:500 18px/24px 'Jost',sans-serif;font-variant-numeric:tabular-nums}
+.numeral-sm{font:500 15px/20px 'Jost',sans-serif;font-variant-numeric:tabular-nums}
+
+
+</style>
+</helmet>
+<div style="width:1280px;height:840px;box-sizing:border-box;background:#e6e2dd;color:#021226;overflow:hidden;">
+
+<div style="display:flex;height:100%;">
+  <div style="flex-grow:1;background:#f5f2ee;padding:32px 40px;">
+    <div class="overline" style="color:#404b5a;">Agenda · detrás del panel</div>
+    <div style="margin-top:16px;opacity:.45;">
+      <x-import component-from-global-scope="Vastio.AgendaGrid" year="2026" month="9" events="{{events}}" today="2026-09-26"></x-import>
+    </div>
+  </div>
+  <div style="width:460px;flex:none;background:#ffffff;border-left:1px solid #d6d1cb;padding:32px;display:flex;flex-direction:column;gap:14px;overflow:auto;">
+    <h2>Nuevo evento</h2>
+    <div class="body-sm" style="color:#404b5a;">Avril · sáb 26 sep · noche</div>
+    <x-import component-from-global-scope="Vastio.Select" label="Salón, fecha y turno" default-value="avril-26-noche" options="{{slotOptions}}"></x-import>
+    <x-import component-from-global-scope="Vastio.Input" label="Cliente" placeholder="Nombre y apellido"></x-import>
+    <x-import component-from-global-scope="Vastio.Input" label="Contactos" placeholder="Teléfono o email"></x-import>
+    <x-import component-from-global-scope="Vastio.Select" label="Vendedora interviniente" default-value="lucia" options="{{vendedoraOptions}}"></x-import>
+    <x-import component-from-global-scope="Vastio.Select" label="Tipo de evento" placeholder="Elegí un tipo" options="{{tipoOptions}}"></x-import>
+    <x-import component-from-global-scope="Vastio.Stepper" label="Cantidad de invitados" default-value="150" min="0" step="10"></x-import>
+    <x-import component-from-global-scope="Vastio.Input" label="Observaciones internas" multiline="{{yes}}" rows="3" placeholder="Notas para el equipo, no visibles para el cliente"></x-import>
+    <sc-if value="{{showError}}" hint-placeholder-val="{{true}}">
+      <x-import component-from-global-scope="Vastio.Alert" tone="danger" title="Esa fecha ya está tomada">Elegí otro salón, otra fecha u otro turno.</x-import>
+    </sc-if>
+    <div style="display:flex;justify-content:flex-end;gap:8px;margin-top:8px;">
+      <x-import component-from-global-scope="Vastio.Button" variant="outline" tone="brand">Cancelar</x-import>
+      <x-import component-from-global-scope="Vastio.Button" variant="solid" tone="brand">Guardar evento</x-import>
+    </div>
+  </div>
+</div>
+
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1280,"height":840}}'>
+class Component extends DCLogic {
+  renderVals() {
+    return {
+      yes: true, showError: this.props.showError ?? false,
+      events: [{ date: '2026-09-26', salon: 'avril', turno: 'noche', status: 'confirmado' }],
+      slotOptions: [{ value: 'avril-26-noche', label: 'Avril · sáb 26 sep · noche' }],
+      vendedoraOptions: [{ value: 'lucia', label: 'Lucía Ferreyra' }, { value: 'melina', label: 'Melina Sifón' }],
+      tipoOptions: [
+        { value: 'casamiento', label: 'Casamiento' }, { value: 'xv', label: 'XV' },
+        { value: 'egresados', label: 'Egresados' }, { value: 'corporativo', label: 'Corporativo' },
+      ],
+    };
+  }
+}
+</script>
+</body>
+</html>

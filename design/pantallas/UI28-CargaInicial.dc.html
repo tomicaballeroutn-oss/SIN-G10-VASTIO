@@ -1,0 +1,70 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<title>Vastio · Carga inicial de inventario</title>
+<script src="./support.js"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&family=Jost:wght@400;500;600&display=swap">
+<link rel="stylesheet" href="ds/vastio/tokens.css"><link rel="stylesheet" href="ds/vastio/components/bundle.css"><script src="ds/vastio/components/bundle.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<style>
+body{margin:0;font-family:'Poppins',sans-serif;background:#e6e2dd;color:#021226;}
+
+.display{font:500 56px/60px 'Jost',sans-serif;letter-spacing:-0.01em;margin:0}
+.display-sm{font:500 40px/44px 'Jost',sans-serif;letter-spacing:-0.005em;margin:0}
+.overline{font:500 12px/16px 'Jost',sans-serif;letter-spacing:0.28em;text-transform:uppercase;margin:0}
+h1{font:600 32px/40px 'Poppins',sans-serif;letter-spacing:-0.01em;margin:0}
+h2{font:600 24px/32px 'Poppins',sans-serif;letter-spacing:-0.005em;margin:0}
+h3{font:600 20px/28px 'Poppins',sans-serif;margin:0}
+h4{font:600 16px/24px 'Poppins',sans-serif;margin:0}
+.body-lg{font:400 18px/28px 'Poppins',sans-serif}
+.body-sm{font:400 14px/20px 'Poppins',sans-serif}
+.label{font:500 14px/20px 'Poppins',sans-serif}
+.caption{font:500 12px/16px 'Poppins',sans-serif}
+.stat-num{font:500 40px/44px 'Jost',sans-serif;font-variant-numeric:tabular-nums;margin:0}
+.numeral{font:500 18px/24px 'Jost',sans-serif;font-variant-numeric:tabular-nums}
+.numeral-sm{font:500 15px/20px 'Jost',sans-serif;font-variant-numeric:tabular-nums}
+
+
+</style>
+</helmet>
+<div style="width:1280px;height:840px;box-sizing:border-box;background:#e6e2dd;color:#021226;overflow:hidden;">
+
+<div style="padding:32px 40px;display:flex;flex-direction:column;gap:20px;height:100%;box-sizing:border-box;overflow:auto;">
+  <div style="display:flex;align-items:center;gap:12px;">
+    <h1>Carga inicial de inventario</h1>
+    <span class="overline" style="color:#153e6c;">Paso 1 de 2</span>
+  </div>
+  <x-import component-from-global-scope="Vastio.Select" label="Ubicación" default-value="deposito-avril" options="{{ubicacionOptions}}" style="max-width:320px;"></x-import>
+  <x-import component-from-global-scope="Vastio.Table" columns="{{cols}}" rows="{{rows}}"></x-import>
+  <div class="body-sm" style="color:#404b5a;">El avance se guarda por ubicación, así podés retomarlo después. Paso 2: datos maestros de proveedores (nombre, contacto, bebidas que provee).</div>
+  <div style="display:flex;gap:10px;">
+    <x-import component-from-global-scope="Vastio.Button" variant="outline" tone="brand">Guardar y continuar después</x-import>
+    <x-import component-from-global-scope="Vastio.Button" variant="solid" tone="brand">Siguiente: proveedores</x-import>
+  </div>
+</div>
+
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1280,"height":840}}'>
+class Component extends DCLogic {
+  renderVals() {
+    return {
+      ubicacionOptions: [{ value: 'deposito-avril', label: 'Depósito Avril' }],
+      cols: [
+        { key: 'bebida', header: 'Bebida' }, { key: 'cantidad', header: 'Cantidad inicial', numeric: true, render: (r) => r.cantidad },
+      ],
+      rows: [
+        { id: 1, bebida: 'Fernet Branca (cajón x12)', cantidad: '14' },
+        { id: 2, bebida: 'Vino tinto malbec (cajón x6)', cantidad: '48' },
+        { id: 3, bebida: 'Cerveza rubia (cajón x24)', cantidad: '38' },
+      ],
+    };
+  }
+}
+</script>
+</body>
+</html>

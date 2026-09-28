@@ -1,0 +1,89 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<title>Vastio · Catálogo de bebidas</title>
+<script src="./support.js"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&family=Jost:wght@400;500;600&display=swap">
+<link rel="stylesheet" href="ds/vastio/tokens.css"><link rel="stylesheet" href="ds/vastio/components/bundle.css"><script src="ds/vastio/components/bundle.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<style>
+body{margin:0;font-family:'Poppins',sans-serif;background:#e6e2dd;color:#021226;}
+
+.display{font:500 56px/60px 'Jost',sans-serif;letter-spacing:-0.01em;margin:0}
+.display-sm{font:500 40px/44px 'Jost',sans-serif;letter-spacing:-0.005em;margin:0}
+.overline{font:500 12px/16px 'Jost',sans-serif;letter-spacing:0.28em;text-transform:uppercase;margin:0}
+h1{font:600 32px/40px 'Poppins',sans-serif;letter-spacing:-0.01em;margin:0}
+h2{font:600 24px/32px 'Poppins',sans-serif;letter-spacing:-0.005em;margin:0}
+h3{font:600 20px/28px 'Poppins',sans-serif;margin:0}
+h4{font:600 16px/24px 'Poppins',sans-serif;margin:0}
+.body-lg{font:400 18px/28px 'Poppins',sans-serif}
+.body-sm{font:400 14px/20px 'Poppins',sans-serif}
+.label{font:500 14px/20px 'Poppins',sans-serif}
+.caption{font:500 12px/16px 'Poppins',sans-serif}
+.stat-num{font:500 40px/44px 'Jost',sans-serif;font-variant-numeric:tabular-nums;margin:0}
+.numeral{font:500 18px/24px 'Jost',sans-serif;font-variant-numeric:tabular-nums}
+.numeral-sm{font:500 15px/20px 'Jost',sans-serif;font-variant-numeric:tabular-nums}
+
+
+</style>
+</helmet>
+<div style="width:1280px;height:800px;box-sizing:border-box;background:#e6e2dd;color:#021226;overflow:hidden;">
+
+<div style="display:flex;height:100%;">
+  <div style="width:200px;flex:none;background:#ffffff;border-right:1px solid #d6d1cb;padding:20px 12px;display:flex;flex-direction:column;gap:24px;">
+    <div style="display:flex;align-items:center;gap:10px;padding:0 8px;"><img src="/_blob/0b4fc5affd13f9515bc6c46761452e90" style="width:28px;"><span class="overline" style="color:#153e6c;">Vastio</span></div>
+    <x-import component-from-global-scope="Vastio.Nav" layout="sidebar" items="{{navItems}}" value="bebidas" label="Navegación principal"></x-import>
+  </div>
+  <div style="flex-grow:1;display:flex;overflow:hidden;">
+    <div style="flex:1.5;padding:32px 40px;display:flex;flex-direction:column;gap:16px;overflow:auto;">
+      <h1>Catálogo de bebidas</h1>
+      <x-import component-from-global-scope="Vastio.Input" placeholder="Buscar bebida" icon="search"></x-import>
+      <x-import component-from-global-scope="Vastio.Table" columns="{{cols}}" rows="{{rows}}"></x-import>
+    </div>
+    <div style="width:400px;flex:none;background:#ffffff;border-left:1px solid #d6d1cb;padding:32px;display:flex;flex-direction:column;gap:14px;overflow:auto;">
+      <h3>Editar bebida</h3>
+      <x-import component-from-global-scope="Vastio.Input" label="Presentación" default-value="Fernet Branca 750ml"></x-import>
+      <x-import component-from-global-scope="Vastio.Select" label="Unidad de manipulación" default-value="cajon12" options="{{unidadOptions}}"></x-import>
+      <div>
+        <div class="label" style="margin-bottom:6px;">Código de barras (a nivel de caja)</div>
+        <div style="display:flex;gap:8px;">
+          <x-import component-from-global-scope="Vastio.Input" default-value="7791234567890" style="flex:1;"></x-import>
+          <x-import component-from-global-scope="Vastio.IconButton" icon="scan-line" label="Escanear código" variant="outline"></x-import>
+        </div>
+      </div>
+      <x-import component-from-global-scope="Vastio.Input" label="Precio de referencia" input-mode="decimal" icon="banknote" default-value="42000"></x-import>
+      <div style="display:flex;justify-content:space-between;margin-top:8px;">
+        <x-import component-from-global-scope="Vastio.Button" variant="outline" tone="danger">Dar de baja</x-import>
+        <x-import component-from-global-scope="Vastio.Button" variant="solid" tone="brand">Guardar</x-import>
+      </div>
+      <div class="body-sm" style="color:#404b5a;">El alcance actual es solo bebida con alcohol; no hay campo de envases retornables todavía.</div>
+    </div>
+  </div>
+</div>
+
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1280,"height":800}}'>
+class Component extends DCLogic {
+  renderVals() {
+    return {
+      navItems: [{"id":"inicio","label":"Inicio","icon":"home"},{"id":"agenda","label":"Agenda","icon":"calendar"},{"id":"usuarios","label":"Usuarios","icon":"users"},{"id":"bebidas","label":"Bebidas","icon":"wine"},{"id":"parametros","label":"Parámetros","icon":"settings"}],
+      unidadOptions: [{value:'cajon12',label:'Cajón x12'},{value:'cajon6',label:'Cajón x6'},{value:'cajon24',label:'Cajón x24'}],
+      cols: [
+        { key: 'bebida', header: 'Bebida' }, { key: 'presentacion', header: 'Presentación' }, { key: 'precio', header: 'Precio de referencia', numeric: true },
+      ],
+      rows: [
+        { id: 1, bebida: 'Fernet Branca', presentacion: 'Cajón x12', precio: '$42.000' },
+        { id: 2, bebida: 'Vino tinto malbec', presentacion: 'Cajón x6', precio: '$36.000' },
+        { id: 3, bebida: 'Cerveza rubia', presentacion: 'Cajón x24', precio: '$28.000' },
+      ],
+    };
+  }
+}
+</script>
+</body>
+</html>

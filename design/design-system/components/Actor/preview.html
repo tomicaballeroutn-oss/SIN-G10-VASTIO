@@ -1,0 +1,23 @@
+<!-- @dsCard group="Datos" height=160 subtitle="Quién hizo qué y cuándo (RNF-DIS-02)" -->
+<style>
+html,body{margin:0}
+body{padding:20px;background:var(--canvas);color:var(--ink);font:400 16px/24px var(--font-sans)}
+.row{display:flex;flex-wrap:wrap;gap:16px;align-items:center}
+.col{display:flex;flex-direction:column;gap:20px}
+.grid{display:grid;gap:16px;grid-template-columns:repeat(auto-fit,minmax(260px,1fr))}
+.cap{margin:0 0 8px;color:var(--ink-muted)}
+.w-sm{max-width:360px}.w-md{max-width:560px}
+</style>
+
+<div id="root"></div>
+<script>
+const V=window.Vastio,$=React.createElement,{useState}=React;
+const cap=(t)=>$("p",{className:"overline cap"},t);
+
+function App(){return $('div',{className:'grid'},
+ $(V.Actor,{name:'Lucía Ferreyra',action:'apartó la fecha',at:'hoy 14:32'}),
+ $(V.Actor,{name:'Marcos Bustos',action:'registró la entrega',at:'sáb 21:05'}),
+ $(V.Actor,{name:'Julieta Ruiz',size:'sm',action:'Planner'})
+);}
+ReactDOM.createRoot(document.getElementById("root")).render($(App));
+</script>

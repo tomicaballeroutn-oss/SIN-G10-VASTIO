@@ -1,0 +1,23 @@
+<!-- @dsCard group="Acciones" height=300 subtitle="Botón de solo ícono; la etiqueta es obligatoria" -->
+<style>
+html,body{margin:0}
+body{padding:20px;background:var(--canvas);color:var(--ink);font:400 16px/24px var(--font-sans)}
+.row{display:flex;flex-wrap:wrap;gap:16px;align-items:center}
+.col{display:flex;flex-direction:column;gap:20px}
+.grid{display:grid;gap:16px;grid-template-columns:repeat(auto-fit,minmax(260px,1fr))}
+.cap{margin:0 0 8px;color:var(--ink-muted)}
+.w-sm{max-width:360px}.w-md{max-width:560px}
+</style>
+
+<div id="root"></div>
+<script>
+const V=window.Vastio,$=React.createElement,{useState}=React;
+const cap=(t)=>$("p",{className:"overline cap"},t);
+
+function App(){return $('div',{className:'col'},
+ $('div',null,cap('Contorno · texto · sólido'),$('div',{className:'row'},$(V.IconButton,{icon:'pencil',label:'Editar evento'}),$(V.IconButton,{icon:'history',label:'Ver historial',variant:'text'}),$(V.IconButton,{icon:'plus',label:'Nuevo evento',variant:'solid'}))),
+ $('div',null,cap('Tamaños'),$('div',{className:'row'},$(V.IconButton,{icon:'search',label:'Buscar',size:'sm'}),$(V.IconButton,{icon:'search',label:'Buscar'}),$(V.IconButton,{icon:'search',label:'Buscar',size:'lg'}))),
+ $('div',null,cap('Destructivo · deshabilitado'),$('div',{className:'row'},$(V.IconButton,{icon:'trash-2',label:'Eliminar',tone:'danger'}),$(V.IconButton,{icon:'pencil',label:'Editar',disabled:true})))
+);}
+ReactDOM.createRoot(document.getElementById("root")).render($(App));
+</script>

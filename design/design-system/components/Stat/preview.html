@@ -1,0 +1,23 @@
+<!-- @dsCard group="Datos" height=220 subtitle="Un indicador con su unidad; el valor usa numerales tabulares" -->
+<style>
+html,body{margin:0}
+body{padding:20px;background:var(--canvas);color:var(--ink);font:400 16px/24px var(--font-sans)}
+.row{display:flex;flex-wrap:wrap;gap:16px;align-items:center}
+.col{display:flex;flex-direction:column;gap:20px}
+.grid{display:grid;gap:16px;grid-template-columns:repeat(auto-fit,minmax(260px,1fr))}
+.cap{margin:0 0 8px;color:var(--ink-muted)}
+.w-sm{max-width:360px}.w-md{max-width:560px}
+</style>
+
+<div id="root"></div>
+<script>
+const V=window.Vastio,$=React.createElement,{useState}=React;
+const cap=(t)=>$("p",{className:"overline cap"},t);
+
+function App(){return $('div',{className:'grid'},
+ $(V.Stat,{label:'Eventos confirmados',value:'24',hint:'De septiembre a diciembre'}),
+ $(V.Stat,{label:'Consumo por asistente',value:'3,4',unit:'bebidas',delta:'−0,3 vs. 2025',deltaTone:'success',deltaIcon:'check'}),
+ $(V.Stat,{label:'Pre-reservas abiertas',value:'5',delta:'2 sin novedades',deltaTone:'warning',deltaIcon:'hourglass'})
+);}
+ReactDOM.createRoot(document.getElementById("root")).render($(App));
+</script>

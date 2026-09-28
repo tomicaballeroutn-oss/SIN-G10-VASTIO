@@ -1,0 +1,23 @@
+<!-- @dsCard group="Agenda (Módulo A)" height=300 subtitle="Estado del evento o del stock: ícono + palabra + color" -->
+<style>
+html,body{margin:0}
+body{padding:20px;background:var(--canvas);color:var(--ink);font:400 16px/24px var(--font-sans)}
+.row{display:flex;flex-wrap:wrap;gap:16px;align-items:center}
+.col{display:flex;flex-direction:column;gap:20px}
+.grid{display:grid;gap:16px;grid-template-columns:repeat(auto-fit,minmax(260px,1fr))}
+.cap{margin:0 0 8px;color:var(--ink-muted)}
+.w-sm{max-width:360px}.w-md{max-width:560px}
+</style>
+
+<div id="root"></div>
+<script>
+const V=window.Vastio,$=React.createElement,{useState}=React;
+const cap=(t)=>$("p",{className:"overline cap"},t);
+
+function App(){return $('div',{className:'col'},
+ $('div',null,cap('Estados de un evento (unidad comercializable)'),$('div',{className:'row'},['disponible','prereserva','senado','confirmado','realizado','cancelado','bloqueado'].map(s=>$(V.StatusChip,{key:s,status:s})))),
+ $('div',null,cap('Estados de stock'),$('div',{className:'row'},['ok','bajo','sin-stock'].map(s=>$(V.StatusChip,{key:s,status:s})))),
+ $('div',null,cap('Tamaño chico'),$('div',{className:'row'},['prereserva','senado','confirmado','cancelado'].map(s=>$(V.StatusChip,{key:s,status:s,size:'sm'}))))
+);}
+ReactDOM.createRoot(document.getElementById("root")).render($(App));
+</script>

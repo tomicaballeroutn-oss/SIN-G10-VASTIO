@@ -1,0 +1,31 @@
+<!-- @dsCard group="Datos" height=330 subtitle="Tabla para leer y comparar; números alineados a la derecha" -->
+<style>
+html,body{margin:0}
+body{padding:20px;background:var(--canvas);color:var(--ink);font:400 16px/24px var(--font-sans)}
+.row{display:flex;flex-wrap:wrap;gap:16px;align-items:center}
+.col{display:flex;flex-direction:column;gap:20px}
+.grid{display:grid;gap:16px;grid-template-columns:repeat(auto-fit,minmax(260px,1fr))}
+.cap{margin:0 0 8px;color:var(--ink-muted)}
+.w-sm{max-width:360px}.w-md{max-width:560px}
+</style>
+
+<div id="root"></div>
+<script>
+const V=window.Vastio,$=React.createElement,{useState}=React;
+const cap=(t)=>$("p",{className:"overline cap"},t);
+
+const rows=[
+ {id:1,b:'Fernet Branca 750 ml',p:'Caja x 12',dep:36,avr:8,club:0,s:'ok'},
+ {id:2,b:'Coca-Cola 2,25 L',p:'Caja x 6',dep:14,avr:4,club:2,s:'bajo'},
+ {id:3,b:'Cerveza rubia 1 L',p:'Caja x 12',dep:0,avr:0,club:0,s:'sin-stock'},
+ {id:4,b:'Vino Malbec 750 ml',p:'Caja x 6',dep:52,avr:6,club:3,s:'ok'}];
+const cols=[
+ {key:'b',header:'Bebida',render:r=>$('span',{className:'label'},r.b)},
+ {key:'p',header:'Presentación'},
+ {key:'dep',header:'Depósito',numeric:true},
+ {key:'avr',header:'Barra Avril',numeric:true},
+ {key:'club',header:'Barra Club',numeric:true},
+ {key:'s',header:'Estado',render:r=>$(V.StatusChip,{status:r.s,size:'sm'})}];
+function App(){return $('div',{className:'col'},cap('Existencias por ubicación, en cajones'),$(V.Table,{caption:'Existencias por ubicación',columns:cols,rows,onRowClick:()=>{}}));}
+ReactDOM.createRoot(document.getElementById("root")).render($(App));
+</script>

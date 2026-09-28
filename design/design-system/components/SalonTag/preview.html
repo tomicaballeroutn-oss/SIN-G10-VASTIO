@@ -1,0 +1,22 @@
+<!-- @dsCard group="Agenda (Módulo A)" height=200 subtitle="Identidad de cada salón, con el color que ya usa la organización" -->
+<style>
+html,body{margin:0}
+body{padding:20px;background:var(--canvas);color:var(--ink);font:400 16px/24px var(--font-sans)}
+.row{display:flex;flex-wrap:wrap;gap:16px;align-items:center}
+.col{display:flex;flex-direction:column;gap:20px}
+.grid{display:grid;gap:16px;grid-template-columns:repeat(auto-fit,minmax(260px,1fr))}
+.cap{margin:0 0 8px;color:var(--ink-muted)}
+.w-sm{max-width:360px}.w-md{max-width:560px}
+</style>
+
+<div id="root"></div>
+<script>
+const V=window.Vastio,$=React.createElement,{useState}=React;
+const cap=(t)=>$("p",{className:"overline cap"},t);
+
+function App(){return $('div',{className:'col'},
+ $('div',null,cap('Con fondo'),$('div',{className:'row'},['avril','club','santa-barbara'].map(s=>$(V.SalonTag,{key:s,salon:s})))),
+ $('div',null,cap('Solo punto'),$('div',{className:'row'},['avril','club','santa-barbara'].map(s=>$(V.SalonTag,{key:s,salon:s,variant:'dot'}))))
+);}
+ReactDOM.createRoot(document.getElementById("root")).render($(App));
+</script>

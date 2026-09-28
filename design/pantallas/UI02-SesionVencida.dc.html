@@ -1,0 +1,72 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<title>Vastio · Sesión vencida</title>
+<script src="./support.js"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&family=Jost:wght@400;500;600&display=swap">
+<link rel="stylesheet" href="ds/vastio/tokens.css"><link rel="stylesheet" href="ds/vastio/components/bundle.css"><script src="ds/vastio/components/bundle.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<style>
+body{margin:0;font-family:'Poppins',sans-serif;background:#e6e2dd;color:#021226;}
+
+.display{font:500 56px/60px 'Jost',sans-serif;letter-spacing:-0.01em;margin:0}
+.display-sm{font:500 40px/44px 'Jost',sans-serif;letter-spacing:-0.005em;margin:0}
+.overline{font:500 12px/16px 'Jost',sans-serif;letter-spacing:0.28em;text-transform:uppercase;margin:0}
+h1{font:600 32px/40px 'Poppins',sans-serif;letter-spacing:-0.01em;margin:0}
+h2{font:600 24px/32px 'Poppins',sans-serif;letter-spacing:-0.005em;margin:0}
+h3{font:600 20px/28px 'Poppins',sans-serif;margin:0}
+h4{font:600 16px/24px 'Poppins',sans-serif;margin:0}
+.body-lg{font:400 18px/28px 'Poppins',sans-serif}
+.body-sm{font:400 14px/20px 'Poppins',sans-serif}
+.label{font:500 14px/20px 'Poppins',sans-serif}
+.caption{font:500 12px/16px 'Poppins',sans-serif}
+.stat-num{font:500 40px/44px 'Jost',sans-serif;font-variant-numeric:tabular-nums;margin:0}
+.numeral{font:500 18px/24px 'Jost',sans-serif;font-variant-numeric:tabular-nums}
+.numeral-sm{font:500 15px/20px 'Jost',sans-serif;font-variant-numeric:tabular-nums}
+
+
+</style>
+</helmet>
+<div style="width:1280px;height:800px;box-sizing:border-box;background:#e6e2dd;color:#021226;overflow:hidden;">
+
+<div style="padding:48px;display:flex;flex-direction:column;gap:40px;">
+  <div>
+    <div class="overline" style="color:#404b5a;margin-bottom:12px;">Aviso previo · no bloqueante</div>
+    <div style="max-width:640px;">
+      <x-import component-from-global-scope="Vastio.Alert" tone="info" title="Tu sesión va a expirar pronto" icon="clock">Guardá los cambios que tengas pendientes.</x-import>
+      <div style="margin-top:12px;">
+        <x-import component-from-global-scope="Vastio.Button" variant="outline" tone="brand" size="md">Seguir trabajando</x-import>
+      </div>
+    </div>
+  </div>
+  <div style="border-top:1px solid #d6d1cb;padding-top:40px;">
+    <div class="overline" style="color:#404b5a;margin-bottom:12px;">Al vencer</div>
+    <div style="width:520px;background:#ffffff;border-radius:24px;box-shadow:0 8px 24px rgba(2,18,38,.12);padding:32px;display:flex;flex-direction:column;gap:16px;">
+      <div style="display:flex;align-items:center;gap:12px;">
+        <x-import component-from-global-scope="Vastio.Icon" name="lock" size="24"></x-import>
+        <h2>Tu sesión expiró</h2>
+      </div>
+      <div class="body-lg">Por seguridad, cerramos tu sesión después de un tiempo sin actividad. Volvé a ingresar para seguir donde estabas.</div>
+      <div style="display:flex;justify-content:flex-end;margin-top:8px;">
+        <x-import component-from-global-scope="Vastio.Button" variant="solid" tone="brand" size="lg">Volver a ingresar</x-import>
+      </div>
+    </div>
+    <div class="body-sm" style="color:#404b5a;max-width:520px;margin-top:16px;">
+      Al volver a entrar, el sistema te devuelve a la misma pantalla donde estabas — por ejemplo, a mitad de una entrega a barra cargada de noche, sin perder lo tipeado hasta ese punto.
+    </div>
+  </div>
+</div>
+
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1280,"height":800}}'>
+class Component extends DCLogic {
+  renderVals() { return { seguirBtn: null }; }
+}
+</script>
+</body>
+</html>

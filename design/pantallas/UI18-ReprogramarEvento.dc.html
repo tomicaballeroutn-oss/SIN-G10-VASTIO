@@ -1,0 +1,72 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<title>Vastio · Reprogramar evento</title>
+<script src="./support.js"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&family=Jost:wght@400;500;600&display=swap">
+<link rel="stylesheet" href="ds/vastio/tokens.css"><link rel="stylesheet" href="ds/vastio/components/bundle.css"><script src="ds/vastio/components/bundle.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<style>
+body{margin:0;font-family:'Poppins',sans-serif;background:#e6e2dd;color:#021226;}
+
+.display{font:500 56px/60px 'Jost',sans-serif;letter-spacing:-0.01em;margin:0}
+.display-sm{font:500 40px/44px 'Jost',sans-serif;letter-spacing:-0.005em;margin:0}
+.overline{font:500 12px/16px 'Jost',sans-serif;letter-spacing:0.28em;text-transform:uppercase;margin:0}
+h1{font:600 32px/40px 'Poppins',sans-serif;letter-spacing:-0.01em;margin:0}
+h2{font:600 24px/32px 'Poppins',sans-serif;letter-spacing:-0.005em;margin:0}
+h3{font:600 20px/28px 'Poppins',sans-serif;margin:0}
+h4{font:600 16px/24px 'Poppins',sans-serif;margin:0}
+.body-lg{font:400 18px/28px 'Poppins',sans-serif}
+.body-sm{font:400 14px/20px 'Poppins',sans-serif}
+.label{font:500 14px/20px 'Poppins',sans-serif}
+.caption{font:500 12px/16px 'Poppins',sans-serif}
+.stat-num{font:500 40px/44px 'Jost',sans-serif;font-variant-numeric:tabular-nums;margin:0}
+.numeral{font:500 18px/24px 'Jost',sans-serif;font-variant-numeric:tabular-nums}
+.numeral-sm{font:500 15px/20px 'Jost',sans-serif;font-variant-numeric:tabular-nums}
+
+
+</style>
+</helmet>
+<div style="width:1280px;height:840px;box-sizing:border-box;background:#e6e2dd;color:#021226;overflow:hidden;">
+
+<div style="padding:32px 40px;display:flex;flex-direction:column;gap:20px;height:100%;box-sizing:border-box;overflow:auto;">
+  <div style="display:flex;align-items:center;gap:12px;">
+    <h1>Reprogramar evento</h1>
+    <span class="overline" style="color:#153e6c;">Paso 2 de 2</span>
+  </div>
+  <div style="display:flex;align-items:center;gap:20px;background:#ffffff;border:1px solid #d6d1cb;border-radius:16px;padding:24px;max-width:760px;">
+    <div><div class="caption" style="color:#404b5a;">Fecha original</div><div class="h3" style="font:600 20px/28px 'Poppins';">Sáb 26 sep · noche</div></div>
+    <x-import component-from-global-scope="Vastio.Icon" name="arrow-right" size="22"></x-import>
+    <div><div class="caption" style="color:#404b5a;">Fecha nueva</div><div class="h3" style="font:600 20px/28px 'Poppins';color:#153e6c;">Sáb 10 oct · noche</div></div>
+  </div>
+  <div style="max-width:760px;">
+    <x-import component-from-global-scope="Vastio.Select" label="Motivo de la reprogramación" placeholder="Elegí un motivo" options="{{motivoOptions}}"></x-import>
+  </div>
+  <div style="max-width:900px;opacity:.6;">
+    <x-import component-from-global-scope="Vastio.AgendaGrid" year="2026" month="10" events="{{events}}" selected="2026-10-10"></x-import>
+  </div>
+  <div class="body-sm" style="color:#404b5a;">Paso 1: elegís la nueva unidad en la agenda — las celdas ocupadas quedan deshabilitadas con su motivo, y la elegida se marca con anillo. La ficha conserva el vínculo con la fecha original.</div>
+  <div style="display:flex;gap:10px;">
+    <x-import component-from-global-scope="Vastio.Button" variant="outline" tone="brand">Volver</x-import>
+    <x-import component-from-global-scope="Vastio.Button" variant="solid" tone="brand">Confirmar reprogramación</x-import>
+  </div>
+</div>
+
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1280,"height":840}}'>
+class Component extends DCLogic {
+  renderVals() {
+    return {
+      motivoOptions: [{ value: 'cliente', label: 'Pedido del cliente' }, { value: 'salon', label: 'Necesidad operativa del salón' }],
+      events: [{ date: '2026-10-04', salon: 'club', turno: 'mediodia', status: 'contratado' }],
+    };
+  }
+}
+</script>
+</body>
+</html>

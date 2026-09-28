@@ -1,0 +1,22 @@
+<!-- @dsCard group="Feedback" height=360 subtitle="Confirmación de una acción que no se puede deshacer" -->
+<style>
+html,body{margin:0}
+body{padding:20px;background:var(--canvas);color:var(--ink);font:400 16px/24px var(--font-sans)}
+.row{display:flex;flex-wrap:wrap;gap:16px;align-items:center}
+.col{display:flex;flex-direction:column;gap:20px}
+.grid{display:grid;gap:16px;grid-template-columns:repeat(auto-fit,minmax(260px,1fr))}
+.cap{margin:0 0 8px;color:var(--ink-muted)}
+.w-sm{max-width:360px}.w-md{max-width:560px}
+</style>
+
+<div id="root"></div>
+<script>
+const V=window.Vastio,$=React.createElement,{useState}=React;
+const cap=(t)=>$("p",{className:"overline cap"},t);
+
+function App(){return $(V.Dialog,{inline:true,title:'¿Cancelar este evento?',onClose:()=>{},
+ actions:[$(V.Button,{key:'a',variant:'outline'},'Volver'),$(V.Button,{key:'b',tone:'danger',icon:'calendar-x'},'Cancelar evento')]},
+ $('p',{style:{margin:'0 0 12px'}},'Quince de Valentina R. · Avril · sáb 14 nov · noche.'),
+ $('p',{className:'v-muted',style:{margin:0}},'La fecha queda libre para vender. Se guarda quién canceló y cuándo, y el historial del evento se conserva.'));}
+ReactDOM.createRoot(document.getElementById("root")).render($(App));
+</script>

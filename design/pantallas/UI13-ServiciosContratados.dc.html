@@ -1,0 +1,93 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<title>Vastio · Servicios contratados</title>
+<script src="./support.js"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&family=Jost:wght@400;500;600&display=swap">
+<link rel="stylesheet" href="ds/vastio/tokens.css"><link rel="stylesheet" href="ds/vastio/components/bundle.css"><script src="ds/vastio/components/bundle.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<style>
+body{margin:0;font-family:'Poppins',sans-serif;background:#e6e2dd;color:#021226;}
+
+.display{font:500 56px/60px 'Jost',sans-serif;letter-spacing:-0.01em;margin:0}
+.display-sm{font:500 40px/44px 'Jost',sans-serif;letter-spacing:-0.005em;margin:0}
+.overline{font:500 12px/16px 'Jost',sans-serif;letter-spacing:0.28em;text-transform:uppercase;margin:0}
+h1{font:600 32px/40px 'Poppins',sans-serif;letter-spacing:-0.01em;margin:0}
+h2{font:600 24px/32px 'Poppins',sans-serif;letter-spacing:-0.005em;margin:0}
+h3{font:600 20px/28px 'Poppins',sans-serif;margin:0}
+h4{font:600 16px/24px 'Poppins',sans-serif;margin:0}
+.body-lg{font:400 18px/28px 'Poppins',sans-serif}
+.body-sm{font:400 14px/20px 'Poppins',sans-serif}
+.label{font:500 14px/20px 'Poppins',sans-serif}
+.caption{font:500 12px/16px 'Poppins',sans-serif}
+.stat-num{font:500 40px/44px 'Jost',sans-serif;font-variant-numeric:tabular-nums;margin:0}
+.numeral{font:500 18px/24px 'Jost',sans-serif;font-variant-numeric:tabular-nums}
+.numeral-sm{font:500 15px/20px 'Jost',sans-serif;font-variant-numeric:tabular-nums}
+
+
+</style>
+</helmet>
+<div style="width:1280px;height:840px;box-sizing:border-box;background:#e6e2dd;color:#021226;overflow:hidden;">
+
+<div style="padding:32px 40px;display:flex;flex-direction:column;gap:16px;height:100%;box-sizing:border-box;overflow:auto;">
+  <div style="display:flex;align-items:center;gap:12px;">
+    <x-import component-from-global-scope="Vastio.StatusChip" status="confirmado"></x-import>
+    <h3 style="margin:0;">Bruno &amp; Martina · Avril</h3>
+  </div>
+  <x-import component-from-global-scope="Vastio.Tabs" items="{{tabItems}}" value="servicios" label="Secciones de la ficha"></x-import>
+  <div style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px;">
+    
+<div style="background:#ffffff;border:1px solid #d6d1cb;border-radius:12px;padding:16px;">
+  <h4 style="margin-bottom:8px;">Recepción</h4>
+  <x-import component-from-global-scope="Vastio.Input" multiline="{{yes}}" rows="2" placeholder="Describí la propuesta para esta categoría"></x-import>
+</div>
+<div style="background:#ffffff;border:1px solid #d6d1cb;border-radius:12px;padding:16px;">
+  <h4 style="margin-bottom:8px;">Plato principal</h4>
+  <x-import component-from-global-scope="Vastio.Input" multiline="{{yes}}" rows="2" placeholder="Describí la propuesta para esta categoría"></x-import>
+</div>
+<div style="background:#ffffff;border:1px solid #d6d1cb;border-radius:12px;padding:16px;">
+  <h4 style="margin-bottom:8px;">Postre</h4>
+  <x-import component-from-global-scope="Vastio.Input" multiline="{{yes}}" rows="2" placeholder="Describí la propuesta para esta categoría"></x-import>
+</div>
+<div style="background:#ffffff;border:1px solid #d6d1cb;border-radius:12px;padding:16px;">
+  <h4 style="margin-bottom:8px;">After</h4>
+  <x-import component-from-global-scope="Vastio.Input" multiline="{{yes}}" rows="2" placeholder="Describí la propuesta para esta categoría"></x-import>
+</div>
+<div style="background:#ffffff;border:1px solid #d6d1cb;border-radius:12px;padding:16px;">
+  <h4 style="margin-bottom:8px;">Bodega</h4>
+  <x-import component-from-global-scope="Vastio.Input" multiline="{{yes}}" rows="2" placeholder="Describí la propuesta para esta categoría"></x-import>
+</div>
+<div style="background:#ffffff;border:1px solid #d6d1cb;border-radius:12px;padding:16px;">
+  <h4 style="margin-bottom:8px;">Tipo de barra</h4>
+  <x-import component-from-global-scope="Vastio.Input" multiline="{{yes}}" rows="2" placeholder="Describí la propuesta para esta categoría"></x-import>
+</div>
+<div style="background:#ffffff;border:1px solid #d6d1cb;border-radius:12px;padding:16px;">
+  <h4 style="margin-bottom:8px;">Técnica</h4>
+  <x-import component-from-global-scope="Vastio.Input" multiline="{{yes}}" rows="2" placeholder="Describí la propuesta para esta categoría"></x-import>
+</div>
+<div style="background:#ffffff;border:1px solid #d6d1cb;border-radius:12px;padding:16px;">
+  <h4 style="margin-bottom:8px;">Mobiliario</h4>
+  <x-import component-from-global-scope="Vastio.Input" multiline="{{yes}}" rows="2" placeholder="Describí la propuesta para esta categoría"></x-import>
+</div>
+<div style="background:#ffffff;border:1px solid #d6d1cb;border-radius:12px;padding:16px;">
+  <h4 style="margin-bottom:8px;">Menús especiales</h4>
+  <x-import component-from-global-scope="Vastio.Input" multiline="{{yes}}" rows="2" placeholder="Describí la propuesta para esta categoría"></x-import>
+</div>
+<div style="background:#ffffff;border:1px solid #d6d1cb;border-radius:12px;padding:16px;">
+  <h4 style="margin-bottom:8px;">Extras</h4>
+  <x-import component-from-global-scope="Vastio.Input" multiline="{{yes}}" rows="2" placeholder="Describí la propuesta para esta categoría"></x-import>
+</div>
+  </div>
+</div>
+
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1280,"height":840}}'>
+class Component extends DCLogic { renderVals() { return { yes: true, tabItems: [{"id":"datos","label":"Datos"},{"id":"servicios","label":"Servicios"},{"id":"asistencia","label":"Asistencia"},{"id":"documentos","label":"Documentos"},{"id":"bebida","label":"Bebida"},{"id":"historial","label":"Historial"}] }; } }
+</script>
+</body>
+</html>

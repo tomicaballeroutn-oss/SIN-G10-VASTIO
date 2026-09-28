@@ -1,0 +1,23 @@
+<!-- @dsCard group="Formularios" height=230 subtitle="Cantidad con botones grandes para operar en la barra" -->
+<style>
+html,body{margin:0}
+body{padding:20px;background:var(--canvas);color:var(--ink);font:400 16px/24px var(--font-sans)}
+.row{display:flex;flex-wrap:wrap;gap:16px;align-items:center}
+.col{display:flex;flex-direction:column;gap:20px}
+.grid{display:grid;gap:16px;grid-template-columns:repeat(auto-fit,minmax(260px,1fr))}
+.cap{margin:0 0 8px;color:var(--ink-muted)}
+.w-sm{max-width:360px}.w-md{max-width:560px}
+</style>
+
+<div id="root"></div>
+<script>
+const V=window.Vastio,$=React.createElement,{useState}=React;
+const cap=(t)=>$("p",{className:"overline cap"},t);
+
+function App(){const [c,setC]=useState(12);return $('div',{className:'row',style:{alignItems:'flex-start',gap:32}},
+ $(V.Stepper,{label:'Fernet Branca 750 ml',unit:'cajones',value:c,onChange:setC,max:36,hint:'Hay 36 cajones en el depósito.'}),
+ $(V.Stepper,{label:'Coca-Cola 2,25 L',unit:'cajones',defaultValue:0,error:'Indicá al menos 1 cajón para registrar la entrega.'}),
+ $(V.Stepper,{label:'Agua sin gas 2 L',unit:'cajones',defaultValue:4,disabled:true})
+);}
+ReactDOM.createRoot(document.getElementById("root")).render($(App));
+</script>

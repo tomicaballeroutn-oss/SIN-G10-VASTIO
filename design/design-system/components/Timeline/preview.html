@@ -1,0 +1,22 @@
+<!-- @dsCard group="Datos" height=380 subtitle="Historial de estados de un evento (trazabilidad)" -->
+<style>
+html,body{margin:0}
+body{padding:20px;background:var(--canvas);color:var(--ink);font:400 16px/24px var(--font-sans)}
+.row{display:flex;flex-wrap:wrap;gap:16px;align-items:center}
+.col{display:flex;flex-direction:column;gap:20px}
+.grid{display:grid;gap:16px;grid-template-columns:repeat(auto-fit,minmax(260px,1fr))}
+.cap{margin:0 0 8px;color:var(--ink-muted)}
+.w-sm{max-width:360px}.w-md{max-width:560px}
+</style>
+
+<div id="root"></div>
+<script>
+const V=window.Vastio,$=React.createElement,{useState}=React;
+const cap=(t)=>$("p",{className:"overline cap"},t);
+
+function App(){return $('div',{className:'w-md',style:{maxWidth:520}},$(V.Timeline,{items:[
+ {title:'Se apartó la fecha',to:'prereserva',icon:'hourglass',tone:'warning',actor:'Lucía Ferreyra',at:'lun 14 sep · 10:12'},
+ {title:'Se registró la seña',from:'prereserva',to:'senado',icon:'banknote',tone:'info',detail:'Seña recibida. La fecha deja de ofrecerse.',actor:'Lucía Ferreyra',at:'jue 17 sep · 16:40'},
+ {title:'Se confirmó el evento',from:'senado',to:'confirmado',icon:'circle-check',tone:'success',actor:'Lucía Ferreyra',at:'hoy 09:05'}]}));}
+ReactDOM.createRoot(document.getElementById("root")).render($(App));
+</script>

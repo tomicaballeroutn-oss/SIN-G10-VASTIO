@@ -1,0 +1,101 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<title>Vastio · Reporte de ocupación</title>
+<script src="./support.js"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&family=Jost:wght@400;500;600&display=swap">
+<link rel="stylesheet" href="ds/vastio/tokens.css"><link rel="stylesheet" href="ds/vastio/components/bundle.css"><script src="ds/vastio/components/bundle.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<style>
+body{margin:0;font-family:'Poppins',sans-serif;background:#e6e2dd;color:#021226;}
+
+.display{font:500 56px/60px 'Jost',sans-serif;letter-spacing:-0.01em;margin:0}
+.display-sm{font:500 40px/44px 'Jost',sans-serif;letter-spacing:-0.005em;margin:0}
+.overline{font:500 12px/16px 'Jost',sans-serif;letter-spacing:0.28em;text-transform:uppercase;margin:0}
+h1{font:600 32px/40px 'Poppins',sans-serif;letter-spacing:-0.01em;margin:0}
+h2{font:600 24px/32px 'Poppins',sans-serif;letter-spacing:-0.005em;margin:0}
+h3{font:600 20px/28px 'Poppins',sans-serif;margin:0}
+h4{font:600 16px/24px 'Poppins',sans-serif;margin:0}
+.body-lg{font:400 18px/28px 'Poppins',sans-serif}
+.body-sm{font:400 14px/20px 'Poppins',sans-serif}
+.label{font:500 14px/20px 'Poppins',sans-serif}
+.caption{font:500 12px/16px 'Poppins',sans-serif}
+.stat-num{font:500 40px/44px 'Jost',sans-serif;font-variant-numeric:tabular-nums;margin:0}
+.numeral{font:500 18px/24px 'Jost',sans-serif;font-variant-numeric:tabular-nums}
+.numeral-sm{font:500 15px/20px 'Jost',sans-serif;font-variant-numeric:tabular-nums}
+
+
+</style>
+</helmet>
+<div style="width:1280px;height:840px;box-sizing:border-box;background:#e6e2dd;color:#021226;overflow:hidden;">
+
+<div style="display:flex;height:100%;">
+  <div style="width:200px;flex:none;background:#ffffff;border-right:1px solid #d6d1cb;padding:20px 12px;display:flex;flex-direction:column;gap:24px;">
+    <div style="display:flex;align-items:center;gap:10px;padding:0 8px;"><img src="/_blob/0b4fc5affd13f9515bc6c46761452e90" style="width:28px;"><span class="overline" style="color:#153e6c;">Vastio</span></div>
+    <x-import component-from-global-scope="Vastio.Nav" layout="sidebar" items="{{navItems}}" value="inicio" label="Navegación principal"></x-import>
+  </div>
+  <div style="flex-grow:1;padding:32px 40px;display:flex;flex-direction:column;gap:20px;overflow:auto;">
+    <h1>Reporte de ocupación</h1>
+    <div style="display:flex;gap:12px;">
+      <x-import component-from-global-scope="Vastio.Select" placeholder="Período" options="{{periodoOptions}}" style="width:180px;"></x-import>
+      <x-import component-from-global-scope="Vastio.Select" placeholder="Salón" options="{{salonOptions}}" style="width:180px;"></x-import>
+      <x-import component-from-global-scope="Vastio.Select" placeholder="Tipo de evento" options="{{tipoOptions}}" style="width:180px;"></x-import>
+      <x-import component-from-global-scope="Vastio.Select" placeholder="Vendedora" options="{{vendedoraOptions}}" style="width:180px;"></x-import>
+      <x-import component-from-global-scope="Vastio.Select" placeholder="Régimen de temporada" options="{{temporadaOptions}}" style="width:200px;"></x-import>
+    </div>
+    <div style="display:flex;gap:20px;">
+      <x-import component-from-global-scope="Vastio.Stat" label="Unidades ocupadas" value="216" style="flex:1;"></x-import>
+      <x-import component-from-global-scope="Vastio.Stat" label="Ocupación promedio" value="78" unit="%" style="flex:1;"></x-import>
+      <x-import component-from-global-scope="Vastio.Stat" label="Eventos realizados" value="52" style="flex:1;"></x-import>
+    </div>
+    <div style="background:#ffffff;border:1px solid #d6d1cb;border-radius:16px;padding:24px;display:flex;flex-direction:column;gap:14px;max-width:640px;">
+      <h4>Ocupación por salón</h4>
+      <div style="display:flex;align-items:center;gap:12px;">
+      <div class="body-sm" style="width:120px;">Avril</div>
+      <div style="flex-grow:1;background:#f5f2ee;border-radius:8px;height:20px;overflow:hidden;"><div style="width:86%;height:100%;background:#a9244e;"></div></div>
+      <div class="numeral-sm" style="width:40px;text-align:right;">86%</div>
+    </div><div style="display:flex;align-items:center;gap:12px;">
+      <div class="body-sm" style="width:120px;">Club de Campo</div>
+      <div style="flex-grow:1;background:#f5f2ee;border-radius:8px;height:20px;overflow:hidden;"><div style="width:64%;height:100%;background:#764d2d;"></div></div>
+      <div class="numeral-sm" style="width:40px;text-align:right;">64%</div>
+    </div><div style="display:flex;align-items:center;gap:12px;">
+      <div class="body-sm" style="width:120px;">Santa Bárbara</div>
+      <div style="flex-grow:1;background:#f5f2ee;border-radius:8px;height:20px;overflow:hidden;"><div style="width:74%;height:100%;background:#1b7da6;"></div></div>
+      <div class="numeral-sm" style="width:40px;text-align:right;">74%</div>
+    </div>
+    </div>
+    <x-import component-from-global-scope="Vastio.Table" columns="{{cols}}" rows="{{rows}}"></x-import>
+  </div>
+</div>
+
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1280,"height":840}}'>
+class Component extends DCLogic {
+  renderVals() {
+    return {
+      navItems: [{"id":"inicio","label":"Inicio","icon":"home"},{"id":"agenda","label":"Agenda","icon":"calendar"},{"id":"usuarios","label":"Usuarios","icon":"users"},{"id":"bebidas","label":"Bebidas","icon":"wine"},{"id":"parametros","label":"Parámetros","icon":"settings"}],
+      periodoOptions: [{value:'septiembre',label:'Septiembre 2026'}],
+      salonOptions: [{value:'avril',label:'Avril'},{value:'club',label:'Club de Campo'},{value:'santa-barbara',label:'Santa Bárbara'}],
+      tipoOptions: [{value:'casamiento',label:'Casamiento'}],
+      vendedoraOptions: [{value:'lucia',label:'Lucía Ferreyra'}],
+      temporadaOptions: [{value:'alta',label:'Temporada alta'},{value:'baja',label:'Temporada baja'}],
+      cols: [
+        { key: 'salon', header: 'Salón' }, { key: 'ocupadas', header: 'Unidades ocupadas', numeric: true },
+        { key: 'ocupacion', header: 'Ocupación', numeric: true },
+      ],
+      rows: [
+        { id: 1, salon: 'Avril', ocupadas: '86', ocupacion: '86%' },
+        { id: 2, salon: 'Club de Campo', ocupadas: '64', ocupacion: '64%' },
+        { id: 3, salon: 'Santa Bárbara', ocupadas: '74', ocupacion: '74%' },
+      ],
+    };
+  }
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,21 @@
+<!-- @dsCard group="Stock (Módulo B)" height=470 subtitle="Cada movimiento queda imputado a un evento y a una persona" -->
+<style>
+html,body{margin:0}
+body{padding:20px;background:var(--canvas);color:var(--ink);font:400 16px/24px var(--font-sans)}
+.row{display:flex;flex-wrap:wrap;gap:16px;align-items:center}
+.col{display:flex;flex-direction:column;gap:20px}
+.grid{display:grid;gap:16px;grid-template-columns:repeat(auto-fit,minmax(260px,1fr))}
+.cap{margin:0 0 8px;color:var(--ink-muted)}
+.w-sm{max-width:360px}.w-md{max-width:560px}
+</style>
+
+<div id="root"></div>
+<script>
+const V=window.Vastio,$=React.createElement,{useState}=React;
+const cap=(t)=>$("p",{className:"overline cap"},t);
+
+function App(){return $('div',{className:'grid',style:{gridTemplateColumns:'repeat(auto-fit,minmax(320px,1fr))'}},
+ $(V.MovementCard,{tipo:'entrega',salon:'avril',evento:'Quince de Valentina R.',desde:'Depósito',hasta:'Barra Avril',items:[{nombre:'Fernet Branca 750 ml',cantidad:8},{nombre:'Coca-Cola 2,25 L',cantidad:6},{nombre:'Agua sin gas 2 L',cantidad:4}],actor:'Marcos Bustos',at:'sáb 26 sep · 19:40'}),
+ $(V.MovementCard,{tipo:'devolucion',salon:'avril',evento:'Quince de Valentina R.',desde:'Barra Avril',hasta:'Depósito',items:[{nombre:'Fernet Branca 750 ml',cantidad:2},{nombre:'Coca-Cola 2,25 L',cantidad:1}],nota:'Consumo real: 6 cajones de Fernet y 5 de Coca-Cola.',actor:'Marcos Bustos',at:'dom 27 sep · 05:50'}));}
+ReactDOM.createRoot(document.getElementById("root")).render($(App));
+</script>

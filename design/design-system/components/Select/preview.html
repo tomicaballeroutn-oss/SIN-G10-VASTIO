@@ -1,0 +1,23 @@
+<!-- @dsCard group="Formularios" height=260 subtitle="Lista desplegable nativa, con la misma altura que el input" -->
+<style>
+html,body{margin:0}
+body{padding:20px;background:var(--canvas);color:var(--ink);font:400 16px/24px var(--font-sans)}
+.row{display:flex;flex-wrap:wrap;gap:16px;align-items:center}
+.col{display:flex;flex-direction:column;gap:20px}
+.grid{display:grid;gap:16px;grid-template-columns:repeat(auto-fit,minmax(260px,1fr))}
+.cap{margin:0 0 8px;color:var(--ink-muted)}
+.w-sm{max-width:360px}.w-md{max-width:560px}
+</style>
+
+<div id="root"></div>
+<script>
+const V=window.Vastio,$=React.createElement,{useState}=React;
+const cap=(t)=>$("p",{className:"overline cap"},t);
+
+function App(){return $('div',{className:'grid'},
+ $(V.Select,{label:'Salón',defaultValue:'avril',options:[{value:'avril',label:'Avril'},{value:'club',label:'Club de Campo'},{value:'santa-barbara',label:'Santa Bárbara'}]}),
+ $(V.Select,{label:'Tipo de evento',placeholder:'Elegí un tipo',options:[{value:'quince',label:'Fiesta de quince'},{value:'casamiento',label:'Casamiento'},{value:'corporativo',label:'Evento corporativo'},{value:'egresados',label:'Fiesta de egresados'},{value:'cumple',label:'Cumpleaños de adultos'}]}),
+ $(V.Select,{label:'Turno',placeholder:'Elegí un turno',error:'Elegí mediodía o noche para seguir.',options:[{value:'mediodia',label:'Mediodía'},{value:'noche',label:'Noche'}]})
+);}
+ReactDOM.createRoot(document.getElementById("root")).render($(App));
+</script>

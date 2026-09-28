@@ -1,0 +1,23 @@
+<!-- @dsCard group="Datos" height=260 subtitle="Contenedor base: título, acciones y pie opcionales" -->
+<style>
+html,body{margin:0}
+body{padding:20px;background:var(--canvas);color:var(--ink);font:400 16px/24px var(--font-sans)}
+.row{display:flex;flex-wrap:wrap;gap:16px;align-items:center}
+.col{display:flex;flex-direction:column;gap:20px}
+.grid{display:grid;gap:16px;grid-template-columns:repeat(auto-fit,minmax(260px,1fr))}
+.cap{margin:0 0 8px;color:var(--ink-muted)}
+.w-sm{max-width:360px}.w-md{max-width:560px}
+</style>
+
+<div id="root"></div>
+<script>
+const V=window.Vastio,$=React.createElement,{useState}=React;
+const cap=(t)=>$("p",{className:"overline cap"},t);
+
+function App(){return $('div',{className:'grid'},
+ $(V.Card,{eyebrow:'Sábado 14 de noviembre',title:'Datos del cliente',actions:$(V.IconButton,{icon:'pencil',label:'Editar datos',variant:'text'}),footer:[$('span',{key:'a',className:'body-sm v-muted'},'Actualizado hoy 14:32'),$(V.Button,{key:'b',variant:'text',size:'sm'},'Ver historial')]},
+  $('p',{className:'body',style:{margin:0}},'Valentina Romero · 3512345678'),$('p',{className:'body-sm v-muted',style:{margin:'4px 0 0'}},'Fiesta de quince · 160 invitados')),
+ $(V.Card,{interactive:true,onClick:()=>{},title:'Tarjeta que abre algo'},$('p',{className:'body-sm v-muted',style:{margin:0}},'Toda la tarjeta es clickeable: tiene foco y sombra al pasar el mouse.'))
+);}
+ReactDOM.createRoot(document.getElementById("root")).render($(App));
+</script>

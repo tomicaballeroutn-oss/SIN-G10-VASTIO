@@ -1,0 +1,26 @@
+<!-- @dsCard group="Acciones" height=560 subtitle="Tres variantes: sólido, contorno y texto" -->
+<style>
+html,body{margin:0}
+body{padding:20px;background:var(--canvas);color:var(--ink);font:400 16px/24px var(--font-sans)}
+.row{display:flex;flex-wrap:wrap;gap:16px;align-items:center}
+.col{display:flex;flex-direction:column;gap:20px}
+.grid{display:grid;gap:16px;grid-template-columns:repeat(auto-fit,minmax(260px,1fr))}
+.cap{margin:0 0 8px;color:var(--ink-muted)}
+.w-sm{max-width:360px}.w-md{max-width:560px}
+</style>
+
+<div id="root"></div>
+<script>
+const V=window.Vastio,$=React.createElement,{useState}=React;
+const cap=(t)=>$("p",{className:"overline cap"},t);
+
+function App(){return $('div',{className:'col'},
+ $('div',null,cap('Sólido · contorno · texto'),$('div',{className:'row'},$(V.Button,null,'Confirmar seña'),$(V.Button,{variant:'outline'},'Guardar borrador'),$(V.Button,{variant:'text'},'Ver historial'))),
+ $('div',null,cap('Con ícono'),$('div',{className:'row'},$(V.Button,{icon:'calendar-plus'},'Nueva pre-reserva'),$(V.Button,{variant:'outline',icon:'arrow-right-left'},'Entregar a barra'),$(V.Button,{variant:'text',iconEnd:'arrow-right'},'Abrir evento'))),
+ $('div',null,cap('Tamaños · 36 / 44 / 52 px'),$('div',{className:'row'},$(V.Button,{size:'sm'},'Chico'),$(V.Button,null,'Estándar'),$(V.Button,{size:'lg'},'Barra y depósito'))),
+ $('div',null,cap('Acción destructiva'),$('div',{className:'row'},$(V.Button,{tone:'danger'},'Cancelar evento'),$(V.Button,{variant:'outline',tone:'danger'},'Liberar fecha'),$(V.Button,{variant:'text',tone:'danger'},'Dar de baja'))),
+ $('div',null,cap('Cargando · deshabilitado'),$('div',{className:'row'},$(V.Button,{loading:true},'Registrando'),$(V.Button,{disabled:true},'Confirmar seña'),$(V.Button,{variant:'outline',disabled:true},'Guardar'))),
+ $('div',{className:'w-sm'},cap('A ancho completo en teléfono'),$(V.Button,{block:true,size:'lg',icon:'check'},'Registrar devolución'))
+);}
+ReactDOM.createRoot(document.getElementById("root")).render($(App));
+</script>

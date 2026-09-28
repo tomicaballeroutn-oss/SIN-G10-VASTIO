@@ -1,0 +1,22 @@
+<!-- @dsCard group="Stock (Módulo B)" height=250 subtitle="Existencias de una bebida frente a lo que necesita la agenda" -->
+<style>
+html,body{margin:0}
+body{padding:20px;background:var(--canvas);color:var(--ink);font:400 16px/24px var(--font-sans)}
+.row{display:flex;flex-wrap:wrap;gap:16px;align-items:center}
+.col{display:flex;flex-direction:column;gap:20px}
+.grid{display:grid;gap:16px;grid-template-columns:repeat(auto-fit,minmax(260px,1fr))}
+.cap{margin:0 0 8px;color:var(--ink-muted)}
+.w-sm{max-width:360px}.w-md{max-width:560px}
+</style>
+
+<div id="root"></div>
+<script>
+const V=window.Vastio,$=React.createElement,{useState}=React;
+const cap=(t)=>$("p",{className:"overline cap"},t);
+
+function App(){return $('div',{className:'grid',style:{gridTemplateColumns:'repeat(auto-fit,minmax(280px,1fr))'}},
+ $(V.StockLevel,{name:'Fernet Branca 750 ml',presentacion:'Caja x 12',ubicacion:'Depósito',cantidad:36,comprometido:28}),
+ $(V.StockLevel,{name:'Coca-Cola 2,25 L',presentacion:'Caja x 6',ubicacion:'Depósito',cantidad:14,comprometido:30}),
+ $(V.StockLevel,{name:'Cerveza rubia 1 L',presentacion:'Caja x 12',ubicacion:'Depósito',cantidad:0,comprometido:18}));}
+ReactDOM.createRoot(document.getElementById("root")).render($(App));
+</script>

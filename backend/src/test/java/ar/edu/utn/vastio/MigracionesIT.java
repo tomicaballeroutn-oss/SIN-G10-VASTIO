@@ -2,19 +2,20 @@ package ar.edu.utn.vastio;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import java.nio.charset.StandardCharsets;
+
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.context.annotation.Import;
+import org.springframework.core.io.Resource;
+import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 import org.springframework.jdbc.core.JdbcTemplate;
 
 /**
  * Verifica que V1 y V2 dejan la base como indica el diccionario de datos.
  */
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.NONE)
-@Import(TestcontainersConfig.class)
+@PruebaDeIntegracion
 class MigracionesIT {
 
     @Autowired
@@ -61,10 +62,13 @@ class MigracionesIT {
     }
 
     @Test
-    void noHayUsuariosCargados() {
-        // V2 no versiona hashes: el primer usuario lo crea la aplicación (tarea 7).
-        Integer usuarios = jdbc.queryForObject("SELECT count(*) FROM usuario", Integer.class);
-
-        assertThat(usuarios).isZero();
+    void lasMigracionesNoCarganUsuarios() throws Exception {
+        // No se versionan hashes: el primer usuario lo crea la aplicación (UsuarioInicialDev).
+        // Se revisa el script porque la base es compartida con tests que crean usuarios.
+        for (Resource script : new PathMatchingResourcePatternResolver().getResources("classpath:db/migration/*.sql")) {
+            assertThat(script.getContentAsString(StandardCharsets.UTF_8))
+                    .as(script.getFilename())
+                    .doesNotContainIgnoringCase("INSERT INTO usuario");
+        }
     }
 }

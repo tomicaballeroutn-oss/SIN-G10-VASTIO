@@ -308,3 +308,15 @@ h2.h2, h3.h3, h3.h4 { margin: 0; color: var(--ink); }
 .v-select:has(option[value=""]:checked) { color: var(--ink-muted); }
 .v-logo { display: block; height: 40px; width: auto; }
 .v-table th:first-child, .v-table td:first-child { min-width: 168px; }
+
+/* ---------- Estados agregados en el Sprint 0: Contratado, En curso, Cerrado, Liberada ----------
+   Chip: ícono + palabra + tono. Agenda: relleno que progresa de vacío a sólido y se lee sin color.
+   contratado = mitad rellena (entre señado y confirmado) · en curso = sólido con punto central
+   cerrado = sólido cruzado por una diagonal · liberada = vacío, igual que disponible (no ocupa la unidad) */
+.v-chip--brand { background: var(--brand-tint); color: var(--brand-ink); border-color: var(--brand); }
+.v-chip--success-solid { background: var(--success); color: var(--on-success); border-color: var(--success); }
+.v-chip--ink { background: transparent; color: var(--ink); border-color: var(--ink); }
+.v-pip--contratado { background: linear-gradient(to top, var(--s) 50%, var(--st) 50%); border: 1.5px solid var(--s); }
+.v-pip--en-curso { background: radial-gradient(circle at center, var(--surface) 0 2px, var(--s) 2.5px); border: 1.5px solid var(--s); }
+.v-pip--cerrado { background: linear-gradient(135deg, var(--s) 0 40%, var(--surface) 40% 60%, var(--s) 60%); border: 1.5px solid var(--s); }
+.v-pip--liberada { border: 1.5px solid var(--line); background: transparent; }

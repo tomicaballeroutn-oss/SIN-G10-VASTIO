@@ -13,3 +13,7 @@
 .ds-nav-lateral { height: 360px; }
 .ds-nav-inferior { width: 100%; max-width: 420px; }
 .ds-agenda { width: 100%; max-width: 760px; }
+.ds-rellenos { border-collapse: collapse; color: var(--ink); }
+.ds-rellenos th, .ds-rellenos td { padding: var(--space-2) var(--space-4); text-align: left; border-bottom: 1px solid var(--line); }
+.ds-rellenos td .v-pip { width: 28px; height: 16px; }
+.ds-nota { width: 100%; }

@@ -4,7 +4,7 @@
  * Los estilos se cargan una vez con `import './ds/ds.css'` en main.tsx.
  */
 export * from './tipos';
-export { ESTADOS, SALONES, ORDEN_SALONES } from './estados';
+export { ESTADOS, ESTADO_POR_CODIGO, ESTADOS_DEL_EVENTO, SALONES, ORDEN_SALONES } from './estados';
 export { Icon, type IconProps } from './components/Icon';
 export { Button, IconButton, type ButtonProps, type IconButtonProps } from './components/Button';
 export {

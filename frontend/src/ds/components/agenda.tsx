@@ -12,7 +12,7 @@ const DIAS = ['Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb', 'Dom'];
 const DIAS_LARGOS = ['lunes', 'martes', 'miércoles', 'jueves', 'viernes', 'sábado', 'domingo'];
 const TURNOS: TurnoId[] = ['mediodia', 'noche'];
 /** Estados que se muestran en la leyenda de la agenda. */
-const LEYENDA: EventStatus[] = ['prereserva', 'senado', 'confirmado', 'bloqueado'];
+const LEYENDA: EventStatus[] = ['prereserva', 'senado', 'contratado', 'confirmado', 'bloqueado'];
 
 const dosDigitos = (n: number) => (n < 10 ? '0' : '') + n;
 
@@ -21,7 +21,8 @@ export interface AgendaEvent {
   date: string;
   salon: SalonId;
   turno: TurnoId;
-  status: Exclude<EventStatus, 'cancelado' | 'disponible'>;
+  /** Liberada y cancelado no ocupan la unidad: el día se ve disponible. */
+  status: Exclude<EventStatus, 'cancelado' | 'liberada' | 'disponible'>;
 }
 
 export interface AgendaGridProps {

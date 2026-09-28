@@ -3,7 +3,9 @@
 export type Tone = 'brand' | 'danger';
 export type SalonId = 'avril' | 'club' | 'santa-barbara';
 export type TurnoId = 'mediodia' | 'noche';
-export type EventStatus = 'disponible' | 'prereserva' | 'senado' | 'confirmado' | 'realizado' | 'cancelado' | 'bloqueado';
+export type EventStatus =
+  | 'disponible' | 'prereserva' | 'senado' | 'contratado' | 'confirmado' | 'en-curso' | 'realizado' | 'cerrado'
+  | 'liberada' | 'cancelado' | 'bloqueado';
 export type StockStatus = 'ok' | 'bajo' | 'sin-stock';
 export type IconName = string;
 export type BadgeTone = 'neutral' | 'brand' | 'accent' | 'success' | 'warning' | 'danger' | 'info';

@@ -2,22 +2,26 @@ import { useState, type ReactNode } from 'react';
 import {
   Actor, AgendaGrid, Alert, Badge, Button, Card, Checkbox, Dialog, EmptyState, EventCard, Icon, IconButton, Input,
   MovementCard, Nav, SalonTag, Select, Stat, StatusChip, Stepper, StockLevel, Switch, Table, Tabs, Timeline,
-  aplicarTema, temaGuardado, type AgendaEvent, type EventStatus, type Tema,
+  ESTADOS_DEL_EVENTO, ORDEN_SALONES, SALONES, aplicarTema, temaGuardado, type AgendaEvent, type EventStatus, type Tema,
 } from '../../ds';
 import './pagina-ds.css';
 
-/** Todos los estados del evento, en el orden de la máquina de estados, más bloqueado y disponible. */
-const ESTADOS_EVENTO: EventStatus[] = ['disponible', 'prereserva', 'senado', 'confirmado', 'realizado', 'cancelado', 'bloqueado'];
+/** Los nueve estados del evento (máquina de estados) y los dos de la unidad sin evento. */
+const ESTADOS_EVENTO: EventStatus[] = [...ESTADOS_DEL_EVENTO, 'bloqueado', 'disponible'];
 
 const EVENTOS_DEMO: AgendaEvent[] = [
-  { date: '2026-09-05', salon: 'avril', turno: 'noche', status: 'confirmado' },
-  { date: '2026-09-05', salon: 'club', turno: 'noche', status: 'senado' },
-  { date: '2026-09-12', salon: 'santa-barbara', turno: 'mediodia', status: 'prereserva' },
+  { date: '2026-09-05', salon: 'avril', turno: 'noche', status: 'cerrado' },
+  { date: '2026-09-05', salon: 'club', turno: 'noche', status: 'cerrado' },
+  { date: '2026-09-12', salon: 'santa-barbara', turno: 'mediodia', status: 'realizado' },
   { date: '2026-09-12', salon: 'avril', turno: 'noche', status: 'realizado' },
   { date: '2026-09-19', salon: 'club', turno: 'mediodia', status: 'bloqueado' },
+  { date: '2026-09-28', salon: 'santa-barbara', turno: 'mediodia', status: 'en-curso' },
+  { date: '2026-10-03', salon: 'avril', turno: 'noche', status: 'contratado' },
   { date: '2026-09-26', salon: 'avril', turno: 'noche', status: 'confirmado' },
   { date: '2026-09-26', salon: 'club', turno: 'noche', status: 'confirmado' },
-  { date: '2026-09-26', salon: 'santa-barbara', turno: 'noche', status: 'senado' },
+  { date: '2026-09-26', salon: 'santa-barbara', turno: 'noche', status: 'contratado' },
+  { date: '2026-09-30', salon: 'club', turno: 'noche', status: 'senado' },
+  { date: '2026-09-30', salon: 'avril', turno: 'noche', status: 'prereserva' },
 ];
 
 function Seccion({ titulo, children }: { titulo: string; children: ReactNode }) {
@@ -156,6 +160,30 @@ export function PaginaDs() {
 
       <Seccion titulo="StatusChip: estados del evento">
         {ESTADOS_EVENTO.map((s) => <StatusChip key={s} status={s} />)}
+      </Seccion>
+
+      <Seccion titulo="Rellenos de la agenda">
+        <table className="ds-rellenos body-sm">
+          <thead>
+            <tr>
+              <th scope="col" className="label">Estado</th>
+              {ORDEN_SALONES.map((s) => <th key={s} scope="col" className="label">{SALONES[s]}</th>)}
+            </tr>
+          </thead>
+          <tbody>
+            {ESTADOS_EVENTO.map((estado) => (
+              <tr key={estado}>
+                <th scope="row"><StatusChip status={estado} size="sm" /></th>
+                {ORDEN_SALONES.map((s) => (
+                  <td key={s}><span className={`v-pip v-pip--${s} v-pip--${estado}`} /></td>
+                ))}
+              </tr>
+            ))}
+          </tbody>
+        </table>
+        <p className="body-sm v-muted ds-nota">
+          Liberada y cancelado no ocupan la unidad: en la agenda el turno vuelve a verse disponible.
+        </p>
       </Seccion>
 
       <Seccion titulo="StatusChip: stock">

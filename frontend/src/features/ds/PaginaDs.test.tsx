@@ -16,11 +16,13 @@ describe('página /_ds', () => {
     }
   });
 
-  it('muestra cada estado del evento con su palabra', () => {
+  it('muestra los nueve estados del evento con su palabra, más bloqueado y disponible', () => {
     render(<PaginaDs />);
     const seccion = screen.getByRole('heading', { name: 'StatusChip: estados del evento' }).parentElement!;
 
-    for (const estado of ['Disponible', 'Pre-reserva', 'Señado', 'Confirmado', 'Realizado', 'Cancelado', 'Bloqueado']) {
+    for (const estado of [
+      'Pre-reserva', 'Señado', 'Contratado', 'Confirmado', 'En curso', 'Realizado', 'Cerrado', 'Liberada', 'Cancelado', 'Bloqueado', 'Disponible',
+    ]) {
       expect(within(seccion).getByText(estado)).toBeInTheDocument();
     }
   });
@@ -47,7 +49,24 @@ describe('página /_ds', () => {
   it('la agenda describe cada día con sus unidades ocupadas', () => {
     render(<PaginaDs />);
 
-    expect(screen.getByRole('button', { name: /sábado 26 de septiembre\. Avril noche: Confirmado; Club de Campo noche: Confirmado; Santa Bárbara noche: Señado/ })).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: 'lunes 28 de septiembre. Todo disponible' })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /sábado 26 de septiembre\. Avril noche: Confirmado; Club de Campo noche: Confirmado; Santa Bárbara noche: Contratado/ })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'martes 29 de septiembre. Todo disponible' })).toBeInTheDocument();
+  });
+});
+
+describe('rellenos de la agenda', () => {
+  it('cada estado tiene su relleno para los tres salones', () => {
+    const { container } = render(<PaginaDs />);
+    const tabla = container.querySelector('.ds-rellenos')!;
+
+    for (const estado of ['prereserva', 'senado', 'contratado', 'confirmado', 'en-curso', 'realizado', 'cerrado', 'liberada', 'cancelado']) {
+      expect(tabla.querySelectorAll(`.v-pip--${estado}`)).toHaveLength(3);
+    }
+  });
+
+  it('un evento en curso se anuncia en el día de la agenda', () => {
+    render(<PaginaDs />);
+
+    expect(screen.getByRole('button', { name: 'lunes 28 de septiembre. Santa Bárbara mediodía: En curso' })).toBeInTheDocument();
   });
 });

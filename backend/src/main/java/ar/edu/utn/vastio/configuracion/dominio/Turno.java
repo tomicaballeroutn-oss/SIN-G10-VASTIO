@@ -41,6 +41,20 @@ public class Turno {
     protected Turno() {
     }
 
+    /**
+     * El horario se puede cambiar aunque haya eventos futuros: el salón se adapta a cambios de último momento.
+     * Si la hora de fin es anterior a la de inicio, el turno termina al día siguiente.
+     */
+    public void actualizar(String nombre, LocalTime horaInicio, LocalTime horaFin) {
+        if (horaInicio.equals(horaFin)) {
+            throw new IllegalArgumentException("El turno no puede empezar y terminar a la misma hora");
+        }
+        this.nombre = nombre;
+        this.horaInicio = horaInicio;
+        this.horaFin = horaFin;
+        this.cruzaMedianoche = horaFin.isBefore(horaInicio);
+    }
+
     public Short getId() {
         return id;
     }

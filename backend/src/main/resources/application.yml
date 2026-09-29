@@ -8,6 +8,10 @@ spring:
       ddl-auto: validate
   flyway:
     locations: classpath:db/migration
+  jackson:
+    deserialization:
+      # Jackson 3 rechaza un booleano o número ausente; en los pedidos, ausente es false o 0.
+      fail-on-null-for-primitives: false
 
 vastio:
   seguridad:

@@ -20,3 +20,7 @@ El sistema de diseño original no tenía estilo para Contratado, En curso, Cerra
 | Liberada | `LIBERADA` | `lock-open` | contorno punteado | vacío, igual que Disponible: no ocupa la unidad (como Cancelado) |
 
 `ESTADO_POR_CODIGO` traduce `evento.estado` al estado del sistema de diseño.
+
+## Cambios del Sprint 1
+
+- `SalonTag` acepta `label`: el nombre del salón se edita en Parámetros (UI-06), pero el color sigue saliendo de `salon.codigo`.

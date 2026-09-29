@@ -13,4 +13,8 @@ public interface SalonRepository extends JpaRepository<Salon, Short> {
 
     /** Orden fijo de la agenda: Avril, Club de Campo, Santa Bárbara (el de los ids de V2). */
     List<Salon> findByActivoTrueOrderByIdAsc();
+
+    List<Salon> findAllByOrderByIdAsc();
+
+    boolean existsByNombreIgnoreCaseAndIdNot(String nombre, Short id);
 }

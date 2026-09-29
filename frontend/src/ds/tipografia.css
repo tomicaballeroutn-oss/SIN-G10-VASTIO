@@ -1,0 +1,44 @@
+/* Vastio · tipografía y base. Generado a partir de tokens.json (type). Cargar después de tokens.css. */
+@font-face { font-family: 'Poppins'; src: url('./fonts/Poppins-Regular.woff2') format('woff2'); font-weight: 400; font-style: normal; font-display: swap; }
+@font-face { font-family: 'Poppins'; src: url('./fonts/Poppins-Medium.woff2') format('woff2'); font-weight: 500; font-style: normal; font-display: swap; }
+@font-face { font-family: 'Poppins'; src: url('./fonts/Poppins-SemiBold.woff2') format('woff2'); font-weight: 600; font-style: normal; font-display: swap; }
+@font-face { font-family: 'Poppins'; src: url('./fonts/Poppins-Bold.woff2') format('woff2'); font-weight: 700; font-style: normal; font-display: swap; }
+@font-face { font-family: 'Jost'; src: url('./fonts/Jost-Variable.woff2') format('woff2'); font-weight: 100 900; font-style: normal; font-display: swap; }
+
+:root {
+  --font-sans: "Poppins", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --font-display: "Jost", "Poppins", system-ui, sans-serif;
+  color-scheme: light;
+}
+[data-theme="dark"] { color-scheme: dark; }
+
+*, *::before, *::after { box-sizing: border-box; }
+html { -webkit-text-size-adjust: 100%; }
+body { margin: 0; background: var(--canvas); color: var(--ink); font: 400 16px/24px var(--font-sans); -webkit-font-smoothing: antialiased; }
+button, input, select, textarea { font: inherit; color: inherit; }
+a { color: var(--brand-ink); }
+img { max-width: 100%; }
+
+/* Display (Jost): momentos de marca */
+.display { font: 500 56px/60px var(--font-display); letter-spacing: -0.01em; margin: 0; }
+.display-sm { font: 500 40px/44px var(--font-display); letter-spacing: -0.005em; margin: 0; }
+.overline { font: 500 12px/16px var(--font-display); letter-spacing: 0.28em; text-transform: uppercase; }
+
+/* Títulos (Poppins). Un solo h1 por pantalla. */
+h1, .h1 { font: 600 32px/40px var(--font-sans); letter-spacing: -0.01em; margin: 0; }
+h2, .h2 { font: 600 24px/32px var(--font-sans); letter-spacing: -0.005em; margin: 0; }
+h3, .h3 { font: 600 20px/28px var(--font-sans); margin: 0; }
+h4, .h4 { font: 600 16px/24px var(--font-sans); margin: 0; }
+
+/* Texto (Poppins) */
+.body-lg { font: 400 18px/28px var(--font-sans); }
+.body { font: 400 16px/24px var(--font-sans); }
+.body-sm { font: 400 14px/20px var(--font-sans); }
+.label { font: 500 14px/20px var(--font-sans); }
+.caption { font: 500 12px/16px var(--font-sans); }
+.button { font: 600 15px/20px var(--font-sans); }
+
+/* Numerales tabulares (Jost): cantidades, fechas y horas que se comparan */
+.stat { font: 500 40px/44px var(--font-display); }
+.numeral { font: 500 18px/24px var(--font-display); }
+.numeral-sm { font: 500 15px/20px var(--font-display); }

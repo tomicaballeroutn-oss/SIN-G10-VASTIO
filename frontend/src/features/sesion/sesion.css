@@ -1,0 +1,12 @@
+/* UI-01 · Inicio de sesión */
+.pagina-ingreso { min-height: 100vh; min-height: 100dvh; display: grid; place-items: center; padding: var(--space-8) var(--space-4); }
+.pagina-ingreso__columna { width: 100%; max-width: 420px; display: flex; flex-direction: column; align-items: center; gap: 28px; }
+.pagina-ingreso__logo { width: 220px; }
+.pagina-ingreso__titulos { display: flex; flex-direction: column; gap: var(--space-2); text-align: center; }
+.ingreso { width: 100%; display: flex; flex-direction: column; gap: var(--space-4); }
+
+/* UI-02 · Aviso previo (no bloqueante) y sesión vencida */
+.aviso-sesion { position: fixed; z-index: var(--z-toast); left: var(--space-4); right: var(--space-4); bottom: calc(88px + env(safe-area-inset-bottom, 0px)); box-shadow: var(--shadow-md); border-radius: var(--radius-md); }
+@media (min-width: 960px) { .aviso-sesion { left: auto; right: var(--space-6); bottom: var(--space-6); width: 440px; } }
+.sesion-vencida { display: flex; align-items: flex-start; gap: var(--space-3); }
+.sesion-vencida .v-icon { margin-top: 2px; flex: none; }

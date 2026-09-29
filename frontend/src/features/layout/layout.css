@@ -1,0 +1,21 @@
+/* Marco de la app: Nav lateral (≥ 960 px) o inferior (< 960 px). Márgenes: space-4 en teléfono, space-6 desde tableta. */
+.app { min-height: 100vh; min-height: 100dvh; }
+.app__lateral { display: none; }
+.app__contenido { max-width: var(--content-max); margin: 0 auto; padding: var(--space-6) var(--space-4) calc(96px + env(safe-area-inset-bottom, 0px)); }
+@media (min-width: 640px) { .app__contenido { padding-inline: var(--space-6); } }
+.app__inferior { position: fixed; z-index: var(--z-nav); left: 0; right: 0; bottom: 0; }
+
+@media (min-width: 960px) {
+  .app { display: grid; grid-template-columns: var(--sidebar-w) minmax(0, 1fr); }
+  .app__lateral { display: block; position: sticky; top: 0; height: 100vh; height: 100dvh; }
+  .app__contenido { width: 100%; padding: var(--space-8) var(--space-6); }
+  .app__inferior { display: none; }
+}
+
+.app__cuenta { display: flex; flex-direction: column; gap: var(--space-2); }
+.app__cuenta-acciones { display: flex; flex-wrap: wrap; gap: var(--space-1); margin-left: calc(-1 * var(--space-3)); }
+
+/* Encabezado común de las pantallas */
+.pantalla { display: flex; flex-direction: column; gap: var(--space-6); }
+.pantalla__titulos { display: flex; flex-direction: column; gap: var(--space-1); }
+.pagina-mas__nav.v-nav--sidebar { width: 100%; height: auto; border-right: 0; }

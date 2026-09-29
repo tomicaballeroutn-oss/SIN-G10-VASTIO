@@ -16,15 +16,15 @@ import ar.edu.utn.vastio.usuarios.infraestructura.RolRepository;
 import ar.edu.utn.vastio.usuarios.infraestructura.UsuarioRepository;
 
 /**
- * Solo en el perfil dev: crea el primer usuario de Dirección si todavía no existe.
- * La contraseña sale de {@code VASTIO_ADMIN_CONTRASENA} (en el .env de la raíz o en el entorno); sin ella no se crea nada.
- * V2 no versiona hashes a propósito.
+ * Crea el primer usuario de Dirección si todavía no existe. Corre solo en los perfiles
+ * {@code dev} y {@code puesta-en-marcha} (primer arranque del ambiente de prueba, ver docs/despliegue.md).
+ * La contraseña sale de {@code VASTIO_ADMIN_CONTRASENA}; sin ella no se crea nada. V2 no versiona hashes a propósito.
  */
 @Component
-@Profile("dev")
-public class UsuarioInicialDev implements ApplicationRunner {
+@Profile({"dev", "puesta-en-marcha"})
+public class UsuarioInicial implements ApplicationRunner {
 
-    private static final Logger log = LoggerFactory.getLogger(UsuarioInicialDev.class);
+    private static final Logger log = LoggerFactory.getLogger(UsuarioInicial.class);
 
     private final UsuarioRepository usuarios;
     private final RolRepository roles;
@@ -32,9 +32,9 @@ public class UsuarioInicialDev implements ApplicationRunner {
     private final String nombreUsuario;
     private final String contrasena;
 
-    public UsuarioInicialDev(UsuarioRepository usuarios, RolRepository roles, PasswordEncoder passwordEncoder,
-            @Value("${vastio.dev.admin-usuario:direccion}") String nombreUsuario,
-            @Value("${vastio.dev.admin-contrasena:}") String contrasena) {
+    public UsuarioInicial(UsuarioRepository usuarios, RolRepository roles, PasswordEncoder passwordEncoder,
+            @Value("${vastio.usuario-inicial.usuario:direccion}") String nombreUsuario,
+            @Value("${vastio.usuario-inicial.contrasena:}") String contrasena) {
         this.usuarios = usuarios;
         this.roles = roles;
         this.passwordEncoder = passwordEncoder;
@@ -49,7 +49,7 @@ public class UsuarioInicialDev implements ApplicationRunner {
             return;
         }
         if (contrasena.isBlank()) {
-            log.warn("No se creó el usuario inicial '{}': definí VASTIO_ADMIN_CONTRASENA en el .env de la raíz.", nombreUsuario);
+            log.warn("No se creó el usuario inicial '{}': definí VASTIO_ADMIN_CONTRASENA.", nombreUsuario);
             return;
         }
         Usuario direccion = new Usuario("Dirección (usuario inicial)", nombreUsuario, passwordEncoder.encode(contrasena));

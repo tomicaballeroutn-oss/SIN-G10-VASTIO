@@ -15,6 +15,9 @@ frontend/dev-dist/
 .env
 .env.*
 !.env.example
+!.env.prod.example
+# Respaldos del ambiente de prueba
+respaldos/
 # IDE y sistema
 .idea/
 .vscode/

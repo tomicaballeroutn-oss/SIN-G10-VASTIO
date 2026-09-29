@@ -22,8 +22,8 @@ import ar.edu.utn.vastio.usuarios.infraestructura.UsuarioRepository;
  * Tareas 7 y 9 del Sprint 0: usuario inicial de Dirección y Swagger UI, ambos solo en dev.
  */
 @SpringBootTest(properties = {
-        "vastio.dev.admin-usuario=direccion.test",
-        "vastio.dev.admin-contrasena=clave-inicial-de-prueba"
+        "vastio.usuario-inicial.usuario=direccion.test",
+        "vastio.usuario-inicial.contrasena=clave-inicial-de-prueba"
 })
 @AutoConfigureMockMvc
 @ActiveProfiles({"dev", "test"})

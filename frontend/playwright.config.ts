@@ -14,6 +14,8 @@ export default defineConfig({
   use: {
     baseURL: process.env.E2E_URL ?? 'http://localhost:5173',
     trace: 'retain-on-failure',
+    // Solo para probar el stack de producción en local (certificado de la CA interna de Caddy).
+    ignoreHTTPSErrors: process.env.E2E_IGNORAR_CERTIFICADO === '1',
   },
   projects: [
     { name: 'escritorio', use: { ...devices['Desktop Chrome'], viewport: { width: 1280, height: 800 } } },

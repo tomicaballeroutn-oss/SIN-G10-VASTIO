@@ -1,6 +1,24 @@
-# Perfil de desarrollo: base de docker-compose.yml (docker compose up -d db)
+# Perfil de desarrollo: base de docker-compose.yml (docker compose up -d db).
+# Lee el .env de la raíz del repo si existe (ver .env.example).
 spring:
+  config:
+    import: optional:file:../.env[.properties]
   datasource:
     url: jdbc:postgresql://localhost:${DB_PORT:5432}/${DB_NAME:vastio}
     username: ${DB_USER:vastio}
     password: ${DB_PASSWORD:vastio}
+
+vastio:
+  seguridad:
+    jwt-secreto: ${VASTIO_JWT_SECRETO:solo-para-desarrollo-local-no-usar-en-otro-lado}
+  dev:
+    admin-usuario: ${VASTIO_ADMIN_USUARIO:direccion}
+    admin-contrasena: ${VASTIO_ADMIN_CONTRASENA:}
+
+springdoc:
+  api-docs:
+    enabled: true
+    path: /api/docs/openapi.json
+  swagger-ui:
+    enabled: true
+    path: /api/docs

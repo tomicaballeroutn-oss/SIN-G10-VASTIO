@@ -9,6 +9,19 @@ spring:
   flyway:
     locations: classpath:db/migration
 
+vastio:
+  seguridad:
+    # Obligatoria fuera de dev: al menos 32 caracteres al azar.
+    jwt-secreto: ${VASTIO_JWT_SECRETO:}
+    minutos-acceso: 15
+    cookie-segura: true
+
+springdoc:
+  api-docs:
+    enabled: false
+  swagger-ui:
+    enabled: false
+
 management:
   endpoints:
     web:

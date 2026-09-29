@@ -1,10 +1,13 @@
 # Backend
 backend/target/
+backend/.mvn/wrapper/maven-wrapper.jar
 *.class
 *.log
 # Frontend
 frontend/node_modules/
 frontend/dist/
+frontend/.vite/
+*.local
 # Entorno
 .env
 .env.*

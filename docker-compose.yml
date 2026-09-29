@@ -1,0 +1,25 @@
+# Ambiente de desarrollo. Uso: docker compose up -d db
+# Los valores se pueden cambiar en un .env (ver .env.example).
+services:
+  db:
+    image: postgres:17
+    container_name: vastio-db
+    environment:
+      POSTGRES_DB: ${DB_NAME:-vastio}
+      POSTGRES_USER: ${DB_USER:-vastio}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-vastio}
+      TZ: America/Argentina/Cordoba
+      PGTZ: America/Argentina/Cordoba
+    ports:
+      - "${DB_PORT:-5432}:5432"
+    volumes:
+      - vastio-db-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    restart: unless-stopped
+
+volumes:
+  vastio-db-data:

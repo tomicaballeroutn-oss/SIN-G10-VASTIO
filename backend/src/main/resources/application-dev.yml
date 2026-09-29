@@ -1,0 +1,6 @@
+# Perfil de desarrollo: base de docker-compose.yml (docker compose up -d db)
+spring:
+  datasource:
+    url: jdbc:postgresql://localhost:${DB_PORT:5432}/${DB_NAME:vastio}
+    username: ${DB_USER:vastio}
+    password: ${DB_PASSWORD:vastio}

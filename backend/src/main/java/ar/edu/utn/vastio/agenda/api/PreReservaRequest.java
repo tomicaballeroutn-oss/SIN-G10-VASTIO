@@ -29,7 +29,7 @@ public record PreReservaRequest(
     public record ClienteRequest(
             Long id,
             @Size(max = 120, message = "Usá hasta 120 caracteres.") String nombre,
-            @Pattern(regexp = "\\d{7,8}|\\d{11}", message = "Escribí el DNI (7 u 8 números) o el CUIT (11), sin puntos ni guiones.") String documento,
+            @Pattern(regexp = "\\d{7,8}|\\d{11}|", message = "Escribí el DNI (7 u 8 números) o el CUIT (11), sin puntos ni guiones.") String documento,
             @Size(max = 30, message = "Usá hasta 30 caracteres.") String telefono,
             @Email(message = "Revisá el correo.") @Size(max = 120, message = "Usá hasta 120 caracteres.") String email) {
 

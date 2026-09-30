@@ -200,6 +200,18 @@ class PreReservaIT {
     }
 
     @Test
+    void losDatosOpcionalesVaciosDelClienteNuevoSeGuardanComoSinDato() throws Exception {
+        // La pantalla manda "" en los campos que la vendedora no completó.
+        long id = idDe(preReservar(lucia, pedido("club", FECHA, "noche", """
+                {"nombre":"Paula Gómez","documento":"","telefono":"","email":""}""", null, null))
+                .andExpect(status().isCreated()));
+
+        Map<String, Object> cliente = jdbc.queryForMap(
+                "SELECT c.documento, c.telefono, c.email FROM evento e JOIN cliente c USING (cliente_id) WHERE evento_id = ?", id);
+        assertThat(cliente.values()).containsOnlyNulls();
+    }
+
+    @Test
     void conUnClienteExistenteActualizaSuTelefono() throws Exception {
         long cliente = escenario.cliente("Delfina Ríos");
 

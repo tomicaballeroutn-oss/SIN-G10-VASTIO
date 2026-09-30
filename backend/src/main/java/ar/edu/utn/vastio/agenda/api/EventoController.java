@@ -1,6 +1,7 @@
 package ar.edu.utn.vastio.agenda.api;
 
 import java.net.URI;
+import java.util.List;
 
 import jakarta.validation.Valid;
 
@@ -8,11 +9,16 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.oauth2.jwt.Jwt;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import ar.edu.utn.vastio.agenda.api.EventoDto.EventoResumen;
+import ar.edu.utn.vastio.agenda.api.EventoDto.FichaResponse;
+import ar.edu.utn.vastio.agenda.aplicacion.ConsultaEventoService;
 import ar.edu.utn.vastio.agenda.aplicacion.PreReservaService;
 import ar.edu.utn.vastio.agenda.dominio.EstadoEvento;
 import ar.edu.utn.vastio.agenda.dominio.Evento;
@@ -31,9 +37,33 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 public class EventoController {
 
     private final PreReservaService preReservas;
+    private final ConsultaEventoService consultas;
+    private final EventoDto dto;
 
-    public EventoController(PreReservaService preReservas) {
+    public EventoController(PreReservaService preReservas, ConsultaEventoService consultas, EventoDto dto) {
         this.preReservas = preReservas;
+        this.consultas = consultas;
+        this.dto = dto;
+    }
+
+    @GetMapping
+    @PreAuthorize(Permisos.CONSULTAR_EVENTOS)
+    @Operation(summary = "Próximos eventos", description = """
+            Eventos activos desde hoy. La vendedora ve los suyos y la planner los asignados («Mis eventos»);
+            Dirección, Coordinación, Administración y Compras, todos.""")
+    public List<EventoResumen> proximos(@AuthenticationPrincipal Jwt jwt) {
+        var proximos = consultas.proximos(UsuarioActual.de(jwt));
+        return proximos.eventos().stream().map(e -> dto.resumen(e, proximos.nombres())).toList();
+    }
+
+    @GetMapping("/{id}")
+    @PreAuthorize(Permisos.CONSULTAR_EVENTOS)
+    @Operation(summary = "Ficha del evento", description = """
+            Datos, estado, acciones disponibles para quien consulta e historial de cambios. La vendedora solo abre
+            sus eventos. El importe de la seña solo llega a Dirección, Coordinación, Administración y la vendedora titular.""")
+    @ApiResponse(responseCode = "403", description = "Evento de otra vendedora")
+    public FichaResponse ficha(@PathVariable long id, @AuthenticationPrincipal Jwt jwt) {
+        return dto.ficha(consultas.ficha(id, UsuarioActual.de(jwt)));
     }
 
     @PostMapping

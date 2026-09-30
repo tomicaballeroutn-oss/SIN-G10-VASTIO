@@ -18,6 +18,9 @@ public final class Permisos {
     /** Registrar pre-reserva: la vendedora (a su nombre), Coordinación y Dirección. */
     public static final String PRERESERVA = "hasAnyRole('DIRECCION', 'COORDINACION', 'VENDEDORA')";
 
+    /** Consultar evento (ficha y lista): todos menos Barra y Cocina. La vendedora, solo los suyos (en el servicio). */
+    public static final String CONSULTAR_EVENTOS = AGENDA;
+
     /** Registrar o modificar datos de un evento; la regla «solo los suyos» se verifica en el servicio. */
     public static final String EDITAR_EVENTOS = "hasAnyRole('DIRECCION', 'COORDINACION', 'VENDEDORA', 'PLANNER')";
 

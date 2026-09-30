@@ -8,7 +8,7 @@ describe('página /_ds', () => {
     render(<PaginaDs />);
 
     for (const titulo of [
-      'Icon', 'Button e IconButton', 'Input, Select, Checkbox, Switch y Stepper', 'Alert', 'Dialog y EmptyState', 'Badge',
+      'Icon', 'Button e IconButton', 'Input, Select, Combobox, Checkbox, Switch y Stepper', 'Alert', 'Dialog y EmptyState', 'Badge',
       'StatusChip: estados del evento', 'SalonTag', 'Card, Actor y Stat', 'Table', 'Tabs', 'Timeline', 'Nav', 'AgendaGrid',
       'EventCard', 'StockLevel y MovementCard',
     ]) {

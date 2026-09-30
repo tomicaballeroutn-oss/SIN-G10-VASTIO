@@ -14,6 +14,8 @@ vastio:
   usuario-inicial:
     usuario: ${VASTIO_ADMIN_USUARIO:direccion}
     contrasena: ${VASTIO_ADMIN_CONTRASENA:}
+  demo:
+    contrasena: ${VASTIO_DEMO_CONTRASENA:}
 
 springdoc:
   api-docs:

@@ -73,6 +73,15 @@ h2.h2, h3.h3, h3.h4 { margin: 0; color: var(--ink); }
 .v-control.has-icon { padding-left: 44px; }
 .v-control.has-suffix { padding-right: 96px; }
 .v-control__icon { position: absolute; left: var(--space-3); color: var(--ink-muted); pointer-events: none; }
+
+/* Combobox: lista de sugerencias bajo el campo */
+.v-combo .v-control-wrap { position: relative; }
+.v-combo__lista { position: absolute; z-index: var(--z-dropdown); top: calc(100% + 4px); left: 0; right: 0; max-height: 288px; overflow: auto; margin: 0; padding: var(--space-1); list-style: none;
+  background: var(--surface-raised); border: 1px solid var(--line-strong); border-radius: var(--radius-md); box-shadow: var(--shadow-md); }
+.v-combo__opcion { display: flex; align-items: center; gap: var(--space-3); min-height: 44px; padding: var(--space-2) var(--space-3); border-radius: var(--radius-sm); color: var(--ink); cursor: pointer; }
+.v-combo__opcion:hover, .v-combo__opcion.is-active { background: var(--brand-tint); }
+.v-combo__texto { display: flex; flex-direction: column; min-width: 0; }
+.v-combo__estado { padding: var(--space-2) var(--space-3); }
 .v-control__suffix { position: absolute; right: var(--space-4); pointer-events: none; }
 .v-select { padding-right: 44px; cursor: pointer; }
 .v-select__chev { position: absolute; right: var(--space-3); color: var(--ink-muted); pointer-events: none; }

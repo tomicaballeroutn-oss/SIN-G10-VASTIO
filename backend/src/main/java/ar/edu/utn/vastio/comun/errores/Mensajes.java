@@ -5,6 +5,8 @@ package ar.edu.utn.vastio.comun.errores;
  */
 public final class Mensajes {
 
+    /** Código de la violación de exclusividad, venga del chequeo del servicio o del índice ux_evento_unidad_activa. */
+    public static final String CODIGO_FECHA_TOMADA = "FECHA_TOMADA";
     public static final String FECHA_TOMADA = "Esa fecha ya está tomada. Elegí otro salón, otra fecha u otro turno.";
     public static final String DATO_DUPLICADO = "Ya hay un registro con esos datos. Revisalos y volvé a intentarlo.";
     public static final String DATOS_INVALIDOS = "Revisá los datos marcados.";

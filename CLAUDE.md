@@ -86,6 +86,7 @@ design/    Sistema de diseño y prototipos originales (solo referencia, no se co
 
 ```powershell
 copy .env.example .env                  # una vez: completar VASTIO_ADMIN_CONTRASENA (usuario inicial «direccion»)
+                                        # opcional: VASTIO_DEMO_CONTRASENA carga un usuario por perfil y pre-reservas de ejemplo
 docker compose up -d db                 # base de desarrollo
 cd backend; .\mvnw spring-boot:run      # backend en http://localhost:8080 · Swagger UI en /api/docs
 cd backend; .\mvnw verify               # tests (necesita Docker por Testcontainers)

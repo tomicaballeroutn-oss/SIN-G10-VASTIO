@@ -15,3 +15,9 @@
 .agenda__unidad:last-child { border-bottom: 0; }
 .agenda__unidad-cabeza { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: var(--space-2); }
 .agenda__evento { display: flex; flex-direction: column; }
+
+/* UI-08: diálogo de pre-reserva */
+.prereserva { display: flex; flex-direction: column; gap: var(--space-4); }
+.prereserva__unidad { display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-2) var(--space-3); padding: var(--space-3); background: var(--surface-sunken); border-radius: var(--radius-md); }
+.prereserva__par { display: grid; gap: var(--space-4); }
+@media (min-width: 480px) { .prereserva__par { grid-template-columns: 1fr 1fr; } }

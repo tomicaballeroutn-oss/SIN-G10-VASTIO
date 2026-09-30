@@ -22,7 +22,7 @@ class ManejadorDeErroresIT {
     void laFechaTomadaEsUn409ConElMensajeDelNegocio() throws Exception {
         mvc.perform(get("/api/v1/_sonda/fecha-tomada"))
                 .andExpect(status().isConflict())
-                .andExpect(jsonPath("$.codigo").value("UX_EVENTO_UNIDAD_ACTIVA"))
+                .andExpect(jsonPath("$.codigo").value("FECHA_TOMADA"))
                 .andExpect(jsonPath("$.detail").value("Esa fecha ya está tomada. Elegí otro salón, otra fecha u otro turno."));
     }
 

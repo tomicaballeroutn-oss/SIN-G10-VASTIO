@@ -12,6 +12,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 
@@ -19,11 +20,12 @@ import ar.edu.utn.vastio.usuarios.dominio.RolCodigo;
 import ar.edu.utn.vastio.usuarios.infraestructura.UsuarioRepository;
 
 /**
- * Tareas 7 y 9 del Sprint 0: usuario inicial de Dirección y Swagger UI, ambos solo en dev.
+ * Solo en dev: usuario inicial de Dirección, Swagger UI (Sprint 0) y datos de demostración (Sprint 1).
  */
 @SpringBootTest(properties = {
         "vastio.usuario-inicial.usuario=direccion.test",
-        "vastio.usuario-inicial.contrasena=clave-inicial-de-prueba"
+        "vastio.usuario-inicial.contrasena=clave-inicial-de-prueba",
+        "vastio.demo.contrasena=clave-de-demostracion"
 })
 @AutoConfigureMockMvc
 @ActiveProfiles({"dev", "test"})
@@ -35,6 +37,9 @@ class PerfilDevIT {
 
     @Autowired
     UsuarioRepository usuarios;
+
+    @Autowired
+    JdbcTemplate jdbc;
 
     @Test
     void alArrancarCreaElUsuarioInicialDeDireccion() {
@@ -64,5 +69,19 @@ class PerfilDevIT {
     void swaggerUiEstaEnApiDocs() throws Exception {
         mvc.perform(get("/api/docs"))
                 .andExpect(status().is3xxRedirection());
+    }
+
+    @Test
+    void cargaUnUsuarioPorPerfilYPreReservasConSuHistorial() {
+        assertThat(usuarios.findByNombreUsuario("lucia.ferreyra")).get()
+                .satisfies(u -> assertThat(u.codigosDeRol()).containsExactly(RolCodigo.VENDEDORA))
+                .satisfies(u -> assertThat(u.isDebeCambiarContrasena()).isFalse());
+        for (RolCodigo rol : RolCodigo.values()) {
+            assertThat(jdbc.queryForObject("""
+                    SELECT count(*) FROM usuario_rol ur JOIN rol r USING (rol_id) WHERE r.codigo = ?""", Integer.class, rol.name()))
+                    .as(rol.name()).isPositive();
+        }
+        assertThat(jdbc.queryForObject("SELECT count(*) FROM evento WHERE estado = 'PRE_RESERVA'", Integer.class)).isEqualTo(7);
+        assertThat(jdbc.queryForObject("SELECT count(DISTINCT evento_id) FROM cambio_estado_evento", Integer.class)).isEqualTo(7);
     }
 }

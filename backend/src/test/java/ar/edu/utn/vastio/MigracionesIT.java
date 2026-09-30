@@ -1,8 +1,10 @@
 package ar.edu.utn.vastio;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import java.nio.charset.StandardCharsets;
+import java.util.List;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -11,9 +13,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.transaction.support.TransactionTemplate;
 
 /**
- * Verifica que V1 y V2 dejan la base como indica el diccionario de datos.
+ * Verifica que las migraciones dejan la base como indica el diccionario de datos.
  */
 @PruebaDeIntegracion
 class MigracionesIT {
@@ -21,8 +24,11 @@ class MigracionesIT {
     @Autowired
     JdbcTemplate jdbc;
 
+    @Autowired
+    TransactionTemplate transacciones;
+
     @Test
-    void creaLas38Tablas() {
+    void creaLas39Tablas() {
         Integer tablas = jdbc.queryForObject("""
                 SELECT count(*) FROM information_schema.tables
                 WHERE table_schema = 'public'
@@ -30,7 +36,7 @@ class MigracionesIT {
                   AND table_name <> 'flyway_schema_history'
                 """, Integer.class);
 
-        assertThat(tablas).isEqualTo(38);
+        assertThat(tablas).isEqualTo(39); // 38 de V1 + numerador_evento (V3)
     }
 
     @ParameterizedTest(name = "{0} tiene {1} filas")
@@ -70,5 +76,29 @@ class MigracionesIT {
                     .as(script.getFilename())
                     .doesNotContainIgnoringCase("INSERT INTO usuario");
         }
+    }
+
+    @ParameterizedTest(name = "{0} no admite UPDATE ni DELETE")
+    @CsvSource({"cambio_estado_evento", "modificacion_evento", "reprogramacion", "movimiento_stock"})
+    void lasTablasDeSoloInsercionRechazanCambios(String tabla) {
+        for (String sentencia : List.of("UPDATE " + tabla + " SET fecha_hora = fecha_hora", "DELETE FROM " + tabla)) {
+            // Con la tabla vacía el trigger por fila no llega a correr: se inserta una fila en una transacción que se descarta.
+            assertThatThrownBy(() -> transacciones.executeWithoutResult(t -> {
+                insertarFilaDePrueba(tabla);
+                jdbc.update(sentencia);
+            })).as(sentencia).hasMessageContaining("es de solo inserción");
+        }
+    }
+
+    /** Fila mínima para el trigger; sin restricciones de clave porque se inserta con los triggers de FK desactivados. */
+    private void insertarFilaDePrueba(String tabla) {
+        jdbc.execute("SET LOCAL session_replication_role = replica");
+        switch (tabla) {
+            case "cambio_estado_evento" -> jdbc.update("INSERT INTO cambio_estado_evento (evento_id, estado_nuevo) VALUES (-1, 'PRE_RESERVA')");
+            case "modificacion_evento" -> jdbc.update("INSERT INTO modificacion_evento (evento_id, campo, usuario_id) VALUES (-1, 'nombre', -1)");
+            case "reprogramacion" -> jdbc.update("INSERT INTO reprogramacion (evento_id, unidad_anterior_id, unidad_nueva_id, motivo_id, usuario_id) VALUES (-1, -1, -2, 4, -1)");
+            default -> jdbc.update("INSERT INTO movimiento_stock (tipo, bebida_id, cantidad, usuario_id, ubicacion_destino_id) VALUES ('INGRESO', -1, 1, -1, 1)");
+        }
+        jdbc.execute("SET LOCAL session_replication_role = DEFAULT");
     }
 }

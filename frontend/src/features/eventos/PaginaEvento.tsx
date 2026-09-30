@@ -1,11 +1,11 @@
 import { useCallback, type ReactNode } from 'react';
-import { useNavigate, useParams, useSearchParams } from 'react-router';
+import { useLocation, useNavigate, useParams, useSearchParams } from 'react-router';
 import type { EstadoEvento } from '../../api/agenda';
 import { hora } from '../../api/catalogos';
-import { fichas, type EntradaHistorial, type Ficha } from '../../api/eventos';
+import { fichas, type CambioDeEstado, type EntradaHistorial, type Ficha, type Modificacion } from '../../api/eventos';
 import { useDatos } from '../../api/useDatos';
 import {
-  Actor, Button, Card, ESTADOS, ESTADO_POR_CODIGO, SalonTag, StatusChip, Tabs, Timeline,
+  Actor, Alert, Button, Card, ESTADOS, ESTADO_POR_CODIGO, SalonTag, StatusChip, Tabs, Timeline,
   type TimelineItem, type TimelineTone,
 } from '../../ds';
 import { Cargando } from '../comun/Cargando';
@@ -37,9 +37,14 @@ export function PaginaEvento() {
 function ContenidoFicha({ ficha }: { ficha: Ficha }) {
   const [busqueda, setBusqueda] = useSearchParams();
   const pestana = busqueda.get('pestana') === 'historial' ? 'historial' : 'datos';
+  // Aviso que deja otra pantalla al volver a la ficha (p. ej. «Datos del evento guardados.»).
+  const aviso = (useLocation().state as { aviso?: string } | null)?.aviso;
+  const navegar = useNavigate();
+  const { acciones } = ficha;
 
   return (
     <>
+      {aviso && <Alert tone="success">{aviso}</Alert>}
       <header className="ficha__cabecera">
         <div className="ficha__etiquetas">
           <StatusChip status={ESTADO_POR_CODIGO[ficha.estado]} />
@@ -53,6 +58,12 @@ function ContenidoFicha({ ficha }: { ficha: Ficha }) {
           {ficha.codigo} · {ficha.tipo.nombre} · {ficha.planner ? `Planner: ${ficha.planner.nombre}` : 'Sin planner asignada'}
         </p>
       </header>
+
+      {acciones.modificar && (
+        <div className="ficha__acciones">
+          <Button variant="outline" icon="pencil" onClick={() => navegar(`/eventos/${ficha.id}/datos`)}>Modificar datos</Button>
+        </div>
+      )}
 
       <Tabs
         label="Secciones de la ficha"
@@ -105,6 +116,19 @@ function Datos({ ficha }: { ficha: Ficha }) {
           <Dato etiqueta="Registrado">{fechaHora(ficha.fechaCreacion)}</Dato>
         </dl>
       </Card>
+      <Card title="Otros contactos">
+        {ficha.contactos.length === 0 ? (
+          <p className="body-sm v-muted">Sin contactos además del cliente.</p>
+        ) : (
+          <dl className="ficha__lista">
+            {ficha.contactos.map((c) => (
+              <Dato key={c.id} etiqueta={c.vinculo ?? 'Contacto'}>
+                {[c.nombre, c.telefono, c.email].filter(Boolean).join(' · ')}
+              </Dato>
+            ))}
+          </dl>
+        )}
+      </Card>
       {sena && (
         <Card title="Seña">
           <dl className="ficha__lista">
@@ -131,8 +155,8 @@ const TONO: Partial<Record<EstadoEvento, TimelineTone>> = {
 };
 
 /** Título y verbo de cada transición, como en UI-09: «Pre-reserva · Lucía Ferreyra · apartó la fecha». */
-function describir(e: EntradaHistorial): { titulo: string; accion: string } {
-  if (e.estadoAnterior === null) return { titulo: 'Pre-reserva registrada', accion: 'apartó la fecha' };
+function describir(e: CambioDeEstado): { titulo: string; accion: string } {
+  if (!e.estadoAnterior) return { titulo: 'Pre-reserva registrada', accion: 'apartó la fecha' };
   switch (e.estadoNuevo) {
     case 'SENADO': return { titulo: 'Seña registrada', accion: 'registró la seña' };
     case 'LIBERADA': return { titulo: 'Pre-reserva liberada', accion: 'liberó la fecha' };
@@ -140,19 +164,67 @@ function describir(e: EntradaHistorial): { titulo: string; accion: string } {
   }
 }
 
+/** Nombre en pantalla de cada dato del registro de modificaciones. */
+const CAMPOS: Record<string, string> = {
+  nombre: 'Nombre del evento',
+  tipo_evento: 'Tipo',
+  cantidad_invitados: 'Invitados',
+  observaciones_internas: 'Observaciones internas',
+  'cliente.nombre': 'Cliente',
+  'cliente.documento': 'Documento del cliente',
+  'cliente.telefono': 'Teléfono del cliente',
+  'cliente.email': 'Correo del cliente',
+  contacto: 'Contacto',
+};
+
+function describirModificacion(m: Modificacion): string {
+  const campo = CAMPOS[m.campo] ?? m.campo;
+  if (m.campo === 'contacto') {
+    if (!m.valorAnterior) return `Agregó el contacto ${m.valorNuevo}`;
+    if (!m.valorNuevo) return `Quitó el contacto ${m.valorAnterior}`;
+  }
+  if (m.campo === 'observaciones_internas') return m.valorNuevo ? 'Cambió las observaciones internas' : 'Borró las observaciones internas';
+  return `${campo}: ${m.valorAnterior ?? 'sin dato'} → ${m.valorNuevo ?? 'sin dato'}`;
+}
+
+/** Los cambios de datos de un mismo guardado (misma persona y momento) van juntos en una entrada. */
+function agrupar(historial: EntradaHistorial[]): (CambioDeEstado | Modificacion[])[] {
+  const grupos: (CambioDeEstado | Modificacion[])[] = [];
+  for (const e of historial) {
+    const ultimo = grupos[grupos.length - 1];
+    if (e.tipo === 'MODIFICACION' && Array.isArray(ultimo) && ultimo[0].fechaHora === e.fechaHora && ultimo[0].usuario.id === e.usuario.id) {
+      ultimo.push(e);
+    } else {
+      grupos.push(e.tipo === 'MODIFICACION' ? [e] : e);
+    }
+  }
+  return grupos;
+}
+
 function Historial({ historial }: { historial: EntradaHistorial[] }) {
-  const items: TimelineItem[] = historial.map((e) => {
-    const { titulo, accion } = describir(e);
+  const items: TimelineItem[] = agrupar(historial).map((g) => {
+    if (Array.isArray(g)) {
+      return {
+        title: 'Datos modificados',
+        detail: g.map(describirModificacion).join('. ') + '.',
+        actor: g[0].usuario.nombre,
+        action: 'modificó los datos',
+        at: fechaHora(g[0].fechaHora),
+        icon: 'pencil',
+        tone: 'neutral',
+      };
+    }
+    const { titulo, accion } = describir(g);
     return {
       title: titulo,
-      from: e.estadoAnterior ? ESTADO_POR_CODIGO[e.estadoAnterior] : undefined,
-      to: ESTADO_POR_CODIGO[e.estadoNuevo],
-      detail: e.observacion ?? undefined,
-      actor: e.usuario?.nombre ?? 'Sistema',
-      action: e.usuario ? accion : 'cambio automático',
-      at: fechaHora(e.fechaHora),
-      icon: ESTADOS[ESTADO_POR_CODIGO[e.estadoNuevo]].icon,
-      tone: TONO[e.estadoNuevo] ?? 'neutral',
+      from: g.estadoAnterior ? ESTADO_POR_CODIGO[g.estadoAnterior] : undefined,
+      to: ESTADO_POR_CODIGO[g.estadoNuevo],
+      detail: g.observacion,
+      actor: g.usuario?.nombre ?? 'Sistema',
+      action: g.usuario ? accion : 'cambio automático',
+      at: fechaHora(g.fechaHora),
+      icon: ESTADOS[ESTADO_POR_CODIGO[g.estadoNuevo]].icon,
+      tone: TONO[g.estadoNuevo] ?? 'neutral',
     };
   });
   return (

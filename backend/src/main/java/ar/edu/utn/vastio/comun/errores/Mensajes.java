@@ -9,6 +9,7 @@ public final class Mensajes {
     public static final String CODIGO_FECHA_TOMADA = "FECHA_TOMADA";
     public static final String FECHA_TOMADA = "Esa fecha ya está tomada. Elegí otro salón, otra fecha u otro turno.";
     public static final String DATO_DUPLICADO = "Ya hay un registro con esos datos. Revisalos y volvé a intentarlo.";
+    public static final String EDICION_SIMULTANEA = "Otra persona guardó cambios al mismo tiempo. Volvé a abrir la pantalla y repetí lo que hiciste.";
     public static final String DATOS_INVALIDOS = "Revisá los datos marcados.";
     public static final String DATOS_ILEGIBLES = "No pudimos leer los datos enviados. Revisalos y volvé a intentarlo.";
     public static final String NO_ENCONTRADO = "No encontramos lo que buscás.";

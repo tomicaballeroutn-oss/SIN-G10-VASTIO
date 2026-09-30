@@ -12,6 +12,7 @@ import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -19,6 +20,7 @@ import org.springframework.web.bind.annotation.RestController;
 import ar.edu.utn.vastio.agenda.api.EventoDto.EventoResumen;
 import ar.edu.utn.vastio.agenda.api.EventoDto.FichaResponse;
 import ar.edu.utn.vastio.agenda.aplicacion.ConsultaEventoService;
+import ar.edu.utn.vastio.agenda.aplicacion.DatosEventoService;
 import ar.edu.utn.vastio.agenda.aplicacion.PreReservaService;
 import ar.edu.utn.vastio.agenda.dominio.EstadoEvento;
 import ar.edu.utn.vastio.agenda.dominio.Evento;
@@ -38,12 +40,29 @@ public class EventoController {
 
     private final PreReservaService preReservas;
     private final ConsultaEventoService consultas;
+    private final DatosEventoService datos;
     private final EventoDto dto;
 
-    public EventoController(PreReservaService preReservas, ConsultaEventoService consultas, EventoDto dto) {
+    public EventoController(PreReservaService preReservas, ConsultaEventoService consultas, DatosEventoService datos,
+            EventoDto dto) {
         this.preReservas = preReservas;
         this.consultas = consultas;
+        this.datos = datos;
         this.dto = dto;
+    }
+
+    @PutMapping("/{id}")
+    @PreAuthorize(Permisos.EDITAR_EVENTOS)
+    @Operation(summary = "Registrar evento", description = """
+            Completa o modifica cliente, contactos, tipo, nombre, invitados y observaciones internas, entre Pre-reserva
+            y Confirmado. Lo hacen la vendedora titular, la planner asignada, Coordinación y Dirección. Cada dato que
+            cambia queda en el historial. Devuelve la ficha actualizada.""")
+    @ApiResponse(responseCode = "409", description = "EVENTO_MODIFICADO: otra persona guardó cambios en el medio")
+    public FichaResponse registrarDatos(@PathVariable long id, @Valid @RequestBody DatosEventoRequest pedido,
+            @AuthenticationPrincipal Jwt jwt) {
+        UsuarioActual quien = UsuarioActual.de(jwt);
+        datos.registrar(id, pedido.datos(), quien);
+        return dto.ficha(consultas.ficha(id, quien));
     }
 
     @GetMapping

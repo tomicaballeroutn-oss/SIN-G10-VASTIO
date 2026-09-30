@@ -14,10 +14,13 @@ import org.springframework.transaction.annotation.Transactional;
 
 import ar.edu.utn.vastio.VastioApplication;
 import ar.edu.utn.vastio.agenda.dominio.CambioEstadoEvento;
+import ar.edu.utn.vastio.agenda.dominio.ContactoEvento;
 import ar.edu.utn.vastio.agenda.dominio.EstadoEvento;
 import ar.edu.utn.vastio.agenda.dominio.Evento;
+import ar.edu.utn.vastio.agenda.dominio.ModificacionEvento;
 import ar.edu.utn.vastio.agenda.infraestructura.CambioEstadoEventoRepository;
 import ar.edu.utn.vastio.agenda.infraestructura.EventoRepository;
+import ar.edu.utn.vastio.agenda.infraestructura.ModificacionEventoRepository;
 import ar.edu.utn.vastio.comun.errores.Mensajes;
 import ar.edu.utn.vastio.comun.errores.ProblemaException;
 import ar.edu.utn.vastio.comun.seguridad.UsuarioActual;
@@ -41,11 +44,14 @@ public class ConsultaEventoService {
 
     private final EventoRepository eventos;
     private final CambioEstadoEventoRepository historial;
+    private final ModificacionEventoRepository modificaciones;
     private final UsuarioService usuarios;
 
-    public ConsultaEventoService(EventoRepository eventos, CambioEstadoEventoRepository historial, UsuarioService usuarios) {
+    public ConsultaEventoService(EventoRepository eventos, CambioEstadoEventoRepository historial,
+            ModificacionEventoRepository modificaciones, UsuarioService usuarios) {
         this.eventos = eventos;
         this.historial = historial;
+        this.modificaciones = modificaciones;
         this.usuarios = usuarios;
     }
 
@@ -53,8 +59,9 @@ public class ConsultaEventoService {
     public record Acciones(boolean modificar, boolean liberar, boolean registrarSena) {
     }
 
-    public record Ficha(Evento evento, boolean veImportes, Acciones acciones, List<CambioEstadoEvento> cambios,
-            Map<Long, String> nombres) {
+    /** Contactos y modificaciones se copian dentro de la transacción: la respuesta se arma después. */
+    public record Ficha(Evento evento, boolean veImportes, Acciones acciones, List<ContactoEvento> contactos,
+            List<CambioEstadoEvento> cambios, List<ModificacionEvento> modificaciones, Map<Long, String> nombres) {
     }
 
     /**
@@ -63,14 +70,16 @@ public class ConsultaEventoService {
     public Ficha ficha(long id, UsuarioActual quien) {
         Evento evento = visible(id, quien);
         List<CambioEstadoEvento> cambios = historial.findByEventoIdOrderByFechaHoraAscIdAsc(id);
+        List<ModificacionEvento> datos = modificaciones.findByEventoIdOrderByFechaHoraAscIdAsc(id);
         Set<Long> personas = new HashSet<>();
         personas.add(evento.getVendedoraId());
         if (evento.getPlannerId() != null) {
             personas.add(evento.getPlannerId());
         }
         cambios.stream().map(CambioEstadoEvento::getUsuarioId).filter(u -> u != null).forEach(personas::add);
-        return new Ficha(evento, AccesoEvento.veImportes(quien, evento), acciones(evento, quien), cambios,
-                usuarios.nombres(personas));
+        datos.forEach(m -> personas.add(m.getUsuarioId()));
+        return new Ficha(evento, AccesoEvento.veImportes(quien, evento), acciones(evento, quien),
+                List.copyOf(evento.getContactos()), cambios, datos, usuarios.nombres(personas));
     }
 
     public static Acciones acciones(Evento evento, UsuarioActual quien) {

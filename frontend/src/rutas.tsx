@@ -2,6 +2,7 @@ import type { ReactNode } from 'react';
 import type { RouteObject } from 'react-router';
 import { PaginaAgenda } from './features/agenda/PaginaAgenda';
 import { PaginaDs } from './features/ds/PaginaDs';
+import { PaginaDatosEvento } from './features/eventos/PaginaDatosEvento';
 import { PaginaEvento } from './features/eventos/PaginaEvento';
 import { PaginaEventos } from './features/eventos/PaginaEventos';
 import { Layout } from './features/layout/Layout';
@@ -34,6 +35,10 @@ export const rutas: RouteObject[] = [
       {
         path: 'eventos/:id',
         element: <ConPermiso item={MENU.find((it) => it.id === 'eventos')!}><PaginaEvento /></ConPermiso>,
+      },
+      {
+        path: 'eventos/:id/datos',
+        element: <ConPermiso item={MENU.find((it) => it.id === 'eventos')!}><PaginaDatosEvento /></ConPermiso>,
       },
       { path: 'mas', element: <PaginaMas /> },
       { path: 'mi-cuenta', element: <PaginaMiCuenta /> },

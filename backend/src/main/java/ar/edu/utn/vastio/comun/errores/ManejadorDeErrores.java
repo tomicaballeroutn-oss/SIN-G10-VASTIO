@@ -9,6 +9,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpHeaders;
+import org.springframework.orm.ObjectOptimisticLockingFailureException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ProblemDetail;
@@ -60,6 +61,12 @@ public class ManejadorDeErrores extends ResponseEntityExceptionHandler {
         }
         log.warn("Violación de integridad sin mensaje propio: {}", causa);
         return problema(HttpStatus.CONFLICT, "DATO_DUPLICADO", "Conflicto", Mensajes.DATO_DUPLICADO);
+    }
+
+    /** Dos personas guardaron el mismo registro a la vez (@Version). */
+    @ExceptionHandler(ObjectOptimisticLockingFailureException.class)
+    ProblemDetail edicionSimultanea(ObjectOptimisticLockingFailureException ex) {
+        return problema(HttpStatus.CONFLICT, "EDICION_SIMULTANEA", "Conflicto", Mensajes.EDICION_SIMULTANEA);
     }
 
     @ExceptionHandler(AuthenticationException.class)

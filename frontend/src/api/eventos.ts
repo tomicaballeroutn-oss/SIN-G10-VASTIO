@@ -78,14 +78,45 @@ export interface Sena {
   firmanteContacto: string | null;
 }
 
-/** Entrada del historial: por ahora, cambios de estado. */
-export interface EntradaHistorial {
+/** Cambio de estado. Sin `estadoAnterior`, es la creación. */
+export interface CambioDeEstado {
   tipo: 'ESTADO';
-  estadoAnterior: EstadoEvento | null;
+  estadoAnterior?: EstadoEvento;
   estadoNuevo: EstadoEvento;
-  usuario: Nombre | null;
+  usuario?: Nombre;
   fechaHora: string;
-  observacion: string | null;
+  observacion?: string;
+}
+
+/** Un dato que cambió al registrar el evento. Sin valor anterior: se agregó; sin nuevo: se quitó. */
+export interface Modificacion {
+  tipo: 'MODIFICACION';
+  campo: string;
+  valorAnterior?: string;
+  valorNuevo?: string;
+  usuario: Nombre;
+  fechaHora: string;
+}
+
+export type EntradaHistorial = CambioDeEstado | Modificacion;
+
+export interface Contacto {
+  id: number;
+  nombre: string;
+  vinculo: string | null;
+  telefono: string | null;
+  email: string | null;
+}
+
+/** Lo que manda «Registrar evento»: el estado completo de los datos. Los contactos que faltan se quitan. */
+export interface DatosEvento {
+  version: number;
+  nombre: string;
+  tipoEventoId: number;
+  cantidadInvitados: number | null;
+  observacionesInternas: string;
+  cliente: { nombre: string; documento: string; telefono: string; email: string };
+  contactos: { id?: number; nombre: string; vinculo: string; telefono: string; email: string }[];
 }
 
 /** Lo que la persona puede hacer, calculado por el backend según perfil y estado. */
@@ -105,6 +136,7 @@ export interface Ficha {
   fecha: string;
   turno: TurnoEvento;
   cliente: Cliente;
+  contactos: Contacto[];
   vendedora: Nombre;
   planner: Nombre | null;
   cantidadInvitados: number | null;
@@ -112,6 +144,8 @@ export interface Ficha {
   observacionesInternas: string | null;
   sena: Sena | null;
   fechaCreacion: string;
+  /** Se manda al guardar, para no pisar cambios de otra persona. */
+  version: number;
   acciones: Acciones;
   historial: EntradaHistorial[];
 }
@@ -134,4 +168,5 @@ export interface EventoResumen {
 export const fichas = {
   ficha: (id: number) => api<Ficha>(`/eventos/${id}`),
   proximos: () => api<EventoResumen[]>('/eventos'),
+  registrarDatos: (id: number, datos: DatosEvento) => api<Ficha>(`/eventos/${id}`, { metodo: 'PUT', cuerpo: datos }),
 };

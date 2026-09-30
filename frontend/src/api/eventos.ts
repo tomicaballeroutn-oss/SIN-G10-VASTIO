@@ -165,9 +165,19 @@ export interface EventoResumen {
   cantidadInvitados: number | null;
 }
 
+/** Registrar seña: importe en pesos, fecha del pago (yyyy-mm-dd) y firmante. */
+export interface PedidoSena {
+  importe: number | null;
+  fechaPago: string;
+  firmanteNombre: string;
+  firmanteDni: string;
+  firmanteContacto: string;
+}
+
 export const fichas = {
   ficha: (id: number) => api<Ficha>(`/eventos/${id}`),
   proximos: () => api<EventoResumen[]>('/eventos'),
   registrarDatos: (id: number, datos: DatosEvento) => api<Ficha>(`/eventos/${id}`, { metodo: 'PUT', cuerpo: datos }),
   liberar: (id: number) => api<Ficha>(`/eventos/${id}/liberacion`, { metodo: 'POST' }),
+  registrarSena: (id: number, sena: PedidoSena) => api<Ficha>(`/eventos/${id}/sena`, { metodo: 'POST', cuerpo: sena }),
 };

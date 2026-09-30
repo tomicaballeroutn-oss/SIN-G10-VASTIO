@@ -32,3 +32,18 @@ export function fechaHora(isoConHora: string): string {
 export function pesos(importe: number): string {
   return new Intl.NumberFormat('es-AR', { style: 'currency', currency: 'ARS' }).format(importe).replace(/\s+/gu, ' ');
 }
+
+/**
+ * Lee un importe escrito a mano: «150.000,50», «150000,5», «150000.50» o «150.000».
+ * Con coma, el punto es separador de miles; sin coma, solo si agrupa de a tres. Null si no es un número.
+ */
+export function leerImporte(texto: string): number | null {
+  const limpio = texto.replace(/[\s$]/g, '');
+  if (!limpio) return null;
+  let normal: string;
+  if (limpio.includes(',')) normal = limpio.replace(/\./g, '').replace(',', '.');
+  else if (/^\d{1,3}(\.\d{3})+$/.test(limpio)) normal = limpio.replace(/\./g, '');
+  else normal = limpio;
+  if (!/^\d+(\.\d+)?$/.test(normal)) return null;
+  return Number(normal);
+}

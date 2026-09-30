@@ -160,6 +160,18 @@ public class Evento {
         return List.copyOf(contactos);
     }
 
+    /**
+     * Datos de la seña. Se cargan antes de pasar a Señado: el CHECK de la base los exige desde ese estado.
+     */
+    public void registrarSena(BigDecimal importe, LocalDate fecha, String firmanteNombre, String firmanteDni,
+            String firmanteContacto) {
+        this.importeSena = importe;
+        this.fechaSena = fecha;
+        this.firmanteNombre = firmanteNombre;
+        this.firmanteDni = firmanteDni;
+        this.firmanteContacto = firmanteContacto;
+    }
+
     /** Solo la llama {@code MaquinaDeEstados}: es quien valida la transición y la registra en el historial. */
     public void cambiarEstado(EstadoEvento nuevo) {
         this.estado = nuevo;

@@ -23,6 +23,7 @@ import ar.edu.utn.vastio.agenda.api.EventoDto.FichaResponse;
 import ar.edu.utn.vastio.agenda.aplicacion.ConsultaEventoService;
 import ar.edu.utn.vastio.agenda.aplicacion.DatosEventoService;
 import ar.edu.utn.vastio.agenda.aplicacion.PreReservaService;
+import ar.edu.utn.vastio.agenda.aplicacion.SenaService;
 import ar.edu.utn.vastio.agenda.dominio.EstadoEvento;
 import ar.edu.utn.vastio.agenda.dominio.Evento;
 import ar.edu.utn.vastio.comun.seguridad.Permisos;
@@ -42,10 +43,12 @@ public class EventoController {
     private final PreReservaService preReservas;
     private final ConsultaEventoService consultas;
     private final DatosEventoService datos;
+    private final SenaService senas;
     private final EventoDto dto;
 
     public EventoController(PreReservaService preReservas, ConsultaEventoService consultas, DatosEventoService datos,
-            EventoDto dto) {
+            SenaService senas, EventoDto dto) {
+        this.senas = senas;
         this.preReservas = preReservas;
         this.consultas = consultas;
         this.datos = datos;
@@ -84,6 +87,19 @@ public class EventoController {
     @ApiResponse(responseCode = "403", description = "Evento de otra vendedora")
     public FichaResponse ficha(@PathVariable long id, @AuthenticationPrincipal Jwt jwt) {
         return dto.ficha(consultas.ficha(id, UsuarioActual.de(jwt)));
+    }
+
+    @PostMapping("/{id}/sena")
+    @PreAuthorize(Permisos.PRERESERVA)
+    @Operation(summary = "Registrar seña", description = """
+            La pre-reserva pasa a Señado con el importe, la fecha del pago y los datos del firmante. La registran la
+            vendedora titular, Coordinación y Dirección. Avisa a Administración y Coordinación. Devuelve la ficha.""")
+    @ApiResponse(responseCode = "422", description = "El evento no está en Pre-reserva, o la fecha del pago es futura")
+    public FichaResponse registrarSena(@PathVariable long id, @Valid @RequestBody SenaRequest pedido,
+            @AuthenticationPrincipal Jwt jwt) {
+        UsuarioActual quien = UsuarioActual.de(jwt);
+        senas.registrar(id, pedido.sena(), quien);
+        return dto.ficha(consultas.ficha(id, quien));
     }
 
     @PostMapping("/{id}/liberacion")

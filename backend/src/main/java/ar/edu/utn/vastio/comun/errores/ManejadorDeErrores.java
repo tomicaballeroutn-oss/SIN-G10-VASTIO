@@ -4,6 +4,8 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
+import jakarta.persistence.OptimisticLockException;
+
 import org.jspecify.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -64,8 +66,8 @@ public class ManejadorDeErrores extends ResponseEntityExceptionHandler {
     }
 
     /** Dos personas guardaron el mismo registro a la vez (@Version). */
-    @ExceptionHandler(ObjectOptimisticLockingFailureException.class)
-    ProblemDetail edicionSimultanea(ObjectOptimisticLockingFailureException ex) {
+    @ExceptionHandler({ObjectOptimisticLockingFailureException.class, OptimisticLockException.class})
+    ProblemDetail edicionSimultanea(Exception ex) {
         return problema(HttpStatus.CONFLICT, "EDICION_SIMULTANEA", "Conflicto", Mensajes.EDICION_SIMULTANEA);
     }
 

@@ -3,6 +3,9 @@ package ar.edu.utn.vastio.agenda.aplicacion;
 import java.time.LocalDate;
 import java.time.ZoneId;
 
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.LockModeType;
+
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -46,10 +49,15 @@ public class PreReservaService {
     private final CatalogoService catalogos;
     private final UsuarioService usuarios;
     private final MaquinaDeEstados maquina;
+    private final ConsultaEventoService consultas;
+    private final EntityManager entityManager;
 
     public PreReservaService(UnidadComercializableRepository unidades, EventoRepository eventos,
             BloqueoRepository bloqueos, NumeradorEvento numerador, ClienteService clientes, CatalogoService catalogos,
-            UsuarioService usuarios, MaquinaDeEstados maquina) {
+            UsuarioService usuarios, MaquinaDeEstados maquina, ConsultaEventoService consultas,
+            EntityManager entityManager) {
+        this.consultas = consultas;
+        this.entityManager = entityManager;
         this.unidades = unidades;
         this.eventos = eventos;
         this.bloqueos = bloqueos;
@@ -91,6 +99,26 @@ public class PreReservaService {
         String codigo = NumeradorEvento.codigo(anio, numerador.siguiente(anio));
         Evento evento = new Evento(codigo, unidad, cliente, tipo.getId(), vendedora, recortar(nombre));
         return maquina.registrarCreacion(evento, quien.id());
+    }
+
+    /**
+     * Liberar pre-reserva (UI-10): la pre-reserva que no prosperó pasa a Liberada y la unidad vuelve a estar
+     * disponible. No es una cancelación. La hacen la vendedora titular, Coordinación y Dirección.
+     */
+    @Transactional
+    public Evento liberar(long id, String observacion, UsuarioActual quien) {
+        Evento evento = consultas.visible(id, quien);
+        if (!AccesoEvento.puedeOperarComoTitular(quien, evento)) {
+            throw ConsultaEventoService.sinPermiso();
+        }
+        if (evento.getEstado() != EstadoEvento.PRE_RESERVA) {
+            throw ProblemaException.reglaDeNegocio("ESTADO_NO_PERMITE", "El evento está en %s: solo se liberan pre-reservas.".formatted(
+                    MaquinaDeEstados.nombre(evento.getEstado())));
+        }
+        // Una versión nueva: si justo otra persona registraba la seña, una de las dos recibe 409.
+        entityManager.lock(evento, LockModeType.PESSIMISTIC_FORCE_INCREMENT);
+        maquina.transicionar(evento, EstadoEvento.LIBERADA, quien.id(), observacion);
+        return evento;
     }
 
     /**

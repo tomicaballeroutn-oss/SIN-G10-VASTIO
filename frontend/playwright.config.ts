@@ -6,6 +6,7 @@ import { defineConfig, devices } from '@playwright/test';
  *   cd backend; .\mvnw spring-boot:run      (con VASTIO_ADMIN_CONTRASENA en el .env)
  *   cd frontend; npm run dev
  *   cd frontend; $env:E2E_USUARIO='direccion'; $env:E2E_CONTRASENA='...'; npm run e2e
+ * El objetivo del Sprint 1 (dos vendedoras, una fecha) usa los datos de demostración: $env:E2E_DEMO_CONTRASENA='...'
  */
 export default defineConfig({
   testDir: './e2e',

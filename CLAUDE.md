@@ -93,6 +93,7 @@ cd backend; .\mvnw verify               # tests (necesita Docker por Testcontain
 cd frontend; npm install; npm run dev   # frontend en http://localhost:5173 · sistema de diseño en /_ds
 cd frontend; npm test; npm run lint     # tests (Vitest) y lint del frontend
 cd frontend; npm run e2e                # punta a punta (Playwright) con todo levantado; ver playwright.config.ts
+                                        # el objetivo del sprint usa los datos de demostración: E2E_DEMO_CONTRASENA
 ```
 
 Ambiente de prueba (Docker Compose + Caddy con HTTPS): `docs/despliegue.md`.

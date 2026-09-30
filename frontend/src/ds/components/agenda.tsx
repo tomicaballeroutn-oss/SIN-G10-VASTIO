@@ -36,11 +36,16 @@ export interface AgendaGridProps {
   onPrev?: () => void;
   onNext?: () => void;
   legend?: boolean;
+  /**
+   * Filtro de la pantalla: las unidades para las que devuelve false se ven atenuadas, no ocultas,
+   * para que una unidad ocupada nunca parezca disponible.
+   */
+  resaltar?: (unidad: { salon: SalonId; turno: TurnoId; status: EventStatus }) => boolean;
   className?: string;
 }
 
 /** Mes de la agenda: cada día muestra las seis unidades (columna = salón, fila = mediodía / noche). */
-export function AgendaGrid({ year, month, events = [], today, selected, onSelectDay, onPrev, onNext, legend = true, className }: AgendaGridProps) {
+export function AgendaGrid({ year, month, events = [], today, selected, onSelectDay, onPrev, onNext, legend = true, resaltar, className }: AgendaGridProps) {
   const primero = new Date(year, month, 1);
   const blancos = (primero.getDay() + 6) % 7;
   const total = new Date(year, month + 1, 0).getDate();
@@ -58,7 +63,8 @@ export function AgendaGrid({ year, month, events = [], today, selected, onSelect
       for (const salon of ORDEN_SALONES) {
         const ev = delDia.find((e) => e.salon === salon && e.turno === turno);
         const estado: EventStatus = ev ? ev.status : 'disponible';
-        pips.push(<span key={turno + salon} className={cx('v-pip', `v-pip--${salon}`, `v-pip--${estado}`)} />);
+        const atenuada = resaltar ? !resaltar({ salon, turno, status: estado }) : false;
+        pips.push(<span key={turno + salon} className={cx('v-pip', `v-pip--${salon}`, `v-pip--${estado}`, atenuada && 'is-dim')} />);
         if (ev && estado !== 'disponible') {
           descripcion.push(`${SALONES[salon]} ${turno === 'noche' ? 'noche' : 'mediodía'}: ${ESTADOS[estado]?.label ?? estado}`);
         }

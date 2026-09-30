@@ -49,8 +49,8 @@ public class EventoController {
     @GetMapping
     @PreAuthorize(Permisos.CONSULTAR_EVENTOS)
     @Operation(summary = "Próximos eventos", description = """
-            Eventos activos desde hoy. La vendedora ve los suyos y la planner los asignados («Mis eventos»);
-            Dirección, Coordinación, Administración y Compras, todos.""")
+            Eventos activos desde hoy. La vendedora ve los suyos («Mis eventos»); Dirección, Coordinación,
+            Administración, Planner y Compras, todos.""")
     public List<EventoResumen> proximos(@AuthenticationPrincipal Jwt jwt) {
         var proximos = consultas.proximos(UsuarioActual.de(jwt));
         return proximos.eventos().stream().map(e -> dto.resumen(e, proximos.nombres())).toList();

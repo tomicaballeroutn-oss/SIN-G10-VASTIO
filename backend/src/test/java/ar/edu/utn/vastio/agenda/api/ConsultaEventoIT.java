@@ -165,8 +165,11 @@ class ConsultaEventoIT {
     }
 
     @Test
-    void laPlannerVeLosQueTieneAsignados() throws Exception {
-        lista(personas.bearer(ana)).andExpect(jsonPath("$[*].nombre", not(hasItem("Casamiento Gómez-Paz"))));
+    void laPlannerVeTodosLosEventosAunqueNoLosTengaAsignados() throws Exception {
+        escenario.evento("avril", FECHA, "noche", "PRE_RESERVA", sofia, "Quince de Sofi");
+        lista(personas.bearer(ana))
+                .andExpect(jsonPath("$[*].nombre", hasItem("Casamiento Gómez-Paz")))
+                .andExpect(jsonPath("$[*].nombre", hasItem("Quince de Sofi")));
 
         jdbc.update("UPDATE evento SET planner_id = ? WHERE evento_id = ?", ana.getId(), senado);
         entityManager.clear(); // la primera consulta dejó el evento en memoria sin planner

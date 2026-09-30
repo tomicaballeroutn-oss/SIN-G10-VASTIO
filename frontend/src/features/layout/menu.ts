@@ -34,8 +34,8 @@ export const MENU: readonly ItemDeMenu[] = [
   { id: 'parametros', label: 'Parámetros', icon: 'settings', group: 'Gestión', ruta: '/parametros', roles: [...TOTAL, 'ADMINISTRACION'] },
 ];
 
-/** Perfiles que solo operan sobre sus propios eventos: para ellos «Eventos» es «Mis eventos». */
-const VEN_TODOS_LOS_EVENTOS: readonly Rol[] = [...TOTAL, 'ADMINISTRACION', 'COMPRAS'];
+/** Perfiles que ven la lista completa de eventos. Para el resto (la vendedora) «Eventos» es «Mis eventos». */
+const VEN_TODOS_LOS_EVENTOS: readonly Rol[] = [...TOTAL, 'ADMINISTRACION', 'PLANNER', 'COMPRAS'];
 
 export function itemsPara(roles: readonly Rol[]): ItemDeMenu[] {
   const soloLosSuyos = !roles.some((r) => VEN_TODOS_LOS_EVENTOS.includes(r));

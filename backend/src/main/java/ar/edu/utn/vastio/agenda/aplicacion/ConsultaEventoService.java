@@ -32,8 +32,8 @@ public class ConsultaEventoService {
 
     private static final ZoneId ZONA = ZoneId.of(VastioApplication.ZONA_HORARIA);
 
-    /** Ven todos los eventos en la lista. PLANNER no está: su lista es «Mis eventos» (asignados). */
-    private static final Set<String> VEN_TODOS = Set.of("DIRECCION", "COORDINACION", "ADMINISTRACION", "COMPRAS");
+    /** Ven todos los eventos en la lista. La vendedora, solo los suyos («Mis eventos»). */
+    private static final Set<String> VEN_TODOS = Set.of("DIRECCION", "COORDINACION", "ADMINISTRACION", "PLANNER", "COMPRAS");
 
     /** Estados en los que se registran o modifican los datos del evento. */
     public static final Set<EstadoEvento> EDITABLES = EnumSet.of(EstadoEvento.PRE_RESERVA, EstadoEvento.SENADO,
@@ -92,14 +92,13 @@ public class ConsultaEventoService {
     }
 
     /**
-     * Eventos activos desde hoy. La vendedora ve los suyos y la planner los que tiene asignados («Mis eventos»);
-     * el resto de los perfiles con acceso, todos.
+     * Eventos activos desde hoy. La vendedora ve los suyos («Mis eventos»); el resto de los perfiles con acceso,
+     * incluida la planner, todos.
      */
     public Proximos proximos(UsuarioActual quien) {
         LocalDate hoy = LocalDate.now(ZONA);
         List<Evento> lista = eventos.activosDesde(hoy, EstadoEvento.INACTIVOS).stream()
-                .filter(e -> quien.tieneAlguno(VEN_TODOS) || AccesoEvento.esTitular(quien, e)
-                        || AccesoEvento.esPlannerAsignada(quien, e))
+                .filter(e -> quien.tieneAlguno(VEN_TODOS) || AccesoEvento.esTitular(quien, e))
                 .toList();
         Set<Long> personas = new HashSet<>();
         lista.forEach(e -> {

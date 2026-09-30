@@ -10,8 +10,8 @@ import { useSesion } from '../sesion/contexto';
 import './eventos.css';
 
 /**
- * Próximos eventos. Para la vendedora son los suyos y para la planner los asignados («Mis eventos»);
- * Dirección, Coordinación, Administración y Compras ven todos.
+ * Próximos eventos. Para la vendedora son los suyos («Mis eventos»); Dirección, Coordinación, Administración,
+ * Planner y Compras ven todos.
  */
 export function PaginaEventos() {
   const datos = useDatos(fichas.proximos);

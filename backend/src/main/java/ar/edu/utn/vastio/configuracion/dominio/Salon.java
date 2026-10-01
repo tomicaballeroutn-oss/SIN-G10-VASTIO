@@ -35,6 +35,16 @@ public class Salon {
     protected Salon() {
     }
 
+    /**
+     * El código no cambia: de él salen el color y el orden de la agenda. Un salón dado de baja
+     * no acepta pre-reservas nuevas; sus eventos siguen en la agenda.
+     */
+    public void actualizar(String nombre, Integer capacidad, boolean activo) {
+        this.nombre = nombre;
+        this.capacidad = capacidad;
+        this.activo = activo;
+    }
+
     public Short getId() {
         return id;
     }

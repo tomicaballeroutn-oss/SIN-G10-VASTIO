@@ -1,11 +1,12 @@
-import { useState } from 'react';
+import { useState, type ReactNode } from 'react';
 import { Card, EmptyState, Nav, Tabs, aplicarTema, temaGuardado, type Tema } from '../../ds';
 import { Navigate, useNavigate } from 'react-router';
 import { useSesion } from '../sesion/contexto';
 import { BloqueCuenta } from './BloqueCuenta';
 import { itemsPara, rutaDeInicio, type ItemDeMenu } from './menu';
 
-function Encabezado({ titulo, antetitulo }: { titulo: string; antetitulo?: string }) {
+/** Antetítulo (grupo del menú) y título de la pantalla. */
+export function Encabezado({ titulo, antetitulo }: { titulo: string; antetitulo?: string }) {
   return (
     <header className="pantalla__titulos">
       {antetitulo && <p className="overline v-muted">{antetitulo}</p>}
@@ -14,24 +15,38 @@ function Encabezado({ titulo, antetitulo }: { titulo: string; antetitulo?: strin
   );
 }
 
+/**
+ * Pantalla de un ítem del menú. Si el perfil no lo tiene, avisa en lugar de mostrarla
+ * (la autorización real está en el backend; esto evita pantallas que solo darían 403).
+ */
+export function ConPermiso({ item, children }: { item: ItemDeMenu; children: ReactNode }) {
+  const { usuario } = useSesion();
+  const propio = usuario ? itemsPara(usuario.roles).some((it) => it.id === item.id) : false;
+  if (propio) return children;
+  return (
+    <section className="pantalla">
+      <Encabezado titulo={item.label} antetitulo={item.group} />
+      <Card flush>
+        <EmptyState icon="lock" title="Tu perfil no tiene acceso a esta pantalla">
+          Si necesitás usarla, pedíselo a Dirección o a Coordinación.
+        </EmptyState>
+      </Card>
+    </section>
+  );
+}
+
 /** Lugar de cada pantalla del menú hasta que llegue su historia. */
 export function PaginaPendiente({ item }: { item: ItemDeMenu }) {
   const { usuario } = useSesion();
-  // El ítem tal como lo ve este perfil (p. ej. «Mis eventos»); undefined si no le corresponde.
+  // El ítem tal como lo ve este perfil (p. ej. «Mis eventos»).
   const propio = usuario ? itemsPara(usuario.roles).find((it) => it.id === item.id) : undefined;
   return (
     <section className="pantalla">
       <Encabezado titulo={propio?.label ?? item.label} antetitulo={item.group} />
       <Card flush>
-        {propio ? (
-          <EmptyState icon={item.icon} title="Esta pantalla todavía no está disponible">
-            Se construye con su historia de usuario en los próximos sprints.
-          </EmptyState>
-        ) : (
-          <EmptyState icon="lock" title="Tu perfil no tiene acceso a esta pantalla">
-            Si necesitás usarla, pedíselo a Dirección o a Coordinación.
-          </EmptyState>
-        )}
+        <EmptyState icon={item.icon} title="Esta pantalla todavía no está disponible">
+          Se construye con su historia de usuario en los próximos sprints.
+        </EmptyState>
       </Card>
     </section>
   );

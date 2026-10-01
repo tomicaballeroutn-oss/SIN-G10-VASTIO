@@ -109,14 +109,14 @@ describe('UI-01 · inicio de sesión', () => {
   it('después del login vuelve a la pantalla que había pedido', async () => {
     backend(null, () => sesionDe(['ADMINISTRACION']));
     const usuario = userEvent.setup();
-    const router = montar('/parametros');
+    const router = montar('/reportes');
 
     await usuario.type(await screen.findByLabelText('Usuario'), 'gabi');
     await usuario.type(screen.getByLabelText('Contraseña'), 'clave');
     await usuario.click(screen.getByRole('button', { name: 'Ingresar' }));
 
-    expect(await screen.findByRole('heading', { level: 1, name: 'Parámetros' })).toBeInTheDocument();
-    expect(router.state.location.pathname).toBe('/parametros');
+    expect(await screen.findByRole('heading', { level: 1, name: 'Reportes' })).toBeInTheDocument();
+    expect(router.state.location.pathname).toBe('/reportes');
   });
 });
 
@@ -166,14 +166,14 @@ describe('UI-02 · sesión vencida', () => {
   it('al vencer muestra el aviso sobre la misma pantalla y deja volver a ingresar ahí', async () => {
     backend(sesionDe(['ADMINISTRACION']), () => sesionDe(['ADMINISTRACION']));
     const usuario = userEvent.setup();
-    const router = montar('/parametros');
-    await screen.findByRole('heading', { level: 1, name: 'Parámetros' });
+    const router = montar('/reportes');
+    await screen.findByRole('heading', { level: 1, name: 'Reportes' });
 
     await act(() => vencerSesion());
 
     const dialogo = await screen.findByRole('dialog', { name: 'Tu sesión expiró' });
     expect(dialogo).toHaveTextContent('cerramos tu sesión después de un tiempo sin actividad');
-    expect(screen.getByRole('heading', { level: 1, name: 'Parámetros' })).toBeInTheDocument();
+    expect(screen.getByRole('heading', { level: 1, name: 'Reportes' })).toBeInTheDocument();
 
     await usuario.click(within(dialogo).getByRole('button', { name: 'Volver a ingresar' }));
     expect(within(dialogo).getByLabelText('Usuario')).toHaveValue('lucia.ferreyra');
@@ -181,7 +181,7 @@ describe('UI-02 · sesión vencida', () => {
     await usuario.click(within(dialogo).getByRole('button', { name: 'Ingresar' }));
 
     await vi.waitFor(() => expect(screen.queryByRole('dialog')).not.toBeInTheDocument());
-    expect(router.state.location.pathname).toBe('/parametros');
+    expect(router.state.location.pathname).toBe('/reportes');
   });
 
   it('avisa antes de vencer y, sin actividad, cierra la sesión', async () => {

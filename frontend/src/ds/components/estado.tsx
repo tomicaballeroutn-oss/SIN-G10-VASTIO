@@ -24,14 +24,16 @@ export function StatusChip({ status, size = 'md', label, className }: StatusChip
 export interface SalonTagProps {
   salon: SalonId;
   variant?: 'tint' | 'dot';
+  /** Nombre a mostrar si el salón fue renombrado en Parámetros; por defecto, el nombre original. */
+  label?: string;
   className?: string;
 }
 
-export function SalonTag({ salon, variant = 'tint', className }: SalonTagProps) {
+export function SalonTag({ salon, variant = 'tint', label, className }: SalonTagProps) {
   return (
     <span className={cx('v-salon', 'label', `v-salon--${variant}`, `v-salon--${salon}`, className)}>
       <span className="v-salon__dot" aria-hidden />
-      {SALONES[salon] ?? salon}
+      {label ?? SALONES[salon] ?? salon}
     </span>
   );
 }

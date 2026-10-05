@@ -3,15 +3,15 @@ import { useNavigate, useParams } from 'react-router';
 import { catalogos } from '../../api/catalogos';
 import { fichas, type DatosEvento, type Ficha } from '../../api/eventos';
 import { useDatos, useEnvio } from '../../api/useDatos';
-import { Alert, Button, Card, IconButton, Input, SalonTag, Select, Stepper } from '../../ds';
+import { Alert, Button, Card, IconButton, Input, SalonTag, Select } from '../../ds';
 import { Cargando } from '../comun/Cargando';
 import { fechaCorta } from '../comun/formato';
 import { Encabezado } from '../layout/paginas';
 import './eventos.css';
 
 /**
- * UI-08 · Registrar evento: completa los datos básicos (cliente, contactos, tipo, nombre, invitados y
- * observaciones internas). Salón, fecha y turno no se cambian acá: eso es reprogramar.
+ * UI-08 · Registrar evento: completa los datos básicos (cliente, contactos, tipo, nombre y observaciones internas).
+ * La cantidad de invitados se registra desde la ficha (UI-14). Salón, fecha y turno no se cambian acá: eso es reprogramar.
  */
 export function PaginaDatosEvento() {
   const { id } = useParams();
@@ -46,7 +46,6 @@ function Formulario({ ficha, tipos }: { ficha: Ficha; tipos: { id: number; nombr
   const navegar = useNavigate();
   const [nombre, setNombre] = useState(ficha.nombre);
   const [tipoId, setTipoId] = useState(String(ficha.tipo.id));
-  const [invitados, setInvitados] = useState<number | null>(ficha.cantidadInvitados);
   const [observaciones, setObservaciones] = useState(ficha.observacionesInternas ?? '');
   const [cliente, setCliente] = useState({
     nombre: ficha.cliente.nombre,
@@ -75,7 +74,6 @@ function Formulario({ ficha, tipos }: { ficha: Ficha; tipos: { id: number; nombr
         version: ficha.version,
         nombre,
         tipoEventoId: Number(tipoId),
-        cantidadInvitados: invitados,
         observacionesInternas: observaciones,
         cliente,
         contactos: contactos.map((c) => ({ id: c.id, nombre: c.nombre, vinculo: c.vinculo, telefono: c.telefono, email: c.email })),
@@ -103,15 +101,6 @@ function Formulario({ ficha, tipos }: { ficha: Ficha; tipos: { id: number; nombr
         <div className="datos-evento__campos">
           <Select label="Tipo de evento" options={opcionesTipo} value={tipoId} onChange={(e) => setTipoId(e.target.value)} error={errorDe('tipoEventoId')} />
           <Input label="Nombre del evento" value={nombre} onChange={(e) => setNombre(e.target.value)} error={errorDe('nombre')} required />
-          <Stepper
-            label="Cantidad de invitados"
-            hint={invitados == null ? 'Sin definir todavía.' : 'Prevista: se confirma más adelante.'}
-            value={invitados ?? 0}
-            onChange={(n) => setInvitados(n)}
-            step={10}
-            unit="invitados"
-            error={errorDe('cantidadInvitados')}
-          />
           <Input
             label="Observaciones internas"
             optional

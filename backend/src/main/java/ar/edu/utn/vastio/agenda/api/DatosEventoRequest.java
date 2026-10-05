@@ -4,11 +4,9 @@ import java.util.List;
 
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Email;
-import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
-import jakarta.validation.constraints.PositiveOrZero;
 import jakarta.validation.constraints.Size;
 
 import ar.edu.utn.vastio.agenda.aplicacion.DatosEventoService.DatosCliente;
@@ -17,13 +15,13 @@ import ar.edu.utn.vastio.agenda.aplicacion.DatosEventoService.DatosEvento;
 
 /**
  * Registrar evento: el estado completo de los datos editables. Los contactos que no vienen se quitan.
+ * La cantidad de invitados se registra aparte ({@link InvitadosRequest}).
  * {@code version}: la de la ficha que se abrió, para no pisar cambios de otra persona.
  */
 public record DatosEventoRequest(
         @NotNull(message = "Falta la versión de la ficha. Volvé a abrirla.") Integer version,
         @NotBlank(message = "Escribí el nombre del evento.") @Size(max = 120, message = "Usá hasta 120 caracteres.") String nombre,
         @NotNull(message = "Elegí el tipo de evento.") Short tipoEventoId,
-        @PositiveOrZero(message = "La cantidad de invitados no puede ser negativa.") @Max(value = 5000, message = "Revisá la cantidad de invitados.") Integer cantidadInvitados,
         @Size(max = 2000, message = "Usá hasta 2000 caracteres.") String observacionesInternas,
         @NotNull(message = "Faltan los datos del cliente.") @Valid ClienteDatos cliente,
         @NotNull List<@Valid ContactoDatos> contactos) {
@@ -44,7 +42,7 @@ public record DatosEventoRequest(
     }
 
     DatosEvento datos() {
-        return new DatosEvento(version, nombre.trim(), tipoEventoId, cantidadInvitados, limpio(observacionesInternas),
+        return new DatosEvento(version, nombre.trim(), tipoEventoId, limpio(observacionesInternas),
                 new DatosCliente(cliente.nombre().trim(), limpio(cliente.documento()), limpio(cliente.telefono()),
                         limpio(cliente.email())),
                 contactos.stream().map(c -> new DatosContacto(c.id(), c.nombre().trim(), limpio(c.vinculo()),

@@ -12,7 +12,7 @@ const FICHA: Ficha = {
   estado: 'PRE_RESERVA',
   nombre: 'Quince de Delfina Ríos',
   tipo: { id: 2, nombre: 'Quince' },
-  salon: { id: 1, codigo: 'avril', nombre: 'Avril' },
+  salon: { id: 1, codigo: 'avril', nombre: 'Avril', capacidad: null },
   fecha: '2026-10-10',
   turno: { id: 2, codigo: 'noche', nombre: 'Noche', horaInicio: '20:00:00', horaFin: '06:00:00' },
   cliente: { id: 7, nombre: 'Delfina Ríos', documento: null, telefono: '351 555-1234', email: null },
@@ -73,7 +73,6 @@ describe('Registrar evento', () => {
     const nombre = await screen.findByLabelText('Nombre del evento');
     await usuario.clear(nombre);
     await usuario.type(nombre, 'Los 15 de Delfi');
-    await usuario.click(screen.getByRole('button', { name: 'Sumar 10' }));
     await usuario.type(screen.getByLabelText(/Observaciones internas/), 'Llamar de tarde.');
     await usuario.click(screen.getByRole('button', { name: 'Quitar contacto Jorge Ríos' }));
     await usuario.click(screen.getByRole('button', { name: 'Agregar contacto' }));
@@ -88,7 +87,6 @@ describe('Registrar evento', () => {
       version: 2,
       nombre: 'Los 15 de Delfi',
       tipoEventoId: 2,
-      cantidadInvitados: 160,
       observacionesInternas: 'Llamar de tarde.',
       cliente: { nombre: 'Delfina Ríos', documento: '', telefono: '351 555-1234', email: '' },
       contactos: [

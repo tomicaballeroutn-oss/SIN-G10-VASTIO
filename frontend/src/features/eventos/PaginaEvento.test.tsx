@@ -13,7 +13,7 @@ const FICHA: Ficha = {
   estado: 'SENADO',
   nombre: 'Quince de Delfina Ríos',
   tipo: { id: 2, nombre: 'Quince' },
-  salon: { id: 2, codigo: 'club', nombre: 'Club de Campo' },
+  salon: { id: 2, codigo: 'club', nombre: 'Club de Campo', capacidad: null },
   fecha: '2026-09-26',
   turno: { id: 1, codigo: 'mediodia', nombre: 'Mediodía', horaInicio: '12:00:00', horaFin: '18:00:00' },
   cliente: { id: 7, nombre: 'Delfina Ríos', documento: '40123456', telefono: '351 555-1234', email: null },

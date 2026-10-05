@@ -45,7 +45,8 @@ public class EventoDto {
     public record Nombre(long id, String nombre) {
     }
 
-    public record SalonDto(short id, String codigo, String nombre) {
+    /** {@code capacidad}: para advertir (sin bloquear) si los invitados la superan. */
+    public record SalonDto(short id, String codigo, String nombre, Integer capacidad) {
     }
 
     public record TurnoDto(short id, String codigo, String nombre, LocalTime horaInicio, LocalTime horaFin) {
@@ -165,7 +166,7 @@ public class EventoDto {
 
     private SalonDto salon(Evento e) {
         Salon s = catalogos.salon(e.getUnidad().getSalonId());
-        return new SalonDto(s.getId(), s.getCodigo(), s.getNombre());
+        return new SalonDto(s.getId(), s.getCodigo(), s.getNombre(), s.getCapacidad());
     }
 
     private TurnoDto turno(Evento e) {

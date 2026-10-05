@@ -135,11 +135,16 @@ public class Evento {
     }
 
     /** Datos que completa «Registrar evento». El registro de qué cambió lo arma el caso de uso. */
-    public void actualizarDatos(String nombre, short tipoEventoId, Integer cantidadInvitados, String observacionesInternas) {
+    public void actualizarDatos(String nombre, short tipoEventoId, String observacionesInternas) {
         this.nombre = nombre;
         this.tipoEventoId = tipoEventoId;
-        this.cantidadInvitados = cantidadInvitados;
         this.observacionesInternas = observacionesInternas;
+    }
+
+    /** Cantidad de invitados y si ya es definitiva (condición de «Confirmar evento»). */
+    public void registrarInvitados(int cantidad, boolean definitivos) {
+        this.cantidadInvitados = cantidad;
+        this.invitadosDefinitivos = definitivos;
     }
 
     public ContactoEvento agregarContacto(String nombre, String vinculo, String telefono, String email) {

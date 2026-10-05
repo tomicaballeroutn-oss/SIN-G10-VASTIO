@@ -4,7 +4,10 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.OffsetDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -15,6 +18,8 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToMany;
+import jakarta.persistence.OrderBy;
 import jakarta.persistence.Table;
 import jakarta.persistence.Version;
 
@@ -107,6 +112,10 @@ public class Evento {
     @Column(name = "version", nullable = false)
     private Integer version;
 
+    @OneToMany(mappedBy = "evento", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OrderBy("id")
+    private List<ContactoEvento> contactos = new ArrayList<>();
+
     protected Evento() {
     }
 
@@ -123,6 +132,32 @@ public class Evento {
         this.vendedoraId = vendedoraId;
         this.nombre = nombre;
         this.fechaCreacion = OffsetDateTime.now();
+    }
+
+    /** Datos que completa «Registrar evento». El registro de qué cambió lo arma el caso de uso. */
+    public void actualizarDatos(String nombre, short tipoEventoId, Integer cantidadInvitados, String observacionesInternas) {
+        this.nombre = nombre;
+        this.tipoEventoId = tipoEventoId;
+        this.cantidadInvitados = cantidadInvitados;
+        this.observacionesInternas = observacionesInternas;
+    }
+
+    public ContactoEvento agregarContacto(String nombre, String vinculo, String telefono, String email) {
+        ContactoEvento contacto = new ContactoEvento(this, nombre, vinculo, telefono, email);
+        contactos.add(contacto);
+        return contacto;
+    }
+
+    public void actualizarContacto(ContactoEvento contacto, String nombre, String vinculo, String telefono, String email) {
+        contacto.actualizar(nombre, vinculo, telefono, email);
+    }
+
+    public void quitarContacto(ContactoEvento contacto) {
+        contactos.remove(contacto);
+    }
+
+    public List<ContactoEvento> getContactos() {
+        return List.copyOf(contactos);
     }
 
     /** Solo la llama {@code MaquinaDeEstados}: es quien valida la transición y la registra en el historial. */

@@ -16,6 +16,7 @@ const FICHA: Ficha = {
   fecha: '2026-09-26',
   turno: { id: 1, codigo: 'mediodia', nombre: 'Mediodía', horaInicio: '12:00:00', horaFin: '18:00:00' },
   cliente: { id: 7, nombre: 'Delfina Ríos', documento: '40123456', telefono: '351 555-1234', email: null },
+  contactos: [{ id: 3, nombre: 'Mariela Ríos', vinculo: 'madre', telefono: '351 444-0000', email: null }],
   vendedora: { id: 1, nombre: 'Lucía Ferreyra' },
   planner: { id: 3, nombre: 'Ana Sosa' },
   cantidadInvitados: 180,
@@ -23,10 +24,11 @@ const FICHA: Ficha = {
   observacionesInternas: 'La madre prefiere que la llamen después de las 18.',
   sena: { importe: 150000, fecha: '2026-09-23', firmanteNombre: 'Mariela Ríos', firmanteDni: '22333444', firmanteContacto: null },
   fechaCreacion: '2026-09-21T10:15:00-03:00',
+  version: 2,
   acciones: { modificar: true, liberar: false, registrarSena: false },
   historial: [
-    { tipo: 'ESTADO', estadoAnterior: null, estadoNuevo: 'PRE_RESERVA', usuario: { id: 1, nombre: 'Lucía Ferreyra' }, fechaHora: '2026-09-21T10:15:00-03:00', observacion: null },
-    { tipo: 'ESTADO', estadoAnterior: 'PRE_RESERVA', estadoNuevo: 'SENADO', usuario: { id: 1, nombre: 'Lucía Ferreyra' }, fechaHora: '2026-09-23T16:40:00-03:00', observacion: null },
+    { tipo: 'ESTADO', estadoNuevo: 'PRE_RESERVA', usuario: { id: 1, nombre: 'Lucía Ferreyra' }, fechaHora: '2026-09-21T10:15:00-03:00' },
+    { tipo: 'ESTADO', estadoAnterior: 'PRE_RESERVA', estadoNuevo: 'SENADO', usuario: { id: 1, nombre: 'Lucía Ferreyra' }, fechaHora: '2026-09-23T16:40:00-03:00' },
   ],
 };
 

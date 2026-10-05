@@ -85,6 +85,11 @@ public class Usuario {
         return roles.stream().map(ur -> ur.getRol().getCodigo()).collect(Collectors.toUnmodifiableSet());
     }
 
+    public void setContacto(String email, String telefono) {
+        this.email = email;
+        this.telefono = telefono;
+    }
+
     public void setDebeCambiarContrasena(boolean debeCambiarContrasena) {
         this.debeCambiarContrasena = debeCambiarContrasena;
     }

@@ -1,17 +1,7 @@
 import { useNavigate } from 'react-router';
+import { NOMBRE_DE_ROL } from '../../api/usuarios';
 import { Actor, Button } from '../../ds';
 import { useSesion } from '../sesion/contexto';
-
-const NOMBRE_DE_ROL: Record<string, string> = {
-  DIRECCION: 'Dirección',
-  COORDINACION: 'Coordinación comercial',
-  ADMINISTRACION: 'Administración',
-  VENDEDORA: 'Vendedora',
-  PLANNER: 'Planner',
-  COMPRAS: 'Compras',
-  BARRA: 'Barra',
-  COCINA: 'Cocina',
-};
 
 /** Quién está usando el sistema, «Mi cuenta» y «Cerrar sesión». Va al pie del Nav lateral y en «Más». */
 export function BloqueCuenta() {

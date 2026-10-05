@@ -6,7 +6,8 @@ import {
 import type { ProblemaApi } from '../../api/problema';
 import { useDatos, useEnvio } from '../../api/useDatos';
 import { Alert, Button, Card, Checkbox, Input, SalonTag, Select, Switch } from '../../ds';
-import { Cargando, ListaYEdicion } from './ListaYEdicion';
+import { Cargando } from '../comun/Cargando';
+import { ListaYEdicion } from './ListaYEdicion';
 import { reemplazar } from './lista';
 
 // ---------- piezas comunes de los formularios ----------

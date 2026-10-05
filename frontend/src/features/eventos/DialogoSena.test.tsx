@@ -26,6 +26,7 @@ const PRE_RESERVA: Ficha = {
   observacionesInternas: null,
   sena: null,
   fechaFirmaContrato: null,
+  cancelacion: null,
   documentos: null,
   servicios: [],
   requisitosConfirmacion: null,

@@ -25,6 +25,7 @@ const FICHA: Ficha = {
   observacionesInternas: 'La madre prefiere que la llamen después de las 18.',
   sena: { importe: 150000, fecha: '2026-09-23', firmanteNombre: 'Mariela Ríos', firmanteDni: '22333444', firmanteContacto: null },
   fechaFirmaContrato: null,
+  cancelacion: null,
   documentos: null,
   servicios: [],
   requisitosConfirmacion: null,

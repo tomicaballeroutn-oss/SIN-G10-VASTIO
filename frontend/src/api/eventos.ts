@@ -128,6 +128,7 @@ export interface Acciones {
   registrarFirma: boolean;
   asignarPlanner: boolean;
   confirmar: boolean;
+  cancelar: boolean;
 }
 
 /** Una condición de «Confirmar evento»: lo que hay («Ana Sosa», «180») o lo que falta. */
@@ -190,6 +191,8 @@ export interface Ficha {
   sena: Sena | null;
   /** yyyy-mm-dd, desde Contratado. */
   fechaFirmaContrato: string | null;
+  /** Solo en Cancelado. */
+  cancelacion: { motivo: string; detalle: string | null } | null;
   /** null para quien no ve el legajo: el contrato tiene importes. */
   documentos: DocumentoLegajo[] | null;
   servicios: ServicioFicha[];
@@ -238,6 +241,8 @@ export const fichas = {
     archivos.forEach((a) => formulario.append('archivos', a));
     return api<Ficha>(`/eventos/${id}/contrato`, { metodo: 'POST', cuerpo: formulario });
   },
+  cancelar: (id: number, motivoId: number, detalle: string) =>
+    api<Ficha>(`/eventos/${id}/cancelacion`, { metodo: 'POST', cuerpo: { motivoId, detalle } }),
   confirmar: (id: number) => api<Ficha>(`/eventos/${id}/confirmacion`, { metodo: 'POST' }),
   planners: (id: number) => api<PlannerCandidata[]>(`/eventos/${id}/planners`),
   /** `plannerId` null quita la planner (solo en Contratado). */

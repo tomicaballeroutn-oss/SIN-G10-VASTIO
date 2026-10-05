@@ -5,6 +5,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.List;
 
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 
 import org.springframework.http.ContentDisposition;
@@ -25,6 +26,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import ar.edu.utn.vastio.agenda.api.EventoDto.EventoResumen;
 import ar.edu.utn.vastio.agenda.api.EventoDto.FichaResponse;
+import ar.edu.utn.vastio.agenda.aplicacion.CancelacionService;
 import ar.edu.utn.vastio.agenda.aplicacion.ConfirmacionService;
 import ar.edu.utn.vastio.agenda.aplicacion.ConsultaEventoService;
 import ar.edu.utn.vastio.agenda.aplicacion.ContratoService;
@@ -60,11 +62,13 @@ public class EventoController {
     private final InvitadosService invitados;
     private final PlannerService planners;
     private final ConfirmacionService confirmaciones;
+    private final CancelacionService cancelaciones;
     private final EventoDto dto;
 
     public EventoController(PreReservaService preReservas, ConsultaEventoService consultas, DatosEventoService datos,
             SenaService senas, ContratoService contratos, ServiciosService servicios, InvitadosService invitados,
-            PlannerService planners, ConfirmacionService confirmaciones, EventoDto dto) {
+            PlannerService planners, ConfirmacionService confirmaciones, CancelacionService cancelaciones, EventoDto dto) {
+        this.cancelaciones = cancelaciones;
         this.confirmaciones = confirmaciones;
         this.invitados = invitados;
         this.planners = planners;
@@ -89,6 +93,28 @@ public class EventoController {
         UsuarioActual quien = UsuarioActual.de(jwt);
         datos.registrar(id, pedido.datos(), quien);
         return dto.ficha(consultas.ficha(id, quien));
+    }
+
+    @PostMapping("/{id}/cancelacion")
+    @PreAuthorize(Permisos.ACCESO_TOTAL)
+    @Operation(summary = "Cancelar evento", description = """
+            El evento señado, contratado o confirmado pasa a Cancelado con un motivo del catálogo (ámbito Cancelación); el
+            detalle es obligatorio si el motivo es «Otro». La fecha vuelve a estar disponible. Coordinación y Dirección.
+            Avisa a todas las áreas, la vendedora titular y la planner. Devuelve la ficha.""")
+    @ApiResponse(responseCode = "422", description = "Estado que no lo permite, motivo inválido o falta el detalle")
+    public FichaResponse cancelar(@PathVariable long id, @Valid @RequestBody CancelacionRequest pedido,
+            @AuthenticationPrincipal Jwt jwt) {
+        UsuarioActual quien = UsuarioActual.de(jwt);
+        cancelaciones.cancelar(id, pedido.motivoId(), pedido.detalleLimpio(), quien);
+        return dto.ficha(consultas.ficha(id, quien));
+    }
+
+    public record CancelacionRequest(
+            @NotNull(message = "Elegí un motivo.") Short motivoId,
+            @Size(max = 255, message = "Usá hasta 255 caracteres.") String detalle) {
+        String detalleLimpio() {
+            return detalle == null || detalle.isBlank() ? null : detalle.trim();
+        }
     }
 
     @PostMapping("/{id}/confirmacion")

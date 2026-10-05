@@ -1,6 +1,7 @@
 package ar.edu.utn.vastio;
 
 import java.time.LocalDate;
+import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -44,17 +45,32 @@ public class Escenario {
 
     /** Evento en ese estado, con los datos que exige el CHECK de cada estado. */
     public long evento(String salon, LocalDate fecha, String turno, String estado, Usuario vendedora, String nombre) {
+        return evento(salon, fecha, turno, estado, vendedora, null, nombre);
+    }
+
+    /**
+     * Evento en ese estado, con los datos que exige el CHECK de cada estado: seña desde Señado, fecha de firma desde
+     * Contratado y, desde Confirmado, planner e invitados definitivos (150).
+     *
+     * @param planner obligatoria desde Confirmado; antes, opcional.
+     */
+    public long evento(String salon, LocalDate fecha, String turno, String estado, Usuario vendedora, Usuario planner,
+            String nombre) {
         long unidad = unidad(salon, fecha, turno);
         long cliente = cliente("Cliente de " + nombre);
-        boolean senado = !estado.equals("PRE_RESERVA") && !estado.equals("LIBERADA");
+        boolean senado = !List.of("PRE_RESERVA", "LIBERADA").contains(estado);
+        boolean contratado = List.of("CONTRATADO", "CONFIRMADO", "EN_CURSO", "REALIZADO", "CERRADO").contains(estado);
+        boolean confirmado = List.of("CONFIRMADO", "EN_CURSO", "REALIZADO", "CERRADO").contains(estado);
         return jdbc.queryForObject("""
-                INSERT INTO evento (codigo, unidad_id, cliente_id, tipo_evento_id, vendedora_id, estado, nombre,
-                    invitados_definitivos, importe_sena, fecha_sena, firmante_dni, motivo_cancelacion_id, version)
-                VALUES (?, ?, ?, 2, ?, ?, ?, false, ?, ?, ?, ?, 0)
+                INSERT INTO evento (codigo, unidad_id, cliente_id, tipo_evento_id, vendedora_id, planner_id, estado, nombre,
+                    cantidad_invitados, invitados_definitivos, importe_sena, fecha_sena, firmante_dni, fecha_firma_contrato,
+                    motivo_cancelacion_id, version)
+                VALUES (?, ?, ?, 2, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 0)
                 RETURNING evento_id""", Long.class,
-                "EV-9999-%05d".formatted(NUMERO.incrementAndGet()), unidad, cliente, vendedora.getId(), estado, nombre,
+                "EV-9999-%05d".formatted(NUMERO.incrementAndGet()), unidad, cliente, vendedora.getId(),
+                planner == null ? null : planner.getId(), estado, nombre, confirmado ? 150 : null, confirmado,
                 senado ? 100000 : null, senado ? fecha.minusMonths(1) : null, senado ? "30111222" : null,
-                estado.equals("CANCELADO") ? 1 : null);
+                contratado ? fecha.minusWeeks(3) : null, estado.equals("CANCELADO") ? 1 : null);
     }
 
     /** Bloqueo activo de una unidad; motivo 7 = Mantenimiento. */

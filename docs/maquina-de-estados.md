@@ -25,12 +25,12 @@ Estados activos (ocupan la unidad): todos salvo `LIBERADA` y `CANCELADO`.
 | — → PRE_RESERVA | Registrar pre-reserva | Vendedora, Coordinación | Unidad sin evento activo ni bloqueo | Crea la unidad si no existe. Notifica a administración y coordinación. |
 | PRE_RESERVA → LIBERADA | Liberar pre-reserva | Vendedora titular, Coordinación | — | Libera la unidad. |
 | PRE_RESERVA → SENADO | Registrar seña | Vendedora titular, Coordinación | Importe, fecha de seña y DNI del firmante | Notifica a administración y coordinación. |
-| SENADO → CONTRATADO | Registrar firma de contrato | Coordinación | Contrato adjunto (documento tipo CONTRATO) y fecha de firma | Habilita asignar planner. |
-| CONTRATADO → CONFIRMADO | Confirmar evento | Planner asignada, Coordinación | Planner asignada, invitados definitivos, servicios en las categorías requeridas | Habilita la orden de preparación. Notifica a compras y cocina. |
+| SENADO → CONTRATADO | Registrar firma de contrato | Coordinación | Contrato adjunto (documento tipo CONTRATO) y fecha de firma | Habilita asignar planner. Notifica a administración, coordinación y la vendedora titular. |
+| CONTRATADO → CONFIRMADO | Confirmar evento | Planner asignada, Coordinación | Planner asignada, invitados definitivos, servicios en las categorías requeridas | Habilita la orden de preparación. Notifica a compras, cocina, administración y la vendedora titular. |
 | CONFIRMADO → EN_CURSO | Automático | Sistema | Llega la hora de inicio del turno | Bloquea la edición comercial. Habilita salidas a barra. |
 | EN_CURSO → REALIZADO | Automático | Sistema | Termina el turno (hora_fin, día siguiente si cruza medianoche) | — |
 | REALIZADO → CERRADO | Registrar cierre de evento | Encargada de barra, Compras | Entregas cerradas; si el tipo usa segmentos, asistencia real cargada | Escribe `consumo_evento` con el precio vigente. |
-| SENADO / CONTRATADO / CONFIRMADO → CANCELADO | Cancelar evento | Coordinación | Motivo obligatorio | Libera la unidad. Descarta la orden de preparación. Notifica a todas las áreas. |
+| SENADO / CONTRATADO / CONFIRMADO → CANCELADO | Cancelar evento | Coordinación | Motivo obligatorio | Libera la unidad. Descarta la orden de preparación. Notifica a todas las áreas (salvo barra), la vendedora titular y la planner. |
 
 ### Operaciones que no cambian el estado
 
@@ -44,7 +44,7 @@ Estados activos (ocupan la unidad): todos salvo `LIBERADA` y `CANCELADO`.
 
 > Corrección respecto de la Definición del Producto v1: **«Reprogramado» no es un estado**. Reprogramar le pasa al evento; si fuera un estado, se perdería si estaba Señado, Contratado o Confirmado.
 
-Todo cambio de estado escribe una fila en `cambio_estado_evento` (usuario null = sistema).
+Todo cambio de estado escribe una fila en `cambio_estado_evento` (usuario null = sistema). Quién recibe cada aviso, incluidas las operaciones que no cambian el estado, está en `docs/sprint-2.md` (decisión 10) y en `AvisosEvento`.
 
 ## Orden de preparación
 

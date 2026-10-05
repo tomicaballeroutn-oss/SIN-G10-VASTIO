@@ -27,7 +27,8 @@ import ar.edu.utn.vastio.configuracion.dominio.TipoEvento;
 
 /**
  * Registrar evento: completa y modifica cliente, contactos, tipo, nombre, invitados y observaciones internas.
- * Cada dato que cambia deja una fila en {@code modificacion_evento} con el valor anterior y el nuevo.
+ * Cada dato que cambia deja una fila en {@code modificacion_evento} con el valor anterior y el nuevo, y el guardado
+ * genera un aviso de modificación.
  * Salón, fecha y turno no se cambian acá: eso es reprogramar.
  */
 @Service
@@ -37,10 +38,12 @@ public class DatosEventoService {
     private final ModificacionEventoRepository modificaciones;
     private final CatalogoService catalogos;
     private final EntityManager entityManager;
+    private final AvisosEvento avisos;
 
     public DatosEventoService(ConsultaEventoService consultas, ModificacionEventoRepository modificaciones,
-            CatalogoService catalogos, EntityManager entityManager) {
+            CatalogoService catalogos, EntityManager entityManager, AvisosEvento avisos) {
         this.entityManager = entityManager;
+        this.avisos = avisos;
         this.consultas = consultas;
         this.modificaciones = modificaciones;
         this.catalogos = catalogos;
@@ -102,6 +105,7 @@ public class DatosEventoService {
 
         actualizarContactos(evento, datos.contactos(), registro);
         modificaciones.saveAll(registro.filas);
+        avisos.modificacion(evento, registro.campos(), quien.id());
         return evento;
     }
 
@@ -153,6 +157,12 @@ public class DatosEventoService {
             if (!Objects.equals(antes, despues)) {
                 filas.add(new ModificacionEvento(eventoId, campo, antes, despues, usuarioId, momento));
             }
+        }
+
+        Set<String> campos() {
+            Set<String> campos = new HashSet<>();
+            filas.forEach(f -> campos.add(f.getCampo()));
+            return campos;
         }
     }
 }

@@ -127,6 +127,15 @@ export interface Acciones {
   registrarSena: boolean;
   registrarFirma: boolean;
   asignarPlanner: boolean;
+  confirmar: boolean;
+}
+
+/** Una condición de «Confirmar evento»: lo que hay («Ana Sosa», «180») o lo que falta. */
+export interface RequisitoConfirmacion {
+  codigo: 'PLANNER' | 'INVITADOS' | 'SERVICIOS' | 'FECHA';
+  titulo: string;
+  cumplido: boolean;
+  detalle: string;
 }
 
 /** Planner activa para asignar, con los otros eventos que ya tiene esa fecha (se advierte, no se impide). */
@@ -184,6 +193,8 @@ export interface Ficha {
   /** null para quien no ve el legajo: el contrato tiene importes. */
   documentos: DocumentoLegajo[] | null;
   servicios: ServicioFicha[];
+  /** Solo en Contratado: lo que muestra el diálogo «Confirmar evento». */
+  requisitosConfirmacion: RequisitoConfirmacion[] | null;
   fechaCreacion: string;
   /** Se manda al guardar, para no pisar cambios de otra persona. */
   version: number;
@@ -227,6 +238,7 @@ export const fichas = {
     archivos.forEach((a) => formulario.append('archivos', a));
     return api<Ficha>(`/eventos/${id}/contrato`, { metodo: 'POST', cuerpo: formulario });
   },
+  confirmar: (id: number) => api<Ficha>(`/eventos/${id}/confirmacion`, { metodo: 'POST' }),
   planners: (id: number) => api<PlannerCandidata[]>(`/eventos/${id}/planners`),
   /** `plannerId` null quita la planner (solo en Contratado). */
   asignarPlanner: (id: number, plannerId: number | null) =>

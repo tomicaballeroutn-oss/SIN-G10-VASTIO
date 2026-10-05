@@ -51,11 +51,13 @@ public class ConsultaEventoService {
     private final ModificacionEventoRepository modificaciones;
     private final DocumentoEventoRepository documentos;
     private final ServicioContratadoRepository servicios;
+    private final RequisitosConfirmacion requisitos;
     private final UsuarioService usuarios;
 
     public ConsultaEventoService(EventoRepository eventos, CambioEstadoEventoRepository historial,
             ModificacionEventoRepository modificaciones, DocumentoEventoRepository documentos,
-            ServicioContratadoRepository servicios, UsuarioService usuarios) {
+            ServicioContratadoRepository servicios, RequisitosConfirmacion requisitos, UsuarioService usuarios) {
+        this.requisitos = requisitos;
         this.eventos = eventos;
         this.historial = historial;
         this.modificaciones = modificaciones;
@@ -66,17 +68,18 @@ public class ConsultaEventoService {
 
     /** Lo que la persona puede hacer con el evento según su perfil y el estado actual. */
     public record Acciones(boolean modificar, boolean liberar, boolean registrarSena, boolean registrarFirma,
-            boolean asignarPlanner) {
+            boolean asignarPlanner, boolean confirmar) {
     }
 
     /**
      * Contactos y modificaciones se copian dentro de la transacción: la respuesta se arma después.
      *
      * @param documentos null si la persona no ve el legajo (el contrato tiene importes).
+     * @param requisitos condiciones para confirmar; null salvo en Contratado.
      */
     public record Ficha(Evento evento, boolean veImportes, Acciones acciones, List<ContactoEvento> contactos,
             List<CambioEstadoEvento> cambios, List<ModificacionEvento> modificaciones, List<DocumentoEvento> documentos,
-            List<ServicioContratado> servicios, Map<Long, String> nombres) {
+            List<ServicioContratado> servicios, List<RequisitosConfirmacion.Requisito> requisitos, Map<Long, String> nombres) {
     }
 
     /**
@@ -101,7 +104,8 @@ public class ConsultaEventoService {
         }
         contratados.forEach(s -> personas.add(s.getUsuarioId()));
         return new Ficha(evento, veImportes, acciones(evento, quien), List.copyOf(evento.getContactos()), cambios, datos,
-                legajo, contratados, usuarios.nombres(personas));
+                legajo, contratados, evento.getEstado() == EstadoEvento.CONTRATADO ? requisitos.de(evento) : null,
+                usuarios.nombres(personas));
     }
 
     public static Acciones acciones(Evento evento, UsuarioActual quien) {
@@ -110,7 +114,8 @@ public class ConsultaEventoService {
         return new Acciones(EDITABLES.contains(evento.getEstado()) && AccesoEvento.puedeModificar(quien, evento),
                 preReserva && titular, preReserva && titular,
                 evento.getEstado() == EstadoEvento.SENADO && quien.accesoTotal(),
-                PlannerService.ESTADOS.contains(evento.getEstado()) && quien.accesoTotal());
+                PlannerService.ESTADOS.contains(evento.getEstado()) && quien.accesoTotal(),
+                evento.getEstado() == EstadoEvento.CONTRATADO && AccesoEvento.puedeConfirmar(quien, evento));
     }
 
     /** El evento, si existe y la persona puede ver su detalle. */

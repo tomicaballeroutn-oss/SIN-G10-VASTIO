@@ -16,6 +16,7 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 
 import ar.edu.utn.vastio.agenda.aplicacion.ConsultaEventoService.Acciones;
 import ar.edu.utn.vastio.agenda.aplicacion.ConsultaEventoService.Ficha;
+import ar.edu.utn.vastio.agenda.aplicacion.RequisitosConfirmacion.Requisito;
 import ar.edu.utn.vastio.agenda.dominio.CambioEstadoEvento;
 import ar.edu.utn.vastio.agenda.dominio.Cliente;
 import ar.edu.utn.vastio.agenda.dominio.ContactoEvento;
@@ -92,12 +93,16 @@ public class EventoDto {
             boolean visibleEnCocina, String descripcion, Nombre usuario, OffsetDateTime fechaModificacion) {
     }
 
-    /** {@code documentos} es null para quien no ve el legajo (el contrato tiene importes). */
+    /**
+     * {@code documentos} es null para quien no ve el legajo (el contrato tiene importes). {@code requisitosConfirmacion}
+     * es null salvo en Contratado: lo que muestra el diálogo «Confirmar evento».
+     */
     public record FichaResponse(long id, String codigo, EstadoEvento estado, String nombre, Nombre tipo, SalonDto salon,
             LocalDate fecha, TurnoDto turno, ClienteDto cliente, List<ContactoDto> contactos, Nombre vendedora,
             Nombre planner, Integer cantidadInvitados, boolean invitadosDefinitivos, String observacionesInternas,
             SenaDto sena, LocalDate fechaFirmaContrato, List<DocumentoDto> documentos, List<ServicioDto> servicios,
-            OffsetDateTime fechaCreacion, int version, Acciones acciones, List<HistorialDto> historial) {
+            List<Requisito> requisitosConfirmacion, OffsetDateTime fechaCreacion, int version, Acciones acciones,
+            List<HistorialDto> historial) {
     }
 
     public record EventoResumen(long id, String codigo, EstadoEvento estado, String nombre, String tipo, SalonDto salon,
@@ -121,7 +126,8 @@ public class EventoDto {
                 persona(e.getPlannerId(), nombres), e.getCantidadInvitados(), e.isInvitadosDefinitivos(),
                 e.getObservacionesInternas(), sena, e.getFechaFirmaContrato(),
                 f.documentos() == null ? null : f.documentos().stream().map(d -> documento(d, nombres)).toList(),
-                servicios(f.servicios(), nombres), e.getFechaCreacion(), e.getVersion(), f.acciones(), historial);
+                servicios(f.servicios(), nombres), f.requisitos(), e.getFechaCreacion(), e.getVersion(), f.acciones(),
+                historial);
     }
 
     public EventoResumen resumen(Evento e, Map<Long, String> nombres) {

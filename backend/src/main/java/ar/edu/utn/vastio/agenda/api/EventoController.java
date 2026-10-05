@@ -25,6 +25,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import ar.edu.utn.vastio.agenda.api.EventoDto.EventoResumen;
 import ar.edu.utn.vastio.agenda.api.EventoDto.FichaResponse;
+import ar.edu.utn.vastio.agenda.aplicacion.ConfirmacionService;
 import ar.edu.utn.vastio.agenda.aplicacion.ConsultaEventoService;
 import ar.edu.utn.vastio.agenda.aplicacion.ContratoService;
 import ar.edu.utn.vastio.agenda.aplicacion.DatosEventoService;
@@ -58,11 +59,13 @@ public class EventoController {
     private final ServiciosService servicios;
     private final InvitadosService invitados;
     private final PlannerService planners;
+    private final ConfirmacionService confirmaciones;
     private final EventoDto dto;
 
     public EventoController(PreReservaService preReservas, ConsultaEventoService consultas, DatosEventoService datos,
             SenaService senas, ContratoService contratos, ServiciosService servicios, InvitadosService invitados,
-            PlannerService planners, EventoDto dto) {
+            PlannerService planners, ConfirmacionService confirmaciones, EventoDto dto) {
+        this.confirmaciones = confirmaciones;
         this.invitados = invitados;
         this.planners = planners;
         this.senas = senas;
@@ -85,6 +88,20 @@ public class EventoController {
             @AuthenticationPrincipal Jwt jwt) {
         UsuarioActual quien = UsuarioActual.de(jwt);
         datos.registrar(id, pedido.datos(), quien);
+        return dto.ficha(consultas.ficha(id, quien));
+    }
+
+    @PostMapping("/{id}/confirmacion")
+    @PreAuthorize(Permisos.EDITAR_EVENTOS)
+    @Operation(summary = "Confirmar evento", description = """
+            El evento contratado pasa a Confirmado si tiene planner, cantidad de invitados definitiva, servicios en las
+            categorías requeridas y la fecha no pasó (la ficha trae esos requisitos en requisitosConfirmacion). Lo hacen la
+            planner asignada, Coordinación y Dirección. Avisa a Compras, Cocina, Administración y la vendedora titular.
+            Devuelve la ficha.""")
+    @ApiResponse(responseCode = "422", description = "No está Contratado o faltan requisitos (REQUISITOS_PENDIENTES)")
+    public FichaResponse confirmar(@PathVariable long id, @AuthenticationPrincipal Jwt jwt) {
+        UsuarioActual quien = UsuarioActual.de(jwt);
+        confirmaciones.confirmar(id, quien);
         return dto.ficha(consultas.ficha(id, quien));
     }
 

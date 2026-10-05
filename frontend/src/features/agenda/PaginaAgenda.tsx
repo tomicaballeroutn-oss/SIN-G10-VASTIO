@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { useSearchParams } from 'react-router';
+import { useNavigate, useSearchParams } from 'react-router';
 import { agenda, estadoDs, fechaLarga, hoyEnCordoba, sumarMeses, type Agenda } from '../../api/agenda';
 import { hora } from '../../api/catalogos';
 import type { PreReservaRegistrada } from '../../api/eventos';
@@ -42,6 +42,7 @@ export function PaginaAgenda() {
   const preReserva = !!usuario?.roles.some((r) => r === 'VENDEDORA' || r === 'DIRECCION' || r === 'COORDINACION');
   const [elegida, setElegida] = useState<UnidadElegida | null>(null);
   const [registrada, setRegistrada] = useState<PreReservaRegistrada | null>(null);
+  const navegar = useNavigate();
 
   function cambiar(valores: Record<string, string | null>) {
     const siguiente = new URLSearchParams(busqueda);
@@ -58,7 +59,11 @@ export function PaginaAgenda() {
     <section className="pantalla">
       <Encabezado titulo="Agenda" antetitulo="Agenda" />
       {registrada && (
-        <Alert tone="success" title="Pre-reserva registrada">
+        <Alert
+          tone="success"
+          title="Pre-reserva registrada"
+          action={<Button variant="outline" size="sm" onClick={() => navegar(`/eventos/${registrada.id}`)}>Ver ficha</Button>}
+        >
           {registrada.codigo} · {registrada.nombre}. La fecha queda apartada hasta que se señe o se libere.
         </Alert>
       )}
@@ -138,6 +143,7 @@ function DetalleDelDia({ agenda: ag, fecha, hoy, alPreReservar }: {
   alPreReservar?: (unidad: UnidadElegida) => void;
 }) {
   const ref = useRef<HTMLDivElement>(null);
+  const navegar = useNavigate();
 
   useEffect(() => {
     if (fecha) ref.current?.scrollIntoView?.({ block: 'nearest', behavior: 'smooth' });
@@ -169,7 +175,7 @@ function DetalleDelDia({ agenda: ag, fecha, hoy, alPreReservar }: {
                       <SalonTag salon={salon.codigo} label={salon.nombre} />
                       <StatusChip status={estado} size="sm" />
                     </div>
-                    <Descripcion ocupada={ocupada} salonActivo={salon.activo} pasada={fecha < hoy} />
+                    <Descripcion ocupada={ocupada} salonActivo={salon.activo} pasada={fecha < hoy} alAbrir={(id) => navegar(`/eventos/${id}`)} />
                     {!ocupada && salon.activo && fecha >= hoy && alPreReservar && (
                       <div>
                         <Button
@@ -193,7 +199,12 @@ function DetalleDelDia({ agenda: ag, fecha, hoy, alPreReservar }: {
   );
 }
 
-function Descripcion({ ocupada, salonActivo, pasada }: { ocupada?: Agenda['unidades'][number]; salonActivo: boolean; pasada: boolean }) {
+function Descripcion({ ocupada, salonActivo, pasada, alAbrir }: {
+  ocupada?: Agenda['unidades'][number];
+  salonActivo: boolean;
+  pasada: boolean;
+  alAbrir: (eventoId: number) => void;
+}) {
   if (!ocupada) {
     const texto = pasada ? 'Sin evento.' : salonActivo ? 'Libre para ofrecer.' : 'Salón dado de baja: no acepta pre-reservas.';
     return <p className="body-sm v-muted">{texto}</p>;
@@ -214,6 +225,11 @@ function Descripcion({ ocupada, salonActivo, pasada }: { ocupada?: Agenda['unida
         Vendedora: {ev.vendedora.nombre}
         {ev.planner ? ` · Planner: ${ev.planner.nombre}` : ''}
       </p>
+      {ev.id != null && (
+        <div className="agenda__ver">
+          <Button variant="text" size="sm" iconEnd="chevron-right" onClick={() => alAbrir(ev.id as number)}>Ver ficha</Button>
+        </div>
+      )}
     </div>
   );
 }

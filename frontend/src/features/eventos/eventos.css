@@ -1,0 +1,19 @@
+/* Lista de eventos: tarjetas en grilla. */
+.eventos__lista { list-style: none; margin: 0; padding: 0; display: grid; gap: var(--space-4); }
+@media (min-width: 720px) { .eventos__lista { grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); } }
+.eventos__lista > li { display: flex; }
+.eventos__lista .v-event { flex: 1; }
+
+/* UI-09: ficha del evento */
+.ficha__cabecera { display: flex; flex-direction: column; gap: var(--space-2); }
+.ficha__etiquetas { display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-2) var(--space-3); }
+.ficha__acciones { display: flex; flex-wrap: wrap; gap: var(--space-2); }
+
+.ficha__datos { display: grid; gap: var(--space-4); align-items: start; }
+@media (min-width: 960px) { .ficha__datos { grid-template-columns: 1fr 1fr; } }
+.ficha__lista { display: flex; flex-direction: column; gap: var(--space-3); margin: 0; }
+.ficha__dato { display: grid; gap: var(--space-1); }
+@media (min-width: 480px) { .ficha__dato { grid-template-columns: 160px minmax(0, 1fr); align-items: baseline; } }
+.ficha__dato dd { margin: 0; overflow-wrap: anywhere; }
+.ficha__observaciones { white-space: pre-wrap; }
+.ficha__historial { max-width: 640px; }

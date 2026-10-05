@@ -78,7 +78,7 @@
 - El historial muestra quién, qué y cuándo, con el componente `Actor`.
 - La vendedora solo abre las fichas de sus eventos. Administración, Planner, Compras, Coordinación y Dirección abren todas. Barra y Cocina reciben 403.
 - El importe de la seña solo llega a Dirección, Coordinación, Administración y la vendedora titular.
-- Lista de próximos eventos («Mis eventos» para la vendedora y la planner).
+- Lista de próximos eventos: la vendedora ve los suyos («Mis eventos»); la planner y el resto de los perfiles con acceso, todos.
 
 ### Registrar evento (UI-08)
 

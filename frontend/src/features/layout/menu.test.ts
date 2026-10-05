@@ -21,8 +21,13 @@ describe('menú por perfil', () => {
     expect(items.find((it) => it.id === 'eventos')?.label).toBe('Mis eventos');
   });
 
-  it('la planner ve agenda, sus eventos y la vista de cocina', () => {
+  it('la planner ve agenda, todos los eventos y la vista de cocina', () => {
     expect(ids(['PLANNER'])).toEqual(['notificaciones', 'agenda', 'eventos', 'cocina']);
+    expect(itemsPara(['PLANNER']).find((it) => it.id === 'eventos')?.label).toBe('Eventos');
+  });
+
+  it('una vendedora que también es planner ve todos los eventos', () => {
+    expect(itemsPara(['VENDEDORA', 'PLANNER']).find((it) => it.id === 'eventos')?.label).toBe('Eventos');
   });
 
   it('Compras ve bebidas, reportes y la agenda en consulta', () => {

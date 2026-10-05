@@ -55,9 +55,36 @@ export interface Opciones {
 }
 
 export async function api<T>(ruta: string, opciones: Opciones = {}): Promise<T> {
+  const respuesta = await pedir(ruta, opciones, 'application/json, application/problem+json');
+  if (respuesta.status === 204) {
+    return undefined as T;
+  }
+  return (await respuesta.json()) as T;
+}
+
+/** Un archivo descargado con la sesión (p. ej. el contrato del legajo), con el nombre que manda el servidor. */
+export async function descargarArchivo(ruta: string): Promise<{ contenido: Blob; nombre: string | null }> {
+  const respuesta = await pedir(ruta, {}, '*/*');
+  return { contenido: await respuesta.blob(), nombre: nombreDeArchivo(respuesta.headers.get('Content-Disposition')) };
+}
+
+/** `filename*=UTF-8''…` (RFC 5987) o, si no viene, `filename="…"`. */
+export function nombreDeArchivo(disposicion: string | null): string | null {
+  if (!disposicion) return null;
+  const extendido = /filename\*=UTF-8''([^;]+)/i.exec(disposicion);
+  if (extendido) return decodeURIComponent(extendido[1]);
+  return /filename="([^"]+)"/i.exec(disposicion)?.[1] ?? null;
+}
+
+/**
+ * Hace el pedido con el token, renueva la sesión una vez si responde 401 y convierte los errores en ProblemaApi.
+ * Un cuerpo FormData (archivos) viaja tal cual; el resto, como JSON.
+ */
+async function pedir(ruta: string, opciones: Opciones, aceptar: string): Promise<Response> {
   const { metodo = 'GET', cuerpo, renovarSiVence = true } = opciones;
-  const headers: Record<string, string> = { Accept: 'application/json, application/problem+json' };
-  if (cuerpo !== undefined) headers['Content-Type'] = 'application/json';
+  const formulario = cuerpo instanceof FormData;
+  const headers: Record<string, string> = { Accept: aceptar };
+  if (cuerpo !== undefined && !formulario) headers['Content-Type'] = 'application/json';
   if (tokenAcceso) headers.Authorization = `Bearer ${tokenAcceso}`;
 
   let respuesta: Response;
@@ -65,7 +92,7 @@ export async function api<T>(ruta: string, opciones: Opciones = {}): Promise<T> 
     respuesta = await fetch(BASE + ruta, {
       method: metodo,
       headers,
-      body: cuerpo === undefined ? undefined : JSON.stringify(cuerpo),
+      body: cuerpo === undefined ? undefined : formulario ? cuerpo : JSON.stringify(cuerpo),
       credentials: 'same-origin',
     });
   } catch {
@@ -74,15 +101,12 @@ export async function api<T>(ruta: string, opciones: Opciones = {}): Promise<T> 
 
   if (respuesta.status === 401 && renovarSiVence && !ruta.startsWith('/auth/')) {
     await renovarSesion();
-    return api<T>(ruta, { ...opciones, renovarSiVence: false });
+    return pedir(ruta, { ...opciones, renovarSiVence: false }, aceptar);
   }
   if (!respuesta.ok) {
     throw await ProblemaApi.desde(respuesta);
   }
-  if (respuesta.status === 204) {
-    return undefined as T;
-  }
-  return (await respuesta.json()) as T;
+  return respuesta;
 }
 
 /** Renueva con la cookie de refresco. Si falla, deja la sesión como vencida y relanza el error. */

@@ -8,6 +8,11 @@ spring:
       ddl-auto: validate
   flyway:
     locations: classpath:db/migration
+  servlet:
+    multipart:
+      # Contrato digitalizado: hasta 10 archivos de 10 MB (ContratoService).
+      max-file-size: 10MB
+      max-request-size: 101MB
   jackson:
     deserialization:
       # Jackson 3 rechaza un booleano o número ausente; en los pedidos, ausente es false o 0.
@@ -19,6 +24,9 @@ vastio:
     jwt-secreto: ${VASTIO_JWT_SECRETO:}
     minutos-acceso: 15
     cookie-segura: true
+  legajo:
+    # Archivos del legajo (contratos). En el ambiente de prueba, un volumen de Docker (docs/despliegue.md).
+    directorio: ${VASTIO_LEGAJO_DIRECTORIO:datos/legajo}
 
 springdoc:
   api-docs:

@@ -79,7 +79,7 @@ Flyway aplica las migraciones nuevas al arrancar el backend.
 
 ## 5. Respaldos
 
-El servicio `respaldo` hace un `pg_dump` por día en `./respaldos/` y conserva los últimos 14. **Esos archivos están en el mismo servidor: si el servidor se pierde, se pierden con él.** Falta decidir a dónde se copian. Una opción sin costo es Google Drive con `rclone`: se configura una vez con `rclone config` y después un cron del servidor copia la carpeta todos los días:
+El servicio `respaldo` hace un `pg_dump` por día en `./respaldos/` y conserva los últimos 14. También copia a `./respaldos/legajo/` los archivos nuevos del legajo (contratos digitalizados), que viven en el volumen `legajo`: la base guarda solo la ruta, así que **un respaldo de la base sin esa carpeta no alcanza para recuperar los contratos**. **Esos archivos están en el mismo servidor: si el servidor se pierde, se pierden con él.** Falta decidir a dónde se copian. Una opción sin costo es Google Drive con `rclone`: se configura una vez con `rclone config` y después un cron del servidor copia la carpeta todos los días:
 
 ```bash
 # crontab -e

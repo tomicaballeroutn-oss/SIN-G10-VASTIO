@@ -30,6 +30,12 @@
 
 /* UI-11: registrar seña */
 .sena { display: flex; flex-direction: column; gap: var(--space-4); }
+.firma { display: flex; flex-direction: column; gap: var(--space-4); min-width: min(440px, 100%); }
+.ficha__documentos { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: var(--space-3); }
+.ficha__documento { display: flex; align-items: center; justify-content: space-between; gap: var(--space-3); padding-bottom: var(--space-3); border-bottom: 1px solid var(--line); }
+.ficha__documento:last-child { padding-bottom: 0; border-bottom: 0; }
+.ficha__documento-datos { display: flex; flex-direction: column; gap: var(--space-1); min-width: 0; }
+.ficha__documento-datos .body { overflow-wrap: anywhere; }
 .sena__par { display: grid; gap: var(--space-4); }
 @media (min-width: 480px) { .sena__par { grid-template-columns: 1fr 1fr; } }
 .sena__firmante { display: flex; flex-direction: column; gap: var(--space-3); margin: 0; padding: 0; border: 0; }

@@ -338,3 +338,17 @@ h2.h2, h3.h3, h3.h4 { margin: 0; color: var(--ink); }
 [data-theme="dark"] .v-brand__claro { display: none !important; }
 [data-theme="dark"] .v-brand__oscuro { display: block !important; }
 .v-brand--marca { width: 28px; }
+
+/* ---------- SelectorArchivos (Sprint 2): contrato digitalizado ----------
+   La zona entera abre el selector (el input transparente la cubre), acepta arrastrar y soltar, y muestra el foco. */
+.v-files__zona { position: relative; display: flex; flex-direction: column; align-items: center; gap: var(--space-2); padding: var(--space-6) var(--space-4);
+  border: 2px dashed var(--line-strong); border-radius: var(--radius-lg); color: var(--ink-muted); text-align: center; cursor: pointer; background: var(--surface); }
+.v-files__zona:hover, .v-files__zona.is-dragging { border-color: var(--brand); color: var(--brand-ink); background: var(--brand-tint); }
+.v-files__zona:focus-within { outline: 3px solid var(--focus-ring); outline-offset: 2px; }
+.v-files__zona.is-invalid { border-color: var(--danger); }
+.v-files__zona.is-disabled { opacity: var(--opacity-disabled); cursor: not-allowed; }
+.v-files__input { position: absolute; inset: 0; width: 100%; height: 100%; opacity: 0; cursor: inherit; }
+.v-files__lista { list-style: none; margin: var(--space-2) 0 0; padding: 0; display: flex; flex-direction: column; gap: var(--space-2); }
+.v-files__item { display: flex; align-items: center; gap: var(--space-3); padding: var(--space-2) var(--space-2) var(--space-2) var(--space-3);
+  background: var(--surface-sunken); border-radius: var(--radius-md); color: var(--ink); }
+.v-files__nombre { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }

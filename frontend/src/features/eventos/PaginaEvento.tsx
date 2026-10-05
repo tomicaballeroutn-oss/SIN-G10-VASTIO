@@ -2,21 +2,25 @@ import { useCallback, useState, type ReactNode } from 'react';
 import { useLocation, useNavigate, useParams, useSearchParams } from 'react-router';
 import type { EstadoEvento } from '../../api/agenda';
 import { hora } from '../../api/catalogos';
-import { fichas, type CambioDeEstado, type EntradaHistorial, type Ficha, type Modificacion } from '../../api/eventos';
-import { useDatos } from '../../api/useDatos';
 import {
-  Actor, Alert, Button, Card, ESTADOS, ESTADO_POR_CODIGO, SalonTag, StatusChip, Tabs, Timeline,
-  type TimelineItem, type TimelineTone,
+  fichas, type CambioDeEstado, type DocumentoLegajo, type EntradaHistorial, type Ficha, type Modificacion,
+} from '../../api/eventos';
+import { useDatos, useEnvio } from '../../api/useDatos';
+import {
+  Actor, Alert, Button, Card, EmptyState, ESTADOS, ESTADO_POR_CODIGO, IconButton, SalonTag, StatusChip, Tabs, Timeline,
+  tamanoLegible, type TimelineItem, type TimelineTone,
 } from '../../ds';
 import { Cargando } from '../comun/Cargando';
+import { guardarArchivo } from '../comun/archivos';
 import { fechaCorta, fechaHora, pesos } from '../comun/formato';
+import { DialogoFirma } from './DialogoFirma';
 import { DialogoLiberar } from './DialogoLiberar';
 import { DialogoSena } from './DialogoSena';
 import './eventos.css';
 
 /**
  * UI-09 · Ficha del evento: estado, datos y el historial de cambios en un solo lugar.
- * En este sprint, pestañas Datos e Historial; las demás llegan con sus historias.
+ * Pestañas Datos, Documentos (solo para quien ve el legajo) e Historial; las demás llegan con sus historias.
  */
 export function PaginaEvento() {
   const { id } = useParams();
@@ -37,11 +41,15 @@ export function PaginaEvento() {
 }
 
 /** Diálogos de las acciones que cambian el estado desde la ficha. */
-type Dialogo = 'liberar' | 'sena' | null;
+type Dialogo = 'liberar' | 'sena' | 'firma' | null;
+
+type Pestana = 'datos' | 'documentos' | 'historial';
 
 function ContenidoFicha({ ficha, alCambiar }: { ficha: Ficha; alCambiar: (ficha: Ficha) => void }) {
   const [busqueda, setBusqueda] = useSearchParams();
-  const pestana = busqueda.get('pestana') === 'historial' ? 'historial' : 'datos';
+  const pedida = busqueda.get('pestana');
+  const pestana: Pestana = pedida === 'historial' ? 'historial'
+    : pedida === 'documentos' && ficha.documentos ? 'documentos' : 'datos';
   // Aviso que deja otra pantalla al volver a la ficha (p. ej. «Datos del evento guardados.»).
   const recibido = (useLocation().state as { aviso?: string } | null)?.aviso;
   const [aviso, setAviso] = useState(recibido);
@@ -72,10 +80,13 @@ function ContenidoFicha({ ficha, alCambiar }: { ficha: Ficha; alCambiar: (ficha:
         </p>
       </header>
 
-      {(acciones.modificar || acciones.liberar || acciones.registrarSena) && (
+      {(acciones.modificar || acciones.liberar || acciones.registrarSena || acciones.registrarFirma) && (
         <div className="ficha__acciones">
           {acciones.registrarSena && (
             <Button icon="banknote" onClick={() => setDialogo('sena')}>Registrar seña</Button>
+          )}
+          {acciones.registrarFirma && (
+            <Button icon="file-check" onClick={() => setDialogo('firma')}>Registrar firma</Button>
           )}
           {acciones.modificar && (
             <Button variant="outline" icon="pencil" onClick={() => navegar(`/eventos/${ficha.id}/datos`)}>Modificar datos</Button>
@@ -92,6 +103,13 @@ function ContenidoFicha({ ficha, alCambiar }: { ficha: Ficha; alCambiar: (ficha:
           alRegistrar={(f) => hecho(f, 'Seña registrada. El evento pasó a Señado.')}
         />
       )}
+      {dialogo === 'firma' && (
+        <DialogoFirma
+          ficha={ficha}
+          alCerrar={() => setDialogo(null)}
+          alRegistrar={(f) => hecho(f, 'Firma registrada. El evento pasó a Contratado.')}
+        />
+      )}
       {dialogo === 'liberar' && (
         <DialogoLiberar
           ficha={ficha}
@@ -104,13 +122,16 @@ function ContenidoFicha({ ficha, alCambiar }: { ficha: Ficha; alCambiar: (ficha:
         label="Secciones de la ficha"
         items={[
           { id: 'datos', label: 'Datos' },
+          ...(ficha.documentos ? [{ id: 'documentos', label: 'Documentos', count: ficha.documentos.length }] : []),
           { id: 'historial', label: 'Historial', count: ficha.historial.length },
         ]}
         value={pestana}
         onChange={(p) => setBusqueda(p === 'datos' ? {} : { pestana: p }, { replace: true })}
       />
 
-      {pestana === 'datos' ? <Datos ficha={ficha} /> : <Historial historial={ficha.historial} />}
+      {pestana === 'datos' && <Datos ficha={ficha} />}
+      {pestana === 'documentos' && <Documentos ficha={ficha} documentos={ficha.documentos ?? []} />}
+      {pestana === 'historial' && <Historial historial={ficha.historial} />}
     </>
   );
 }
@@ -174,10 +195,52 @@ function Datos({ ficha }: { ficha: Ficha }) {
           </dl>
         </Card>
       )}
+      {ficha.fechaFirmaContrato && (
+        <Card title="Contrato">
+          <dl className="ficha__lista">
+            <Dato etiqueta="Fecha de firma">{fechaCorta(ficha.fechaFirmaContrato, true)}</Dato>
+          </dl>
+        </Card>
+      )}
       <Card title="Observaciones internas" subtitle="No se muestran en la vista de cocina.">
         <p className="body ficha__observaciones">{ficha.observacionesInternas || 'Sin observaciones.'}</p>
       </Card>
     </div>
+  );
+}
+
+/** Legajo del evento: el contrato digitalizado. Solo llega a quien ve datos económicos. */
+function Documentos({ ficha, documentos }: { ficha: Ficha; documentos: DocumentoLegajo[] }) {
+  const { error, enviar } = useEnvio();
+
+  async function descargar(d: DocumentoLegajo) {
+    const archivo = await enviar(() => fichas.descargarDocumento(ficha.id, d.id));
+    if (archivo) guardarArchivo(archivo.contenido, archivo.nombre ?? d.nombreArchivo);
+  }
+
+  if (documentos.length === 0) {
+    return (
+      <Card>
+        <EmptyState icon="file-text" title="Sin documentos">El contrato digitalizado se adjunta al registrar la firma.</EmptyState>
+      </Card>
+    );
+  }
+  return (
+    <Card title="Contrato digitalizado">
+      {error && <Alert tone="danger">{error.message}</Alert>}
+      <ul className="ficha__documentos">
+        {documentos.map((d) => (
+          <li key={d.id} className="ficha__documento">
+            <div className="ficha__documento-datos">
+              <span className="body">{d.nombreArchivo}</span>
+              <span className="caption v-muted">{tamanoLegible(d.tamanoBytes)}</span>
+              <Actor name={d.usuario.nombre} action="lo adjuntó" at={fechaHora(d.fechaCarga)} size="sm" />
+            </div>
+            <IconButton icon="download" label={`Descargar ${d.nombreArchivo}`} onClick={() => void descargar(d)} />
+          </li>
+        ))}
+      </ul>
+    </Card>
   );
 }
 
@@ -194,6 +257,7 @@ function describir(e: CambioDeEstado): { titulo: string; accion: string } {
   if (!e.estadoAnterior) return { titulo: 'Pre-reserva registrada', accion: 'apartó la fecha' };
   switch (e.estadoNuevo) {
     case 'SENADO': return { titulo: 'Seña registrada', accion: 'registró la seña' };
+    case 'CONTRATADO': return { titulo: 'Contrato firmado', accion: 'registró la firma del contrato' };
     case 'LIBERADA': return { titulo: 'Pre-reserva liberada', accion: 'liberó la fecha' };
     default: return { titulo: `Pasó a ${ESTADOS[ESTADO_POR_CODIGO[e.estadoNuevo]].label}`, accion: 'cambió el estado' };
   }

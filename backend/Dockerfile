@@ -9,7 +9,7 @@ RUN ./mvnw -B -q package -DskipTests && cp target/vastio-backend-*.jar app.jar
 
 FROM eclipse-temurin:25-jre
 RUN apt-get update && apt-get install -y --no-install-recommends curl && rm -rf /var/lib/apt/lists/* \
-    && useradd --system --uid 10001 vastio
+    && useradd --system --uid 10001 vastio     && mkdir -p /datos/legajo && chown vastio /datos/legajo
 WORKDIR /app
 COPY --from=build /app/app.jar app.jar
 USER vastio

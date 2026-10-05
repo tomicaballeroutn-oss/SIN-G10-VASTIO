@@ -5,6 +5,7 @@ import { _reiniciarCliente, type Rol } from '../../api/cliente';
 import type { EventoResumen, Ficha } from '../../api/eventos';
 import { backendFalso, json, montar, problema, sesionDe } from '../../test/backendFalso';
 import { fechaCorta, fechaHora, pesos } from '../comun/formato';
+import { SIN_ACCIONES } from '../../test/fichas';
 
 const FICHA: Ficha = {
   id: 5,
@@ -23,9 +24,11 @@ const FICHA: Ficha = {
   invitadosDefinitivos: false,
   observacionesInternas: 'La madre prefiere que la llamen después de las 18.',
   sena: { importe: 150000, fecha: '2026-09-23', firmanteNombre: 'Mariela Ríos', firmanteDni: '22333444', firmanteContacto: null },
+  fechaFirmaContrato: null,
+  documentos: null,
   fechaCreacion: '2026-09-21T10:15:00-03:00',
   version: 2,
-  acciones: { modificar: true, liberar: false, registrarSena: false },
+  acciones: { ...SIN_ACCIONES, modificar: true, liberar: false, registrarSena: false },
   historial: [
     { tipo: 'ESTADO', estadoNuevo: 'PRE_RESERVA', usuario: { id: 1, nombre: 'Lucía Ferreyra' }, fechaHora: '2026-09-21T10:15:00-03:00' },
     { tipo: 'ESTADO', estadoAnterior: 'PRE_RESERVA', estadoNuevo: 'SENADO', usuario: { id: 1, nombre: 'Lucía Ferreyra' }, fechaHora: '2026-09-23T16:40:00-03:00' },

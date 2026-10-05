@@ -3,3 +3,5 @@ vastio:
     jwt-secreto: secreto-de-tests-con-al-menos-32-caracteres
     # MockMvc no usa HTTPS; la cookie igual se verifica en los tests.
     cookie-segura: false
+  legajo:
+    directorio: ${java.io.tmpdir}/vastio-legajo-test

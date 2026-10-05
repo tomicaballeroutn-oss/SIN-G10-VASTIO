@@ -172,6 +172,11 @@ public class Evento {
         this.firmanteContacto = firmanteContacto;
     }
 
+    /** Fecha de firma del contrato. Se carga antes de pasar a Contratado: el CHECK de la base la exige desde ese estado. */
+    public void registrarFirmaContrato(LocalDate fecha) {
+        this.fechaFirmaContrato = fecha;
+    }
+
     /** Solo la llama {@code MaquinaDeEstados}: es quien valida la transición y la registra en el historial. */
     public void cambiarEstado(EstadoEvento nuevo) {
         this.estado = nuevo;

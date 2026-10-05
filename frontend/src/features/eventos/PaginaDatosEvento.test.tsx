@@ -4,6 +4,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { _reiniciarCliente } from '../../api/cliente';
 import type { Ficha } from '../../api/eventos';
 import { backendFalso, json, montar, pedidos, problema, sesionDe, type Pedido } from '../../test/backendFalso';
+import { SIN_ACCIONES } from '../../test/fichas';
 
 const FICHA: Ficha = {
   id: 5,
@@ -25,9 +26,11 @@ const FICHA: Ficha = {
   invitadosDefinitivos: false,
   observacionesInternas: null,
   sena: null,
+  fechaFirmaContrato: null,
+  documentos: null,
   fechaCreacion: '2026-09-21T10:15:00-03:00',
   version: 2,
-  acciones: { modificar: true, liberar: true, registrarSena: true },
+  acciones: { ...SIN_ACCIONES, modificar: true, liberar: true, registrarSena: true },
   historial: [
     { tipo: 'ESTADO', estadoNuevo: 'PRE_RESERVA', usuario: { id: 1, nombre: 'Lucía Ferreyra' }, fechaHora: '2026-09-21T10:15:00-03:00' },
     { tipo: 'MODIFICACION', campo: 'cantidad_invitados', valorNuevo: '150', usuario: { id: 1, nombre: 'Lucía Ferreyra' }, fechaHora: '2026-09-22T11:00:00-03:00' },
@@ -106,7 +109,7 @@ describe('Registrar evento', () => {
   });
 
   it('sin permiso, la ficha no ofrece modificar y el formulario lo explica', async () => {
-    backend({ ...FICHA, acciones: { modificar: false, liberar: false, registrarSena: false } });
+    backend({ ...FICHA, acciones: { ...SIN_ACCIONES, modificar: false, liberar: false, registrarSena: false } });
     montar('/eventos/5/datos');
 
     expect(await screen.findByText('No podés modificar este evento')).toBeInTheDocument();

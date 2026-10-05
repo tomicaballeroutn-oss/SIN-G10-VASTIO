@@ -587,5 +587,5 @@ Estimación de consumo por asistente según tipo de evento. Alimenta la orden su
 - **Señado y Contratado como estados distintos** (a confirmar con Meli). Si se fusionan, se quita un valor del `CHECK`; ninguna tabla cambia.
 - **Quién registra la seña** (vendedora o administración). No afecta al modelo, solo a la autorización.
 - **Botellas abiertas al cierre.** Las cantidades admiten decimales para registrar, por ejemplo, 0,5 botella si se decide contarlas; si se cuentan solo cerradas, se usan enteros.
-- **Almacenamiento de archivos del legajo.** `documento_evento.ruta` sirve tanto para disco local como para un almacenamiento de objetos; la decisión es de despliegue.
+- **Almacenamiento de archivos del legajo.** Resuelto en el Sprint 2: disco local, en el volumen `legajo` del ambiente de prueba (`vastio.legajo.directorio`); `documento_evento.ruta` es relativa a ese directorio (`<evento_id>/<uuid>.<extensión>`). Pasar a un almacenamiento de objetos no cambia el modelo.
 - **Revocación de sesiones.** Si se requiere cerrar sesiones de forma remota (por ejemplo al dar de baja un usuario), se agrega una tabla de tokens de refresco.

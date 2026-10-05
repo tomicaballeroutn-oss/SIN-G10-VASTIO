@@ -1,16 +1,21 @@
 package ar.edu.utn.vastio.agenda.api;
 
 import java.net.URI;
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Size;
 
+import org.springframework.http.ContentDisposition;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -21,6 +26,7 @@ import org.springframework.web.bind.annotation.RestController;
 import ar.edu.utn.vastio.agenda.api.EventoDto.EventoResumen;
 import ar.edu.utn.vastio.agenda.api.EventoDto.FichaResponse;
 import ar.edu.utn.vastio.agenda.aplicacion.ConsultaEventoService;
+import ar.edu.utn.vastio.agenda.aplicacion.ContratoService;
 import ar.edu.utn.vastio.agenda.aplicacion.DatosEventoService;
 import ar.edu.utn.vastio.agenda.aplicacion.PreReservaService;
 import ar.edu.utn.vastio.agenda.aplicacion.SenaService;
@@ -33,22 +39,24 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 
 /**
- * Eventos: pre-reserva y, en las historias siguientes, ficha, datos, liberación y seña.
+ * Eventos: pre-reserva, ficha, datos, liberación, seña y firma de contrato.
  */
 @RestController
 @RequestMapping("/api/v1/eventos")
-@Tag(name = "Eventos", description = "Pre-reserva, ficha, datos, liberación y seña")
+@Tag(name = "Eventos", description = "Pre-reserva, ficha, datos, liberación, seña y contrato")
 public class EventoController {
 
     private final PreReservaService preReservas;
     private final ConsultaEventoService consultas;
     private final DatosEventoService datos;
     private final SenaService senas;
+    private final ContratoService contratos;
     private final EventoDto dto;
 
     public EventoController(PreReservaService preReservas, ConsultaEventoService consultas, DatosEventoService datos,
-            SenaService senas, EventoDto dto) {
+            SenaService senas, ContratoService contratos, EventoDto dto) {
         this.senas = senas;
+        this.contratos = contratos;
         this.preReservas = preReservas;
         this.consultas = consultas;
         this.datos = datos;
@@ -100,6 +108,37 @@ public class EventoController {
         UsuarioActual quien = UsuarioActual.de(jwt);
         senas.registrar(id, pedido.sena(), quien);
         return dto.ficha(consultas.ficha(id, quien));
+    }
+
+    @PostMapping(path = "/{id}/contrato", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @PreAuthorize(Permisos.ACCESO_TOTAL)
+    @Operation(summary = "Registrar firma de contrato", description = """
+            El evento señado pasa a Contratado con la fecha de firma (no anterior a la seña ni futura) y el contrato
+            digitalizado: de 1 a 10 archivos PDF, JPG o PNG de hasta 10 MB cada uno. La registran Coordinación y Dirección.
+            Avisa a Administración, Coordinación y la vendedora titular. Devuelve la ficha.""")
+    @ApiResponse(responseCode = "413", description = "Un archivo pesa más de 10 MB")
+    @ApiResponse(responseCode = "422", description = "El evento no está Señado, la fecha no corresponde o un archivo no es válido")
+    public FichaResponse registrarContrato(@PathVariable long id, @Valid @ModelAttribute ContratoRequest pedido,
+            @AuthenticationPrincipal Jwt jwt) {
+        UsuarioActual quien = UsuarioActual.de(jwt);
+        contratos.registrar(id, pedido.fechaFirma(), pedido.archivosLeidos(), quien);
+        return dto.ficha(consultas.ficha(id, quien));
+    }
+
+    @GetMapping("/{id}/documentos/{documentoId}")
+    @PreAuthorize(Permisos.CONSULTAR_EVENTOS)
+    @Operation(summary = "Descargar un archivo del legajo", description = """
+            Solo para quien ve el importe de la seña (Dirección, Coordinación, Administración y la vendedora titular):
+            el contrato tiene importes.""")
+    public ResponseEntity<byte[]> descargarDocumento(@PathVariable long id, @PathVariable long documentoId,
+            @AuthenticationPrincipal Jwt jwt) {
+        ContratoService.Descarga descarga = contratos.descargar(id, documentoId, UsuarioActual.de(jwt));
+        return ResponseEntity.ok()
+                .contentType(MediaType.parseMediaType(descarga.documento().getMimeType()))
+                .header(HttpHeaders.CONTENT_DISPOSITION, ContentDisposition.attachment()
+                        .filename(descarga.documento().getNombreArchivo(), StandardCharsets.UTF_8).build().toString())
+                .header(HttpHeaders.CACHE_CONTROL, "private, no-store")
+                .body(descarga.contenido());
     }
 
     @PostMapping("/{id}/liberacion")

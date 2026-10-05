@@ -18,6 +18,7 @@ import ar.edu.utn.vastio.agenda.aplicacion.ConsultaEventoService.Ficha;
 import ar.edu.utn.vastio.agenda.dominio.CambioEstadoEvento;
 import ar.edu.utn.vastio.agenda.dominio.Cliente;
 import ar.edu.utn.vastio.agenda.dominio.ContactoEvento;
+import ar.edu.utn.vastio.agenda.dominio.DocumentoEvento;
 import ar.edu.utn.vastio.agenda.dominio.EstadoEvento;
 import ar.edu.utn.vastio.agenda.dominio.Evento;
 import ar.edu.utn.vastio.agenda.dominio.ModificacionEvento;
@@ -74,10 +75,17 @@ public class EventoDto {
         }
     }
 
+    /** Archivo del legajo; se descarga de /api/v1/eventos/{id}/documentos/{documentoId}. */
+    public record DocumentoDto(long id, DocumentoEvento.Tipo tipo, String nombreArchivo, String mimeType, int tamanoBytes,
+            Nombre usuario, OffsetDateTime fechaCarga) {
+    }
+
+    /** {@code documentos} es null para quien no ve el legajo (el contrato tiene importes). */
     public record FichaResponse(long id, String codigo, EstadoEvento estado, String nombre, Nombre tipo, SalonDto salon,
             LocalDate fecha, TurnoDto turno, ClienteDto cliente, List<ContactoDto> contactos, Nombre vendedora,
             Nombre planner, Integer cantidadInvitados, boolean invitadosDefinitivos, String observacionesInternas,
-            SenaDto sena, OffsetDateTime fechaCreacion, int version, Acciones acciones, List<HistorialDto> historial) {
+            SenaDto sena, LocalDate fechaFirmaContrato, List<DocumentoDto> documentos, OffsetDateTime fechaCreacion,
+            int version, Acciones acciones, List<HistorialDto> historial) {
     }
 
     public record EventoResumen(long id, String codigo, EstadoEvento estado, String nombre, String tipo, SalonDto salon,
@@ -99,13 +107,20 @@ public class EventoDto {
                 e.getUnidad().getFecha(), turno(e), ClienteDto.de(e.getCliente()),
                 f.contactos().stream().map(ContactoDto::de).toList(), persona(e.getVendedoraId(), nombres),
                 persona(e.getPlannerId(), nombres), e.getCantidadInvitados(), e.isInvitadosDefinitivos(),
-                e.getObservacionesInternas(), sena, e.getFechaCreacion(), e.getVersion(), f.acciones(), historial);
+                e.getObservacionesInternas(), sena, e.getFechaFirmaContrato(),
+                f.documentos() == null ? null : f.documentos().stream().map(d -> documento(d, nombres)).toList(),
+                e.getFechaCreacion(), e.getVersion(), f.acciones(), historial);
     }
 
     public EventoResumen resumen(Evento e, Map<Long, String> nombres) {
         return new EventoResumen(e.getId(), e.getCodigo(), e.getEstado(), e.getNombre(), tipo(e).nombre(), salon(e),
                 e.getUnidad().getFecha(), turno(e), e.getCliente().getNombre(), persona(e.getVendedoraId(), nombres),
                 persona(e.getPlannerId(), nombres), e.getCantidadInvitados());
+    }
+
+    private static DocumentoDto documento(DocumentoEvento d, Map<Long, String> nombres) {
+        return new DocumentoDto(d.getId(), d.getTipo(), d.getNombreArchivo(), d.getMimeType(), d.getTamanoBytes(),
+                persona(d.getUsuarioId(), nombres), d.getFechaCarga());
     }
 
     private static HistorialDto historial(CambioEstadoEvento c, Map<Long, String> nombres) {

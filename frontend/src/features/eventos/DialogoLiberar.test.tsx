@@ -4,6 +4,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { _reiniciarCliente } from '../../api/cliente';
 import type { Ficha } from '../../api/eventos';
 import { backendFalso, json, montar, pedidos, problema, sesionDe, type Pedido } from '../../test/backendFalso';
+import { SIN_ACCIONES } from '../../test/fichas';
 
 const PRE_RESERVA: Ficha = {
   id: 5,
@@ -22,9 +23,11 @@ const PRE_RESERVA: Ficha = {
   invitadosDefinitivos: false,
   observacionesInternas: null,
   sena: null,
+  fechaFirmaContrato: null,
+  documentos: null,
   fechaCreacion: '2026-09-21T10:15:00-03:00',
   version: 0,
-  acciones: { modificar: true, liberar: true, registrarSena: true },
+  acciones: { ...SIN_ACCIONES, modificar: true, liberar: true, registrarSena: true },
   historial: [{ tipo: 'ESTADO', estadoNuevo: 'PRE_RESERVA', usuario: { id: 1, nombre: 'Lucía Ferreyra' }, fechaHora: '2026-09-21T10:15:00-03:00' }],
 };
 
@@ -32,7 +35,7 @@ const LIBERADA: Ficha = {
   ...PRE_RESERVA,
   estado: 'LIBERADA',
   version: 1,
-  acciones: { modificar: false, liberar: false, registrarSena: false },
+  acciones: { ...SIN_ACCIONES, modificar: false, liberar: false, registrarSena: false },
   historial: [
     ...PRE_RESERVA.historial,
     { tipo: 'ESTADO', estadoAnterior: 'PRE_RESERVA', estadoNuevo: 'LIBERADA', usuario: { id: 1, nombre: 'Lucía Ferreyra' }, fechaHora: '2026-09-25T09:00:00-03:00' },
@@ -102,7 +105,7 @@ describe('UI-10 · liberar pre-reserva', () => {
   });
 
   it('sin la acción disponible, no aparece el botón', async () => {
-    backend(undefined, { ...PRE_RESERVA, acciones: { modificar: false, liberar: false, registrarSena: false } });
+    backend(undefined, { ...PRE_RESERVA, acciones: { ...SIN_ACCIONES, modificar: false, liberar: false, registrarSena: false } });
     montar('/eventos/5');
 
     await screen.findByRole('heading', { level: 1, name: 'Quince de Delfina Ríos' });

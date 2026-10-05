@@ -1,4 +1,4 @@
-import { useCallback, type ReactNode } from 'react';
+import { useCallback, useState, type ReactNode } from 'react';
 import { useLocation, useNavigate, useParams, useSearchParams } from 'react-router';
 import type { EstadoEvento } from '../../api/agenda';
 import { hora } from '../../api/catalogos';
@@ -10,6 +10,7 @@ import {
 } from '../../ds';
 import { Cargando } from '../comun/Cargando';
 import { fechaCorta, fechaHora, pesos } from '../comun/formato';
+import { DialogoLiberar } from './DialogoLiberar';
 import './eventos.css';
 
 /**
@@ -29,18 +30,29 @@ export function PaginaEvento() {
       <div>
         <Button variant="text" icon="arrow-left" onClick={volver}>Volver</Button>
       </div>
-      <Cargando datos={datos}>{(ficha) => <ContenidoFicha ficha={ficha} />}</Cargando>
+      <Cargando datos={datos}>{(ficha) => <ContenidoFicha ficha={ficha} alCambiar={(nueva) => datos.fijar(() => nueva)} />}</Cargando>
     </section>
   );
 }
 
-function ContenidoFicha({ ficha }: { ficha: Ficha }) {
+/** Diálogos de las acciones que cambian el estado desde la ficha. */
+type Dialogo = 'liberar' | null;
+
+function ContenidoFicha({ ficha, alCambiar }: { ficha: Ficha; alCambiar: (ficha: Ficha) => void }) {
   const [busqueda, setBusqueda] = useSearchParams();
   const pestana = busqueda.get('pestana') === 'historial' ? 'historial' : 'datos';
   // Aviso que deja otra pantalla al volver a la ficha (p. ej. «Datos del evento guardados.»).
-  const aviso = (useLocation().state as { aviso?: string } | null)?.aviso;
+  const recibido = (useLocation().state as { aviso?: string } | null)?.aviso;
+  const [aviso, setAviso] = useState(recibido);
+  const [dialogo, setDialogo] = useState<Dialogo>(null);
   const navegar = useNavigate();
   const { acciones } = ficha;
+
+  function hecho(nueva: Ficha, mensaje: string) {
+    setDialogo(null);
+    setAviso(mensaje);
+    alCambiar(nueva);
+  }
 
   return (
     <>
@@ -59,10 +71,22 @@ function ContenidoFicha({ ficha }: { ficha: Ficha }) {
         </p>
       </header>
 
-      {acciones.modificar && (
+      {(acciones.modificar || acciones.liberar) && (
         <div className="ficha__acciones">
-          <Button variant="outline" icon="pencil" onClick={() => navegar(`/eventos/${ficha.id}/datos`)}>Modificar datos</Button>
+          {acciones.modificar && (
+            <Button variant="outline" icon="pencil" onClick={() => navegar(`/eventos/${ficha.id}/datos`)}>Modificar datos</Button>
+          )}
+          {acciones.liberar && (
+            <Button variant="outline" icon="lock-open" onClick={() => setDialogo('liberar')}>Liberar pre-reserva</Button>
+          )}
         </div>
+      )}
+      {dialogo === 'liberar' && (
+        <DialogoLiberar
+          ficha={ficha}
+          alCerrar={() => setDialogo(null)}
+          alLiberar={(f) => hecho(f, 'Pre-reserva liberada. La fecha volvió a estar disponible en la agenda.')}
+        />
       )}
 
       <Tabs

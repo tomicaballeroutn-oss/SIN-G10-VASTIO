@@ -4,6 +4,7 @@ import java.net.URI;
 import java.util.List;
 
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.Size;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -83,6 +84,25 @@ public class EventoController {
     @ApiResponse(responseCode = "403", description = "Evento de otra vendedora")
     public FichaResponse ficha(@PathVariable long id, @AuthenticationPrincipal Jwt jwt) {
         return dto.ficha(consultas.ficha(id, UsuarioActual.de(jwt)));
+    }
+
+    @PostMapping("/{id}/liberacion")
+    @PreAuthorize(Permisos.PRERESERVA)
+    @Operation(summary = "Liberar pre-reserva", description = """
+            La pre-reserva que no prosperó pasa a Liberada y la fecha vuelve a estar disponible. No es una cancelación.
+            La hacen la vendedora titular, Coordinación y Dirección. Queda en el historial. Devuelve la ficha.""")
+    @ApiResponse(responseCode = "422", description = "El evento no está en Pre-reserva")
+    public FichaResponse liberar(@PathVariable long id, @Valid @RequestBody(required = false) LiberacionRequest pedido,
+            @AuthenticationPrincipal Jwt jwt) {
+        UsuarioActual quien = UsuarioActual.de(jwt);
+        String observacion = pedido == null || pedido.observacion() == null || pedido.observacion().isBlank()
+                ? null : pedido.observacion().trim();
+        preReservas.liberar(id, observacion, quien);
+        return dto.ficha(consultas.ficha(id, quien));
+    }
+
+    /** Comentario opcional: queda en el historial junto a la liberación. */
+    public record LiberacionRequest(@Size(max = 255, message = "Usá hasta 255 caracteres.") String observacion) {
     }
 
     @PostMapping

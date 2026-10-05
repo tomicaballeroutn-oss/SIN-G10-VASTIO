@@ -169,4 +169,5 @@ export const fichas = {
   ficha: (id: number) => api<Ficha>(`/eventos/${id}`),
   proximos: () => api<EventoResumen[]>('/eventos'),
   registrarDatos: (id: number, datos: DatosEvento) => api<Ficha>(`/eventos/${id}`, { metodo: 'PUT', cuerpo: datos }),
+  liberar: (id: number) => api<Ficha>(`/eventos/${id}/liberacion`, { metodo: 'POST' }),
 };

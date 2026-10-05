@@ -11,6 +11,7 @@ import {
 import { Cargando } from '../comun/Cargando';
 import { fechaCorta, fechaHora, pesos } from '../comun/formato';
 import { DialogoLiberar } from './DialogoLiberar';
+import { DialogoSena } from './DialogoSena';
 import './eventos.css';
 
 /**
@@ -36,7 +37,7 @@ export function PaginaEvento() {
 }
 
 /** Diálogos de las acciones que cambian el estado desde la ficha. */
-type Dialogo = 'liberar' | null;
+type Dialogo = 'liberar' | 'sena' | null;
 
 function ContenidoFicha({ ficha, alCambiar }: { ficha: Ficha; alCambiar: (ficha: Ficha) => void }) {
   const [busqueda, setBusqueda] = useSearchParams();
@@ -71,8 +72,11 @@ function ContenidoFicha({ ficha, alCambiar }: { ficha: Ficha; alCambiar: (ficha:
         </p>
       </header>
 
-      {(acciones.modificar || acciones.liberar) && (
+      {(acciones.modificar || acciones.liberar || acciones.registrarSena) && (
         <div className="ficha__acciones">
+          {acciones.registrarSena && (
+            <Button icon="banknote" onClick={() => setDialogo('sena')}>Registrar seña</Button>
+          )}
           {acciones.modificar && (
             <Button variant="outline" icon="pencil" onClick={() => navegar(`/eventos/${ficha.id}/datos`)}>Modificar datos</Button>
           )}
@@ -80,6 +84,13 @@ function ContenidoFicha({ ficha, alCambiar }: { ficha: Ficha; alCambiar: (ficha:
             <Button variant="outline" icon="lock-open" onClick={() => setDialogo('liberar')}>Liberar pre-reserva</Button>
           )}
         </div>
+      )}
+      {dialogo === 'sena' && (
+        <DialogoSena
+          ficha={ficha}
+          alCerrar={() => setDialogo(null)}
+          alRegistrar={(f) => hecho(f, 'Seña registrada. El evento pasó a Señado.')}
+        />
       )}
       {dialogo === 'liberar' && (
         <DialogoLiberar

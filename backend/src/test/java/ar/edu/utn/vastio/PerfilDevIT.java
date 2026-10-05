@@ -72,7 +72,7 @@ class PerfilDevIT {
     }
 
     @Test
-    void cargaUnUsuarioPorPerfilYPreReservasConSuHistorial() {
+    void cargaUnUsuarioPorPerfilYEventosConSuHistorial() {
         assertThat(usuarios.findByNombreUsuario("lucia.ferreyra")).get()
                 .satisfies(u -> assertThat(u.codigosDeRol()).containsExactly(RolCodigo.VENDEDORA))
                 .satisfies(u -> assertThat(u.isDebeCambiarContrasena()).isFalse());
@@ -81,7 +81,8 @@ class PerfilDevIT {
                     SELECT count(*) FROM usuario_rol ur JOIN rol r USING (rol_id) WHERE r.codigo = ?""", Integer.class, rol.name()))
                     .as(rol.name()).isPositive();
         }
-        assertThat(jdbc.queryForObject("SELECT count(*) FROM evento WHERE estado = 'PRE_RESERVA'", Integer.class)).isEqualTo(7);
+        assertThat(jdbc.queryForObject("SELECT count(*) FROM evento WHERE estado = 'PRE_RESERVA'", Integer.class)).isEqualTo(4);
+        assertThat(jdbc.queryForObject("SELECT count(*) FROM evento WHERE estado = 'SENADO'", Integer.class)).isEqualTo(3);
         assertThat(jdbc.queryForObject("SELECT count(DISTINCT evento_id) FROM cambio_estado_evento", Integer.class)).isEqualTo(7);
     }
 }

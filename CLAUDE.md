@@ -86,13 +86,14 @@ design/    Sistema de diseño y prototipos originales (solo referencia, no se co
 
 ```powershell
 copy .env.example .env                  # una vez: completar VASTIO_ADMIN_CONTRASENA (usuario inicial «direccion»)
-                                        # opcional: VASTIO_DEMO_CONTRASENA carga un usuario por perfil y pre-reservas de ejemplo
+                                        # opcional: VASTIO_DEMO_CONTRASENA carga un usuario por perfil y eventos de ejemplo
 docker compose up -d db                 # base de desarrollo
 cd backend; .\mvnw spring-boot:run      # backend en http://localhost:8080 · Swagger UI en /api/docs
 cd backend; .\mvnw verify               # tests (necesita Docker por Testcontainers)
 cd frontend; npm install; npm run dev   # frontend en http://localhost:5173 · sistema de diseño en /_ds
 cd frontend; npm test; npm run lint     # tests (Vitest) y lint del frontend
 cd frontend; npm run e2e                # punta a punta (Playwright) con todo levantado; ver playwright.config.ts
+                                        # el objetivo del sprint usa los datos de demostración: E2E_DEMO_CONTRASENA
 ```
 
 Ambiente de prueba (Docker Compose + Caddy con HTTPS): `docs/despliegue.md`.

@@ -18,4 +18,7 @@ public interface EventoRepository extends JpaRepository<Evento, Long> {
             where u.fecha between :desde and :hasta and e.estado not in :inactivos
             """)
     List<Evento> activosEntre(LocalDate desde, LocalDate hasta, Collection<EstadoEvento> inactivos);
+
+    @Query("select count(e) > 0 from Evento e where e.unidad.id = :unidadId and e.estado not in :inactivos")
+    boolean hayActivoEn(long unidadId, Collection<EstadoEvento> inactivos);
 }

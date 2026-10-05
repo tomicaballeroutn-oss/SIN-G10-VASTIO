@@ -33,7 +33,7 @@ Motor: PostgreSQL. Convenciones: nombres en `snake_case` y en español; claves p
 - **Evento contra bloqueo.** Antes de crear un evento, reprogramarlo o bloquear, el backend toma `SELECT … FOR UPDATE` sobre la fila de `unidad_comercializable`, y dentro de esa transacción verifica que no haya evento activo ni bloqueo activo.
 - **Fecha operativa.** `unidad_comercializable.fecha` es la fecha de inicio de la jornada. Los movimientos de la madrugada no se imputan por fecha sino por `evento_id`, así que un retiro a las 02:00 cae en el evento correcto.
 - **Reprogramación.** No cambia el estado: actualiza `evento.unidad_id` y deja una fila en `reprogramacion` con la unidad anterior. Esto reemplaza al estado «Reprogramado» de la máquina de estados v1.
-- **Tablas de solo inserción.** `cambio_estado_evento`, `modificacion_evento`, `reprogramacion` y `movimiento_stock` no admiten UPDATE ni DELETE (se revocan esos permisos al usuario de la aplicación). Las correcciones de stock se registran como asiento de ajuste con `movimiento_corregido_id`.
+- **Tablas de solo inserción.** `cambio_estado_evento`, `modificacion_evento`, `reprogramacion` y `movimiento_stock` no admiten UPDATE ni DELETE: un trigger (`fn_solo_insercion`, V3) los rechaza sin importar quién los intente, porque la aplicación es dueña de las tablas y revocarle permisos no alcanza. Las correcciones de stock se registran como asiento de ajuste con `movimiento_corregido_id`.
 - **Saldo teórico negativo permitido.** `stock_ubicacion.cantidad` no tiene `CHECK ≥ 0`: un retiro mayor al saldo se acepta y genera alerta a compras y administración (operación a ciegas).
 - **Costo congelado.** Al cerrar el evento se escribe `consumo_evento` con el precio vigente; cambios posteriores de `bebida.precio_referencia` no alteran eventos cerrados.
 - **Costo por asistente.** Se divide el costo total por la suma de `asistencia_segmento.cantidad_real` si el tipo de evento usa segmentos; si no, por `evento.cantidad_invitados`.
@@ -216,6 +216,8 @@ Persona u organización que contrata el evento.
 | `telefono` | varchar(30) |  | SÍ | Teléfono principal. |
 | `email` | varchar(120) |  | SÍ | Correo principal. |
 
+*Índices (V3):* `ix_cliente_documento` (documento) e `ix_cliente_nombre` (lower(nombre)), para buscarlo al pre-reservar.
+
 #### EVENTO
 
 Entidad central que vincula ambos módulos.
@@ -370,6 +372,15 @@ Destinatarios de cada aviso. El ruteo por perfil y dato modificado se resuelve a
 | `usuario_id` | bigint | PK/FK | NO | → usuario. |
 | `leida` | boolean |  | NO | Default false. |
 | `fecha_lectura` | timestamptz |  | SÍ |  |
+
+#### NUMERADOR_EVENTO
+
+Último número de evento de cada año, para el código EV-AAAA-NNNNN (V3). Se incrementa con `INSERT … ON CONFLICT … RETURNING`: la fila del año queda bloqueada hasta el final de la transacción, así dos pre-reservas simultáneas no comparten número y, si una se deshace, su número no se pierde.
+
+| Campo | Tipo | Clave | Nulo | Descripción / valores posibles |
+|---|---|---|---|---|
+| `anio` | smallint | PK | NO | Año de creación del evento. |
+| `ultimo` | integer |  | NO | Último número entregado. Entre 1 y 99999. |
 
 ### 3.4 Módulo B — Control de existencias de bebida
 

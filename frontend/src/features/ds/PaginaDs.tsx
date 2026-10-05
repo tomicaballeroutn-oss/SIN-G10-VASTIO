@@ -1,6 +1,6 @@
 import { useState, type ReactNode } from 'react';
 import {
-  Actor, AgendaGrid, Alert, Badge, Button, Card, Checkbox, Dialog, EmptyState, EventCard, Icon, IconButton, Input,
+  Actor, AgendaGrid, Alert, Badge, Button, Card, Checkbox, Combobox, Dialog, EmptyState, EventCard, Icon, IconButton, Input,
   MovementCard, Nav, SalonTag, Select, Stat, StatusChip, Stepper, StockLevel, Switch, Table, Tabs, Timeline,
   ESTADOS_DEL_EVENTO, ORDEN_SALONES, SALONES, aplicarTema, temaGuardado, type AgendaEvent, type EventStatus, type Tema,
 } from '../../ds';
@@ -23,6 +23,29 @@ const EVENTOS_DEMO: AgendaEvent[] = [
   { date: '2026-09-30', salon: 'club', turno: 'noche', status: 'senado' },
   { date: '2026-09-30', salon: 'avril', turno: 'noche', status: 'prereserva' },
 ];
+
+const CLIENTES_DEMO = [
+  { value: '1', label: 'Delfina Ríos', detail: 'DNI 40123456 · 351 555-1234' },
+  { value: '2', label: 'Estudio Ríos y Asociados', detail: 'CUIT 30711222334' },
+];
+
+/** Buscador de clientes: filtra la lista de ejemplo y ofrece cargar uno nuevo. */
+function ComboboxDeMuestra() {
+  const [texto, setTexto] = useState('');
+  const coinciden = CLIENTES_DEMO.filter((c) => c.label.toLowerCase().includes(texto.trim().toLowerCase()));
+  return (
+    <Combobox
+      label="Cliente"
+      icon="search"
+      placeholder="Nombre o documento"
+      value={texto}
+      onInputChange={setTexto}
+      onSelect={(o) => setTexto(o.value === 'nuevo' ? texto : o.label)}
+      options={[...coinciden, { value: 'nuevo', label: `Cargar «${texto.trim()}» como cliente nuevo`, icon: 'user-plus' }]}
+      hint="Probá con «ríos»."
+    />
+  );
+}
 
 function Seccion({ titulo, children }: { titulo: string; children: ReactNode }) {
   return (
@@ -101,7 +124,7 @@ export function PaginaDs() {
         <IconButton icon="trash-2" label="Quitar" variant="text" tone="danger" />
       </Seccion>
 
-      <Seccion titulo="Input, Select, Checkbox, Switch y Stepper">
+      <Seccion titulo="Input, Select, Combobox, Checkbox, Switch y Stepper">
         <div className="ds-formulario">
           <Input label="Nombre del cliente" placeholder="Nombre y apellido" hint="Como figura en el DNI" />
           <Input label="Importe de la seña" icon="banknote" suffix="pesos" inputMode="decimal" defaultValue="150.000" />
@@ -112,6 +135,7 @@ export function PaginaDs() {
             placeholder="Elegí un turno"
             options={[{ value: 'mediodia', label: 'Mediodía' }, { value: 'noche', label: 'Noche' }]}
           />
+          <ComboboxDeMuestra />
           <Stepper label="Invitados" value={invitados} onChange={setInvitados} step={10} unit="personas" />
           <Checkbox label="Invitados definitivos" hint="Ya no se esperan cambios" defaultChecked />
           <Switch label="Tema oscuro en barra" />

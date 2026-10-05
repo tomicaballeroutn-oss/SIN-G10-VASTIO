@@ -32,7 +32,7 @@ import ar.edu.utn.vastio.usuarios.infraestructura.UsuarioRepository;
 class UsuarioIT {
 
     private static final String ALTA_LUCIA = """
-            {"nombreCompleto":" Lucía Ferreyra ","nombreUsuario":"lucia.ferreyra","roles":["VENDEDORA","PLANNER"],
+            {"nombreCompleto":" Lucía Ferreyra ","nombreUsuario":"lucia.alta","roles":["VENDEDORA","PLANNER"],
              "email":"lucia@salonavril.com","telefono":"","contrasenaInicial":"bienvenida-2026"}""";
 
     @Autowired
@@ -58,7 +58,7 @@ class UsuarioIT {
                 .andExpect(jsonPath("$.debeCambiarContrasena").value(true))
                 .andExpect(jsonPath("$.hashContrasena").doesNotExist());
 
-        Usuario lucia = usuarios.findByNombreUsuario("lucia.ferreyra").orElseThrow();
+        Usuario lucia = usuarios.findByNombreUsuario("lucia.alta").orElseThrow();
         assertThat(passwordEncoder.matches("bienvenida-2026", lucia.getHashContrasena())).isTrue();
     }
 

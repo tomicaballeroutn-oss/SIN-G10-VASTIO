@@ -110,6 +110,26 @@ public class Evento {
     protected Evento() {
     }
 
+    /**
+     * Una pre-reserva nueva. Nace sin estado: lo fija {@code MaquinaDeEstados.registrarCreacion},
+     * que además deja la primera fila del historial.
+     */
+    public Evento(String codigo, UnidadComercializable unidad, Cliente cliente, short tipoEventoId, long vendedoraId,
+            String nombre) {
+        this.codigo = codigo;
+        this.unidad = unidad;
+        this.cliente = cliente;
+        this.tipoEventoId = tipoEventoId;
+        this.vendedoraId = vendedoraId;
+        this.nombre = nombre;
+        this.fechaCreacion = OffsetDateTime.now();
+    }
+
+    /** Solo la llama {@code MaquinaDeEstados}: es quien valida la transición y la registra en el historial. */
+    public void cambiarEstado(EstadoEvento nuevo) {
+        this.estado = nuevo;
+    }
+
     public Long getId() {
         return id;
     }

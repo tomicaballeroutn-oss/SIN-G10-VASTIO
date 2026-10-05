@@ -1,4 +1,4 @@
-import { useState, type ChangeEvent, type ReactNode } from 'react';
+import { useState, type ChangeEvent, type KeyboardEvent, type ReactNode } from 'react';
 import type { IconName } from '../tipos';
 import { cx, useFieldId } from '../util';
 import { Icon } from './Icon';
@@ -222,6 +222,124 @@ export function Stepper(p: StepperProps) {
         <button type="button" className="v-stepper__btn" aria-label={`Sumar ${step}`} disabled={p.disabled || valor >= max} onClick={() => fijar(valor + step)}>
           <Icon name="plus" size={22} />
         </button>
+      </div>
+    </Field>
+  );
+}
+
+export interface ComboboxOption {
+  value: string;
+  label: string;
+  /** Segunda línea, p. ej. documento y teléfono. */
+  detail?: string;
+  icon?: IconName;
+}
+
+export interface ComboboxProps extends FieldBase {
+  /** Texto escrito. */
+  value: string;
+  onInputChange: (texto: string) => void;
+  options: ComboboxOption[];
+  onSelect: (opcion: ComboboxOption) => void;
+  placeholder?: string;
+  icon?: IconName;
+  /** Mientras se buscan sugerencias. */
+  loading?: boolean;
+  /** Se muestra si hay texto y ninguna opción. */
+  emptyText?: string;
+  name?: string;
+}
+
+/**
+ * Campo de texto con sugerencias (patrón combobox de WAI-ARIA): flechas para recorrer, Enter para elegir,
+ * Escape para cerrar. Las opciones las decide la pantalla (p. ej. resultados de una búsqueda más «Cargar nuevo»).
+ */
+export function Combobox(p: ComboboxProps) {
+  const id = useFieldId(p.id);
+  const listaId = `${id}-lista`;
+  const [abierta, setAbierta] = useState(false);
+  const [activa, setActiva] = useState(-1);
+  const hayTexto = p.value.trim().length > 0;
+  const mostrarVacio = hayTexto && !p.loading && p.options.length === 0 && !!p.emptyText;
+  const visible = abierta && hayTexto && (p.options.length > 0 || !!p.loading || mostrarVacio);
+
+  function elegir(opcion: ComboboxOption) {
+    p.onSelect(opcion);
+    setAbierta(false);
+    setActiva(-1);
+  }
+
+  function alTeclear(e: KeyboardEvent<HTMLInputElement>) {
+    if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {
+      e.preventDefault();
+      setAbierta(true);
+      if (p.options.length === 0) return;
+      const paso = e.key === 'ArrowDown' ? 1 : -1;
+      setActiva((i) => (i + paso + p.options.length) % p.options.length);
+    } else if (e.key === 'Enter' && visible && activa >= 0 && p.options[activa]) {
+      e.preventDefault();
+      elegir(p.options[activa]);
+    } else if (e.key === 'Escape' && visible) {
+      e.preventDefault();
+      setAbierta(false);
+    }
+  }
+
+  return (
+    <Field label={p.label} hint={p.hint} error={p.error} optional={p.optional} id={id} className={cx('v-combo', p.className)}>
+      <div className="v-control-wrap">
+        {p.icon && <Icon name={p.icon} size={20} className="v-control__icon" />}
+        <input
+          id={id}
+          name={p.name}
+          type="text"
+          role="combobox"
+          autoComplete="off"
+          aria-autocomplete="list"
+          aria-expanded={visible}
+          aria-controls={listaId}
+          aria-activedescendant={visible && activa >= 0 ? `${listaId}-${activa}` : undefined}
+          aria-invalid={p.error ? true : undefined}
+          aria-describedby={p.error || p.hint ? `${id}-msg` : undefined}
+          className={cx('v-control', 'body', p.icon && 'has-icon')}
+          value={p.value}
+          placeholder={p.placeholder}
+          disabled={p.disabled}
+          onChange={(e) => {
+            p.onInputChange(e.target.value);
+            setAbierta(true);
+            setActiva(-1);
+          }}
+          onFocus={() => setAbierta(true)}
+          onBlur={() => setAbierta(false)}
+          onKeyDown={alTeclear}
+        />
+        {visible && (
+          <ul id={listaId} role="listbox" className="v-combo__lista" aria-busy={p.loading || undefined}>
+            {p.options.map((o, i) => (
+              <li
+                key={o.value}
+                id={`${listaId}-${i}`}
+                role="option"
+                aria-selected={i === activa}
+                className={cx('v-combo__opcion', i === activa && 'is-active')}
+                // mousedown en lugar de click: si no, el blur del campo cierra la lista antes de elegir.
+                onMouseDown={(e) => {
+                  e.preventDefault();
+                  elegir(o);
+                }}
+              >
+                {o.icon && <Icon name={o.icon} size={18} />}
+                <span className="v-combo__texto">
+                  <span className="body">{o.label}</span>
+                  {o.detail && <span className="body-sm v-muted">{o.detail}</span>}
+                </span>
+              </li>
+            ))}
+            {p.loading && <li className="body-sm v-muted v-combo__estado" role="presentation">Buscando…</li>}
+            {mostrarVacio && <li className="body-sm v-muted v-combo__estado" role="presentation">{p.emptyText}</li>}
+          </ul>
+        )}
       </div>
     </Field>
   );

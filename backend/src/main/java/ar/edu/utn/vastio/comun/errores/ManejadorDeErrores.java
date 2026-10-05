@@ -38,9 +38,12 @@ public class ManejadorDeErrores extends ResponseEntityExceptionHandler {
 
     private static final Logger log = LoggerFactory.getLogger(ManejadorDeErrores.class);
 
-    /** Restricciones de la base con un mensaje propio. El resto de las violaciones usa {@link Mensajes#DATO_DUPLICADO}. */
-    private static final Map<String, String> MENSAJE_POR_RESTRICCION = Map.of(
-            "ux_evento_unidad_activa", Mensajes.FECHA_TOMADA);
+    /** Restricciones de la base con código y mensaje propios. El resto de las violaciones usa {@link Mensajes#DATO_DUPLICADO}. */
+    private static final Map<String, Restriccion> POR_RESTRICCION = Map.of(
+            "ux_evento_unidad_activa", new Restriccion(Mensajes.CODIGO_FECHA_TOMADA, Mensajes.FECHA_TOMADA));
+
+    private record Restriccion(String codigo, String mensaje) {
+    }
 
     @ExceptionHandler(ProblemaException.class)
     ProblemDetail problema(ProblemaException ex) {
@@ -50,9 +53,9 @@ public class ManejadorDeErrores extends ResponseEntityExceptionHandler {
     @ExceptionHandler(DataIntegrityViolationException.class)
     ProblemDetail integridad(DataIntegrityViolationException ex) {
         String causa = String.valueOf(ex.getMostSpecificCause().getMessage()).toLowerCase(Locale.ROOT);
-        for (var entrada : MENSAJE_POR_RESTRICCION.entrySet()) {
+        for (var entrada : POR_RESTRICCION.entrySet()) {
             if (causa.contains(entrada.getKey())) {
-                return problema(HttpStatus.CONFLICT, entrada.getKey().toUpperCase(Locale.ROOT), "Conflicto", entrada.getValue());
+                return problema(HttpStatus.CONFLICT, entrada.getValue().codigo(), "Conflicto", entrada.getValue().mensaje());
             }
         }
         log.warn("Violación de integridad sin mensaje propio: {}", causa);

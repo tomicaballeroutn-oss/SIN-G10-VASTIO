@@ -15,12 +15,13 @@ import { guardarArchivo } from '../comun/archivos';
 import { fechaCorta, fechaHora, pesos } from '../comun/formato';
 import { DialogoFirma } from './DialogoFirma';
 import { DialogoLiberar } from './DialogoLiberar';
+import { PestanaServicios } from './PestanaServicios';
 import { DialogoSena } from './DialogoSena';
 import './eventos.css';
 
 /**
  * UI-09 · Ficha del evento: estado, datos y el historial de cambios en un solo lugar.
- * Pestañas Datos, Documentos (solo para quien ve el legajo) e Historial; las demás llegan con sus historias.
+ * Pestañas Datos, Servicios, Documentos (solo para quien ve el legajo) e Historial; las demás llegan con sus historias.
  */
 export function PaginaEvento() {
   const { id } = useParams();
@@ -43,12 +44,12 @@ export function PaginaEvento() {
 /** Diálogos de las acciones que cambian el estado desde la ficha. */
 type Dialogo = 'liberar' | 'sena' | 'firma' | null;
 
-type Pestana = 'datos' | 'documentos' | 'historial';
+type Pestana = 'datos' | 'servicios' | 'documentos' | 'historial';
 
 function ContenidoFicha({ ficha, alCambiar }: { ficha: Ficha; alCambiar: (ficha: Ficha) => void }) {
   const [busqueda, setBusqueda] = useSearchParams();
   const pedida = busqueda.get('pestana');
-  const pestana: Pestana = pedida === 'historial' ? 'historial'
+  const pestana: Pestana = pedida === 'historial' || pedida === 'servicios' ? pedida
     : pedida === 'documentos' && ficha.documentos ? 'documentos' : 'datos';
   // Aviso que deja otra pantalla al volver a la ficha (p. ej. «Datos del evento guardados.»).
   const recibido = (useLocation().state as { aviso?: string } | null)?.aviso;
@@ -122,6 +123,7 @@ function ContenidoFicha({ ficha, alCambiar }: { ficha: Ficha; alCambiar: (ficha:
         label="Secciones de la ficha"
         items={[
           { id: 'datos', label: 'Datos' },
+          { id: 'servicios', label: 'Servicios', count: ficha.servicios.filter((x) => x.descripcion).length },
           ...(ficha.documentos ? [{ id: 'documentos', label: 'Documentos', count: ficha.documentos.length }] : []),
           { id: 'historial', label: 'Historial', count: ficha.historial.length },
         ]}
@@ -130,6 +132,7 @@ function ContenidoFicha({ ficha, alCambiar }: { ficha: Ficha; alCambiar: (ficha:
       />
 
       {pestana === 'datos' && <Datos ficha={ficha} />}
+      {pestana === 'servicios' && <PestanaServicios key={ficha.id} ficha={ficha} alGuardar={alCambiar} />}
       {pestana === 'documentos' && <Documentos ficha={ficha} documentos={ficha.documentos ?? []} />}
       {pestana === 'historial' && <Historial historial={ficha.historial} />}
     </>
@@ -276,7 +279,19 @@ const CAMPOS: Record<string, string> = {
   contacto: 'Contacto',
 };
 
+/** Valores largos (p. ej. la descripción de un servicio) se recortan en el historial. */
+function corto(valor: string | undefined): string {
+  if (valor === undefined) return 'sin dato';
+  return valor.length <= 80 ? valor : `${valor.slice(0, 79)}…`;
+}
+
 function describirModificacion(m: Modificacion): string {
+  if (m.campo.startsWith('servicio.')) {
+    const categoria = m.campo.slice('servicio.'.length);
+    if (!m.valorAnterior) return `Cargó ${categoria}: ${corto(m.valorNuevo)}`;
+    if (!m.valorNuevo) return `Vació ${categoria}`;
+    return `${categoria}: ${corto(m.valorAnterior)} → ${corto(m.valorNuevo)}`;
+  }
   const campo = CAMPOS[m.campo] ?? m.campo;
   if (m.campo === 'contacto') {
     if (!m.valorAnterior) return `Agregó el contacto ${m.valorNuevo}`;

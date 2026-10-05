@@ -25,6 +25,7 @@ const PRE_RESERVA: Ficha = {
   sena: null,
   fechaFirmaContrato: null,
   documentos: null,
+  servicios: [],
   fechaCreacion: '2026-09-21T10:15:00-03:00',
   version: 0,
   acciones: { ...SIN_ACCIONES, modificar: true, liberar: true, registrarSena: true },

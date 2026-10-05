@@ -40,3 +40,10 @@
 @media (min-width: 480px) { .sena__par { grid-template-columns: 1fr 1fr; } }
 .sena__firmante { display: flex; flex-direction: column; gap: var(--space-3); margin: 0; padding: 0; border: 0; }
 .sena__firmante legend { padding: 0; margin-bottom: var(--space-1); }
+
+/* UI-13 · Servicios contratados */
+.servicios { display: flex; flex-direction: column; gap: var(--space-5); }
+.servicios__categoria { display: flex; flex-direction: column; gap: var(--space-2); }
+.servicios__titulo { display: flex; align-items: center; flex-wrap: wrap; gap: var(--space-2); }
+.servicios__texto { margin: 0; white-space: pre-line; }
+.servicios__acciones { display: flex; justify-content: flex-end; padding-top: var(--space-4); border-top: 1px solid var(--line); }

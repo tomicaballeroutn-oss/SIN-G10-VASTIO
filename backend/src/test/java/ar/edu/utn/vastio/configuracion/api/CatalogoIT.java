@@ -1,5 +1,6 @@
 package ar.edu.utn.vastio.configuracion.api;
 
+import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.hasItem;
 import static org.hamcrest.Matchers.hasSize;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -165,6 +166,16 @@ class CatalogoIT {
                 {"nombre":"Sin orden"}""")
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.errores[0].campo").value("orden"));
+    }
+
+    @Test
+    void bodegaYTipoDeBarraAvisanACompras() throws Exception {
+        leer("/categorias-servicio", personas.bearer(RolCodigo.ADMINISTRACION))
+                .andExpect(jsonPath("$[?(@.avisaACompras == true)].nombre", containsInAnyOrder("Bodega", "Tipo de barra")));
+        escribir(put("/api/v1/categorias-servicio/4"), RolCodigo.ADMINISTRACION, """
+                {"nombre":"After","orden":4,"visibleEnCocina":true,"requeridaParaConfirmar":false,"avisaACompras":true,"activo":true}""")
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.avisaACompras").value(true));
     }
 
     @Test

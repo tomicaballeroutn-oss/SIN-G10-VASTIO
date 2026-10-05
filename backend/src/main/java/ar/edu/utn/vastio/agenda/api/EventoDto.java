@@ -5,6 +5,7 @@ import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.OffsetDateTime;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Stream;
@@ -22,7 +23,9 @@ import ar.edu.utn.vastio.agenda.dominio.DocumentoEvento;
 import ar.edu.utn.vastio.agenda.dominio.EstadoEvento;
 import ar.edu.utn.vastio.agenda.dominio.Evento;
 import ar.edu.utn.vastio.agenda.dominio.ModificacionEvento;
+import ar.edu.utn.vastio.agenda.dominio.ServicioContratado;
 import ar.edu.utn.vastio.configuracion.aplicacion.CatalogoService;
+import ar.edu.utn.vastio.configuracion.dominio.CategoriaServicio;
 import ar.edu.utn.vastio.configuracion.dominio.Salon;
 import ar.edu.utn.vastio.configuracion.dominio.Turno;
 
@@ -80,12 +83,20 @@ public class EventoDto {
             Nombre usuario, OffsetDateTime fechaCarga) {
     }
 
+    /**
+     * Una categoría de servicio de la ficha, en el orden configurado: todas las activas y, de las dadas de baja, las que
+     * tienen algo cargado ({@code activa = false}: se ven pero no se editan). Sin servicio, {@code descripcion} es null.
+     */
+    public record ServicioDto(short categoriaId, String categoria, boolean activa, boolean requeridaParaConfirmar,
+            boolean visibleEnCocina, String descripcion, Nombre usuario, OffsetDateTime fechaModificacion) {
+    }
+
     /** {@code documentos} es null para quien no ve el legajo (el contrato tiene importes). */
     public record FichaResponse(long id, String codigo, EstadoEvento estado, String nombre, Nombre tipo, SalonDto salon,
             LocalDate fecha, TurnoDto turno, ClienteDto cliente, List<ContactoDto> contactos, Nombre vendedora,
             Nombre planner, Integer cantidadInvitados, boolean invitadosDefinitivos, String observacionesInternas,
-            SenaDto sena, LocalDate fechaFirmaContrato, List<DocumentoDto> documentos, OffsetDateTime fechaCreacion,
-            int version, Acciones acciones, List<HistorialDto> historial) {
+            SenaDto sena, LocalDate fechaFirmaContrato, List<DocumentoDto> documentos, List<ServicioDto> servicios,
+            OffsetDateTime fechaCreacion, int version, Acciones acciones, List<HistorialDto> historial) {
     }
 
     public record EventoResumen(long id, String codigo, EstadoEvento estado, String nombre, String tipo, SalonDto salon,
@@ -109,13 +120,28 @@ public class EventoDto {
                 persona(e.getPlannerId(), nombres), e.getCantidadInvitados(), e.isInvitadosDefinitivos(),
                 e.getObservacionesInternas(), sena, e.getFechaFirmaContrato(),
                 f.documentos() == null ? null : f.documentos().stream().map(d -> documento(d, nombres)).toList(),
-                e.getFechaCreacion(), e.getVersion(), f.acciones(), historial);
+                servicios(f.servicios(), nombres), e.getFechaCreacion(), e.getVersion(), f.acciones(), historial);
     }
 
     public EventoResumen resumen(Evento e, Map<Long, String> nombres) {
         return new EventoResumen(e.getId(), e.getCodigo(), e.getEstado(), e.getNombre(), tipo(e).nombre(), salon(e),
                 e.getUnidad().getFecha(), turno(e), e.getCliente().getNombre(), persona(e.getVendedoraId(), nombres),
                 persona(e.getPlannerId(), nombres), e.getCantidadInvitados());
+    }
+
+    private List<ServicioDto> servicios(List<ServicioContratado> contratados, Map<Long, String> nombres) {
+        Map<Short, ServicioContratado> porCategoria = new HashMap<>();
+        contratados.forEach(s -> porCategoria.put(s.getCategoriaId(), s));
+        return catalogos.categorias().stream()
+                .filter(c -> c.isActivo() || porCategoria.containsKey(c.getId()))
+                .map(c -> servicio(c, porCategoria.get(c.getId()), nombres))
+                .toList();
+    }
+
+    private static ServicioDto servicio(CategoriaServicio c, ServicioContratado s, Map<Long, String> nombres) {
+        return new ServicioDto(c.getId(), c.getNombre(), c.isActivo(), c.isRequeridaParaConfirmar(), c.isVisibleEnCocina(),
+                s == null ? null : s.getDescripcion(), s == null ? null : persona(s.getUsuarioId(), nombres),
+                s == null ? null : s.getFechaModificacion());
     }
 
     private static DocumentoDto documento(DocumentoEvento d, Map<Long, String> nombres) {

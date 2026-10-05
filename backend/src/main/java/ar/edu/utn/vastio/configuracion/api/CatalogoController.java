@@ -145,7 +145,7 @@ public class CatalogoController {
     @Operation(summary = "Agregar una categoría de servicio")
     public CategoriaResponse crearCategoria(@Valid @RequestBody CategoriaRequest pedido) {
         return CategoriaResponse.de(catalogos.crearCategoria(pedido.nombre().trim(), pedido.orden(),
-                pedido.visibleEnCocina(), pedido.requeridaParaConfirmar()));
+                pedido.visibleEnCocina(), pedido.requeridaParaConfirmar(), pedido.avisaACompras()));
     }
 
     @PutMapping("/categorias-servicio/{id}")
@@ -153,7 +153,7 @@ public class CatalogoController {
     @Operation(summary = "Editar o dar de baja una categoría de servicio")
     public CategoriaResponse actualizarCategoria(@PathVariable short id, @Valid @RequestBody CategoriaRequest pedido) {
         return CategoriaResponse.de(catalogos.actualizarCategoria(id, pedido.nombre().trim(), pedido.orden(),
-                pedido.visibleEnCocina(), pedido.requeridaParaConfirmar(), activo(pedido.activo())));
+                pedido.visibleEnCocina(), pedido.requeridaParaConfirmar(), pedido.avisaACompras(), activo(pedido.activo())));
     }
 
     // ---------- motivos ----------

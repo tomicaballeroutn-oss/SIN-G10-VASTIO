@@ -42,6 +42,8 @@ export interface Categoria {
   orden: number;
   visibleEnCocina: boolean;
   requeridaParaConfirmar: boolean;
+  /** Categoría de bebida: sus cambios en un evento confirmado le llegan a Compras. */
+  avisaACompras: boolean;
   activo: boolean;
 }
 

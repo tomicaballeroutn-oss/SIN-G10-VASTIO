@@ -33,25 +33,32 @@ public class CategoriaServicio {
     @Column(name = "requerida_para_confirmar", nullable = false)
     private boolean requeridaParaConfirmar;
 
+    /** Categoría de bebida (bodega, tipo de barra): sus cambios en un evento confirmado le llegan a Compras. */
+    @Column(name = "avisa_a_compras", nullable = false)
+    private boolean avisaACompras;
+
     @Column(name = "activo", nullable = false)
     private boolean activo = true;
 
     protected CategoriaServicio() {
     }
 
-    public CategoriaServicio(String nombre, short orden, boolean visibleEnCocina, boolean requeridaParaConfirmar) {
+    public CategoriaServicio(String nombre, short orden, boolean visibleEnCocina, boolean requeridaParaConfirmar,
+            boolean avisaACompras) {
         this.nombre = nombre;
         this.orden = orden;
         this.visibleEnCocina = visibleEnCocina;
         this.requeridaParaConfirmar = requeridaParaConfirmar;
+        this.avisaACompras = avisaACompras;
     }
 
     public void actualizar(String nombre, short orden, boolean visibleEnCocina, boolean requeridaParaConfirmar,
-            boolean activo) {
+            boolean avisaACompras, boolean activo) {
         this.nombre = nombre;
         this.orden = orden;
         this.visibleEnCocina = visibleEnCocina;
         this.requeridaParaConfirmar = requeridaParaConfirmar;
+        this.avisaACompras = avisaACompras;
         this.activo = activo;
     }
 
@@ -73,6 +80,10 @@ public class CategoriaServicio {
 
     public boolean isRequeridaParaConfirmar() {
         return requeridaParaConfirmar;
+    }
+
+    public boolean isAvisaACompras() {
+        return avisaACompras;
     }
 
     public boolean isActivo() {

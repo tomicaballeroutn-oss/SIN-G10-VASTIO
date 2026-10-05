@@ -12,6 +12,9 @@ public final class Permisos {
     /** Configurar parámetros. */
     public static final String CONFIGURAR = "hasAnyRole('DIRECCION', 'COORDINACION', 'ADMINISTRACION')";
 
+    /** Consultar agenda: todos menos Barra y Cocina. */
+    public static final String AGENDA = "hasAnyRole('DIRECCION', 'COORDINACION', 'ADMINISTRACION', 'VENDEDORA', 'PLANNER', 'COMPRAS')";
+
     private Permisos() {
     }
 }

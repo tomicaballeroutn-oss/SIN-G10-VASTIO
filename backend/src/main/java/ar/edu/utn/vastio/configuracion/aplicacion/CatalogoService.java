@@ -183,6 +183,11 @@ public class CatalogoService {
         return motivos.findAllByOrderByAmbitoAscIdAsc();
     }
 
+    public Motivo motivo(short id) {
+        return motivos.findById(id).orElseThrow(() -> ProblemaException.noEncontrado("MOTIVO_INEXISTENTE",
+                "No encontramos ese motivo."));
+    }
+
     @Transactional
     public Motivo crearMotivo(AmbitoMotivo ambito, String nombre) {
         if (motivos.existsByAmbitoAndNombreIgnoreCaseAndIdNot(ambito, nombre, SIN_ID)) {

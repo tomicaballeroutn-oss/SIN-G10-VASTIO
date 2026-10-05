@@ -1,0 +1,17 @@
+/* UI-07: filtros en fila desde tableta. */
+.agenda__filtros { display: grid; gap: var(--space-3); align-items: end; }
+@media (min-width: 640px) { .agenda__filtros { grid-template-columns: auto 220px 220px; justify-content: start; } }
+
+/* Mes y detalle del día: lado a lado en pantallas anchas, uno debajo del otro en el resto. */
+.agenda { display: grid; gap: var(--space-6); align-items: start; }
+@media (min-width: 1200px) { .agenda { grid-template-columns: minmax(0, 1fr) 340px; } }
+.agenda__dia { scroll-margin-top: var(--space-4); }
+@media (max-width: 1199.98px) { .agenda__dia--vacio { display: none; } }
+
+.agenda__turno { display: flex; flex-direction: column; gap: var(--space-2); }
+.agenda__turno + .agenda__turno { margin-top: var(--space-2); }
+.agenda__unidades { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; }
+.agenda__unidad { display: flex; flex-direction: column; gap: var(--space-1); padding: var(--space-3) 0; border-bottom: 1px solid var(--line); }
+.agenda__unidad:last-child { border-bottom: 0; }
+.agenda__unidad-cabeza { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: var(--space-2); }
+.agenda__evento { display: flex; flex-direction: column; }

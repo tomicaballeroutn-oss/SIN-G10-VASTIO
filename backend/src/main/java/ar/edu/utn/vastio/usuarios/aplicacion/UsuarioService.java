@@ -1,9 +1,12 @@
 package ar.edu.utn.vastio.usuarios.aplicacion;
 
+import java.util.Collection;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -51,6 +54,11 @@ public class UsuarioService {
 
     public Optional<Usuario> buscar(long id) {
         return usuarios.findById(id);
+    }
+
+    /** Nombre y apellido de cada id, para mostrar quién hizo o tiene algo sin cargar el usuario entero. */
+    public Map<Long, String> nombres(Collection<Long> ids) {
+        return usuarios.findAllById(ids).stream().collect(Collectors.toMap(Usuario::getId, Usuario::getNombreCompleto));
     }
 
     /**

@@ -15,6 +15,7 @@ import { guardarArchivo } from '../comun/archivos';
 import { fechaCorta, fechaHora, pesos } from '../comun/formato';
 import { DialogoFirma } from './DialogoFirma';
 import { DialogoInvitados } from './DialogoInvitados';
+import { DialogoPlanner } from './DialogoPlanner';
 import { DialogoLiberar } from './DialogoLiberar';
 import { PestanaServicios } from './PestanaServicios';
 import { DialogoSena } from './DialogoSena';
@@ -43,7 +44,7 @@ export function PaginaEvento() {
 }
 
 /** Diálogos de las acciones que cambian el estado desde la ficha. */
-type Dialogo = 'liberar' | 'sena' | 'firma' | 'invitados' | null;
+type Dialogo = 'liberar' | 'sena' | 'firma' | 'invitados' | 'planner' | null;
 
 type Pestana = 'datos' | 'servicios' | 'documentos' | 'historial';
 
@@ -82,13 +83,18 @@ function ContenidoFicha({ ficha, alCambiar }: { ficha: Ficha; alCambiar: (ficha:
         </p>
       </header>
 
-      {(acciones.modificar || acciones.liberar || acciones.registrarSena || acciones.registrarFirma) && (
+      {Object.values(acciones).some(Boolean) && (
         <div className="ficha__acciones">
           {acciones.registrarSena && (
             <Button icon="banknote" onClick={() => setDialogo('sena')}>Registrar seña</Button>
           )}
           {acciones.registrarFirma && (
             <Button icon="file-check" onClick={() => setDialogo('firma')}>Registrar firma</Button>
+          )}
+          {acciones.asignarPlanner && (
+            <Button variant={ficha.planner ? 'outline' : 'solid'} icon="user-plus" onClick={() => setDialogo('planner')}>
+              {ficha.planner ? 'Cambiar planner' : 'Asignar planner'}
+            </Button>
           )}
           {acciones.modificar && (
             <Button variant="outline" icon="pencil" onClick={() => navegar(`/eventos/${ficha.id}/datos`)}>Modificar datos</Button>
@@ -120,6 +126,13 @@ function ContenidoFicha({ ficha, alCambiar }: { ficha: Ficha; alCambiar: (ficha:
           ficha={ficha}
           alCerrar={() => setDialogo(null)}
           alGuardar={(f) => hecho(f, 'Cantidad de invitados guardada.')}
+        />
+      )}
+      {dialogo === 'planner' && (
+        <DialogoPlanner
+          ficha={ficha}
+          alCerrar={() => setDialogo(null)}
+          alAsignar={(f) => hecho(f, f.planner ? `Planner asignada: ${f.planner.nombre}.` : 'Planner quitada.')}
         />
       )}
       {dialogo === 'liberar' && (
@@ -283,6 +296,7 @@ const CAMPOS: Record<string, string> = {
   tipo_evento: 'Tipo',
   cantidad_invitados: 'Invitados',
   invitados_definitivos: 'Invitados definitivos',
+  planner: 'Planner',
   observaciones_internas: 'Observaciones internas',
   'cliente.nombre': 'Cliente',
   'cliente.documento': 'Documento del cliente',

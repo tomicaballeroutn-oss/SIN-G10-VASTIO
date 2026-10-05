@@ -71,7 +71,7 @@ public class PlannerService {
                 .toList();
         return usuarios.activosConPerfil(RolCodigo.PLANNER).stream()
                 .map(p -> new Candidata(p.getId(), p.getNombreCompleto(), esaFecha.stream()
-                        .filter(e -> e.getPlannerId() == p.getId())
+                        .filter(e -> p.getId().equals(e.getPlannerId()))
                         .map(descripcion::de)
                         .toList()))
                 .toList();

@@ -153,9 +153,10 @@ class PlannerIT {
 
         mvc.perform(get("/api/v1/eventos/{id}/planners", contratado).header(HttpHeaders.AUTHORIZATION, personas.bearer(coordinacion)))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$[?(@.nombre == 'Ana Sosa')].otrosEventos[0]", contains(startsWith("Quince de Delfina · Santa Bárbara"))))
-                .andExpect(jsonPath("$[?(@.nombre == 'Carla Núñez')].otrosEventos", contains(hasSize(0))))
-                .andExpect(jsonPath("$[?(@.nombre == 'Lucía Ferreyra')]").isEmpty());
+                // Por id: la base de tests puede tener otras «Ana Sosa» (los datos de demostración de PerfilDevIT).
+                .andExpect(jsonPath("$[?(@.id == %d)].otrosEventos[0]".formatted(ana.getId()), contains(startsWith("Quince de Delfina · Santa Bárbara"))))
+                .andExpect(jsonPath("$[?(@.id == %d)].otrosEventos".formatted(carla.getId()), contains(hasSize(0))))
+                .andExpect(jsonPath("$[?(@.id == %d)]".formatted(lucia.getId())).isEmpty());
     }
 
     @Test

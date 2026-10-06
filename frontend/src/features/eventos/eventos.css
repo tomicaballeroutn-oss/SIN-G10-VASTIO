@@ -67,3 +67,12 @@
 /* UI-17 · Cancelar evento */
 .cancelar { display: flex; flex-direction: column; gap: var(--space-4); min-width: min(440px, 100%); }
 .cancelar p { margin: 0; }
+
+/* UI-18 · Reprogramar evento */
+.ficha__reprogramado { display: inline-flex; align-items: center; gap: var(--space-2); margin: 0; color: var(--info-ink); }
+.reprogramar { display: flex; flex-direction: column; gap: var(--space-5); }
+.reprogramar__fechas { display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-4); }
+.reprogramar__fechas p { margin: 0; }
+.reprogramar__motivo { display: grid; gap: var(--space-4); }
+.reprogramar__acciones { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: var(--space-2); }
+.agenda__unidad.is-elegida { outline: 3px solid var(--brand); outline-offset: 4px; border-radius: var(--radius-sm); }

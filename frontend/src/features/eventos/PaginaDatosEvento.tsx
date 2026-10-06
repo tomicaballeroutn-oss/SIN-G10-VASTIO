@@ -1,6 +1,6 @@
 import { useCallback, useState, type FormEvent } from 'react';
 import { useNavigate, useParams } from 'react-router';
-import { catalogos } from '../../api/catalogos';
+import { catalogos, hora } from '../../api/catalogos';
 import { fichas, type DatosEvento, type Ficha } from '../../api/eventos';
 import { useDatos, useEnvio } from '../../api/useDatos';
 import { Alert, Button, Card, IconButton, Input, SalonTag, Select } from '../../ds';
@@ -10,7 +10,8 @@ import { Encabezado } from '../layout/paginas';
 import './eventos.css';
 
 /**
- * UI-08 · Registrar evento: completa los datos básicos (cliente, contactos, tipo, nombre y observaciones internas).
+ * UI-08 · Registrar evento: completa los datos básicos (cliente, contactos, tipo, nombre, hora de inicio y
+ * observaciones internas).
  * La cantidad de invitados se registra desde la ficha (UI-14). Salón, fecha y turno no se cambian acá: eso es reprogramar.
  */
 export function PaginaDatosEvento() {
@@ -46,6 +47,7 @@ function Formulario({ ficha, tipos }: { ficha: Ficha; tipos: { id: number; nombr
   const navegar = useNavigate();
   const [nombre, setNombre] = useState(ficha.nombre);
   const [tipoId, setTipoId] = useState(String(ficha.tipo.id));
+  const [horaInicio, setHoraInicio] = useState(ficha.horaInicio?.slice(0, 5) ?? '');
   const [observaciones, setObservaciones] = useState(ficha.observacionesInternas ?? '');
   const [cliente, setCliente] = useState({
     nombre: ficha.cliente.nombre,
@@ -74,6 +76,7 @@ function Formulario({ ficha, tipos }: { ficha: Ficha; tipos: { id: number; nombr
         version: ficha.version,
         nombre,
         tipoEventoId: Number(tipoId),
+        horaInicio: horaInicio || null,
         observacionesInternas: observaciones,
         cliente,
         contactos: contactos.map((c) => ({ id: c.id, nombre: c.nombre, vinculo: c.vinculo, telefono: c.telefono, email: c.email })),
@@ -101,6 +104,15 @@ function Formulario({ ficha, tipos }: { ficha: Ficha; tipos: { id: number; nombr
         <div className="datos-evento__campos">
           <Select label="Tipo de evento" options={opcionesTipo} value={tipoId} onChange={(e) => setTipoId(e.target.value)} error={errorDe('tipoEventoId')} />
           <Input label="Nombre del evento" value={nombre} onChange={(e) => setNombre(e.target.value)} error={errorDe('nombre')} required />
+          <Input
+            label="Hora de inicio"
+            type="time"
+            optional
+            hint={`Vacía: la del turno (${hora(ficha.turno.horaInicio)}). La usa la vista de cocina.`}
+            value={horaInicio}
+            onChange={(e) => setHoraInicio(e.target.value)}
+            error={errorDe('horaInicio')}
+          />
           <Input
             label="Observaciones internas"
             optional

@@ -89,6 +89,25 @@ class DatosEventoIT {
     }
 
     @Test
+    void laHoraDeInicioSeCambiaYVaciaVuelveALaDelTurno() throws Exception {
+        mvc.perform(put("/api/v1/eventos/{id}", evento).header(HttpHeaders.AUTHORIZATION, personas.bearer(lucia))
+                        .contentType(MediaType.APPLICATION_JSON).content("""
+                                {"version":0,"nombre":"Quince de Delfina","tipoEventoId":2,"horaInicio":"21:30",
+                                 "cliente":{"nombre":"Cliente de Quince de Delfina"},"contactos":[]}"""))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.horaInicio").value("21:30:00"))
+                .andExpect(jsonPath("$.turno.horaInicio").value("20:00:00"))
+                .andExpect(jsonPath("$.historial[?(@.campo == 'hora_inicio')].valorNuevo", hasItem("21:30")));
+        entityManager.flush();
+        int version = jdbc.queryForObject("SELECT version FROM evento WHERE evento_id = ?", Integer.class, evento);
+
+        guardar(lucia, datos(version, "Quince de Delfina", null, null, "[]"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.horaInicio").doesNotExist())
+                .andExpect(jsonPath("$.historial[?(@.campo == 'hora_inicio' && @.valorAnterior == '21:30')]").isNotEmpty());
+    }
+
+    @Test
     void cambiarYQuitarContactosTambienQuedaRegistrado() throws Exception {
         String ficha = guardar(lucia, datos(0, "Quince de Delfina", null, null, """
                 [{"nombre":"María Ríos","vinculo":"madre"},{"nombre":"Jorge Ríos","vinculo":"padre"}]"""))

@@ -19,11 +19,13 @@ import ar.edu.utn.vastio.agenda.dominio.DocumentoEvento;
 import ar.edu.utn.vastio.agenda.dominio.EstadoEvento;
 import ar.edu.utn.vastio.agenda.dominio.Evento;
 import ar.edu.utn.vastio.agenda.dominio.ModificacionEvento;
+import ar.edu.utn.vastio.agenda.dominio.Reprogramacion;
 import ar.edu.utn.vastio.agenda.dominio.ServicioContratado;
 import ar.edu.utn.vastio.agenda.infraestructura.CambioEstadoEventoRepository;
 import ar.edu.utn.vastio.agenda.infraestructura.DocumentoEventoRepository;
 import ar.edu.utn.vastio.agenda.infraestructura.EventoRepository;
 import ar.edu.utn.vastio.agenda.infraestructura.ModificacionEventoRepository;
+import ar.edu.utn.vastio.agenda.infraestructura.ReprogramacionRepository;
 import ar.edu.utn.vastio.agenda.infraestructura.ServicioContratadoRepository;
 import ar.edu.utn.vastio.comun.errores.Mensajes;
 import ar.edu.utn.vastio.comun.errores.ProblemaException;
@@ -52,11 +54,14 @@ public class ConsultaEventoService {
     private final DocumentoEventoRepository documentos;
     private final ServicioContratadoRepository servicios;
     private final RequisitosConfirmacion requisitos;
+    private final ReprogramacionRepository reprogramaciones;
     private final UsuarioService usuarios;
 
     public ConsultaEventoService(EventoRepository eventos, CambioEstadoEventoRepository historial,
             ModificacionEventoRepository modificaciones, DocumentoEventoRepository documentos,
-            ServicioContratadoRepository servicios, RequisitosConfirmacion requisitos, UsuarioService usuarios) {
+            ServicioContratadoRepository servicios, RequisitosConfirmacion requisitos,
+            ReprogramacionRepository reprogramaciones, UsuarioService usuarios) {
+        this.reprogramaciones = reprogramaciones;
         this.requisitos = requisitos;
         this.eventos = eventos;
         this.historial = historial;
@@ -68,7 +73,7 @@ public class ConsultaEventoService {
 
     /** Lo que la persona puede hacer con el evento según su perfil y el estado actual. */
     public record Acciones(boolean modificar, boolean liberar, boolean registrarSena, boolean registrarFirma,
-            boolean asignarPlanner, boolean confirmar, boolean cancelar) {
+            boolean asignarPlanner, boolean confirmar, boolean cancelar, boolean reprogramar) {
     }
 
     /**
@@ -79,7 +84,8 @@ public class ConsultaEventoService {
      */
     public record Ficha(Evento evento, boolean veImportes, Acciones acciones, List<ContactoEvento> contactos,
             List<CambioEstadoEvento> cambios, List<ModificacionEvento> modificaciones, List<DocumentoEvento> documentos,
-            List<ServicioContratado> servicios, List<RequisitosConfirmacion.Requisito> requisitos, Map<Long, String> nombres) {
+            List<ServicioContratado> servicios, List<RequisitosConfirmacion.Requisito> requisitos,
+            List<Reprogramacion> reprogramaciones, Map<Long, String> nombres) {
     }
 
     /**
@@ -92,6 +98,7 @@ public class ConsultaEventoService {
         boolean veImportes = AccesoEvento.veImportes(quien, evento);
         List<DocumentoEvento> legajo = veImportes ? documentos.findByEventoIdOrderByIdAsc(id) : null;
         List<ServicioContratado> contratados = servicios.findByEventoId(id);
+        List<Reprogramacion> cambiosDeUnidad = reprogramaciones.delEvento(id);
         Set<Long> personas = new HashSet<>();
         personas.add(evento.getVendedoraId());
         if (evento.getPlannerId() != null) {
@@ -103,9 +110,10 @@ public class ConsultaEventoService {
             legajo.forEach(d -> personas.add(d.getUsuarioId()));
         }
         contratados.forEach(s -> personas.add(s.getUsuarioId()));
+        cambiosDeUnidad.forEach(r -> personas.add(r.getUsuarioId()));
         return new Ficha(evento, veImportes, acciones(evento, quien), List.copyOf(evento.getContactos()), cambios, datos,
                 legajo, contratados, evento.getEstado() == EstadoEvento.CONTRATADO ? requisitos.de(evento) : null,
-                usuarios.nombres(personas));
+                cambiosDeUnidad, usuarios.nombres(personas));
     }
 
     public static Acciones acciones(Evento evento, UsuarioActual quien) {
@@ -116,7 +124,8 @@ public class ConsultaEventoService {
                 evento.getEstado() == EstadoEvento.SENADO && quien.accesoTotal(),
                 PlannerService.ESTADOS.contains(evento.getEstado()) && quien.accesoTotal(),
                 evento.getEstado() == EstadoEvento.CONTRATADO && AccesoEvento.puedeConfirmar(quien, evento),
-                CancelacionService.ESTADOS.contains(evento.getEstado()) && quien.accesoTotal());
+                CancelacionService.ESTADOS.contains(evento.getEstado()) && quien.accesoTotal(),
+                EDITABLES.contains(evento.getEstado()) && titular);
     }
 
     /** El evento, si existe y la persona puede ver su detalle. */

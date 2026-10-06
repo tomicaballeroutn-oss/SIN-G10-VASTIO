@@ -15,6 +15,8 @@ const FICHA: Ficha = {
   salon: { id: 1, codigo: 'avril', nombre: 'Avril', capacidad: null },
   fecha: '2026-10-10',
   turno: { id: 2, codigo: 'noche', nombre: 'Noche', horaInicio: '20:00:00', horaFin: '06:00:00' },
+  horaInicio: null,
+  reprogramadoDesde: null,
   cliente: { id: 7, nombre: 'Delfina Ríos', documento: null, telefono: '351 555-1234', email: null },
   contactos: [
     { id: 3, nombre: 'Mariela Ríos', vinculo: 'madre', telefono: null, email: null },
@@ -89,6 +91,7 @@ describe('Registrar evento', () => {
       version: 2,
       nombre: 'Los 15 de Delfi',
       tipoEventoId: 2,
+      horaInicio: null,
       observacionesInternas: 'Llamar de tarde.',
       cliente: { nombre: 'Delfina Ríos', documento: '', telefono: '351 555-1234', email: '' },
       contactos: [

@@ -6,6 +6,7 @@ import java.util.Locale;
 import org.springframework.stereotype.Component;
 
 import ar.edu.utn.vastio.agenda.dominio.Evento;
+import ar.edu.utn.vastio.agenda.dominio.UnidadComercializable;
 import ar.edu.utn.vastio.configuracion.aplicacion.CatalogoService;
 
 /**
@@ -24,9 +25,13 @@ public class DescripcionEvento {
     }
 
     public String de(Evento evento) {
-        var unidad = evento.getUnidad();
-        String texto = String.join(" · ", evento.getNombre(), catalogos.salon(unidad.getSalonId()).getNombre(),
-                FECHA.format(unidad.getFecha()).replace(".", ""), catalogos.turno(unidad.getTurnoId()).getNombre());
+        String texto = evento.getNombre() + " · " + unidad(evento.getUnidad());
         return texto.length() <= LARGO_MAXIMO ? texto : texto.substring(0, LARGO_MAXIMO - 1) + "…";
+    }
+
+    /** «Avril · sáb 10/10 · Noche». */
+    public String unidad(UnidadComercializable unidad) {
+        return String.join(" · ", catalogos.salon(unidad.getSalonId()).getNombre(),
+                FECHA.format(unidad.getFecha()).replace(".", ""), catalogos.turno(unidad.getTurnoId()).getNombre());
     }
 }

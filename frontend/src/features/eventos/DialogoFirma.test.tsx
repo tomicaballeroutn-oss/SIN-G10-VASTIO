@@ -16,6 +16,8 @@ const SENADO: Ficha = {
   salon: { id: 1, codigo: 'avril', nombre: 'Avril', capacidad: null },
   fecha: '2026-11-14',
   turno: { id: 2, codigo: 'noche', nombre: 'Noche', horaInicio: '20:00:00', horaFin: '06:00:00' },
+  horaInicio: null,
+  reprogramadoDesde: null,
   cliente: { id: 7, nombre: 'Martina Gómez', documento: null, telefono: null, email: null },
   contactos: [],
   vendedora: { id: 1, nombre: 'Lucía Ferreyra' },

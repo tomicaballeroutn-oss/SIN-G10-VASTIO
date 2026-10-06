@@ -3,11 +3,11 @@ import { useLocation, useNavigate, useParams, useSearchParams } from 'react-rout
 import type { EstadoEvento } from '../../api/agenda';
 import { hora } from '../../api/catalogos';
 import {
-  fichas, type CambioDeEstado, type DocumentoLegajo, type EntradaHistorial, type Ficha, type Modificacion,
+  fichas, type CambioDeEstado, type CambioDeUnidad, type DocumentoLegajo, type EntradaHistorial, type Ficha, type Modificacion,
 } from '../../api/eventos';
 import { useDatos, useEnvio } from '../../api/useDatos';
 import {
-  Actor, Alert, Button, Card, EmptyState, ESTADOS, ESTADO_POR_CODIGO, IconButton, SalonTag, StatusChip, Tabs, Timeline,
+  Actor, Alert, Button, Card, EmptyState, ESTADOS, ESTADO_POR_CODIGO, Icon, IconButton, SalonTag, StatusChip, Tabs, Timeline,
   tamanoLegible, type TimelineItem, type TimelineTone,
 } from '../../ds';
 import { Cargando } from '../comun/Cargando';
@@ -83,6 +83,11 @@ function ContenidoFicha({ ficha, alCambiar }: { ficha: Ficha; alCambiar: (ficha:
         <p className="body-sm v-muted">
           {ficha.codigo} · {ficha.tipo.nombre} · {ficha.planner ? `Planner: ${ficha.planner.nombre}` : 'Sin planner asignada'}
         </p>
+        {ficha.reprogramadoDesde && (
+          <p className="body-sm ficha__reprogramado">
+            <Icon name="calendar-clock" size={16} /> Reprogramado. Fecha original: {ficha.reprogramadoDesde}
+          </p>
+        )}
       </header>
 
       {Object.values(acciones).some(Boolean) && (
@@ -106,6 +111,9 @@ function ContenidoFicha({ ficha, alCambiar }: { ficha: Ficha; alCambiar: (ficha:
           )}
           {acciones.modificar && (
             <Button variant="outline" icon="users" onClick={() => setDialogo('invitados')}>Cantidad de invitados</Button>
+          )}
+          {acciones.reprogramar && (
+            <Button variant="outline" icon="calendar-clock" onClick={() => navegar(`/eventos/${ficha.id}/reprogramar`)}>Reprogramar</Button>
           )}
           {acciones.liberar && (
             <Button variant="outline" icon="lock-open" onClick={() => setDialogo('liberar')}>Liberar pre-reserva</Button>
@@ -211,6 +219,9 @@ function Datos({ ficha }: { ficha: Ficha }) {
       <Card title="Evento">
         <dl className="ficha__lista">
           <Dato etiqueta="Tipo">{ficha.tipo.nombre}</Dato>
+          <Dato etiqueta="Hora de inicio">
+            {ficha.horaInicio ? hora(ficha.horaInicio) : `${hora(ficha.turno.horaInicio)} (la del turno)`}
+          </Dato>
           <Dato etiqueta="Invitados">
             {ficha.cantidadInvitados == null
               ? 'Sin definir'
@@ -329,6 +340,8 @@ const CAMPOS: Record<string, string> = {
   cantidad_invitados: 'Invitados',
   invitados_definitivos: 'Invitados definitivos',
   planner: 'Planner',
+  hora_inicio: 'Hora de inicio',
+  unidad: 'Salón, fecha y turno',
   observaciones_internas: 'Observaciones internas',
   'cliente.nombre': 'Cliente',
   'cliente.documento': 'Documento del cliente',
@@ -360,8 +373,8 @@ function describirModificacion(m: Modificacion): string {
 }
 
 /** Los cambios de datos de un mismo guardado (misma persona y momento) van juntos en una entrada. */
-function agrupar(historial: EntradaHistorial[]): (CambioDeEstado | Modificacion[])[] {
-  const grupos: (CambioDeEstado | Modificacion[])[] = [];
+function agrupar(historial: EntradaHistorial[]): (CambioDeEstado | CambioDeUnidad | Modificacion[])[] {
+  const grupos: (CambioDeEstado | CambioDeUnidad | Modificacion[])[] = [];
   for (const e of historial) {
     const ultimo = grupos[grupos.length - 1];
     if (e.tipo === 'MODIFICACION' && Array.isArray(ultimo) && ultimo[0].fechaHora === e.fechaHora && ultimo[0].usuario.id === e.usuario.id) {
@@ -384,6 +397,17 @@ function Historial({ historial }: { historial: EntradaHistorial[] }) {
         at: fechaHora(g[0].fechaHora),
         icon: 'pencil',
         tone: 'neutral',
+      };
+    }
+    if (g.tipo === 'REPROGRAMACION') {
+      return {
+        title: 'Evento reprogramado',
+        detail: `${g.valorAnterior} → ${g.valorNuevo}.${g.observacion ? ` Motivo: ${g.observacion}.` : ''}`,
+        actor: g.usuario.nombre,
+        action: 'reprogramó el evento',
+        at: fechaHora(g.fechaHora),
+        icon: 'calendar-clock',
+        tone: 'info',
       };
     }
     const { titulo, accion } = describir(g);

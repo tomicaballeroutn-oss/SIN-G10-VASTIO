@@ -90,6 +90,17 @@ export interface CambioDeEstado {
   observacion?: string;
 }
 
+/** Cambio de salón, fecha o turno («Avril · sáb 10/10 · Noche»), con el motivo y el detalle en `observacion`. */
+export interface CambioDeUnidad {
+  tipo: 'REPROGRAMACION';
+  campo: 'unidad';
+  valorAnterior: string;
+  valorNuevo: string;
+  usuario: Nombre;
+  fechaHora: string;
+  observacion?: string;
+}
+
 /** Un dato que cambió al registrar el evento. Sin valor anterior: se agregó; sin nuevo: se quitó. */
 export interface Modificacion {
   tipo: 'MODIFICACION';
@@ -100,7 +111,7 @@ export interface Modificacion {
   fechaHora: string;
 }
 
-export type EntradaHistorial = CambioDeEstado | Modificacion;
+export type EntradaHistorial = CambioDeEstado | Modificacion | CambioDeUnidad;
 
 export interface Contacto {
   id: number;
@@ -115,6 +126,8 @@ export interface DatosEvento {
   version: number;
   nombre: string;
   tipoEventoId: number;
+  /** HH:mm; null: la del turno. */
+  horaInicio: string | null;
   observacionesInternas: string;
   cliente: { nombre: string; documento: string; telefono: string; email: string };
   contactos: { id?: number; nombre: string; vinculo: string; telefono: string; email: string }[];
@@ -129,6 +142,7 @@ export interface Acciones {
   asignarPlanner: boolean;
   confirmar: boolean;
   cancelar: boolean;
+  reprogramar: boolean;
 }
 
 /** Una condición de «Confirmar evento»: lo que hay («Ana Sosa», «180») o lo que falta. */
@@ -181,6 +195,10 @@ export interface Ficha {
   salon: SalonEvento;
   fecha: string;
   turno: TurnoEvento;
+  /** HH:mm:ss; null: la del turno. */
+  horaInicio: string | null;
+  /** Unidad original si el evento se reprogramó («Avril · sáb 26/9 · Noche»). */
+  reprogramadoDesde: string | null;
   cliente: Cliente;
   contactos: Contacto[];
   vendedora: Nombre;
@@ -241,6 +259,8 @@ export const fichas = {
     archivos.forEach((a) => formulario.append('archivos', a));
     return api<Ficha>(`/eventos/${id}/contrato`, { metodo: 'POST', cuerpo: formulario });
   },
+  reprogramar: (id: number, pedido: { salonId: number; fecha: string; turnoId: number; motivoId: number | null; detalle: string }) =>
+    api<Ficha>(`/eventos/${id}/reprogramacion`, { metodo: 'POST', cuerpo: pedido }),
   cancelar: (id: number, motivoId: number, detalle: string) =>
     api<Ficha>(`/eventos/${id}/cancelacion`, { metodo: 'POST', cuerpo: { motivoId, detalle } }),
   confirmar: (id: number) => api<Ficha>(`/eventos/${id}/confirmacion`, { metodo: 'POST' }),

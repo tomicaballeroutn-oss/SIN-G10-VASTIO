@@ -26,6 +26,7 @@ const SENADO: Ficha = {
   sena: { importe: 300000, fecha: '2026-09-29', firmanteNombre: null, firmanteDni: '30111222', firmanteContacto: null },
   fechaFirmaContrato: null,
   documentos: [],
+  servicios: [],
   fechaCreacion: '2026-09-21T10:15:00-03:00',
   version: 1,
   acciones: { ...SIN_ACCIONES, modificar: true, registrarFirma: true },

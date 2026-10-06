@@ -127,6 +127,21 @@ export interface Acciones {
   registrarFirma: boolean;
 }
 
+/**
+ * Una categoría de servicio de la ficha, en el orden configurado. `activa = false`: categoría dada de baja con algo
+ * cargado (se ve, no se edita). Sin servicio, `descripcion` es null.
+ */
+export interface ServicioFicha {
+  categoriaId: number;
+  categoria: string;
+  activa: boolean;
+  requeridaParaConfirmar: boolean;
+  visibleEnCocina: boolean;
+  descripcion: string | null;
+  usuario: Nombre | null;
+  fechaModificacion: string | null;
+}
+
 /** Archivo del legajo (p. ej. una hoja del contrato). */
 export interface DocumentoLegajo {
   id: number;
@@ -159,6 +174,7 @@ export interface Ficha {
   fechaFirmaContrato: string | null;
   /** null para quien no ve el legajo: el contrato tiene importes. */
   documentos: DocumentoLegajo[] | null;
+  servicios: ServicioFicha[];
   fechaCreacion: string;
   /** Se manda al guardar, para no pisar cambios de otra persona. */
   version: number;
@@ -202,6 +218,8 @@ export const fichas = {
     archivos.forEach((a) => formulario.append('archivos', a));
     return api<Ficha>(`/eventos/${id}/contrato`, { metodo: 'POST', cuerpo: formulario });
   },
+  registrarServicios: (id: number, version: number, servicios: { categoriaId: number; descripcion: string }[]) =>
+    api<Ficha>(`/eventos/${id}/servicios`, { metodo: 'PUT', cuerpo: { version, servicios } }),
   descargarDocumento: (id: number, documentoId: number) => descargarArchivo(`/eventos/${id}/documentos/${documentoId}`),
 };
 

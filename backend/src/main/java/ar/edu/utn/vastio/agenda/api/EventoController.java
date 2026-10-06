@@ -30,6 +30,7 @@ import ar.edu.utn.vastio.agenda.aplicacion.ContratoService;
 import ar.edu.utn.vastio.agenda.aplicacion.DatosEventoService;
 import ar.edu.utn.vastio.agenda.aplicacion.PreReservaService;
 import ar.edu.utn.vastio.agenda.aplicacion.SenaService;
+import ar.edu.utn.vastio.agenda.aplicacion.ServiciosService;
 import ar.edu.utn.vastio.agenda.dominio.EstadoEvento;
 import ar.edu.utn.vastio.agenda.dominio.Evento;
 import ar.edu.utn.vastio.comun.seguridad.Permisos;
@@ -51,12 +52,14 @@ public class EventoController {
     private final DatosEventoService datos;
     private final SenaService senas;
     private final ContratoService contratos;
+    private final ServiciosService servicios;
     private final EventoDto dto;
 
     public EventoController(PreReservaService preReservas, ConsultaEventoService consultas, DatosEventoService datos,
-            SenaService senas, ContratoService contratos, EventoDto dto) {
+            SenaService senas, ContratoService contratos, ServiciosService servicios, EventoDto dto) {
         this.senas = senas;
         this.contratos = contratos;
+        this.servicios = servicios;
         this.preReservas = preReservas;
         this.consultas = consultas;
         this.datos = datos;
@@ -74,6 +77,22 @@ public class EventoController {
             @AuthenticationPrincipal Jwt jwt) {
         UsuarioActual quien = UsuarioActual.de(jwt);
         datos.registrar(id, pedido.datos(), quien);
+        return dto.ficha(consultas.ficha(id, quien));
+    }
+
+    @PutMapping("/{id}/servicios")
+    @PreAuthorize(Permisos.EDITAR_EVENTOS)
+    @Operation(summary = "Registrar servicios contratados", description = """
+            Un texto libre por categoría (vacío la deja sin servicio; las que no vienen no cambian), entre Pre-reserva y
+            Confirmado. Lo hacen la vendedora titular, la planner asignada, Coordinación y Dirección. En un evento
+            confirmado no se pueden vaciar las categorías requeridas para confirmar. Cada cambio queda en el historial.
+            Devuelve la ficha.""")
+    @ApiResponse(responseCode = "409", description = "EVENTO_MODIFICADO: otra persona guardó cambios en el medio")
+    @ApiResponse(responseCode = "422", description = "Categoría dada de baja o requerida vacía en un evento confirmado")
+    public FichaResponse registrarServicios(@PathVariable long id, @Valid @RequestBody ServiciosRequest pedido,
+            @AuthenticationPrincipal Jwt jwt) {
+        UsuarioActual quien = UsuarioActual.de(jwt);
+        servicios.registrar(id, pedido.version(), pedido.lista(), quien);
         return dto.ficha(consultas.ficha(id, quien));
     }
 

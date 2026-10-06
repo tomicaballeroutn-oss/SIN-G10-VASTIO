@@ -163,6 +163,7 @@ Categoría configurable de servicio contratado (decisión de Meli: sin desplegab
 | `orden` | smallint |  | NO | Orden de presentación en la ficha. |
 | `visible_en_cocina` | boolean |  | NO | true si se muestra en la vista de cocina. |
 | `requerida_para_confirmar` | boolean |  | NO | true para Plato principal y Tipo de barra (condición de Confirmar evento). |
+| `avisa_a_compras` | boolean |  | NO | true para Bodega y Tipo de barra (V4): un cambio en un evento confirmado le llega a Compras. Default false. |
 | `activo` | boolean |  | NO | Default true. |
 
 ### 3.3 Módulo A — Agenda de eventos
@@ -275,6 +276,8 @@ Servicio acordado con el cliente, con descripción libre dentro de una categorí
 | `descripcion` | text |  | NO | Detalle libre. Ej.: «Malbec Luigi Bosca y Chardonnay Alamos». |
 | `usuario_id` | bigint | FK | NO | → usuario. Último en modificarlo. |
 | `fecha_modificacion` | timestamptz |  | NO | Default now(). |
+
+*Restricciones (V4):* `ux_servicio_contratado_evento_categoria` UNIQUE (evento_id, categoria_id): un texto por categoría y evento.
 
 #### ASISTENCIA_SEGMENTO
 

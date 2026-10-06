@@ -26,6 +26,7 @@ const FICHA: Ficha = {
   sena: { importe: 150000, fecha: '2026-09-23', firmanteNombre: 'Mariela Ríos', firmanteDni: '22333444', firmanteContacto: null },
   fechaFirmaContrato: null,
   documentos: null,
+  servicios: [],
   fechaCreacion: '2026-09-21T10:15:00-03:00',
   version: 2,
   acciones: { ...SIN_ACCIONES, modificar: true, liberar: false, registrarSena: false },

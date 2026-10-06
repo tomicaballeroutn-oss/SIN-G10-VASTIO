@@ -19,10 +19,12 @@ import ar.edu.utn.vastio.agenda.dominio.DocumentoEvento;
 import ar.edu.utn.vastio.agenda.dominio.EstadoEvento;
 import ar.edu.utn.vastio.agenda.dominio.Evento;
 import ar.edu.utn.vastio.agenda.dominio.ModificacionEvento;
+import ar.edu.utn.vastio.agenda.dominio.ServicioContratado;
 import ar.edu.utn.vastio.agenda.infraestructura.CambioEstadoEventoRepository;
 import ar.edu.utn.vastio.agenda.infraestructura.DocumentoEventoRepository;
 import ar.edu.utn.vastio.agenda.infraestructura.EventoRepository;
 import ar.edu.utn.vastio.agenda.infraestructura.ModificacionEventoRepository;
+import ar.edu.utn.vastio.agenda.infraestructura.ServicioContratadoRepository;
 import ar.edu.utn.vastio.comun.errores.Mensajes;
 import ar.edu.utn.vastio.comun.errores.ProblemaException;
 import ar.edu.utn.vastio.comun.seguridad.UsuarioActual;
@@ -48,14 +50,17 @@ public class ConsultaEventoService {
     private final CambioEstadoEventoRepository historial;
     private final ModificacionEventoRepository modificaciones;
     private final DocumentoEventoRepository documentos;
+    private final ServicioContratadoRepository servicios;
     private final UsuarioService usuarios;
 
     public ConsultaEventoService(EventoRepository eventos, CambioEstadoEventoRepository historial,
-            ModificacionEventoRepository modificaciones, DocumentoEventoRepository documentos, UsuarioService usuarios) {
+            ModificacionEventoRepository modificaciones, DocumentoEventoRepository documentos,
+            ServicioContratadoRepository servicios, UsuarioService usuarios) {
         this.eventos = eventos;
         this.historial = historial;
         this.modificaciones = modificaciones;
         this.documentos = documentos;
+        this.servicios = servicios;
         this.usuarios = usuarios;
     }
 
@@ -70,7 +75,7 @@ public class ConsultaEventoService {
      */
     public record Ficha(Evento evento, boolean veImportes, Acciones acciones, List<ContactoEvento> contactos,
             List<CambioEstadoEvento> cambios, List<ModificacionEvento> modificaciones, List<DocumentoEvento> documentos,
-            Map<Long, String> nombres) {
+            List<ServicioContratado> servicios, Map<Long, String> nombres) {
     }
 
     /**
@@ -82,6 +87,7 @@ public class ConsultaEventoService {
         List<ModificacionEvento> datos = modificaciones.findByEventoIdOrderByFechaHoraAscIdAsc(id);
         boolean veImportes = AccesoEvento.veImportes(quien, evento);
         List<DocumentoEvento> legajo = veImportes ? documentos.findByEventoIdOrderByIdAsc(id) : null;
+        List<ServicioContratado> contratados = servicios.findByEventoId(id);
         Set<Long> personas = new HashSet<>();
         personas.add(evento.getVendedoraId());
         if (evento.getPlannerId() != null) {
@@ -92,8 +98,9 @@ public class ConsultaEventoService {
         if (legajo != null) {
             legajo.forEach(d -> personas.add(d.getUsuarioId()));
         }
+        contratados.forEach(s -> personas.add(s.getUsuarioId()));
         return new Ficha(evento, veImportes, acciones(evento, quien), List.copyOf(evento.getContactos()), cambios, datos,
-                legajo, usuarios.nombres(personas));
+                legajo, contratados, usuarios.nombres(personas));
     }
 
     public static Acciones acciones(Evento evento, UsuarioActual quien) {

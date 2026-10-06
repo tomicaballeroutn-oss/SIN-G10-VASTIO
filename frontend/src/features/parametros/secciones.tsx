@@ -261,7 +261,8 @@ export function SeccionCategorias() {
             <span className="catalogo__texto">
               <span className="label">{c.nombre}</span>
               <span className="body-sm v-muted">
-                {[c.visibleEnCocina && 'Se ve en cocina', c.requeridaParaConfirmar && 'Hace falta para confirmar'].filter(Boolean).join(' · ') || 'Solo comercial'}
+                {[c.visibleEnCocina && 'Se ve en cocina', c.requeridaParaConfirmar && 'Hace falta para confirmar', c.avisaACompras && 'Avisa a compras']
+                  .filter(Boolean).join(' · ') || 'Solo comercial'}
               </span>
             </span>
           )}
@@ -288,11 +289,12 @@ function FormularioCategoria({ categoria, siguienteOrden, listo }: {
   const [orden, setOrden] = useState(String(categoria?.orden ?? siguienteOrden));
   const [visibleEnCocina, setVisibleEnCocina] = useState(categoria?.visibleEnCocina ?? false);
   const [requerida, setRequerida] = useState(categoria?.requeridaParaConfirmar ?? false);
+  const [avisaACompras, setAvisaACompras] = useState(categoria?.avisaACompras ?? false);
   const [activo, setActivo] = useState(categoria?.activo ?? true);
   const { guardando, error, enviar } = useEnvio();
 
   async function guardar() {
-    const datos = { nombre, orden: Number(orden), visibleEnCocina, requeridaParaConfirmar: requerida };
+    const datos = { nombre, orden: Number(orden), visibleEnCocina, requeridaParaConfirmar: requerida, avisaACompras };
     const guardado = await enviar(() =>
       categoria ? catalogos.actualizarCategoria(categoria.id, { ...datos, activo }) : catalogos.crearCategoria(datos),
     );
@@ -316,6 +318,12 @@ function FormularioCategoria({ categoria, siguienteOrden, listo }: {
         hint="El evento no se confirma sin un servicio cargado en esta categoría."
         checked={requerida}
         onChange={(e) => setRequerida(e.target.checked)}
+      />
+      <Checkbox
+        label="Avisa a compras cuando cambia"
+        hint="Para las categorías de bebida: un cambio en un evento confirmado le llega a Compras."
+        checked={avisaACompras}
+        onChange={(e) => setAvisaACompras(e.target.checked)}
       />
       {categoria && <SwitchActivo activo={activo} onChange={setActivo} ayuda={AYUDA_BAJA} />}
     </Formulario>

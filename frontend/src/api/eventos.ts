@@ -250,6 +250,8 @@ export interface PedidoSena {
 export const fichas = {
   ficha: (id: number) => api<Ficha>(`/eventos/${id}`),
   proximos: () => api<EventoResumen[]>('/eventos'),
+  /** Eventos activos desde hoy en los que la persona es vendedora titular o planner (antes de darla de baja). */
+  afectados: (usuarioId: number) => api<EventoResumen[]>(`/eventos/afectados?usuarioId=${usuarioId}`),
   registrarDatos: (id: number, datos: DatosEvento) => api<Ficha>(`/eventos/${id}`, { metodo: 'PUT', cuerpo: datos }),
   liberar: (id: number) => api<Ficha>(`/eventos/${id}/liberacion`, { metodo: 'POST' }),
   registrarSena: (id: number, sena: PedidoSena) => api<Ficha>(`/eventos/${id}/sena`, { metodo: 'POST', cuerpo: sena }),

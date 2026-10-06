@@ -2,7 +2,7 @@ import { screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { _reiniciarCliente } from '../../api/cliente';
-import type { Usuario } from '../../api/usuarios';
+import { ROLES, type Usuario } from '../../api/usuarios';
 import { backendFalso, json, montar, pedidos, problema, sesionDe, type Pedido } from '../../test/backendFalso';
 
 const usuario = (id: number, nombreCompleto: string, nombreUsuario: string, roles: Usuario['roles'], activo = true): Usuario => ({
@@ -24,6 +24,25 @@ function backend({ metodo, ruta, cuerpo }: Pedido) {
     return json(201, { ...usuario(9, alta.nombreCompleto, alta.nombreUsuario, alta.roles), debeCambiarContrasena: true });
   }
   if (metodo === 'POST' && ruta === '/usuarios/2/baja') return json(200, { ...USUARIOS[1], activo: false });
+  if (metodo === 'GET' && ruta === '/eventos/afectados?usuarioId=2') return json(200, []);
+  if (metodo === 'GET' && ruta === '/eventos/afectados?usuarioId=3') {
+    return json(200, [{
+      id: 5, codigo: 'EV-2026-00005', estado: 'CONTRATADO', nombre: 'Bruno y Martina', tipo: 'Casamiento',
+      salon: { id: 1, codigo: 'avril', nombre: 'Avril', capacidad: null }, fecha: '2026-11-14',
+      turno: { id: 2, codigo: 'noche', nombre: 'Noche', horaInicio: '20:00:00', horaFin: '06:00:00' },
+      cliente: 'Martina Gómez', vendedora: { id: 2, nombre: 'Lucía Ferreyra' }, planner: { id: 3, nombre: 'Ana Sosa' }, cantidadInvitados: 180,
+    }]);
+  }
+  if (metodo === 'POST' && ruta === '/usuarios/3/baja') return json(200, { ...USUARIOS[2], activo: false });
+  if (metodo === 'PUT' && ruta === '/usuarios/3') {
+    const datos = cuerpo as { nombreCompleto: string; roles: Usuario['roles']; email: string };
+    // Como el backend: los perfiles vuelven en el orden de la matriz.
+    return json(200, { ...USUARIOS[2], nombreCompleto: datos.nombreCompleto, roles: ROLES.filter((r) => datos.roles.includes(r)), email: datos.email || null });
+  }
+  if (metodo === 'PUT' && ruta === '/usuarios/1') {
+    return problema(422, 'PERFIL_PROPIO', 'No podés quitarte tu propio perfil de Dirección o Coordinación. Pedíselo a otra persona con acceso total.');
+  }
+  if (metodo === 'POST' && ruta === '/usuarios/4/reactivacion') return json(200, { ...USUARIOS[3], activo: true });
   return undefined;
 }
 
@@ -109,5 +128,85 @@ describe('UI-05 · alta mínima de usuarios', () => {
     expect(await screen.findByText('Se dio de baja a Lucía Ferreyra. Lo que registró se conserva.')).toBeInTheDocument();
     expect(within(lucia).getByText('De baja')).toBeInTheDocument();
     expect(pedidos(fetchMock)).toContainEqual({ metodo: 'POST', ruta: '/usuarios/2/baja', cuerpo: undefined });
+  });
+});
+
+describe('UI-05 · administrar usuarios', () => {
+  it('modifica nombre, perfiles y contacto; el usuario no se edita', async () => {
+    const fetchMock = backendFalso(sesionDe(['COORDINACION'], 'Melina Sifón', 1), backend);
+    const persona = userEvent.setup();
+    montar('/usuarios');
+
+    const ana = (await screen.findByText('Ana Sosa')).closest('tr') as HTMLElement;
+    await persona.click(within(ana).getByRole('button', { name: 'Modificar' }));
+    const dialogo = screen.getByRole('dialog', { name: 'Modificar usuario' });
+    expect(within(dialogo).getByLabelText('Usuario')).toHaveAttribute('readonly');
+    const nombre = within(dialogo).getByLabelText('Nombre y apellido');
+    await persona.clear(nombre);
+    await persona.type(nombre, 'Ana María Sosa');
+    await persona.click(within(dialogo).getByLabelText('Vendedora'));
+    await persona.type(within(dialogo).getByLabelText(/Correo/), 'ana@salonavril.com');
+    await persona.click(within(dialogo).getByRole('button', { name: 'Guardar cambios' }));
+
+    expect(await screen.findByText('Datos de Ana María Sosa guardados.')).toBeInTheDocument();
+    expect(within(screen.getByRole('table')).getByText('Vendedora · Planner')).toBeInTheDocument();
+    expect(pedidos(fetchMock).find((p) => p.metodo === 'PUT')?.cuerpo).toEqual({
+      nombreCompleto: 'Ana María Sosa', roles: ['PLANNER', 'VENDEDORA'], email: 'ana@salonavril.com', telefono: '',
+    });
+  });
+
+  it('muestra por qué no se puede quitar el propio acceso total', async () => {
+    backendFalso(sesionDe(['COORDINACION'], 'Melina Sifón', 1), backend);
+    const persona = userEvent.setup();
+    montar('/usuarios');
+
+    const melina = within(await screen.findByRole('table')).getByText('Melina Sifón').closest('tr') as HTMLElement;
+    await persona.click(within(melina).getByRole('button', { name: 'Modificar' }));
+    const dialogo = screen.getByRole('dialog', { name: 'Modificar usuario' });
+    expect(within(dialogo).getByText('No podés quitarte tu propio perfil de Dirección o Coordinación.')).toBeInTheDocument();
+    await persona.click(within(dialogo).getByLabelText('Coordinación comercial'));
+    await persona.click(within(dialogo).getByLabelText('Vendedora'));
+    await persona.click(within(dialogo).getByRole('button', { name: 'Guardar cambios' }));
+
+    expect(await within(dialogo).findByText(/Pedíselo a otra persona con acceso total/)).toBeInTheDocument();
+  });
+
+  it('antes de dar de baja muestra los eventos activos de la persona', async () => {
+    backendFalso(sesionDe(['DIRECCION'], 'Roberto Díaz', 9), backend);
+    const persona = userEvent.setup();
+    montar('/usuarios');
+
+    const ana = (await screen.findByText('Ana Sosa')).closest('tr') as HTMLElement;
+    await persona.click(within(ana).getByRole('button', { name: 'Dar de baja' }));
+    const dialogo = screen.getByRole('dialog', { name: 'Dar de baja usuario' });
+
+    expect(await within(dialogo).findByText('Tiene 1 evento activo')).toBeInTheDocument();
+    expect(within(dialogo).getByText(/Bruno y Martina · Avril · sáb 14 nov 2026 · Noche \(planner\)/)).toBeInTheDocument();
+    await persona.click(within(dialogo).getByRole('button', { name: 'Dar de baja usuario' }));
+    expect(await screen.findByText('Se dio de baja a Ana Sosa. Lo que registró se conserva.')).toBeInTheDocument();
+  });
+
+  it('sin eventos activos lo dice', async () => {
+    backendFalso(sesionDe(['DIRECCION'], 'Roberto Díaz', 9), backend);
+    const persona = userEvent.setup();
+    montar('/usuarios');
+
+    const lucia = (await screen.findByText('Lucía Ferreyra')).closest('tr') as HTMLElement;
+    await persona.click(within(lucia).getByRole('button', { name: 'Dar de baja' }));
+
+    expect(await within(screen.getByRole('dialog')).findByText('No tiene eventos activos a su cargo.')).toBeInTheDocument();
+  });
+
+  it('reactiva a un usuario dado de baja', async () => {
+    const fetchMock = backendFalso(sesionDe(['COORDINACION'], 'Melina Sifón', 1), backend);
+    const persona = userEvent.setup();
+    montar('/usuarios');
+
+    const ex = (await screen.findByText('Ex Empleada')).closest('tr') as HTMLElement;
+    await persona.click(within(ex).getByRole('button', { name: 'Reactivar' }));
+
+    expect(await screen.findByText('Se reactivó a Ex Empleada. Ya puede ingresar con su contraseña de siempre.')).toBeInTheDocument();
+    expect(within(ex).queryByText('De baja')).not.toBeInTheDocument();
+    expect(pedidos(fetchMock).some((p) => p.metodo === 'POST' && p.ruta === '/usuarios/4/reactivacion')).toBe(true);
   });
 });

@@ -161,6 +161,25 @@ public class ConsultaEventoService {
     public record Proximos(List<Evento> eventos, Map<Long, String> nombres) {
     }
 
+    /**
+     * Eventos activos desde hoy en los que la persona es la vendedora titular o la planner: lo que queda pendiente si
+     * se la da de baja (Administrar usuarios).
+     */
+    public Proximos afectados(long usuarioId) {
+        LocalDate hoy = LocalDate.now(ZONA);
+        List<Evento> lista = eventos.activosDesde(hoy, EstadoEvento.INACTIVOS).stream()
+                .filter(e -> e.getVendedoraId() == usuarioId || Long.valueOf(usuarioId).equals(e.getPlannerId()))
+                .toList();
+        Set<Long> personas = new HashSet<>();
+        lista.forEach(e -> {
+            personas.add(e.getVendedoraId());
+            if (e.getPlannerId() != null) {
+                personas.add(e.getPlannerId());
+            }
+        });
+        return new Proximos(lista, usuarios.nombres(personas));
+    }
+
     /** Para mensajes: el evento no está en un estado que permita la operación. */
     public static ProblemaException noPermiteEnEsteEstado(Evento evento, String operacion) {
         return ProblemaException.reglaDeNegocio("ESTADO_NO_PERMITE",

@@ -23,6 +23,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import ar.edu.utn.vastio.agenda.api.EventoDto.EventoResumen;
@@ -229,6 +230,16 @@ public class EventoController {
     public List<EventoResumen> proximos(@AuthenticationPrincipal Jwt jwt) {
         var proximos = consultas.proximos(UsuarioActual.de(jwt));
         return proximos.eventos().stream().map(e -> dto.resumen(e, proximos.nombres())).toList();
+    }
+
+    @GetMapping("/afectados")
+    @PreAuthorize(Permisos.ACCESO_TOTAL)
+    @Operation(summary = "Eventos de una persona", description = """
+            Eventos activos desde hoy en los que es la vendedora titular o la planner. Administrar usuarios los muestra
+            antes de dar de baja a alguien.""")
+    public List<EventoResumen> afectados(@RequestParam long usuarioId) {
+        var afectados = consultas.afectados(usuarioId);
+        return afectados.eventos().stream().map(e -> dto.resumen(e, afectados.nombres())).toList();
     }
 
     @GetMapping("/{id}")

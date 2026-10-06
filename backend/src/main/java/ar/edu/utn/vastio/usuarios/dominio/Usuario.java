@@ -1,6 +1,7 @@
 package ar.edu.utn.vastio.usuarios.dominio;
 
 import java.time.OffsetDateTime;
+import java.util.Collection;
 import java.util.LinkedHashSet;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -72,6 +73,23 @@ public class Usuario {
         if (!codigosDeRol().contains(rol.getCodigo())) {
             roles.add(new UsuarioRol(this, rol));
         }
+    }
+
+    /** Deja exactamente esos perfiles: quita los que no están y agrega los nuevos. */
+    public void fijarRoles(Collection<Rol> nuevos) {
+        Set<RolCodigo> codigos = nuevos.stream().map(Rol::getCodigo).collect(Collectors.toSet());
+        roles.removeIf(ur -> !codigos.contains(ur.getRol().getCodigo()));
+        nuevos.forEach(this::asignarRol);
+    }
+
+    public void cambiarNombre(String nombreCompleto) {
+        this.nombreCompleto = nombreCompleto;
+    }
+
+    /** Vuelve a poder ingresar y a aparecer para elegir. */
+    public void reactivar() {
+        activo = true;
+        fechaBaja = null;
     }
 
     public void darDeBaja() {

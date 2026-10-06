@@ -19,7 +19,8 @@ import ar.edu.utn.vastio.usuarios.infraestructura.RolRepository;
 import ar.edu.utn.vastio.usuarios.infraestructura.UsuarioRepository;
 
 /**
- * Alta mínima de usuarios (adelantada de «Administrar usuarios», UI-05): listar, dar de alta y dar de baja.
+ * Administrar usuarios (UI-05): listar, dar de alta, modificar, dar de baja y reactivar. Siempre queda al menos un
+ * usuario activo de Dirección y nadie se quita a sí mismo un perfil de acceso total.
  * También es la puerta de los otros módulos a los usuarios (p. ej. elegir la vendedora de un evento).
  */
 @Service
@@ -83,6 +84,27 @@ public class UsuarioService {
         return usuarios.save(usuario);
     }
 
+    /**
+     * Nombre, perfiles y contacto. El nombre de usuario no cambia: es con lo que la persona ingresa.
+     */
+    @Transactional
+    public Usuario modificar(long id, String nombreCompleto, Set<RolCodigo> perfiles, String email, String telefono,
+            long quienModifica) {
+        Usuario usuario = existente(id);
+        Set<RolCodigo> antes = usuario.codigosDeRol();
+        if (id == quienModifica && ACCESO_TOTAL.stream().anyMatch(r -> antes.contains(r) && !perfiles.contains(r))) {
+            throw ProblemaException.reglaDeNegocio("PERFIL_PROPIO",
+                    "No podés quitarte tu propio perfil de Dirección o Coordinación. Pedíselo a otra persona con acceso total.");
+        }
+        if (usuario.isActivo() && antes.contains(RolCodigo.DIRECCION) && !perfiles.contains(RolCodigo.DIRECCION)) {
+            exigirOtraDireccion(usuario, "quitarle el perfil de Dirección");
+        }
+        usuario.cambiarNombre(nombreCompleto);
+        usuario.setContacto(email, telefono);
+        usuario.fijarRoles(perfiles.stream().sorted().map(codigo -> roles.findByCodigo(codigo).orElseThrow()).toList());
+        return usuario;
+    }
+
     /** Baja lógica: se conserva todo lo que registró. Nadie se da de baja a sí mismo. */
     @Transactional
     public Usuario darDeBaja(long id, long quienDaLaBaja) {
@@ -90,9 +112,36 @@ public class UsuarioService {
             throw ProblemaException.reglaDeNegocio("BAJA_PROPIA",
                     "No podés darte de baja a vos mismo. Pedíselo a otra persona de Dirección o Coordinación.");
         }
-        Usuario usuario = usuarios.findById(id).orElseThrow(() -> ProblemaException.noEncontrado("USUARIO_INEXISTENTE",
-                "No encontramos ese usuario."));
+        Usuario usuario = existente(id);
+        if (usuario.isActivo() && usuario.codigosDeRol().contains(RolCodigo.DIRECCION)) {
+            exigirOtraDireccion(usuario, "darlo de baja");
+        }
         usuario.darDeBaja();
         return usuario;
+    }
+
+    /** Vuelve a poder ingresar con su contraseña de siempre y a aparecer para elegir. */
+    @Transactional
+    public Usuario reactivar(long id) {
+        Usuario usuario = existente(id);
+        usuario.reactivar();
+        return usuario;
+    }
+
+    private static final Set<RolCodigo> ACCESO_TOTAL = Set.of(RolCodigo.DIRECCION, RolCodigo.COORDINACION);
+
+    /** Siempre tiene que quedar alguien activo de Dirección: es quien da de alta a los demás. */
+    private void exigirOtraDireccion(Usuario usuario, String operacion) {
+        boolean hayOtra = activosConPerfil(RolCodigo.DIRECCION).stream().anyMatch(u -> !u.getId().equals(usuario.getId()));
+        if (!hayOtra) {
+            throw ProblemaException.reglaDeNegocio("ULTIMA_DIRECCION",
+                    "%s es el único usuario activo de Dirección: no se puede %s. Primero dale ese perfil a otra persona."
+                            .formatted(usuario.getNombreCompleto(), operacion));
+        }
+    }
+
+    private Usuario existente(long id) {
+        return usuarios.findById(id).orElseThrow(() -> ProblemaException.noEncontrado("USUARIO_INEXISTENTE",
+                "No encontramos ese usuario."));
     }
 }

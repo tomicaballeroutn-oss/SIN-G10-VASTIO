@@ -37,6 +37,14 @@ public final class UsuarioDto {
         }
     }
 
+    /** Modificar: nombre, perfiles y contacto. El nombre de usuario no se edita. */
+    public record UsuarioModificacionRequest(
+            @NotBlank(message = "Escribí el nombre y apellido.") @Size(max = 120, message = "Usá hasta 120 caracteres.") String nombreCompleto,
+            @NotEmpty(message = "Elegí al menos un perfil.") Set<RolCodigo> roles,
+            @Email(message = "Revisá el correo.") @Size(max = 120, message = "Usá hasta 120 caracteres.") String email,
+            @Size(max = 30, message = "Usá hasta 30 caracteres.") String telefono) {
+    }
+
     public record UsuarioAltaRequest(
             @NotBlank(message = "Escribí el nombre y apellido.") @Size(max = 120, message = "Usá hasta 120 caracteres.") String nombreCompleto,
             @NotBlank(message = "Escribí el usuario.")

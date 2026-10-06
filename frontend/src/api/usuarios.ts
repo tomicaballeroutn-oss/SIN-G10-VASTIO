@@ -42,9 +42,14 @@ export interface AltaDeUsuario {
   contrasenaInicial: string;
 }
 
+/** Modificar: nombre, perfiles y contacto. El nombre de usuario no se edita. */
+export type ModificacionDeUsuario = Pick<AltaDeUsuario, 'nombreCompleto' | 'roles' | 'email' | 'telefono'>;
+
 export const usuarios = {
   listar: () => api<Usuario[]>('/usuarios'),
   personas: (perfil: Rol) => api<Persona[]>(`/usuarios/personas?perfil=${perfil}`),
   crear: (datos: AltaDeUsuario) => api<Usuario>('/usuarios', { metodo: 'POST', cuerpo: datos }),
+  modificar: (id: number, datos: ModificacionDeUsuario) => api<Usuario>(`/usuarios/${id}`, { metodo: 'PUT', cuerpo: datos }),
   darDeBaja: (id: number) => api<Usuario>(`/usuarios/${id}/baja`, { metodo: 'POST' }),
+  reactivar: (id: number) => api<Usuario>(`/usuarios/${id}/reactivacion`, { metodo: 'POST' }),
 };

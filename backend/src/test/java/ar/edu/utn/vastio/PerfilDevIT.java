@@ -20,7 +20,7 @@ import ar.edu.utn.vastio.usuarios.dominio.RolCodigo;
 import ar.edu.utn.vastio.usuarios.infraestructura.UsuarioRepository;
 
 /**
- * Solo en dev: usuario inicial de Dirección, Swagger UI (Sprint 0) y datos de demostración (Sprint 1).
+ * Solo en dev: usuario inicial de Dirección, Swagger UI (Sprint 0) y datos de demostración (Sprints 1 y 2).
  */
 @SpringBootTest(properties = {
         "vastio.usuario-inicial.usuario=direccion.test",
@@ -82,7 +82,9 @@ class PerfilDevIT {
                     .as(rol.name()).isPositive();
         }
         assertThat(jdbc.queryForObject("SELECT count(*) FROM evento WHERE estado = 'PRE_RESERVA'", Integer.class)).isEqualTo(4);
-        assertThat(jdbc.queryForObject("SELECT count(*) FROM evento WHERE estado = 'SENADO'", Integer.class)).isEqualTo(3);
+        assertThat(jdbc.queryForObject("SELECT count(*) FROM evento WHERE estado = 'SENADO'", Integer.class)).isEqualTo(1);
+        assertThat(jdbc.queryForObject("SELECT count(*) FROM evento WHERE estado = 'CONTRATADO'", Integer.class)).isEqualTo(1);
+        assertThat(jdbc.queryForObject("SELECT count(*) FROM evento WHERE estado = 'CONFIRMADO'", Integer.class)).isEqualTo(1);
         assertThat(jdbc.queryForObject("SELECT count(DISTINCT evento_id) FROM cambio_estado_evento", Integer.class)).isEqualTo(7);
     }
 }

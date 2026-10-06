@@ -13,6 +13,7 @@ import {
 import { Cargando } from '../comun/Cargando';
 import { guardarArchivo } from '../comun/archivos';
 import { fechaCorta, fechaHora, pesos } from '../comun/formato';
+import { DialogoConfirmar } from './DialogoConfirmar';
 import { DialogoFirma } from './DialogoFirma';
 import { DialogoInvitados } from './DialogoInvitados';
 import { DialogoPlanner } from './DialogoPlanner';
@@ -44,7 +45,7 @@ export function PaginaEvento() {
 }
 
 /** Diálogos de las acciones que cambian el estado desde la ficha. */
-type Dialogo = 'liberar' | 'sena' | 'firma' | 'invitados' | 'planner' | null;
+type Dialogo = 'liberar' | 'sena' | 'firma' | 'invitados' | 'planner' | 'confirmar' | null;
 
 type Pestana = 'datos' | 'servicios' | 'documentos' | 'historial';
 
@@ -91,6 +92,9 @@ function ContenidoFicha({ ficha, alCambiar }: { ficha: Ficha; alCambiar: (ficha:
           {acciones.registrarFirma && (
             <Button icon="file-check" onClick={() => setDialogo('firma')}>Registrar firma</Button>
           )}
+          {acciones.confirmar && (
+            <Button icon="circle-check" onClick={() => setDialogo('confirmar')}>Confirmar evento</Button>
+          )}
           {acciones.asignarPlanner && (
             <Button variant={ficha.planner ? 'outline' : 'solid'} icon="user-plus" onClick={() => setDialogo('planner')}>
               {ficha.planner ? 'Cambiar planner' : 'Asignar planner'}
@@ -126,6 +130,13 @@ function ContenidoFicha({ ficha, alCambiar }: { ficha: Ficha; alCambiar: (ficha:
           ficha={ficha}
           alCerrar={() => setDialogo(null)}
           alGuardar={(f) => hecho(f, 'Cantidad de invitados guardada.')}
+        />
+      )}
+      {dialogo === 'confirmar' && (
+        <DialogoConfirmar
+          ficha={ficha}
+          alCerrar={() => setDialogo(null)}
+          alConfirmar={(f) => hecho(f, 'Evento confirmado. Se avisó a Compras y Cocina.')}
         />
       )}
       {dialogo === 'planner' && (
@@ -285,6 +296,7 @@ function describir(e: CambioDeEstado): { titulo: string; accion: string } {
   switch (e.estadoNuevo) {
     case 'SENADO': return { titulo: 'Seña registrada', accion: 'registró la seña' };
     case 'CONTRATADO': return { titulo: 'Contrato firmado', accion: 'registró la firma del contrato' };
+    case 'CONFIRMADO': return { titulo: 'Evento confirmado', accion: 'confirmó el evento' };
     case 'LIBERADA': return { titulo: 'Pre-reserva liberada', accion: 'liberó la fecha' };
     default: return { titulo: `Pasó a ${ESTADOS[ESTADO_POR_CODIGO[e.estadoNuevo]].label}`, accion: 'cambió el estado' };
   }

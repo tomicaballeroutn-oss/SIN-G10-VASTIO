@@ -54,3 +54,12 @@
 
 /* UI-16 · Asignar planner */
 .planner { display: flex; flex-direction: column; gap: var(--space-4); min-width: min(400px, 100%); }
+
+/* UI-15 · Confirmar evento: cada requisito por ícono + palabra, nunca solo por color */
+.confirmar { display: flex; flex-direction: column; gap: var(--space-4); min-width: min(440px, 100%); }
+.confirmar p { margin: 0; }
+.confirmar__requisitos { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: var(--space-2); }
+.confirmar__requisito { display: grid; grid-template-columns: auto 1fr auto; align-items: center; gap: var(--space-3);
+  padding: var(--space-3) var(--space-4); border-radius: var(--radius-md); background: var(--success-tint); color: var(--success-ink); }
+.confirmar__requisito.is-pendiente { background: var(--warning-tint); color: var(--warning-ink); }
+@media (max-width: 479px) { .confirmar__requisito { grid-template-columns: auto 1fr; } .confirmar__requisito > :last-child { grid-column: 2; } }

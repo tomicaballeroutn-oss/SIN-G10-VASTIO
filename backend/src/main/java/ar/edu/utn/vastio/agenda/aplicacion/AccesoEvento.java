@@ -41,6 +41,11 @@ public final class AccesoEvento {
         return usuario.accesoTotal() || esTitular(usuario, evento) || esPlannerAsignada(usuario, evento);
     }
 
+    /** Confirmar evento: planner asignada, Coordinación y Dirección. */
+    public static boolean puedeConfirmar(UsuarioActual usuario, Evento evento) {
+        return usuario.accesoTotal() || esPlannerAsignada(usuario, evento);
+    }
+
     /** Liberar pre-reserva y registrar seña: vendedora titular, Coordinación y Dirección. */
     public static boolean puedeOperarComoTitular(UsuarioActual usuario, Evento evento) {
         return usuario.accesoTotal() || esTitular(usuario, evento);

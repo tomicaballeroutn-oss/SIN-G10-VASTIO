@@ -52,6 +52,12 @@ public class UsuarioService {
                 .toList();
     }
 
+    /** De esos ids, los que siguen activos (p. ej. para no avisarle a alguien dado de baja). */
+    public Set<Long> activos(Collection<Long> ids) {
+        return usuarios.findAllById(ids).stream().filter(Usuario::isActivo).map(Usuario::getId)
+                .collect(Collectors.toSet());
+    }
+
     public Optional<Usuario> buscar(long id) {
         return usuarios.findById(id);
     }

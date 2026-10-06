@@ -13,7 +13,6 @@ import static ar.edu.utn.vastio.agenda.dominio.EstadoEvento.SENADO;
 import java.time.OffsetDateTime;
 import java.util.EnumMap;
 import java.util.EnumSet;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -27,13 +26,10 @@ import ar.edu.utn.vastio.agenda.dominio.Evento;
 import ar.edu.utn.vastio.agenda.infraestructura.CambioEstadoEventoRepository;
 import ar.edu.utn.vastio.agenda.infraestructura.EventoRepository;
 import ar.edu.utn.vastio.comun.errores.ProblemaException;
-import ar.edu.utn.vastio.notificaciones.aplicacion.NotificacionService;
-import ar.edu.utn.vastio.notificaciones.dominio.TipoNotificacion;
-import ar.edu.utn.vastio.usuarios.dominio.RolCodigo;
 
 /**
  * Único lugar que cambia {@code evento.estado} (regla 4 de CLAUDE.md): valida la transición contra
- * docs/maquina-de-estados.md, escribe {@code cambio_estado_evento} y genera los avisos.
+ * docs/maquina-de-estados.md, escribe {@code cambio_estado_evento} y genera los avisos ({@link AvisosEvento}).
  * Quién puede disparar cada transición y sus condiciones de datos las valida el caso de uso que la llama.
  */
 @Service
@@ -48,27 +44,14 @@ public class MaquinaDeEstados {
             EN_CURSO, EnumSet.of(REALIZADO),
             REALIZADO, EnumSet.of(CERRADO)));
 
-    /** A quién avisa cada estado nuevo. Las transiciones de los sprints siguientes agregan las suyas. */
-    private static final Map<EstadoEvento, Aviso> AVISOS = new EnumMap<>(Map.of(
-            PRE_RESERVA, new Aviso(TipoNotificacion.EVENTO_NUEVO, "Nueva pre-reserva",
-                    List.of(RolCodigo.ADMINISTRACION, RolCodigo.COORDINACION)),
-            SENADO, new Aviso(TipoNotificacion.SENA, "Seña registrada",
-                    List.of(RolCodigo.ADMINISTRACION, RolCodigo.COORDINACION))));
-
-    private record Aviso(TipoNotificacion tipo, String titulo, List<RolCodigo> perfiles) {
-    }
-
     private final EventoRepository eventos;
     private final CambioEstadoEventoRepository historial;
-    private final NotificacionService notificaciones;
-    private final DescripcionEvento descripcion;
+    private final AvisosEvento avisos;
 
-    public MaquinaDeEstados(EventoRepository eventos, CambioEstadoEventoRepository historial,
-            NotificacionService notificaciones, DescripcionEvento descripcion) {
+    public MaquinaDeEstados(EventoRepository eventos, CambioEstadoEventoRepository historial, AvisosEvento avisos) {
         this.eventos = eventos;
         this.historial = historial;
-        this.notificaciones = notificaciones;
-        this.descripcion = descripcion;
+        this.avisos = avisos;
     }
 
     /** — → Pre-reserva. Guarda el evento (hace falta su id para el historial). */
@@ -103,11 +86,7 @@ public class MaquinaDeEstados {
     private void registrar(Evento evento, EstadoEvento anterior, Long usuarioId, String observacion) {
         historial.save(new CambioEstadoEvento(evento.getId(), anterior, evento.getEstado(), usuarioId,
                 OffsetDateTime.now(), observacion));
-        Aviso aviso = AVISOS.get(evento.getEstado());
-        if (aviso != null) {
-            notificaciones.notificar(evento.getId(), aviso.tipo(), aviso.titulo() + ": " + descripcion.de(evento),
-                    usuarioId, aviso.perfiles());
-        }
+        avisos.cambioDeEstado(evento, usuarioId);
     }
 
     /** Nombre en pantalla: «Pre-reserva», «Señado», … */

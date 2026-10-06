@@ -59,6 +59,8 @@ export interface SalonEvento {
   id: number;
   codigo: SalonId;
   nombre: string;
+  /** Para advertir (sin bloquear) si los invitados la superan. */
+  capacidad: number | null;
 }
 
 export interface TurnoEvento {
@@ -113,7 +115,6 @@ export interface DatosEvento {
   version: number;
   nombre: string;
   tipoEventoId: number;
-  cantidadInvitados: number | null;
   observacionesInternas: string;
   cliente: { nombre: string; documento: string; telefono: string; email: string };
   contactos: { id?: number; nombre: string; vinculo: string; telefono: string; email: string }[];
@@ -218,6 +219,8 @@ export const fichas = {
     archivos.forEach((a) => formulario.append('archivos', a));
     return api<Ficha>(`/eventos/${id}/contrato`, { metodo: 'POST', cuerpo: formulario });
   },
+  registrarInvitados: (id: number, version: number, cantidad: number, definitivos: boolean) =>
+    api<Ficha>(`/eventos/${id}/invitados`, { metodo: 'PUT', cuerpo: { version, cantidad, definitivos } }),
   registrarServicios: (id: number, version: number, servicios: { categoriaId: number; descripcion: string }[]) =>
     api<Ficha>(`/eventos/${id}/servicios`, { metodo: 'PUT', cuerpo: { version, servicios } }),
   descargarDocumento: (id: number, documentoId: number) => descargarArchivo(`/eventos/${id}/documentos/${documentoId}`),

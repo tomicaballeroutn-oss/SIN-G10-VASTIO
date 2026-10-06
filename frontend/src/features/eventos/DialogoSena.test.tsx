@@ -14,7 +14,7 @@ const PRE_RESERVA: Ficha = {
   estado: 'PRE_RESERVA',
   nombre: 'Casamiento de Camila Ruiz',
   tipo: { id: 1, nombre: 'Casamiento' },
-  salon: { id: 3, codigo: 'santa-barbara', nombre: 'Santa Bárbara' },
+  salon: { id: 3, codigo: 'santa-barbara', nombre: 'Santa Bárbara', capacidad: null },
   fecha: '2026-11-14',
   turno: { id: 2, codigo: 'noche', nombre: 'Noche', horaInicio: '20:00:00', horaFin: '06:00:00' },
   cliente: { id: 7, nombre: 'Camila Ruiz', documento: null, telefono: null, email: null },

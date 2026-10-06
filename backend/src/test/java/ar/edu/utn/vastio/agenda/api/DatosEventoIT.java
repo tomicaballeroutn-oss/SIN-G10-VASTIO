@@ -68,16 +68,15 @@ class DatosEventoIT {
 
     @Test
     void laVendedoraCompletaLosDatosYCadaCambioQuedaRegistrado() throws Exception {
-        guardar(lucia, datos(0, "Los 15 de Delfina", 150, "Prefieren que las llamen de tarde.", "351 555-1234", """
+        guardar(lucia, datos(0, "Los 15 de Delfina", "Prefieren que las llamen de tarde.", "351 555-1234", """
                 [{"nombre":"María Ríos","vinculo":"madre","telefono":"351 444-0000"}]"""))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.nombre").value("Los 15 de Delfina"))
-                .andExpect(jsonPath("$.cantidadInvitados").value(150))
                 .andExpect(jsonPath("$.cliente.telefono").value("351 555-1234"))
                 .andExpect(jsonPath("$.contactos", hasSize(1)))
                 .andExpect(jsonPath("$.contactos[0].vinculo").value("madre"))
                 .andExpect(jsonPath("$.version").value(greaterThan(0)))
-                .andExpect(jsonPath("$.historial[?(@.tipo == 'MODIFICACION')].campo", hasItem("cantidad_invitados")))
+                .andExpect(jsonPath("$.historial[?(@.tipo == 'MODIFICACION')].campo", hasItem("observaciones_internas")))
                 .andExpect(jsonPath("$.historial[?(@.campo == 'nombre')].valorAnterior", hasItem("Quince de Delfina")))
                 .andExpect(jsonPath("$.historial[?(@.campo == 'contacto')].valorNuevo", hasItem("María Ríos (madre) · 351 444-0000")))
                 .andExpect(jsonPath("$.historial[?(@.campo == 'cliente.telefono')].usuario.nombre", hasItem("Lucía Ferreyra")));
@@ -85,20 +84,20 @@ class DatosEventoIT {
         List<Map<String, Object>> filas = jdbc.queryForList(
                 "SELECT campo, valor_anterior, valor_nuevo, usuario_id FROM modificacion_evento WHERE evento_id = ? ORDER BY campo", evento);
         assertThat(filas).extracting(f -> f.get("campo"))
-                .containsExactly("cantidad_invitados", "cliente.telefono", "contacto", "nombre", "observaciones_internas");
+                .containsExactly("cliente.telefono", "contacto", "nombre", "observaciones_internas");
         assertThat(filas).allSatisfy(f -> assertThat(f.get("usuario_id")).isEqualTo(lucia.getId()));
     }
 
     @Test
     void cambiarYQuitarContactosTambienQuedaRegistrado() throws Exception {
-        String ficha = guardar(lucia, datos(0, "Quince de Delfina", null, null, null, """
+        String ficha = guardar(lucia, datos(0, "Quince de Delfina", null, null, """
                 [{"nombre":"María Ríos","vinculo":"madre"},{"nombre":"Jorge Ríos","vinculo":"padre"}]"""))
                 .andExpect(status().isOk()).andReturn().getResponse().getContentAsString();
         List<Integer> ids = JsonPath.read(ficha, "$.contactos[*].id");
         int version = JsonPath.read(ficha, "$.version");
         assertThat(version).as("agregar contactos también es una versión nueva").isPositive();
 
-        guardar(lucia, datos(version, "Quince de Delfina", null, null, null, """
+        guardar(lucia, datos(version, "Quince de Delfina", null, null, """
                 [{"id":%d,"nombre":"María Ríos","vinculo":"madre","telefono":"351 444-0000"}]""".formatted(ids.get(0))))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.contactos", hasSize(1)))
@@ -108,7 +107,7 @@ class DatosEventoIT {
 
     @Test
     void guardarSinCambiosNoAgregaNadaAlHistorial() throws Exception {
-        guardar(lucia, datos(0, "Quince de Delfina", null, null, null, "[]")).andExpect(status().isOk());
+        guardar(lucia, datos(0, "Quince de Delfina", null, null, "[]")).andExpect(status().isOk());
         entityManager.flush();
 
         assertThat(jdbc.queryForObject("SELECT count(*) FROM modificacion_evento WHERE evento_id = ?", Integer.class, evento)).isZero();
@@ -116,10 +115,10 @@ class DatosEventoIT {
 
     @Test
     void siOtraPersonaGuardoEnElMedioNoSePisa() throws Exception {
-        guardar(lucia, datos(0, "Primera versión", null, null, null, "[]")).andExpect(status().isOk());
+        guardar(lucia, datos(0, "Primera versión", null, null, "[]")).andExpect(status().isOk());
         entityManager.flush();
 
-        guardar(personas.de(RolCodigo.COORDINACION), datos(0, "Versión vieja", null, null, null, "[]"))
+        guardar(personas.de(RolCodigo.COORDINACION), datos(0, "Versión vieja", null, null, "[]"))
                 .andExpect(status().isConflict())
                 .andExpect(jsonPath("$.codigo").value("EVENTO_MODIFICADO"));
     }
@@ -129,18 +128,18 @@ class DatosEventoIT {
         Usuario sofia = personas.usuario("sofia.datos", "Sofía Méndez", RolCodigo.VENDEDORA);
         Usuario ana = personas.usuario("ana.datos", "Ana Sosa", RolCodigo.PLANNER);
 
-        guardar(sofia, datos(0, "Ajeno", null, null, null, "[]"))
+        guardar(sofia, datos(0, "Ajeno", null, null, "[]"))
                 .andExpect(status().isForbidden())
                 .andExpect(jsonPath("$.codigo").value("EVENTO_DE_OTRA_VENDEDORA"));
-        guardar(ana, datos(0, "Sin asignar", null, null, null, "[]"))
+        guardar(ana, datos(0, "Sin asignar", null, null, "[]"))
                 .andExpect(status().isForbidden())
                 .andExpect(jsonPath("$.codigo").value("SIN_PERMISO"));
-        guardar(personas.de(RolCodigo.ADMINISTRACION), datos(0, "Administración", null, null, null, "[]"))
+        guardar(personas.de(RolCodigo.ADMINISTRACION), datos(0, "Administración", null, null, "[]"))
                 .andExpect(status().isForbidden());
 
         jdbc.update("UPDATE evento SET planner_id = ? WHERE evento_id = ?", ana.getId(), evento);
         entityManager.clear();
-        guardar(ana, datos(0, "La planner asignada", null, null, null, "[]")).andExpect(status().isOk());
+        guardar(ana, datos(0, "La planner asignada", null, null, "[]")).andExpect(status().isOk());
     }
 
     @Test
@@ -148,7 +147,7 @@ class DatosEventoIT {
         long liberada = escenario.evento("club", FECHA, "noche", "LIBERADA", lucia, "No prosperó");
 
         mvc.perform(put("/api/v1/eventos/{id}", liberada).header(HttpHeaders.AUTHORIZATION, personas.bearer(lucia))
-                        .contentType(MediaType.APPLICATION_JSON).content(datos(0, "Otra cosa", null, null, null, "[]")))
+                        .contentType(MediaType.APPLICATION_JSON).content(datos(0, "Otra cosa", null, null, "[]")))
                 .andExpect(status().isUnprocessableContent())
                 .andExpect(jsonPath("$.codigo").value("ESTADO_NO_PERMITE"))
                 .andExpect(jsonPath("$.detail").value("El evento está en Liberada: no se puede modificar sus datos."));
@@ -157,11 +156,10 @@ class DatosEventoIT {
     @Test
     void validaLosDatos() throws Exception {
         guardar(lucia, """
-                {"version":0,"nombre":" ","tipoEventoId":2,"cantidadInvitados":-1,
+                {"version":0,"nombre":" ","tipoEventoId":2,
                  "cliente":{"nombre":"","documento":"12.345"},"contactos":[{"nombre":""}]}""")
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.errores[*].campo", hasItem("nombre")))
-                .andExpect(jsonPath("$.errores[*].campo", hasItem("cantidadInvitados")))
                 .andExpect(jsonPath("$.errores[*].campo", hasItem("cliente.nombre")))
                 .andExpect(jsonPath("$.errores[*].campo", hasItem("cliente.documento")))
                 .andExpect(jsonPath("$.errores[*].campo", hasItem("contactos[0].nombre")));
@@ -179,12 +177,12 @@ class DatosEventoIT {
                 .contentType(MediaType.APPLICATION_JSON).content(json));
     }
 
-    private static String datos(int version, String nombre, Integer invitados, String observaciones, String telefono,
+    private static String datos(int version, String nombre, String observaciones, String telefono,
             String contactos) {
         return """
-                {"version":%d,"nombre":"%s","tipoEventoId":2,"cantidadInvitados":%s,"observacionesInternas":%s,
+                {"version":%d,"nombre":"%s","tipoEventoId":2,"observacionesInternas":%s,
                  "cliente":{"nombre":"Cliente de Quince de Delfina","telefono":%s},"contactos":%s}"""
-                .formatted(version, nombre, invitados, observaciones == null ? "null" : "\"" + observaciones + "\"",
+                .formatted(version, nombre, observaciones == null ? "null" : "\"" + observaciones + "\"",
                         telefono == null ? "null" : "\"" + telefono + "\"", contactos);
     }
 }

@@ -26,7 +26,8 @@ import ar.edu.utn.vastio.configuracion.aplicacion.CatalogoService;
 import ar.edu.utn.vastio.configuracion.dominio.TipoEvento;
 
 /**
- * Registrar evento: completa y modifica cliente, contactos, tipo, nombre, invitados y observaciones internas.
+ * Registrar evento: completa y modifica cliente, contactos, tipo, nombre y observaciones internas (la cantidad de
+ * invitados tiene su propio caso de uso, {@link InvitadosService}).
  * Cada dato que cambia deja una fila en {@code modificacion_evento} con el valor anterior y el nuevo, y el guardado
  * genera un aviso de modificación.
  * Salón, fecha y turno no se cambian acá: eso es reprogramar.
@@ -59,8 +60,8 @@ public class DatosEventoService {
     /**
      * @param version la que tenía la ficha al abrir el formulario: si otra persona guardó en el medio, 409.
      */
-    public record DatosEvento(int version, String nombre, short tipoEventoId, Integer cantidadInvitados,
-            String observacionesInternas, DatosCliente cliente, List<DatosContacto> contactos) {
+    public record DatosEvento(int version, String nombre, short tipoEventoId, String observacionesInternas,
+            DatosCliente cliente, List<DatosContacto> contactos) {
     }
 
     @Transactional
@@ -91,9 +92,8 @@ public class DatosEventoService {
             registro.cambio("tipo_evento", catalogos.tipoEvento(evento.getTipoEventoId()).getNombre(), nuevo.getNombre());
         }
         registro.cambio("nombre", evento.getNombre(), datos.nombre());
-        registro.cambio("cantidad_invitados", texto(evento.getCantidadInvitados()), texto(datos.cantidadInvitados()));
         registro.cambio("observaciones_internas", evento.getObservacionesInternas(), datos.observacionesInternas());
-        evento.actualizarDatos(datos.nombre(), datos.tipoEventoId(), datos.cantidadInvitados(), datos.observacionesInternas());
+        evento.actualizarDatos(datos.nombre(), datos.tipoEventoId(), datos.observacionesInternas());
 
         Cliente cliente = evento.getCliente();
         DatosCliente c = datos.cliente();
@@ -135,10 +135,6 @@ public class DatosEventoService {
                 evento.quitarContacto(contacto);
             }
         }
-    }
-
-    private static String texto(Integer numero) {
-        return numero == null ? null : numero.toString();
     }
 
     /** Junta los cambios de un guardado, todos con el mismo momento. Si el valor no cambió, no deja fila. */

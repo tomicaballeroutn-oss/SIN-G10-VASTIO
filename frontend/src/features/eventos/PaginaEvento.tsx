@@ -14,6 +14,7 @@ import { Cargando } from '../comun/Cargando';
 import { guardarArchivo } from '../comun/archivos';
 import { fechaCorta, fechaHora, pesos } from '../comun/formato';
 import { DialogoFirma } from './DialogoFirma';
+import { DialogoInvitados } from './DialogoInvitados';
 import { DialogoLiberar } from './DialogoLiberar';
 import { PestanaServicios } from './PestanaServicios';
 import { DialogoSena } from './DialogoSena';
@@ -42,7 +43,7 @@ export function PaginaEvento() {
 }
 
 /** Diálogos de las acciones que cambian el estado desde la ficha. */
-type Dialogo = 'liberar' | 'sena' | 'firma' | null;
+type Dialogo = 'liberar' | 'sena' | 'firma' | 'invitados' | null;
 
 type Pestana = 'datos' | 'servicios' | 'documentos' | 'historial';
 
@@ -92,6 +93,9 @@ function ContenidoFicha({ ficha, alCambiar }: { ficha: Ficha; alCambiar: (ficha:
           {acciones.modificar && (
             <Button variant="outline" icon="pencil" onClick={() => navegar(`/eventos/${ficha.id}/datos`)}>Modificar datos</Button>
           )}
+          {acciones.modificar && (
+            <Button variant="outline" icon="users" onClick={() => setDialogo('invitados')}>Cantidad de invitados</Button>
+          )}
           {acciones.liberar && (
             <Button variant="outline" icon="lock-open" onClick={() => setDialogo('liberar')}>Liberar pre-reserva</Button>
           )}
@@ -109,6 +113,13 @@ function ContenidoFicha({ ficha, alCambiar }: { ficha: Ficha; alCambiar: (ficha:
           ficha={ficha}
           alCerrar={() => setDialogo(null)}
           alRegistrar={(f) => hecho(f, 'Firma registrada. El evento pasó a Contratado.')}
+        />
+      )}
+      {dialogo === 'invitados' && (
+        <DialogoInvitados
+          ficha={ficha}
+          alCerrar={() => setDialogo(null)}
+          alGuardar={(f) => hecho(f, 'Cantidad de invitados guardada.')}
         />
       )}
       {dialogo === 'liberar' && (
@@ -271,6 +282,7 @@ const CAMPOS: Record<string, string> = {
   nombre: 'Nombre del evento',
   tipo_evento: 'Tipo',
   cantidad_invitados: 'Invitados',
+  invitados_definitivos: 'Invitados definitivos',
   observaciones_internas: 'Observaciones internas',
   'cliente.nombre': 'Cliente',
   'cliente.documento': 'Documento del cliente',

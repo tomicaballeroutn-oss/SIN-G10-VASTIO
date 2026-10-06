@@ -28,6 +28,7 @@ import ar.edu.utn.vastio.agenda.api.EventoDto.FichaResponse;
 import ar.edu.utn.vastio.agenda.aplicacion.ConsultaEventoService;
 import ar.edu.utn.vastio.agenda.aplicacion.ContratoService;
 import ar.edu.utn.vastio.agenda.aplicacion.DatosEventoService;
+import ar.edu.utn.vastio.agenda.aplicacion.InvitadosService;
 import ar.edu.utn.vastio.agenda.aplicacion.PreReservaService;
 import ar.edu.utn.vastio.agenda.aplicacion.SenaService;
 import ar.edu.utn.vastio.agenda.aplicacion.ServiciosService;
@@ -53,10 +54,13 @@ public class EventoController {
     private final SenaService senas;
     private final ContratoService contratos;
     private final ServiciosService servicios;
+    private final InvitadosService invitados;
     private final EventoDto dto;
 
     public EventoController(PreReservaService preReservas, ConsultaEventoService consultas, DatosEventoService datos,
-            SenaService senas, ContratoService contratos, ServiciosService servicios, EventoDto dto) {
+            SenaService senas, ContratoService contratos, ServiciosService servicios, InvitadosService invitados,
+            EventoDto dto) {
+        this.invitados = invitados;
         this.senas = senas;
         this.contratos = contratos;
         this.servicios = servicios;
@@ -77,6 +81,21 @@ public class EventoController {
             @AuthenticationPrincipal Jwt jwt) {
         UsuarioActual quien = UsuarioActual.de(jwt);
         datos.registrar(id, pedido.datos(), quien);
+        return dto.ficha(consultas.ficha(id, quien));
+    }
+
+    @PutMapping("/{id}/invitados")
+    @PreAuthorize(Permisos.EDITAR_EVENTOS)
+    @Operation(summary = "Registrar cantidad de invitados", description = """
+            Cantidad (mayor a 0) y si ya es definitiva, entre Pre-reserva y Confirmado. Lo hacen la vendedora titular, la
+            planner asignada, Coordinación y Dirección. En un evento confirmado la cantidad cambia pero sigue siendo
+            definitiva. Superar la capacidad del salón no se rechaza (la pantalla lo advierte). Devuelve la ficha.""")
+    @ApiResponse(responseCode = "409", description = "EVENTO_MODIFICADO: otra persona guardó cambios en el medio")
+    @ApiResponse(responseCode = "422", description = "Quitar «definitiva» en un evento confirmado")
+    public FichaResponse registrarInvitados(@PathVariable long id, @Valid @RequestBody InvitadosRequest pedido,
+            @AuthenticationPrincipal Jwt jwt) {
+        UsuarioActual quien = UsuarioActual.de(jwt);
+        invitados.registrar(id, pedido.version(), pedido.cantidad(), pedido.definitivos(), quien);
         return dto.ficha(consultas.ficha(id, quien));
     }
 

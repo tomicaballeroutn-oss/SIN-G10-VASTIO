@@ -9,6 +9,7 @@ import { PaginaReprogramar } from './features/eventos/PaginaReprogramar';
 import { Layout } from './features/layout/Layout';
 import { MENU } from './features/layout/menu';
 import { ConPermiso, IrAlInicio, PaginaMas, PaginaMiCuenta, PaginaPendiente } from './features/layout/paginas';
+import { PaginaNotificaciones } from './features/notificaciones/PaginaNotificaciones';
 import { PaginaParametros } from './features/parametros/PaginaParametros';
 import { PaginaUsuarios } from './features/usuarios/PaginaUsuarios';
 import { PaginaIngreso } from './features/sesion/PaginaIngreso';
@@ -17,6 +18,7 @@ import { PaginaIngreso } from './features/sesion/PaginaIngreso';
 const PANTALLAS: Partial<Record<string, ReactNode>> = {
   agenda: <PaginaAgenda />,
   eventos: <PaginaEventos />,
+  notificaciones: <PaginaNotificaciones />,
   parametros: <PaginaParametros />,
   usuarios: <PaginaUsuarios />,
 };

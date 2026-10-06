@@ -136,6 +136,7 @@ export function PaginaDs() {
         <Button size="lg" icon="arrow-right-left">Entregar a barra</Button>
         <Button size="sm" disabled>Deshabilitado</Button>
         <IconButton icon="pencil" label="Modificar" />
+        <IconButton icon="bell" label="Notificaciones, 3 sin leer" variant="text" count={3} />
         <IconButton icon="plus" label="Agregar" variant="solid" />
         <IconButton icon="trash-2" label="Quitar" variant="text" tone="danger" />
       </Seccion>

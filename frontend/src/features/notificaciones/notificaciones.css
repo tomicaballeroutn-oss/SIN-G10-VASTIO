@@ -1,0 +1,14 @@
+/* UI-22 · Notificaciones: lo nuevo se distingue por punto + negrita + texto para lector, no solo por color. */
+.app__barra { display: flex; justify-content: flex-end; margin-bottom: var(--space-2); }
+.avisos { display: flex; flex-direction: column; gap: var(--space-4); min-width: min(420px, 100%); }
+.avisos__cabeza { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: var(--space-3); }
+.avisos__lista { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: var(--space-1); max-height: min(60vh, 520px); overflow-y: auto; }
+.avisos__aviso { display: grid; grid-template-columns: auto 1fr auto; align-items: start; gap: var(--space-3); width: 100%; padding: var(--space-3);
+  border: 0; border-radius: var(--radius-md); background: transparent; color: var(--ink); text-align: left; cursor: pointer; font: inherit; }
+.avisos__aviso:hover { background: var(--surface-sunken); }
+.avisos__aviso:focus-visible { outline: 3px solid var(--focus-ring); outline-offset: 1px; }
+.avisos__aviso.is-nuevo { background: var(--brand-tint); }
+.avisos__aviso.is-nuevo .body-sm { font-weight: 600; }
+.avisos__texto { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.avisos__punto { width: 10px; height: 10px; margin-top: 6px; border-radius: 50%; background: var(--accent); }
+.avisos__pie { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: var(--space-2); }

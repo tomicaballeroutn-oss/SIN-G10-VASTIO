@@ -1,5 +1,6 @@
 import { Navigate, Outlet, useLocation, useNavigate } from 'react-router';
 import { Logo, Nav } from '../../ds';
+import { Campana } from '../notificaciones/Campana';
 import { AvisosDeSesion } from '../sesion/AvisosDeSesion';
 import { useSesion } from '../sesion/contexto';
 import { BloqueCuenta } from './BloqueCuenta';
@@ -8,7 +9,7 @@ import './layout.css';
 
 /**
  * Marco de las pantallas con sesión: Nav lateral en escritorio (≥ 960 px) e inferior en teléfono y tableta.
- * Cada perfil ve solo sus ítems; un grupo sin ítems no se dibuja.
+ * Cada perfil ve solo sus ítems; un grupo sin ítems no se dibuja. Arriba del contenido, la campana de notificaciones.
  */
 export function Layout() {
   const { estado, usuario } = useSesion();
@@ -36,6 +37,9 @@ export function Layout() {
         <Nav label="Navegación principal" items={items} value={actual} onSelect={ir} logo={<Logo variant="marca" />} footer={<BloqueCuenta />} />
       </div>
       <main className="app__contenido">
+        <div className="app__barra">
+          <Campana />
+        </div>
         <Outlet />
       </main>
       <div className="app__inferior">

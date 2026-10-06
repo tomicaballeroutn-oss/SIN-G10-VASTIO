@@ -126,6 +126,14 @@ export interface Acciones {
   liberar: boolean;
   registrarSena: boolean;
   registrarFirma: boolean;
+  asignarPlanner: boolean;
+}
+
+/** Planner activa para asignar, con los otros eventos que ya tiene esa fecha (se advierte, no se impide). */
+export interface PlannerCandidata {
+  id: number;
+  nombre: string;
+  otrosEventos: string[];
 }
 
 /**
@@ -219,6 +227,10 @@ export const fichas = {
     archivos.forEach((a) => formulario.append('archivos', a));
     return api<Ficha>(`/eventos/${id}/contrato`, { metodo: 'POST', cuerpo: formulario });
   },
+  planners: (id: number) => api<PlannerCandidata[]>(`/eventos/${id}/planners`),
+  /** `plannerId` null quita la planner (solo en Contratado). */
+  asignarPlanner: (id: number, plannerId: number | null) =>
+    api<Ficha>(`/eventos/${id}/planner`, { metodo: 'PUT', cuerpo: { plannerId } }),
   registrarInvitados: (id: number, version: number, cantidad: number, definitivos: boolean) =>
     api<Ficha>(`/eventos/${id}/invitados`, { metodo: 'PUT', cuerpo: { version, cantidad, definitivos } }),
   registrarServicios: (id: number, version: number, servicios: { categoriaId: number; descripcion: string }[]) =>

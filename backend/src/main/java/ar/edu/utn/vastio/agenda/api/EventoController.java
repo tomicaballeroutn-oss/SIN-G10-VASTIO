@@ -29,6 +29,8 @@ import ar.edu.utn.vastio.agenda.aplicacion.ConsultaEventoService;
 import ar.edu.utn.vastio.agenda.aplicacion.ContratoService;
 import ar.edu.utn.vastio.agenda.aplicacion.DatosEventoService;
 import ar.edu.utn.vastio.agenda.aplicacion.InvitadosService;
+import ar.edu.utn.vastio.agenda.aplicacion.PlannerService;
+import ar.edu.utn.vastio.agenda.aplicacion.PlannerService.Candidata;
 import ar.edu.utn.vastio.agenda.aplicacion.PreReservaService;
 import ar.edu.utn.vastio.agenda.aplicacion.SenaService;
 import ar.edu.utn.vastio.agenda.aplicacion.ServiciosService;
@@ -55,12 +57,14 @@ public class EventoController {
     private final ContratoService contratos;
     private final ServiciosService servicios;
     private final InvitadosService invitados;
+    private final PlannerService planners;
     private final EventoDto dto;
 
     public EventoController(PreReservaService preReservas, ConsultaEventoService consultas, DatosEventoService datos,
             SenaService senas, ContratoService contratos, ServiciosService servicios, InvitadosService invitados,
-            EventoDto dto) {
+            PlannerService planners, EventoDto dto) {
         this.invitados = invitados;
+        this.planners = planners;
         this.senas = senas;
         this.contratos = contratos;
         this.servicios = servicios;
@@ -82,6 +86,33 @@ public class EventoController {
         UsuarioActual quien = UsuarioActual.de(jwt);
         datos.registrar(id, pedido.datos(), quien);
         return dto.ficha(consultas.ficha(id, quien));
+    }
+
+    @GetMapping("/{id}/planners")
+    @PreAuthorize(Permisos.ACCESO_TOTAL)
+    @Operation(summary = "Planners para asignar", description = """
+            Las planners activas, cada una con los otros eventos activos que ya tiene asignados esa fecha (la pantalla
+            lo advierte, pero se puede asignar igual).""")
+    public List<Candidata> planners(@PathVariable long id, @AuthenticationPrincipal Jwt jwt) {
+        return planners.candidatas(id, UsuarioActual.de(jwt));
+    }
+
+    @PutMapping("/{id}/planner")
+    @PreAuthorize(Permisos.ACCESO_TOTAL)
+    @Operation(summary = "Asignar planner", description = """
+            Asigna, cambia o (con plannerId null, solo en Contratado) quita la planner, en Contratado o Confirmado.
+            Coordinación y Dirección. Queda en el historial y avisa a la planner nueva, a la anterior y a Administración.
+            Devuelve la ficha.""")
+    @ApiResponse(responseCode = "422", description = "Estado que no lo permite, planner inválida o quitarla en Confirmado")
+    public FichaResponse asignarPlanner(@PathVariable long id, @RequestBody PlannerRequest pedido,
+            @AuthenticationPrincipal Jwt jwt) {
+        UsuarioActual quien = UsuarioActual.de(jwt);
+        planners.asignar(id, pedido.plannerId(), quien);
+        return dto.ficha(consultas.ficha(id, quien));
+    }
+
+    /** {@code plannerId} null quita la planner. */
+    public record PlannerRequest(Long plannerId) {
     }
 
     @PutMapping("/{id}/invitados")

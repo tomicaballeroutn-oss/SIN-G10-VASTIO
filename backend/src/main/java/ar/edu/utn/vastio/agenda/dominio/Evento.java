@@ -177,6 +177,11 @@ public class Evento {
         this.firmanteContacto = firmanteContacto;
     }
 
+    /** Planner responsable de la jornada; null la quita (solo antes de confirmar). */
+    public void asignarPlanner(Long plannerId) {
+        this.plannerId = plannerId;
+    }
+
     /** Fecha de firma del contrato. Se carga antes de pasar a Contratado: el CHECK de la base la exige desde ese estado. */
     public void registrarFirmaContrato(LocalDate fecha) {
         this.fechaFirmaContrato = fecha;

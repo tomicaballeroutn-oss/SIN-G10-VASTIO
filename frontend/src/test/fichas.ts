@@ -9,6 +9,7 @@ export const SIN_ACCIONES: Acciones = {
   liberar: false,
   registrarSena: false,
   registrarFirma: false,
+  asignarPlanner: false,
 };
 
 /** Las categorías de servicio de V2, sin nada cargado. */

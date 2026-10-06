@@ -1,6 +1,6 @@
 import type { SalonId } from '../ds';
 import type { EstadoEvento } from './agenda';
-import { api } from './cliente';
+import { api, descargarArchivo } from './cliente';
 
 export interface Cliente {
   id: number;
@@ -124,6 +124,18 @@ export interface Acciones {
   modificar: boolean;
   liberar: boolean;
   registrarSena: boolean;
+  registrarFirma: boolean;
+}
+
+/** Archivo del legajo (p. ej. una hoja del contrato). */
+export interface DocumentoLegajo {
+  id: number;
+  tipo: 'CONTRATO' | 'PRESUPUESTO' | 'OTRO';
+  nombreArchivo: string;
+  mimeType: string;
+  tamanoBytes: number;
+  usuario: Nombre;
+  fechaCarga: string;
 }
 
 export interface Ficha {
@@ -143,6 +155,10 @@ export interface Ficha {
   invitadosDefinitivos: boolean;
   observacionesInternas: string | null;
   sena: Sena | null;
+  /** yyyy-mm-dd, desde Contratado. */
+  fechaFirmaContrato: string | null;
+  /** null para quien no ve el legajo: el contrato tiene importes. */
+  documentos: DocumentoLegajo[] | null;
   fechaCreacion: string;
   /** Se manda al guardar, para no pisar cambios de otra persona. */
   version: number;
@@ -180,4 +196,16 @@ export const fichas = {
   registrarDatos: (id: number, datos: DatosEvento) => api<Ficha>(`/eventos/${id}`, { metodo: 'PUT', cuerpo: datos }),
   liberar: (id: number) => api<Ficha>(`/eventos/${id}/liberacion`, { metodo: 'POST' }),
   registrarSena: (id: number, sena: PedidoSena) => api<Ficha>(`/eventos/${id}/sena`, { metodo: 'POST', cuerpo: sena }),
+  registrarFirma: (id: number, fechaFirma: string, archivos: File[]) => {
+    const formulario = new FormData();
+    formulario.append('fechaFirma', fechaFirma);
+    archivos.forEach((a) => formulario.append('archivos', a));
+    return api<Ficha>(`/eventos/${id}/contrato`, { metodo: 'POST', cuerpo: formulario });
+  },
+  descargarDocumento: (id: number, documentoId: number) => descargarArchivo(`/eventos/${id}/documentos/${documentoId}`),
 };
+
+/** Lo que acepta «Registrar firma de contrato». */
+export const CONTRATO_TIPOS = 'application/pdf,image/jpeg,image/png';
+export const CONTRATO_MAXIMO_ARCHIVOS = 10;
+export const CONTRATO_MAXIMO_BYTES = 10 * 1024 * 1024;

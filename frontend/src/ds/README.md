@@ -26,3 +26,7 @@ El sistema de diseño original no tenía estilo para Contratado, En curso, Cerra
 - `SalonTag` acepta `label`: el nombre del salón se edita en Parámetros (UI-06), pero el color sigue saliendo de `salon.codigo`.
 - `AgendaGrid` acepta `resaltar`: los filtros de la agenda atenúan las unidades que no coinciden, sin ocultarlas, para que una unidad ocupada nunca parezca disponible.
 - `Combobox`: campo con sugerencias (patrón combobox de WAI-ARIA), para buscar clientes al pre-reservar. Muestra en `/_ds`.
+
+## Cambios del Sprint 2
+
+- `SelectorArchivos`: zona para elegir archivos (en el celular abre la cámara o la galería; en la PC, el explorador o arrastrar y soltar) con la lista de los elegidos, su tamaño y un botón para quitar cada uno. Lo usa «Registrar firma de contrato» (UI-12). Muestra en `/_ds`. El sistema de diseño original no tenía un componente para adjuntar archivos.

@@ -122,6 +122,7 @@ public class ManejadorDeErrores extends ResponseEntityExceptionHandler {
                 case 400 -> Mensajes.DATOS_ILEGIBLES;
                 case 404 -> Mensajes.NO_ENCONTRADO;
                 case 405, 415 -> Mensajes.OPERACION_NO_PERMITIDA;
+                case 413 -> Mensajes.ARCHIVO_GRANDE;
                 default -> statusCode.is5xxServerError() ? Mensajes.ERROR_INTERNO : detalle.getDetail();
             };
             detalle.setDetail(mensaje);

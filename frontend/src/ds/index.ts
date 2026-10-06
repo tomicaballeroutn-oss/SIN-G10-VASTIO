@@ -8,8 +8,9 @@ export { ESTADOS, ESTADO_POR_CODIGO, ESTADOS_DEL_EVENTO, SALONES, ORDEN_SALONES 
 export { Icon, type IconProps } from './components/Icon';
 export { Button, IconButton, type ButtonProps, type IconButtonProps } from './components/Button';
 export {
-  Input, Select, Checkbox, Switch, Stepper, Combobox,
+  Input, Select, Checkbox, Switch, Stepper, Combobox, SelectorArchivos,
   type InputProps, type SelectProps, type SelectOption, type ChoiceProps, type StepperProps, type ComboboxProps, type ComboboxOption,
+  type SelectorArchivosProps,
 } from './components/formularios';
 export { Alert, Dialog, EmptyState, Badge, type AlertProps, type DialogProps, type EmptyStateProps, type BadgeProps } from './components/feedback';
 export { StatusChip, SalonTag, type StatusChipProps, type SalonTagProps } from './components/estado';
@@ -22,3 +23,4 @@ export { Logo, type LogoProps } from './components/Logo';
 export { AgendaGrid, EventCard, type AgendaEvent, type AgendaGridProps, type EventCardProps } from './components/agenda';
 export { StockLevel, MovementCard, type StockLevelProps, type MovementCardProps } from './components/stock';
 export { aplicarTema, temaGuardado, type Tema } from './tema';
+export { tamanoLegible } from './util';

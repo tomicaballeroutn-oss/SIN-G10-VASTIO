@@ -15,10 +15,12 @@ import org.springframework.transaction.annotation.Transactional;
 import ar.edu.utn.vastio.VastioApplication;
 import ar.edu.utn.vastio.agenda.dominio.CambioEstadoEvento;
 import ar.edu.utn.vastio.agenda.dominio.ContactoEvento;
+import ar.edu.utn.vastio.agenda.dominio.DocumentoEvento;
 import ar.edu.utn.vastio.agenda.dominio.EstadoEvento;
 import ar.edu.utn.vastio.agenda.dominio.Evento;
 import ar.edu.utn.vastio.agenda.dominio.ModificacionEvento;
 import ar.edu.utn.vastio.agenda.infraestructura.CambioEstadoEventoRepository;
+import ar.edu.utn.vastio.agenda.infraestructura.DocumentoEventoRepository;
 import ar.edu.utn.vastio.agenda.infraestructura.EventoRepository;
 import ar.edu.utn.vastio.agenda.infraestructura.ModificacionEventoRepository;
 import ar.edu.utn.vastio.comun.errores.Mensajes;
@@ -45,23 +47,30 @@ public class ConsultaEventoService {
     private final EventoRepository eventos;
     private final CambioEstadoEventoRepository historial;
     private final ModificacionEventoRepository modificaciones;
+    private final DocumentoEventoRepository documentos;
     private final UsuarioService usuarios;
 
     public ConsultaEventoService(EventoRepository eventos, CambioEstadoEventoRepository historial,
-            ModificacionEventoRepository modificaciones, UsuarioService usuarios) {
+            ModificacionEventoRepository modificaciones, DocumentoEventoRepository documentos, UsuarioService usuarios) {
         this.eventos = eventos;
         this.historial = historial;
         this.modificaciones = modificaciones;
+        this.documentos = documentos;
         this.usuarios = usuarios;
     }
 
     /** Lo que la persona puede hacer con el evento según su perfil y el estado actual. */
-    public record Acciones(boolean modificar, boolean liberar, boolean registrarSena) {
+    public record Acciones(boolean modificar, boolean liberar, boolean registrarSena, boolean registrarFirma) {
     }
 
-    /** Contactos y modificaciones se copian dentro de la transacción: la respuesta se arma después. */
+    /**
+     * Contactos y modificaciones se copian dentro de la transacción: la respuesta se arma después.
+     *
+     * @param documentos null si la persona no ve el legajo (el contrato tiene importes).
+     */
     public record Ficha(Evento evento, boolean veImportes, Acciones acciones, List<ContactoEvento> contactos,
-            List<CambioEstadoEvento> cambios, List<ModificacionEvento> modificaciones, Map<Long, String> nombres) {
+            List<CambioEstadoEvento> cambios, List<ModificacionEvento> modificaciones, List<DocumentoEvento> documentos,
+            Map<Long, String> nombres) {
     }
 
     /**
@@ -71,6 +80,8 @@ public class ConsultaEventoService {
         Evento evento = visible(id, quien);
         List<CambioEstadoEvento> cambios = historial.findByEventoIdOrderByFechaHoraAscIdAsc(id);
         List<ModificacionEvento> datos = modificaciones.findByEventoIdOrderByFechaHoraAscIdAsc(id);
+        boolean veImportes = AccesoEvento.veImportes(quien, evento);
+        List<DocumentoEvento> legajo = veImportes ? documentos.findByEventoIdOrderByIdAsc(id) : null;
         Set<Long> personas = new HashSet<>();
         personas.add(evento.getVendedoraId());
         if (evento.getPlannerId() != null) {
@@ -78,15 +89,19 @@ public class ConsultaEventoService {
         }
         cambios.stream().map(CambioEstadoEvento::getUsuarioId).filter(u -> u != null).forEach(personas::add);
         datos.forEach(m -> personas.add(m.getUsuarioId()));
-        return new Ficha(evento, AccesoEvento.veImportes(quien, evento), acciones(evento, quien),
-                List.copyOf(evento.getContactos()), cambios, datos, usuarios.nombres(personas));
+        if (legajo != null) {
+            legajo.forEach(d -> personas.add(d.getUsuarioId()));
+        }
+        return new Ficha(evento, veImportes, acciones(evento, quien), List.copyOf(evento.getContactos()), cambios, datos,
+                legajo, usuarios.nombres(personas));
     }
 
     public static Acciones acciones(Evento evento, UsuarioActual quien) {
         boolean preReserva = evento.getEstado() == EstadoEvento.PRE_RESERVA;
         boolean titular = AccesoEvento.puedeOperarComoTitular(quien, evento);
         return new Acciones(EDITABLES.contains(evento.getEstado()) && AccesoEvento.puedeModificar(quien, evento),
-                preReserva && titular, preReserva && titular);
+                preReserva && titular, preReserva && titular,
+                evento.getEstado() == EstadoEvento.SENADO && quien.accesoTotal());
     }
 
     /** El evento, si existe y la persona puede ver su detalle. */

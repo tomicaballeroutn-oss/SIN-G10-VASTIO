@@ -12,6 +12,7 @@ public final class Mensajes {
     public static final String EDICION_SIMULTANEA = "Otra persona guardó cambios al mismo tiempo. Volvé a abrir la pantalla y repetí lo que hiciste.";
     public static final String DATOS_INVALIDOS = "Revisá los datos marcados.";
     public static final String DATOS_ILEGIBLES = "No pudimos leer los datos enviados. Revisalos y volvé a intentarlo.";
+    public static final String ARCHIVO_GRANDE = "Cada archivo puede pesar hasta 10 MB. Sacá la foto con menos resolución o comprimí el PDF.";
     public static final String NO_ENCONTRADO = "No encontramos lo que buscás.";
     public static final String OPERACION_NO_PERMITIDA = "Esa operación no está disponible acá.";
     public static final String CREDENCIALES_INVALIDAS = "Usuario o contraseña incorrectos. Volvé a intentarlo.";

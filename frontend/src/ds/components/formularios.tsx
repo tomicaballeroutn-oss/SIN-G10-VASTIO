@@ -1,6 +1,6 @@
 import { useState, type ChangeEvent, type KeyboardEvent, type ReactNode } from 'react';
 import type { IconName } from '../tipos';
-import { cx, useFieldId } from '../util';
+import { cx, tamanoLegible, useFieldId } from '../util';
 import { Icon } from './Icon';
 
 interface FieldBase {
@@ -341,6 +341,89 @@ export function Combobox(p: ComboboxProps) {
           </ul>
         )}
       </div>
+    </Field>
+  );
+}
+
+export interface SelectorArchivosProps extends FieldBase {
+  /** Archivos elegidos (controlado). */
+  files: File[];
+  onChange: (files: File[]) => void;
+  /** Tipos aceptados, como en `<input accept>`: `application/pdf,image/jpeg,image/png`. */
+  accept?: string;
+  multiple?: boolean;
+  /** Texto de la zona: qué hacer («Sacá una foto o elegí un archivo de la galería»). */
+  prompt?: string;
+}
+
+/**
+ * Elegir archivos: en el celular abre la cámara o la galería; en la PC, el explorador o arrastrar y soltar.
+ * Debajo, la lista de los elegidos con su tamaño y un botón para quitar cada uno.
+ */
+export function SelectorArchivos(p: SelectorArchivosProps) {
+  const id = useFieldId(p.id);
+  const [arrastrando, setArrastrando] = useState(false);
+
+  function agregar(nuevos: FileList | null) {
+    if (!nuevos || nuevos.length === 0) return;
+    const lista = Array.from(nuevos);
+    p.onChange(p.multiple ? [...p.files, ...lista] : lista.slice(0, 1));
+  }
+
+  return (
+    <Field label={p.label} hint={p.hint} error={p.error} optional={p.optional} id={id} className={cx('v-files', p.className)}>
+      <div
+        className={cx('v-files__zona', arrastrando && 'is-dragging', p.error && 'is-invalid', p.disabled && 'is-disabled')}
+        onDragOver={(e) => {
+          e.preventDefault();
+          if (!p.disabled) setArrastrando(true);
+        }}
+        onDragLeave={() => setArrastrando(false)}
+        onDrop={(e) => {
+          e.preventDefault();
+          setArrastrando(false);
+          if (!p.disabled) agregar(e.dataTransfer.files);
+        }}
+      >
+        <Icon name="upload" size={24} />
+        <span className="body-sm">{p.prompt ?? 'Elegí un archivo'}</span>
+        <input
+          id={id}
+          type="file"
+          className="v-files__input"
+          accept={p.accept}
+          multiple={p.multiple}
+          disabled={p.disabled}
+          aria-invalid={p.error ? true : undefined}
+          aria-describedby={p.error || p.hint ? `${id}-msg` : undefined}
+          onChange={(e) => {
+            agregar(e.target.files);
+            // Permite volver a elegir el mismo archivo después de quitarlo.
+            e.target.value = '';
+          }}
+        />
+      </div>
+      {p.files.length > 0 && (
+        <ul className="v-files__lista">
+          {p.files.map((f, i) => (
+            <li key={`${f.name}-${i}`} className="v-files__item">
+              <Icon name="file-text" size={20} />
+              <span className="body-sm v-files__nombre">{f.name}</span>
+              <span className="caption v-muted">{tamanoLegible(f.size)}</span>
+              <button
+                type="button"
+                className="v-iconbtn v-iconbtn--text v-iconbtn--sm"
+                aria-label={`Quitar ${f.name}`}
+                title={`Quitar ${f.name}`}
+                disabled={p.disabled}
+                onClick={() => p.onChange(p.files.filter((_, j) => j !== i))}
+              >
+                <Icon name="x" size={18} />
+              </button>
+            </li>
+          ))}
+        </ul>
+      )}
     </Field>
   );
 }

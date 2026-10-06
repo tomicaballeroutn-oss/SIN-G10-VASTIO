@@ -1,7 +1,7 @@
 import { useState, type ReactNode } from 'react';
 import {
   Actor, AgendaGrid, Alert, Badge, Button, Card, Checkbox, Combobox, Dialog, EmptyState, EventCard, Icon, IconButton, Input,
-  MovementCard, Nav, SalonTag, Select, Stat, StatusChip, Stepper, StockLevel, Switch, Table, Tabs, Timeline,
+  MovementCard, Nav, SalonTag, Select, SelectorArchivos, Stat, StatusChip, Stepper, StockLevel, Switch, Table, Tabs, Timeline,
   ESTADOS_DEL_EVENTO, ORDEN_SALONES, SALONES, aplicarTema, temaGuardado, type AgendaEvent, type EventStatus, type Tema,
 } from '../../ds';
 import './pagina-ds.css';
@@ -43,6 +43,22 @@ function ComboboxDeMuestra() {
       onSelect={(o) => setTexto(o.value === 'nuevo' ? texto : o.label)}
       options={[...coinciden, { value: 'nuevo', label: `Cargar «${texto.trim()}» como cliente nuevo`, icon: 'user-plus' }]}
       hint="Probá con «ríos»."
+    />
+  );
+}
+
+/** Selector con un archivo de ejemplo ya elegido, para ver la lista. */
+function SelectorDeMuestra() {
+  const [archivos, setArchivos] = useState<File[]>(() => [new File([new Uint8Array(870_000)], 'contrato hoja 1.jpg', { type: 'image/jpeg' })]);
+  return (
+    <SelectorArchivos
+      label="Contrato digitalizado"
+      prompt="Sacá una foto o elegí un archivo de la galería"
+      hint="PDF, JPG o PNG, hasta 10 MB cada uno."
+      accept="application/pdf,image/jpeg,image/png"
+      multiple
+      files={archivos}
+      onChange={setArchivos}
     />
   );
 }
@@ -124,7 +140,7 @@ export function PaginaDs() {
         <IconButton icon="trash-2" label="Quitar" variant="text" tone="danger" />
       </Seccion>
 
-      <Seccion titulo="Input, Select, Combobox, Checkbox, Switch y Stepper">
+      <Seccion titulo="Input, Select, Combobox, SelectorArchivos, Checkbox, Switch y Stepper">
         <div className="ds-formulario">
           <Input label="Nombre del cliente" placeholder="Nombre y apellido" hint="Como figura en el DNI" />
           <Input label="Importe de la seña" icon="banknote" suffix="pesos" inputMode="decimal" defaultValue="150.000" />
@@ -136,6 +152,7 @@ export function PaginaDs() {
             options={[{ value: 'mediodia', label: 'Mediodía' }, { value: 'noche', label: 'Noche' }]}
           />
           <ComboboxDeMuestra />
+          <SelectorDeMuestra />
           <Stepper label="Invitados" value={invitados} onChange={setInvitados} step={10} unit="personas" />
           <Checkbox label="Invitados definitivos" hint="Ya no se esperan cambios" defaultChecked />
           <Switch label="Tema oscuro en barra" />

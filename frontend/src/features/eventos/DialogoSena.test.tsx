@@ -6,6 +6,7 @@ import { _reiniciarCliente } from '../../api/cliente';
 import type { Ficha } from '../../api/eventos';
 import { backendFalso, json, montar, pedidos, problema, sesionDe, type Pedido } from '../../test/backendFalso';
 import { leerImporte } from '../comun/formato';
+import { SIN_ACCIONES } from '../../test/fichas';
 
 const PRE_RESERVA: Ficha = {
   id: 5,
@@ -24,9 +25,11 @@ const PRE_RESERVA: Ficha = {
   invitadosDefinitivos: false,
   observacionesInternas: null,
   sena: null,
+  fechaFirmaContrato: null,
+  documentos: null,
   fechaCreacion: '2026-09-21T10:15:00-03:00',
   version: 0,
-  acciones: { modificar: true, liberar: true, registrarSena: true },
+  acciones: { ...SIN_ACCIONES, modificar: true, liberar: true, registrarSena: true },
   historial: [{ tipo: 'ESTADO', estadoNuevo: 'PRE_RESERVA', usuario: { id: 1, nombre: 'Lucía Ferreyra' }, fechaHora: '2026-09-21T10:15:00-03:00' }],
 };
 
@@ -35,7 +38,7 @@ const SENADO: Ficha = {
   estado: 'SENADO',
   version: 1,
   sena: { importe: 150000.5, fecha: '2026-09-29', firmanteNombre: 'Mariela Ruiz', firmanteDni: '30111222', firmanteContacto: null },
-  acciones: { modificar: true, liberar: false, registrarSena: false },
+  acciones: { ...SIN_ACCIONES, modificar: true, liberar: false, registrarSena: false },
   historial: [
     ...PRE_RESERVA.historial,
     { tipo: 'ESTADO', estadoAnterior: 'PRE_RESERVA', estadoNuevo: 'SENADO', usuario: { id: 1, nombre: 'Lucía Ferreyra' }, fechaHora: '2026-09-29T16:40:00-03:00' },

@@ -33,6 +33,10 @@ services:
       SPRING_PROFILES_ACTIVE: ${SPRING_PROFILES_ACTIVE:-}
       VASTIO_ADMIN_USUARIO: ${VASTIO_ADMIN_USUARIO:-direccion}
       VASTIO_ADMIN_CONTRASENA: ${VASTIO_ADMIN_CONTRASENA:-}
+      VASTIO_LEGAJO_DIRECTORIO: /datos/legajo
+    volumes:
+      # Contratos digitalizados y demás archivos del legajo de cada evento.
+      - legajo:/datos/legajo
     depends_on:
       db:
         condition: service_healthy
@@ -55,7 +59,8 @@ services:
         condition: service_healthy
     restart: unless-stopped
 
-  # Un pg_dump por día a ./respaldos, se conservan 14. Espera al backend para respaldar la base ya migrada.
+  # Un pg_dump por día a ./respaldos, se conservan 14, y copia de los archivos nuevos del legajo a ./respaldos/legajo.
+  # Espera al backend para respaldar la base ya migrada.
   # Copiarlos fuera del servidor: ver docs/despliegue.md.
   respaldo:
     image: postgres:17
@@ -67,6 +72,7 @@ services:
       TZ: America/Argentina/Cordoba
     volumes:
       - ./respaldos:/respaldos
+      - legajo:/legajo:ro
     entrypoint: ["/bin/sh", "-c"]
     command:
       - |
@@ -74,6 +80,7 @@ services:
           archivo=/respaldos/vastio-$$(date +%Y%m%d-%H%M).dump
           if pg_dump -Fc -f "$$archivo"; then echo "Respaldo $$archivo"; else echo "Falló el respaldo" >&2; rm -f "$$archivo"; fi
           find /respaldos -name 'vastio-*.dump' -mtime +14 -delete
+          mkdir -p /respaldos/legajo && cp -ru /legajo/. /respaldos/legajo/
           sleep 86400
         done
     depends_on:
@@ -83,5 +90,6 @@ services:
 
 volumes:
   datos-db:
+  legajo:
   caddy-datos:
   caddy-config:

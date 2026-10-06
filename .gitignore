@@ -1,5 +1,7 @@
 # Backend
 backend/target/
+# Archivos del legajo en desarrollo (vastio.legajo.directorio)
+backend/datos/
 backend/.mvn/wrapper/maven-wrapper.jar
 *.class
 *.log

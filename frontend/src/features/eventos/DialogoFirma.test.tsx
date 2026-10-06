@@ -25,6 +25,7 @@ const SENADO: Ficha = {
   observacionesInternas: null,
   sena: { importe: 300000, fecha: '2026-09-29', firmanteNombre: null, firmanteDni: '30111222', firmanteContacto: null },
   fechaFirmaContrato: null,
+  cancelacion: null,
   documentos: [],
   servicios: [],
   requisitosConfirmacion: null,
@@ -42,6 +43,7 @@ const CONTRATADO: Ficha = {
   estado: 'CONTRATADO',
   version: 2,
   fechaFirmaContrato: '2026-10-02',
+  cancelacion: null,
   documentos: [{
     id: 40, tipo: 'CONTRATO', nombreArchivo: 'contrato firmado.pdf', mimeType: 'application/pdf', tamanoBytes: 850_000,
     usuario: { id: 2, nombre: 'Melina Sifón' }, fechaCarga: '2026-10-02T11:00:00-03:00',

@@ -11,6 +11,7 @@ export const SIN_ACCIONES: Acciones = {
   registrarFirma: false,
   asignarPlanner: false,
   confirmar: false,
+  cancelar: false,
 };
 
 /** Las categorías de servicio de V2, sin nada cargado. */
@@ -49,6 +50,7 @@ export function fichaDePrueba(cambios: Partial<Ficha> = {}): Ficha {
     observacionesInternas: null,
     sena: { importe: 300000, fecha: '2026-09-29', firmanteNombre: null, firmanteDni: '30111222', firmanteContacto: null },
     fechaFirmaContrato: null,
+    cancelacion: null,
     documentos: null,
     servicios: SERVICIOS_VACIOS,
     requisitosConfirmacion: null,

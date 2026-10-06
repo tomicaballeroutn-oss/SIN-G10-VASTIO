@@ -63,3 +63,7 @@
   padding: var(--space-3) var(--space-4); border-radius: var(--radius-md); background: var(--success-tint); color: var(--success-ink); }
 .confirmar__requisito.is-pendiente { background: var(--warning-tint); color: var(--warning-ink); }
 @media (max-width: 479px) { .confirmar__requisito { grid-template-columns: auto 1fr; } .confirmar__requisito > :last-child { grid-column: 2; } }
+
+/* UI-17 · Cancelar evento */
+.cancelar { display: flex; flex-direction: column; gap: var(--space-4); min-width: min(440px, 100%); }
+.cancelar p { margin: 0; }

@@ -177,6 +177,12 @@ public class Evento {
         this.firmanteContacto = firmanteContacto;
     }
 
+    /** Motivo (ámbito Cancelación) y detalle. Se cargan antes de pasar a Cancelado: el CHECK de la base exige el motivo. */
+    public void cancelar(short motivoId, String detalle) {
+        this.motivoCancelacionId = motivoId;
+        this.detalleCancelacion = detalle;
+    }
+
     /** Planner responsable de la jornada; null la quita (solo antes de confirmar). */
     public void asignarPlanner(Long plannerId) {
         this.plannerId = plannerId;

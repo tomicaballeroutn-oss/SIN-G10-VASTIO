@@ -93,6 +93,10 @@ public class EventoDto {
             boolean visibleEnCocina, String descripcion, Nombre usuario, OffsetDateTime fechaModificacion) {
     }
 
+    /** Motivo y detalle de un evento cancelado. */
+    public record CancelacionDto(String motivo, String detalle) {
+    }
+
     /**
      * {@code documentos} es null para quien no ve el legajo (el contrato tiene importes). {@code requisitosConfirmacion}
      * es null salvo en Contratado: lo que muestra el diálogo «Confirmar evento».
@@ -100,7 +104,8 @@ public class EventoDto {
     public record FichaResponse(long id, String codigo, EstadoEvento estado, String nombre, Nombre tipo, SalonDto salon,
             LocalDate fecha, TurnoDto turno, ClienteDto cliente, List<ContactoDto> contactos, Nombre vendedora,
             Nombre planner, Integer cantidadInvitados, boolean invitadosDefinitivos, String observacionesInternas,
-            SenaDto sena, LocalDate fechaFirmaContrato, List<DocumentoDto> documentos, List<ServicioDto> servicios,
+            SenaDto sena, LocalDate fechaFirmaContrato, CancelacionDto cancelacion, List<DocumentoDto> documentos,
+            List<ServicioDto> servicios,
             List<Requisito> requisitosConfirmacion, OffsetDateTime fechaCreacion, int version, Acciones acciones,
             List<HistorialDto> historial) {
     }
@@ -125,6 +130,8 @@ public class EventoDto {
                 f.contactos().stream().map(ContactoDto::de).toList(), persona(e.getVendedoraId(), nombres),
                 persona(e.getPlannerId(), nombres), e.getCantidadInvitados(), e.isInvitadosDefinitivos(),
                 e.getObservacionesInternas(), sena, e.getFechaFirmaContrato(),
+                e.getMotivoCancelacionId() == null ? null
+                        : new CancelacionDto(catalogos.motivo(e.getMotivoCancelacionId()).getNombre(), e.getDetalleCancelacion()),
                 f.documentos() == null ? null : f.documentos().stream().map(d -> documento(d, nombres)).toList(),
                 servicios(f.servicios(), nombres), f.requisitos(), e.getFechaCreacion(), e.getVersion(), f.acciones(),
                 historial);

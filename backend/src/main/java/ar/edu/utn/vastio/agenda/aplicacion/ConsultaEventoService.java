@@ -68,7 +68,7 @@ public class ConsultaEventoService {
 
     /** Lo que la persona puede hacer con el evento según su perfil y el estado actual. */
     public record Acciones(boolean modificar, boolean liberar, boolean registrarSena, boolean registrarFirma,
-            boolean asignarPlanner, boolean confirmar) {
+            boolean asignarPlanner, boolean confirmar, boolean cancelar) {
     }
 
     /**
@@ -115,7 +115,8 @@ public class ConsultaEventoService {
                 preReserva && titular, preReserva && titular,
                 evento.getEstado() == EstadoEvento.SENADO && quien.accesoTotal(),
                 PlannerService.ESTADOS.contains(evento.getEstado()) && quien.accesoTotal(),
-                evento.getEstado() == EstadoEvento.CONTRATADO && AccesoEvento.puedeConfirmar(quien, evento));
+                evento.getEstado() == EstadoEvento.CONTRATADO && AccesoEvento.puedeConfirmar(quien, evento),
+                CancelacionService.ESTADOS.contains(evento.getEstado()) && quien.accesoTotal());
     }
 
     /** El evento, si existe y la persona puede ver su detalle. */

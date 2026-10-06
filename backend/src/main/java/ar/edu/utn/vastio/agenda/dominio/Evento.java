@@ -134,11 +134,21 @@ public class Evento {
         this.fechaCreacion = OffsetDateTime.now();
     }
 
-    /** Datos que completa «Registrar evento». El registro de qué cambió lo arma el caso de uso. */
-    public void actualizarDatos(String nombre, short tipoEventoId, String observacionesInternas) {
+    /**
+     * Datos que completa «Registrar evento». El registro de qué cambió lo arma el caso de uso.
+     *
+     * @param horaInicio null: la del turno.
+     */
+    public void actualizarDatos(String nombre, short tipoEventoId, LocalTime horaInicio, String observacionesInternas) {
         this.nombre = nombre;
         this.tipoEventoId = tipoEventoId;
+        this.horaInicio = horaInicio;
         this.observacionesInternas = observacionesInternas;
+    }
+
+    /** Cambia la unidad. Quién, por qué y la unidad anterior los registra el caso de uso. */
+    public void reprogramar(UnidadComercializable nueva) {
+        this.unidad = nueva;
     }
 
     /** Cantidad de invitados y si ya es definitiva (condición de «Confirmar evento»). */

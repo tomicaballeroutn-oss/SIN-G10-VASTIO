@@ -16,6 +16,7 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 
 import ar.edu.utn.vastio.agenda.aplicacion.ConsultaEventoService.Acciones;
 import ar.edu.utn.vastio.agenda.aplicacion.ConsultaEventoService.Ficha;
+import ar.edu.utn.vastio.agenda.aplicacion.DescripcionEvento;
 import ar.edu.utn.vastio.agenda.aplicacion.RequisitosConfirmacion.Requisito;
 import ar.edu.utn.vastio.agenda.dominio.CambioEstadoEvento;
 import ar.edu.utn.vastio.agenda.dominio.Cliente;
@@ -24,6 +25,7 @@ import ar.edu.utn.vastio.agenda.dominio.DocumentoEvento;
 import ar.edu.utn.vastio.agenda.dominio.EstadoEvento;
 import ar.edu.utn.vastio.agenda.dominio.Evento;
 import ar.edu.utn.vastio.agenda.dominio.ModificacionEvento;
+import ar.edu.utn.vastio.agenda.dominio.Reprogramacion;
 import ar.edu.utn.vastio.agenda.dominio.ServicioContratado;
 import ar.edu.utn.vastio.configuracion.aplicacion.CatalogoService;
 import ar.edu.utn.vastio.configuracion.dominio.CategoriaServicio;
@@ -38,9 +40,11 @@ import ar.edu.utn.vastio.configuracion.dominio.Turno;
 public class EventoDto {
 
     private final CatalogoService catalogos;
+    private final DescripcionEvento descripcion;
 
-    public EventoDto(CatalogoService catalogos) {
+    public EventoDto(CatalogoService catalogos, DescripcionEvento descripcion) {
         this.catalogos = catalogos;
+        this.descripcion = descripcion;
     }
 
     public record Nombre(long id, String nombre) {
@@ -67,7 +71,8 @@ public class EventoDto {
 
     /**
      * Una entrada del historial. {@code tipo} ESTADO: cambio de estado (estadoAnterior, estadoNuevo, observacion).
-     * MODIFICACION: un dato que cambió (campo, valorAnterior, valorNuevo).
+     * MODIFICACION: un dato que cambió (campo, valorAnterior, valorNuevo). REPROGRAMACION: cambio de unidad (campo
+     * «unidad», valorAnterior y valorNuevo como «Avril · sáb 10/10 · Noche», observacion con el motivo y el detalle).
      */
     @JsonInclude(JsonInclude.Include.NON_NULL)
     public record HistorialDto(String tipo, EstadoEvento estadoAnterior, EstadoEvento estadoNuevo, String campo,
@@ -102,9 +107,9 @@ public class EventoDto {
      * es null salvo en Contratado: lo que muestra el diálogo «Confirmar evento».
      */
     public record FichaResponse(long id, String codigo, EstadoEvento estado, String nombre, Nombre tipo, SalonDto salon,
-            LocalDate fecha, TurnoDto turno, ClienteDto cliente, List<ContactoDto> contactos, Nombre vendedora,
-            Nombre planner, Integer cantidadInvitados, boolean invitadosDefinitivos, String observacionesInternas,
-            SenaDto sena, LocalDate fechaFirmaContrato, CancelacionDto cancelacion, List<DocumentoDto> documentos,
+            LocalDate fecha, TurnoDto turno, LocalTime horaInicio, String reprogramadoDesde, ClienteDto cliente,
+            List<ContactoDto> contactos, Nombre vendedora, Nombre planner, Integer cantidadInvitados,
+            boolean invitadosDefinitivos, String observacionesInternas, SenaDto sena, LocalDate fechaFirmaContrato, CancelacionDto cancelacion, List<DocumentoDto> documentos,
             List<ServicioDto> servicios,
             List<Requisito> requisitosConfirmacion, OffsetDateTime fechaCreacion, int version, Acciones acciones,
             List<HistorialDto> historial) {
@@ -120,13 +125,17 @@ public class EventoDto {
         SenaDto sena = e.getFechaSena() == null ? null
                 : new SenaDto(f.veImportes() ? e.getImporteSena() : null, e.getFechaSena(), e.getFirmanteNombre(),
                         e.getFirmanteDni(), e.getFirmanteContacto());
-        List<HistorialDto> historial = Stream.concat(
+        List<HistorialDto> historial = Stream.of(
                         f.cambios().stream().map(c -> historial(c, nombres)),
-                        f.modificaciones().stream().map(m -> historial(m, nombres)))
+                        f.modificaciones().stream().map(m -> historial(m, nombres)),
+                        f.reprogramaciones().stream().map(r -> historial(r, nombres)))
+                .flatMap(s -> s)
                 .sorted(Comparator.comparing(HistorialDto::fechaHora))
                 .toList();
+        String reprogramadoDesde = f.reprogramaciones().isEmpty() ? null
+                : descripcion.unidad(f.reprogramaciones().get(0).getUnidadAnterior());
         return new FichaResponse(e.getId(), e.getCodigo(), e.getEstado(), e.getNombre(), tipo(e), salon(e),
-                e.getUnidad().getFecha(), turno(e), ClienteDto.de(e.getCliente()),
+                e.getUnidad().getFecha(), turno(e), e.getHoraInicio(), reprogramadoDesde, ClienteDto.de(e.getCliente()),
                 f.contactos().stream().map(ContactoDto::de).toList(), persona(e.getVendedoraId(), nombres),
                 persona(e.getPlannerId(), nombres), e.getCantidadInvitados(), e.isInvitadosDefinitivos(),
                 e.getObservacionesInternas(), sena, e.getFechaFirmaContrato(),
@@ -156,6 +165,13 @@ public class EventoDto {
         return new ServicioDto(c.getId(), c.getNombre(), c.isActivo(), c.isRequeridaParaConfirmar(), c.isVisibleEnCocina(),
                 s == null ? null : s.getDescripcion(), s == null ? null : persona(s.getUsuarioId(), nombres),
                 s == null ? null : s.getFechaModificacion());
+    }
+
+    private HistorialDto historial(Reprogramacion r, Map<Long, String> nombres) {
+        String motivo = catalogos.motivo(r.getMotivoId()).getNombre();
+        return new HistorialDto("REPROGRAMACION", null, null, "unidad", descripcion.unidad(r.getUnidadAnterior()),
+                descripcion.unidad(r.getUnidadNueva()), persona(r.getUsuarioId(), nombres), r.getFechaHora(),
+                r.getDetalle() == null ? motivo : motivo + ": " + r.getDetalle());
     }
 
     private static DocumentoDto documento(DocumentoEvento d, Map<Long, String> nombres) {

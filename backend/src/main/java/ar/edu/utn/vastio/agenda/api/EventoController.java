@@ -1,6 +1,7 @@
 package ar.edu.utn.vastio.agenda.api;
 
 import java.net.URI;
+import java.time.LocalDate;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
 
@@ -35,6 +36,7 @@ import ar.edu.utn.vastio.agenda.aplicacion.InvitadosService;
 import ar.edu.utn.vastio.agenda.aplicacion.PlannerService;
 import ar.edu.utn.vastio.agenda.aplicacion.PlannerService.Candidata;
 import ar.edu.utn.vastio.agenda.aplicacion.PreReservaService;
+import ar.edu.utn.vastio.agenda.aplicacion.ReprogramacionService;
 import ar.edu.utn.vastio.agenda.aplicacion.SenaService;
 import ar.edu.utn.vastio.agenda.aplicacion.ServiciosService;
 import ar.edu.utn.vastio.agenda.dominio.EstadoEvento;
@@ -63,11 +65,14 @@ public class EventoController {
     private final PlannerService planners;
     private final ConfirmacionService confirmaciones;
     private final CancelacionService cancelaciones;
+    private final ReprogramacionService reprogramaciones;
     private final EventoDto dto;
 
     public EventoController(PreReservaService preReservas, ConsultaEventoService consultas, DatosEventoService datos,
             SenaService senas, ContratoService contratos, ServiciosService servicios, InvitadosService invitados,
-            PlannerService planners, ConfirmacionService confirmaciones, CancelacionService cancelaciones, EventoDto dto) {
+            PlannerService planners, ConfirmacionService confirmaciones, CancelacionService cancelaciones,
+            ReprogramacionService reprogramaciones, EventoDto dto) {
+        this.reprogramaciones = reprogramaciones;
         this.cancelaciones = cancelaciones;
         this.confirmaciones = confirmaciones;
         this.invitados = invitados;
@@ -93,6 +98,33 @@ public class EventoController {
         UsuarioActual quien = UsuarioActual.de(jwt);
         datos.registrar(id, pedido.datos(), quien);
         return dto.ficha(consultas.ficha(id, quien));
+    }
+
+    @PostMapping("/{id}/reprogramacion")
+    @PreAuthorize(Permisos.PRERESERVA)
+    @Operation(summary = "Reprogramar evento", description = """
+            Cambia salón, fecha o turno sin cambiar el estado, entre Pre-reserva y Confirmado. Lo hacen la vendedora
+            titular, Coordinación y Dirección. Pide motivo del catálogo (ámbito Reprogramación) salvo en Pre-reserva, donde
+            es una modificación más. Conserva la unidad original y avisa a todas las áreas. Devuelve la ficha.""")
+    @ApiResponse(responseCode = "409", description = "FECHA_TOMADA o UNIDAD_BLOQUEADA")
+    @ApiResponse(responseCode = "422", description = "Estado que no lo permite, misma unidad, fecha pasada, salón dado de baja o motivo")
+    public FichaResponse reprogramar(@PathVariable long id, @Valid @RequestBody ReprogramacionRequest pedido,
+            @AuthenticationPrincipal Jwt jwt) {
+        UsuarioActual quien = UsuarioActual.de(jwt);
+        reprogramaciones.reprogramar(id, pedido.pedido(), quien);
+        return dto.ficha(consultas.ficha(id, quien));
+    }
+
+    public record ReprogramacionRequest(
+            @NotNull(message = "Elegí el salón.") Short salonId,
+            @NotNull(message = "Elegí la fecha.") LocalDate fecha,
+            @NotNull(message = "Elegí el turno.") Short turnoId,
+            Short motivoId,
+            @Size(max = 255, message = "Usá hasta 255 caracteres.") String detalle) {
+        ReprogramacionService.Pedido pedido() {
+            return new ReprogramacionService.Pedido(salonId, fecha, turnoId, motivoId,
+                    detalle == null || detalle.isBlank() ? null : detalle.trim());
+        }
     }
 
     @PostMapping("/{id}/cancelacion")

@@ -1,5 +1,6 @@
 package ar.edu.utn.vastio.agenda.aplicacion;
 
+import java.time.LocalTime;
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -26,7 +27,7 @@ import ar.edu.utn.vastio.configuracion.aplicacion.CatalogoService;
 import ar.edu.utn.vastio.configuracion.dominio.TipoEvento;
 
 /**
- * Registrar evento: completa y modifica cliente, contactos, tipo, nombre y observaciones internas (la cantidad de
+ * Registrar evento: completa y modifica cliente, contactos, tipo, nombre, hora de inicio y observaciones internas (la cantidad de
  * invitados tiene su propio caso de uso, {@link InvitadosService}).
  * Cada dato que cambia deja una fila en {@code modificacion_evento} con el valor anterior y el nuevo, y el guardado
  * genera un aviso de modificación.
@@ -60,8 +61,9 @@ public class DatosEventoService {
     /**
      * @param version la que tenía la ficha al abrir el formulario: si otra persona guardó en el medio, 409.
      */
-    public record DatosEvento(int version, String nombre, short tipoEventoId, String observacionesInternas,
-            DatosCliente cliente, List<DatosContacto> contactos) {
+    /** {@code horaInicio} null: la del turno. */
+    public record DatosEvento(int version, String nombre, short tipoEventoId, LocalTime horaInicio,
+            String observacionesInternas, DatosCliente cliente, List<DatosContacto> contactos) {
     }
 
     @Transactional
@@ -92,8 +94,9 @@ public class DatosEventoService {
             registro.cambio("tipo_evento", catalogos.tipoEvento(evento.getTipoEventoId()).getNombre(), nuevo.getNombre());
         }
         registro.cambio("nombre", evento.getNombre(), datos.nombre());
+        registro.cambio("hora_inicio", hora(evento.getHoraInicio()), hora(datos.horaInicio()));
         registro.cambio("observaciones_internas", evento.getObservacionesInternas(), datos.observacionesInternas());
-        evento.actualizarDatos(datos.nombre(), datos.tipoEventoId(), datos.observacionesInternas());
+        evento.actualizarDatos(datos.nombre(), datos.tipoEventoId(), datos.horaInicio(), datos.observacionesInternas());
 
         Cliente cliente = evento.getCliente();
         DatosCliente c = datos.cliente();
@@ -135,6 +138,10 @@ public class DatosEventoService {
                 evento.quitarContacto(contacto);
             }
         }
+    }
+
+    private static String hora(LocalTime hora) {
+        return hora == null ? null : hora.toString();
     }
 
     /** Junta los cambios de un guardado, todos con el mismo momento. Si el valor no cambió, no deja fila. */

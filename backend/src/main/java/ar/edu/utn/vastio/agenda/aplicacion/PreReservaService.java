@@ -15,11 +15,7 @@ import ar.edu.utn.vastio.agenda.dominio.Cliente;
 import ar.edu.utn.vastio.agenda.dominio.EstadoEvento;
 import ar.edu.utn.vastio.agenda.dominio.Evento;
 import ar.edu.utn.vastio.agenda.dominio.UnidadComercializable;
-import ar.edu.utn.vastio.agenda.infraestructura.BloqueoRepository;
-import ar.edu.utn.vastio.agenda.infraestructura.EventoRepository;
 import ar.edu.utn.vastio.agenda.infraestructura.NumeradorEvento;
-import ar.edu.utn.vastio.agenda.infraestructura.UnidadComercializableRepository;
-import ar.edu.utn.vastio.comun.errores.Mensajes;
 import ar.edu.utn.vastio.comun.errores.ProblemaException;
 import ar.edu.utn.vastio.comun.seguridad.UsuarioActual;
 import ar.edu.utn.vastio.configuracion.aplicacion.CatalogoService;
@@ -31,9 +27,7 @@ import ar.edu.utn.vastio.usuarios.dominio.RolCodigo;
 /**
  * Registrar pre-reserva (UI-08): aparta una unidad para un cliente mientras se negocia. No vence sola.
  *
- * <p>Exclusividad: se toma {@code SELECT … FOR UPDATE} sobre la unidad y, con el bloqueo tomado, se verifica
- * que no haya evento activo ni bloqueo. Si aun así dos transacciones llegaran a insertar, el índice
- * {@code ux_evento_unidad_activa} rechaza la segunda. En ambos casos: 409 «Esa fecha ya está tomada…».
+ * <p>Exclusividad: {@link TomaDeUnidad}.
  */
 @Service
 public class PreReservaService {
@@ -41,9 +35,7 @@ public class PreReservaService {
     private static final ZoneId ZONA = ZoneId.of(VastioApplication.ZONA_HORARIA);
     private static final int LARGO_NOMBRE = 120;
 
-    private final UnidadComercializableRepository unidades;
-    private final EventoRepository eventos;
-    private final BloqueoRepository bloqueos;
+    private final TomaDeUnidad tomaDeUnidad;
     private final NumeradorEvento numerador;
     private final ClienteService clientes;
     private final CatalogoService catalogos;
@@ -52,15 +44,12 @@ public class PreReservaService {
     private final ConsultaEventoService consultas;
     private final EntityManager entityManager;
 
-    public PreReservaService(UnidadComercializableRepository unidades, EventoRepository eventos,
-            BloqueoRepository bloqueos, NumeradorEvento numerador, ClienteService clientes, CatalogoService catalogos,
-            UsuarioService usuarios, MaquinaDeEstados maquina, ConsultaEventoService consultas,
+    public PreReservaService(TomaDeUnidad tomaDeUnidad, NumeradorEvento numerador, ClienteService clientes,
+            CatalogoService catalogos, UsuarioService usuarios, MaquinaDeEstados maquina, ConsultaEventoService consultas,
             EntityManager entityManager) {
         this.consultas = consultas;
         this.entityManager = entityManager;
-        this.unidades = unidades;
-        this.eventos = eventos;
-        this.bloqueos = bloqueos;
+        this.tomaDeUnidad = tomaDeUnidad;
         this.numerador = numerador;
         this.clientes = clientes;
         this.catalogos = catalogos;
@@ -90,7 +79,7 @@ public class PreReservaService {
                     "El tipo de evento " + tipo.getNombre() + " está dado de baja. Elegí otro.");
         }
 
-        UnidadComercializable unidad = tomarUnidad(pedido.salonId(), pedido.fecha(), pedido.turnoId());
+        UnidadComercializable unidad = tomaDeUnidad.tomar(pedido.salonId(), pedido.fecha(), pedido.turnoId());
         Cliente cliente = clientes.obtenerOCrear(pedido.cliente());
         String nombre = pedido.nombre() == null || pedido.nombre().isBlank()
                 ? tipo.getNombre() + " de " + cliente.getNombre()
@@ -145,22 +134,6 @@ public class PreReservaService {
             throw ProblemaException.reglaDeNegocio("VENDEDORA_INVALIDA", "Elegí una vendedora activa.");
         }
         return pedida;
-    }
-
-    /** Crea la unidad si hace falta, la bloquea y verifica que esté libre. */
-    private UnidadComercializable tomarUnidad(short salonId, LocalDate fecha, short turnoId) {
-        unidades.asegurar(salonId, fecha, turnoId);
-        UnidadComercializable unidad = unidades.bloquear(salonId, fecha, turnoId).orElseThrow();
-        if (eventos.hayActivoEn(unidad.getId(), EstadoEvento.INACTIVOS)) {
-            throw ProblemaException.conflicto(Mensajes.CODIGO_FECHA_TOMADA, Mensajes.FECHA_TOMADA);
-        }
-        var bloqueo = bloqueos.activosEn(unidad.getId()).stream().findFirst();
-        if (bloqueo.isPresent()) {
-            String motivo = catalogos.motivo(bloqueo.get().getMotivoId()).getNombre().toLowerCase();
-            throw ProblemaException.conflicto("UNIDAD_BLOQUEADA",
-                    "Esa fecha está bloqueada (" + motivo + "). Elegí otro salón, otra fecha u otro turno.");
-        }
-        return unidad;
     }
 
     private static String recortar(String texto) {

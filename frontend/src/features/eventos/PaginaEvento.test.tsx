@@ -16,6 +16,8 @@ const FICHA: Ficha = {
   salon: { id: 2, codigo: 'club', nombre: 'Club de Campo', capacidad: null },
   fecha: '2026-09-26',
   turno: { id: 1, codigo: 'mediodia', nombre: 'Mediodía', horaInicio: '12:00:00', horaFin: '18:00:00' },
+  horaInicio: null,
+  reprogramadoDesde: null,
   cliente: { id: 7, nombre: 'Delfina Ríos', documento: '40123456', telefono: '351 555-1234', email: null },
   contactos: [{ id: 3, nombre: 'Mariela Ríos', vinculo: 'madre', telefono: '351 444-0000', email: null }],
   vendedora: { id: 1, nombre: 'Lucía Ferreyra' },

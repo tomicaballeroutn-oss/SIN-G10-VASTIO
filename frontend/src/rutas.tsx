@@ -5,6 +5,7 @@ import { PaginaDs } from './features/ds/PaginaDs';
 import { PaginaDatosEvento } from './features/eventos/PaginaDatosEvento';
 import { PaginaEvento } from './features/eventos/PaginaEvento';
 import { PaginaEventos } from './features/eventos/PaginaEventos';
+import { PaginaReprogramar } from './features/eventos/PaginaReprogramar';
 import { Layout } from './features/layout/Layout';
 import { MENU } from './features/layout/menu';
 import { ConPermiso, IrAlInicio, PaginaMas, PaginaMiCuenta, PaginaPendiente } from './features/layout/paginas';
@@ -39,6 +40,10 @@ export const rutas: RouteObject[] = [
       {
         path: 'eventos/:id/datos',
         element: <ConPermiso item={MENU.find((it) => it.id === 'eventos')!}><PaginaDatosEvento /></ConPermiso>,
+      },
+      {
+        path: 'eventos/:id/reprogramar',
+        element: <ConPermiso item={MENU.find((it) => it.id === 'eventos')!}><PaginaReprogramar /></ConPermiso>,
       },
       { path: 'mas', element: <PaginaMas /> },
       { path: 'mi-cuenta', element: <PaginaMiCuenta /> },

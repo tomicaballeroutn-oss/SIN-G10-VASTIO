@@ -1,5 +1,6 @@
 package ar.edu.utn.vastio.agenda.api;
 
+import java.time.LocalTime;
 import java.util.List;
 
 import jakarta.validation.Valid;
@@ -15,13 +16,14 @@ import ar.edu.utn.vastio.agenda.aplicacion.DatosEventoService.DatosEvento;
 
 /**
  * Registrar evento: el estado completo de los datos editables. Los contactos que no vienen se quitan.
- * La cantidad de invitados se registra aparte ({@link InvitadosRequest}).
+ * La cantidad de invitados se registra aparte ({@link InvitadosRequest}). {@code horaInicio} vacía: la del turno.
  * {@code version}: la de la ficha que se abrió, para no pisar cambios de otra persona.
  */
 public record DatosEventoRequest(
         @NotNull(message = "Falta la versión de la ficha. Volvé a abrirla.") Integer version,
         @NotBlank(message = "Escribí el nombre del evento.") @Size(max = 120, message = "Usá hasta 120 caracteres.") String nombre,
         @NotNull(message = "Elegí el tipo de evento.") Short tipoEventoId,
+        LocalTime horaInicio,
         @Size(max = 2000, message = "Usá hasta 2000 caracteres.") String observacionesInternas,
         @NotNull(message = "Faltan los datos del cliente.") @Valid ClienteDatos cliente,
         @NotNull List<@Valid ContactoDatos> contactos) {
@@ -42,7 +44,7 @@ public record DatosEventoRequest(
     }
 
     DatosEvento datos() {
-        return new DatosEvento(version, nombre.trim(), tipoEventoId, limpio(observacionesInternas),
+        return new DatosEvento(version, nombre.trim(), tipoEventoId, horaInicio, limpio(observacionesInternas),
                 new DatosCliente(cliente.nombre().trim(), limpio(cliente.documento()), limpio(cliente.telefono()),
                         limpio(cliente.email())),
                 contactos.stream().map(c -> new DatosContacto(c.id(), c.nombre().trim(), limpio(c.vinculo()),

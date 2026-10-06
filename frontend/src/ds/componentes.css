@@ -352,3 +352,9 @@ h2.h2, h3.h3, h3.h4 { margin: 0; color: var(--ink); }
 .v-files__item { display: flex; align-items: center; gap: var(--space-3); padding: var(--space-2) var(--space-2) var(--space-2) var(--space-3);
   background: var(--surface-sunken); border-radius: var(--radius-md); color: var(--ink); }
 .v-files__nombre { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+/* ---------- IconButton con contador (Sprint 2): campana de notificaciones ---------- */
+.v-iconbtn { position: relative; }
+.v-iconbtn__count { position: absolute; top: 2px; right: 2px; min-width: 18px; height: 18px; padding: 0 5px; display: inline-grid; place-items: center;
+  border-radius: var(--radius-pill); background: var(--accent); color: var(--on-accent); font-variant-numeric: tabular-nums; line-height: 1;
+  box-shadow: 0 0 0 2px var(--surface); pointer-events: none; }

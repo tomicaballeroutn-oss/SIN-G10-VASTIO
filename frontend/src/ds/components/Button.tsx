@@ -52,12 +52,17 @@ export interface IconButtonProps {
   size?: 'sm' | 'md' | 'lg';
   disabled?: boolean;
   pressed?: boolean;
+  /**
+   * Contador sobre el ícono (p. ej. avisos sin leer); 0 o ausente no se dibuja y más de 99 se muestra «99+».
+   * Es solo visual: `label` tiene que decir la cantidad («Notificaciones, 3 sin leer»).
+   */
+  count?: number;
   onClick?: (e: MouseEvent<HTMLButtonElement>) => void;
   type?: 'button' | 'submit';
   className?: string;
 }
 
-export function IconButton({ icon, label, variant = 'outline', tone, size = 'md', disabled, pressed, onClick, type = 'button', className }: IconButtonProps) {
+export function IconButton({ icon, label, variant = 'outline', tone, size = 'md', disabled, pressed, count, onClick, type = 'button', className }: IconButtonProps) {
   return (
     <button
       type={type}
@@ -69,6 +74,7 @@ export function IconButton({ icon, label, variant = 'outline', tone, size = 'md'
       aria-pressed={pressed}
     >
       <Icon name={icon} size={size === 'sm' ? 18 : 22} />
+      {!!count && count > 0 && <span className="v-iconbtn__count caption" aria-hidden>{count > 99 ? '99+' : count}</span>}
     </button>
   );
 }

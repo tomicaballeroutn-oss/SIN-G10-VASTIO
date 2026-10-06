@@ -43,6 +43,18 @@ public class NotificacionDestinatario {
         this.id.usuarioId = usuarioId;
     }
 
+    public Notificacion getNotificacion() {
+        return notificacion;
+    }
+
+    /** La primera lectura queda; volver a abrirla no cambia el momento. */
+    public void marcarLeida(OffsetDateTime ahora) {
+        if (!leida) {
+            leida = true;
+            fechaLectura = ahora;
+        }
+    }
+
     public long getUsuarioId() {
         return id.usuarioId;
     }

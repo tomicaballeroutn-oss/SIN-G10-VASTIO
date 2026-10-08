@@ -49,7 +49,7 @@ class MigracionesIT {
             "categoria_servicio, 10",
             "motivo, 13",
             "parametro, 3",
-            "tipo_bebida, 7",
+            "tipo_bebida, 5",
             "unidad_manipulacion, 3",
             "ubicacion, 4"
     })

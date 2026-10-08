@@ -55,7 +55,10 @@ export function Dialog({ open, inline, title, onClose, children, actions, id, cl
     if (!open || inline) return undefined;
     ref.current?.focus();
     function alTeclear(e: KeyboardEvent) {
-      if (e.key === 'Escape') onClose?.();
+      if (e.key !== 'Escape') return;
+      // Con un diálogo abierto desde otro (p. ej. el lector de código), Escape cierra solo el de arriba.
+      const abiertos = document.querySelectorAll('.v-scrim > .v-dialog');
+      if (abiertos[abiertos.length - 1] === ref.current) onClose?.();
     }
     document.addEventListener('keydown', alTeclear);
     return () => document.removeEventListener('keydown', alTeclear);

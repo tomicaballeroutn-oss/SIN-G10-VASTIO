@@ -31,3 +31,10 @@ El sistema de diseño original no tenía estilo para Contratado, En curso, Cerra
 
 - `SelectorArchivos`: zona para elegir archivos (en el celular abre la cámara o la galería; en la PC, el explorador o arrastrar y soltar) con la lista de los elegidos, su tamaño y un botón para quitar cada uno. Lo usa «Registrar firma de contrato» (UI-12). Muestra en `/_ds`. El sistema de diseño original no tenía un componente para adjuntar archivos.
 - `IconButton` acepta `count`: un contador sobre el ícono (avisos sin leer de la campana, UI-22). Es solo visual: el `label` tiene que decir la cantidad.
+
+## Cambios del Sprint 3
+
+- `CantidadEnCajas`: cantidad de bebida cargada en cajas (o packs) y botellas sueltas, que devuelve botellas. Con 1 botella por bulto, un solo contador. La usan el stock mínimo del catálogo y, más adelante, el ingreso, la carga inicial y el ajuste. Muestra en `/_ds`.
+- `cantidadLegible`, `enBultos` y `plural` (`cantidad.ts`): «8 cajas y 3 botellas» a partir de las botellas y de las que trae cada bulto. El backend guarda todo en botellas.
+- `LectorCodigo` (UI-30): lector de código de barras con la cámara trasera, en Android y en iOS (`@zxing/browser`; la API nativa no está en Safari). Necesita HTTPS: sin conexión segura, sin cámara o sin permiso lo dice y ofrece la carga manual. El mismo código leído varias veces seguidas cuenta una vez. La librería se carga recién al abrirlo. Muestra en `/_ds` («Simular lectura» funciona sin cámara).
+- `Dialog`: con un diálogo abierto desde otro (el lector desde el formulario de la bebida), Escape cierra solo el de arriba.

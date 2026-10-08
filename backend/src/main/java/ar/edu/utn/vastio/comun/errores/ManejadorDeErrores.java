@@ -43,7 +43,10 @@ public class ManejadorDeErrores extends ResponseEntityExceptionHandler {
 
     /** Restricciones de la base con código y mensaje propios. El resto de las violaciones usa {@link Mensajes#DATO_DUPLICADO}. */
     private static final Map<String, Restriccion> POR_RESTRICCION = Map.of(
-            "ux_evento_unidad_activa", new Restriccion(Mensajes.CODIGO_FECHA_TOMADA, Mensajes.FECHA_TOMADA));
+            "ux_evento_unidad_activa", new Restriccion(Mensajes.CODIGO_FECHA_TOMADA, Mensajes.FECHA_TOMADA),
+            // Dos altas simultáneas que pasaron el chequeo del servicio.
+            "ux_bebida_nombre_presentacion_activa", new Restriccion("BEBIDA_REPETIDA", Mensajes.BEBIDA_REPETIDA),
+            "pk_codigo_barra", new Restriccion("CODIGO_DE_OTRA_BEBIDA", Mensajes.CODIGO_DE_OTRA_BEBIDA));
 
     private record Restriccion(String codigo, String mensaje) {
     }

@@ -1,6 +1,7 @@
 import type { ReactNode } from 'react';
 import type { RouteObject } from 'react-router';
 import { PaginaAgenda } from './features/agenda/PaginaAgenda';
+import { PaginaCatalogo } from './features/bebidas/PaginaCatalogo';
 import { PaginaDs } from './features/ds/PaginaDs';
 import { PaginaDatosEvento } from './features/eventos/PaginaDatosEvento';
 import { PaginaEvento } from './features/eventos/PaginaEvento';
@@ -17,6 +18,7 @@ import { PaginaIngreso } from './features/sesion/PaginaIngreso';
 /** Pantallas ya construidas, por id del menú. El resto muestra PaginaPendiente hasta que llegue su historia. */
 const PANTALLAS: Partial<Record<string, ReactNode>> = {
   agenda: <PaginaAgenda />,
+  catalogo: <PaginaCatalogo />,
   eventos: <PaginaEventos />,
   notificaciones: <PaginaNotificaciones />,
   parametros: <PaginaParametros />,

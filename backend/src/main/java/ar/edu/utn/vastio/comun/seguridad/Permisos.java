@@ -24,6 +24,9 @@ public final class Permisos {
     /** Registrar o modificar datos de un evento; la regla «solo los suyos» se verifica en el servicio. */
     public static final String EDITAR_EVENTOS = "hasAnyRole('DIRECCION', 'COORDINACION', 'VENDEDORA', 'PLANNER')";
 
+    /** Catálogo de bebidas y proveedores: Administración y Compras, además del acceso total. */
+    public static final String CATALOGO_BEBIDA = "hasAnyRole('DIRECCION', 'COORDINACION', 'ADMINISTRACION', 'COMPRAS')";
+
     private Permisos() {
     }
 }

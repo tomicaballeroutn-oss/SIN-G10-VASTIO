@@ -358,3 +358,17 @@ h2.h2, h3.h3, h3.h4 { margin: 0; color: var(--ink); }
 .v-iconbtn__count { position: absolute; top: 2px; right: 2px; min-width: 18px; height: 18px; padding: 0 5px; display: inline-grid; place-items: center;
   border-radius: var(--radius-pill); background: var(--accent); color: var(--on-accent); font-variant-numeric: tabular-nums; line-height: 1;
   box-shadow: 0 0 0 2px var(--surface); pointer-events: none; }
+
+/* ---------- Sprint 3: cantidad en cajas y lector de código de barras ----------
+   CantidadEnCajas: cajas y botellas sueltas lado a lado; en pantallas angostas, una debajo de la otra.
+   LectorCodigo (UI-30): la cámara con un marco que indica dónde apuntar; la confirmación de la última lectura abajo. */
+.v-cantidad { margin: 0; padding: 0; border: 0; min-width: 0; }
+.v-cantidad legend { padding: 0; margin-bottom: var(--space-2); }
+.v-cantidad__controles { display: flex; flex-wrap: wrap; gap: var(--space-3) var(--space-5); }
+.v-lector__cuerpo { display: flex; flex-direction: column; gap: var(--space-3); min-width: min(440px, 100%); }
+.v-lector__visor { position: relative; width: 100%; aspect-ratio: 4 / 3; border-radius: var(--radius-lg); overflow: hidden; background: #000; }
+.v-lector__visor[hidden] { display: none; }
+.v-lector__video { width: 100%; height: 100%; object-fit: cover; display: block; }
+.v-lector__marco { position: absolute; inset: 18% 12%; border: 3px solid var(--accent); border-radius: var(--radius-lg); pointer-events: none; }
+.v-lector__lectura { display: flex; align-items: center; gap: var(--space-3); padding: var(--space-3) var(--space-4); border-radius: var(--radius-md);
+  background: var(--surface-sunken); color: var(--ink); }

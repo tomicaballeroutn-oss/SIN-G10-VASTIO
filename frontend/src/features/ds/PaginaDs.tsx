@@ -1,8 +1,9 @@
 import { useState, type ReactNode } from 'react';
 import {
-  Actor, AgendaGrid, Alert, Badge, Button, Card, Checkbox, Combobox, Dialog, EmptyState, EventCard, Icon, IconButton, Input,
-  MovementCard, Nav, SalonTag, Select, SelectorArchivos, Stat, StatusChip, Stepper, StockLevel, Switch, Table, Tabs, Timeline,
-  ESTADOS_DEL_EVENTO, ORDEN_SALONES, SALONES, aplicarTema, temaGuardado, type AgendaEvent, type EventStatus, type Tema,
+  Actor, AgendaGrid, Alert, Badge, Button, CantidadEnCajas, Card, Checkbox, Combobox, Dialog, EmptyState, EventCard, Icon, IconButton, Input,
+  LectorCodigo, MovementCard, Nav, SalonTag, Select, SelectorArchivos, Stat, StatusChip, Stepper, StockLevel, Switch, Table, Tabs, Timeline,
+  ESTADOS_DEL_EVENTO, ORDEN_SALONES, SALONES, aplicarTema, cantidadLegible, temaGuardado, type AgendaEvent, type EventStatus,
+  type IniciarLector, type Tema,
 } from '../../ds';
 import './pagina-ds.css';
 
@@ -60,6 +61,44 @@ function SelectorDeMuestra() {
       files={archivos}
       onChange={setArchivos}
     />
+  );
+}
+
+/** Cantidad en cajas de 6 y botellas sueltas; abajo, cómo se muestra. */
+function CantidadDeMuestra() {
+  const [botellas, setBotellas] = useState(51);
+  return (
+    <div className="ds-columna">
+      <CantidadEnCajas label="Cantidad inicial" value={botellas} onChange={setBotellas} porBulto={6} unidad="Caja" hint="Se guarda en botellas." />
+      <p className="body-sm">{botellas} botellas = {cantidadLegible(botellas, 6, 'Caja')}</p>
+    </div>
+  );
+}
+
+/** Sin cámara (como en la PC sin HTTPS), el lector lo dice y ofrece la carga manual. Con «Simular lectura», un código de ejemplo. */
+function LectorDeMuestra() {
+  const [abierto, setAbierto] = useState(false);
+  const [leido, setLeido] = useState<string | null>(null);
+  const [simular, setSimular] = useState(false);
+  const simulado: IniciarLector = async (_video, alLeer) => {
+    const t = setTimeout(() => alLeer('7790000000019'), 800);
+    return { stop: () => clearTimeout(t) };
+  };
+  return (
+    <>
+      <Button variant="outline" icon="scan-line" onClick={() => { setSimular(false); setAbierto(true); }}>Abrir lector</Button>
+      <Button variant="outline" icon="scan-line" onClick={() => { setSimular(true); setAbierto(true); }}>Simular lectura</Button>
+      <LectorCodigo
+        open={abierto}
+        onClose={() => setAbierto(false)}
+        onRead={setLeido}
+        onManual={() => setAbierto(false)}
+        instruction="Apuntá al código de la caja"
+        iniciar={simular ? simulado : undefined}
+      >
+        {leido && <span className="body">Fernet Branca · Caja de 6 · código {leido}</span>}
+      </LectorCodigo>
+    </>
   );
 }
 
@@ -158,6 +197,11 @@ export function PaginaDs() {
           <Checkbox label="Invitados definitivos" hint="Ya no se esperan cambios" defaultChecked />
           <Switch label="Tema oscuro en barra" />
         </div>
+      </Seccion>
+
+      <Seccion titulo="CantidadEnCajas y LectorCodigo (Sprint 3)">
+        <CantidadDeMuestra />
+        <LectorDeMuestra />
       </Seccion>
 
       <Seccion titulo="Alert">

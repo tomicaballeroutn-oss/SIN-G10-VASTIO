@@ -13,6 +13,8 @@
     "e2e": "playwright test"
   },
   "dependencies": {
+    "@zxing/browser": "^0.2.1",
+    "@zxing/library": "^0.23.0",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
     "react-router": "^7.18.4"

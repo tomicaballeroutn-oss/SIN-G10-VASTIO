@@ -33,6 +33,9 @@ public final class Permisos {
     /** Carga inicial e ingreso de bebida: Administración y Compras, además del acceso total. */
     public static final String INGRESO_BEBIDA = CATALOGO_BEBIDA;
 
+    /** Consultar stock: Administración y Compras ven todo; Barra, solo las barras de la jornada (en el servicio). */
+    public static final String CONSULTAR_STOCK = "hasAnyRole('DIRECCION', 'COORDINACION', 'ADMINISTRACION', 'COMPRAS', 'BARRA')";
+
     private Permisos() {
     }
 }

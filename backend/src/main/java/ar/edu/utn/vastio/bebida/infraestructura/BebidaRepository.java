@@ -22,6 +22,21 @@ public interface BebidaRepository extends JpaRepository<Bebida, Long> {
 
     List<Bebida> findByProveedorHabitualId(Long proveedorId);
 
+    /** Saldo de una bebida, en botellas. */
+    interface SaldoBebida {
+        Long getBebidaId();
+
+        BigDecimal getCantidad();
+    }
+
+    /** Saldos de la ubicación, incluidos los ceros. */
+    @Query(nativeQuery = true, value = "SELECT bebida_id AS bebidaId, cantidad FROM stock_ubicacion WHERE ubicacion_id = :ubicacionId")
+    List<SaldoBebida> saldosDe(short ubicacionId);
+
+    /** Total de cada bebida sumando todas las ubicaciones. */
+    @Query(nativeQuery = true, value = "SELECT bebida_id AS bebidaId, sum(cantidad) AS cantidad FROM stock_ubicacion GROUP BY bebida_id")
+    List<SaldoBebida> saldosTotales();
+
     /** Saldo de una ubicación con la bebida. */
     interface Saldo {
         Short getUbicacionId();

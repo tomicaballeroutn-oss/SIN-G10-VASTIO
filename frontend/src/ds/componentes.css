@@ -372,3 +372,8 @@ h2.h2, h3.h3, h3.h4 { margin: 0; color: var(--ink); }
 .v-lector__marco { position: absolute; inset: 18% 12%; border: 3px solid var(--accent); border-radius: var(--radius-lg); pointer-events: none; }
 .v-lector__lectura { display: flex; align-items: center; gap: var(--space-3); padding: var(--space-3) var(--space-4); border-radius: var(--radius-md);
   background: var(--surface-sunken); color: var(--ink); }
+
+/* ---------- StockLevel (Sprint 3): saldo negativo, sin culpa ----------
+   El saldo teórico quedó bajo cero porque falta registrar un movimiento: borde de advertencia, no de error. */
+.v-stock--negativo { border-color: var(--warning); }
+.v-meter--negativo .v-meter__fill { background: var(--warning); }

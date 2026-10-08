@@ -16,6 +16,8 @@ export const ESTADOS: Record<EventStatus | StockStatus, { label: string; icon: I
   ok: { label: 'En stock', icon: 'circle-check', tone: 'success' },
   bajo: { label: 'Stock bajo', icon: 'triangle-alert', tone: 'warning' },
   'sin-stock': { label: 'Sin stock', icon: 'circle-x', tone: 'danger' },
+  // Sin culpa: el saldo es teórico y se corrige registrando lo que falta.
+  negativo: { label: 'Falta registrar un movimiento', icon: 'circle-alert', tone: 'warning' },
 };
 
 /** Código de `evento.estado` en la base → estado del sistema de diseño. */

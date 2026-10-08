@@ -10,33 +10,57 @@ export interface StockLevelProps {
   presentacion?: string;
   ubicacion?: string;
   cantidad: number;
-  /** Lo que la agenda ya tiene comprometido; se marca sobre la barra. */
+  /** Cantidad como texto, en lugar del número y la unidad: «8 cajas y 3 botellas». */
+  cantidadTexto?: string;
+  /** Lo que la agenda ya tiene comprometido; se marca sobre la barra. Sin este dato no se dibuja la barra. */
   comprometido?: number;
   unidad?: string;
   unidadUno?: string;
-  status?: StockStatus;
+  /** null: sin chip de estado (la encargada de barra no ve estado ni stock mínimo). */
+  status?: StockStatus | null;
   className?: string;
 }
 
-export function StockLevel({ name, presentacion, ubicacion, cantidad, comprometido = 0, unidad = 'cajones', unidadUno = 'cajón', status, className }: StockLevelProps) {
+export function StockLevel({ name, presentacion, ubicacion, cantidad, cantidadTexto, comprometido, unidad = 'cajones', unidadUno = 'cajón', status, className }: StockLevelProps) {
   const enUnidad = (n: number) => (n === 1 ? unidadUno : unidad);
-  const estado: StockStatus = status ?? (cantidad <= 0 ? 'sin-stock' : cantidad < comprometido ? 'bajo' : 'ok');
-  const escala = Math.max(cantidad, comprometido, 1) * 1.15;
-  const relleno = Math.max(0, Math.min(100, (cantidad / escala) * 100));
-  const marca = Math.min(100, (comprometido / escala) * 100);
+  const estado: StockStatus | null = status === null ? null
+    : status ?? (cantidad < 0 ? 'negativo' : cantidad === 0 ? 'sin-stock' : cantidad < (comprometido ?? 0) ? 'bajo' : 'ok');
   return (
-    <div className={cx('v-stock', className)}>
+    <div className={cx('v-stock', estado && `v-stock--${estado}`, className)}>
       <div className="v-stock__top">
         <div>
           <p className="label">{name}</p>
           <p className="body-sm v-muted">{[presentacion, ubicacion].filter(Boolean).join(' · ')}</p>
         </div>
-        <StatusChip status={estado} size="sm" />
+        {estado && <StatusChip status={estado} size="sm" />}
       </div>
       <p className="v-stock__qty">
-        <span className="numeral">{cantidad}</span>
-        <span className="body-sm v-muted"> {enUnidad(cantidad)}</span>
+        {cantidadTexto ? (
+          <span className="numeral">{cantidadTexto}</span>
+        ) : (
+          <>
+            <span className="numeral">{cantidad}</span>
+            <span className="body-sm v-muted"> {enUnidad(cantidad)}</span>
+          </>
+        )}
       </p>
+      {comprometido !== undefined && <Medidor name={name} cantidad={cantidad} comprometido={comprometido} estado={estado ?? 'ok'} enUnidad={enUnidad} />}
+    </div>
+  );
+}
+
+function Medidor({ name, cantidad, comprometido, estado, enUnidad }: {
+  name: string;
+  cantidad: number;
+  comprometido: number;
+  estado: StockStatus;
+  enUnidad: (n: number) => string;
+}) {
+  const escala = Math.max(cantidad, comprometido, 1) * 1.15;
+  const relleno = Math.max(0, Math.min(100, (cantidad / escala) * 100));
+  const marca = Math.min(100, (comprometido / escala) * 100);
+  return (
+    <>
       <div
         className={cx('v-meter', `v-meter--${estado}`)}
         role="meter"
@@ -54,7 +78,7 @@ export function StockLevel({ name, presentacion, ubicacion, cantidad, comprometi
           {comprometido === 1 ? ' comprometido' : ' comprometidos'} por la agenda
         </p>
       )}
-    </div>
+    </>
   );
 }
 

@@ -369,6 +369,8 @@ export function PaginaDs() {
       <Seccion titulo="StockLevel y MovementCard">
         <StockLevel name="Fernet Branca" presentacion="750 ml" ubicacion="Depósito principal" cantidad={14} comprometido={6} />
         <StockLevel name="Malbec reserva" presentacion="750 ml" ubicacion="Depósito principal" cantidad={3} comprometido={8} />
+        <StockLevel name="Gin Bombay" presentacion="750 ml · Caja de 6" ubicacion="Barra Avril" cantidad={-3} cantidadTexto="−3 botellas" />
+        <StockLevel name="Fernet Branca" presentacion="750 ml · Caja de 6" ubicacion="Barra Avril (vista de la barra)" cantidad={9} cantidadTexto="1 caja y 3 botellas" status={null} />
         <MovementCard
           tipo="entrega"
           evento="Bruno y Martina"

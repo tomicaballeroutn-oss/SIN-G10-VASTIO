@@ -1,0 +1,17 @@
+/* UI-29: mobile first. Cabecera y buscador en una columna; desde tableta, en fila. */
+.ingreso-bebida__cabecera { display: grid; gap: var(--space-4); }
+@media (min-width: 720px) { .ingreso-bebida__cabecera { grid-template-columns: minmax(0, 1fr) 200px minmax(0, 1fr); align-items: start; } }
+.ingreso-bebida__agregar { display: flex; flex-wrap: wrap; gap: var(--space-3); align-items: end; }
+.ingreso-bebida__agregar > :first-child { flex: 1 1 260px; }
+
+.ingreso-bebida__renglones { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: var(--space-3); }
+.ingreso-bebida__pie { position: sticky; bottom: 0; z-index: 1; display: flex; flex-direction: column; gap: var(--space-3); padding: var(--space-4);
+  background: var(--surface-raised); border: 1px solid var(--line); border-radius: var(--radius-lg); box-shadow: var(--shadow-md); }
+@media (min-width: 640px) { .ingreso-bebida__pie { flex-direction: row; flex-wrap: wrap; align-items: center; justify-content: space-between; } }
+
+.ingreso-bebida__revision { display: flex; flex-direction: column; gap: var(--space-3); }
+.ingreso-bebida__lista { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: var(--space-1); }
+.ingreso-bebida__lista li { display: flex; justify-content: space-between; gap: var(--space-3); }
+.ingreso-bebida__recientes { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: var(--space-4); }
+.ingreso-bebida__recientes > li { display: flex; flex-direction: column; gap: var(--space-2); padding-bottom: var(--space-4); border-bottom: 1px solid var(--line); }
+.ingreso-bebida__recientes > li:last-child { border-bottom: 0; padding-bottom: 0; }

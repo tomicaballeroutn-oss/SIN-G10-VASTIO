@@ -25,6 +25,7 @@ export const MENU: readonly ItemDeMenu[] = [
 
   { id: 'barra', label: 'Barra', icon: 'martini', group: 'Bebidas', ruta: '/barra', roles: [...TOTAL, 'COMPRAS', 'BARRA'] },
   { id: 'existencias', label: 'Existencias', icon: 'package', group: 'Bebidas', ruta: '/existencias', roles: [...TOTAL, 'ADMINISTRACION', 'COMPRAS', 'BARRA'] },
+  { id: 'ingreso', label: 'Ingreso de mercadería', icon: 'truck', group: 'Bebidas', ruta: '/ingreso', roles: [...TOTAL, 'ADMINISTRACION', 'COMPRAS'] },
   { id: 'movimientos', label: 'Movimientos', icon: 'history', group: 'Bebidas', ruta: '/movimientos', roles: [...TOTAL, 'ADMINISTRACION', 'COMPRAS'] },
   { id: 'ordenes', label: 'Órdenes de preparación', icon: 'file-text', group: 'Bebidas', ruta: '/ordenes', roles: [...TOTAL, 'ADMINISTRACION', 'COMPRAS'] },
   { id: 'catalogo', label: 'Catálogo', icon: 'wine', group: 'Bebidas', ruta: '/catalogo', roles: [...TOTAL, 'ADMINISTRACION', 'COMPRAS'] },

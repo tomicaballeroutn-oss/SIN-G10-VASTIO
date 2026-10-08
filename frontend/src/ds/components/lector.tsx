@@ -124,12 +124,7 @@ function LectorAbierto({ onClose, onRead, manualLabel = 'Elegir a mano', onManua
       title="Leer código de barras"
       onClose={onClose}
       className="v-lector"
-      actions={
-        <>
-          <Button variant="outline" onClick={onClose}>Cerrar</Button>
-          <Button variant="outline" onClick={onManual}>{manualLabel}</Button>
-        </>
-      }
+      actions={<Button variant="outline" onClick={onManual}>{manualLabel}</Button>}
     >
       <div className="v-lector__cuerpo">
         {problema ? (

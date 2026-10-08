@@ -12,6 +12,11 @@ function sinPuntuacion(texto: string): string {
   return texto.replace(/,/g, '').replace(/\./g, '').replace(/\bsept\b/g, 'sep');
 }
 
+/** Hoy en Córdoba como fecha de calendario: «2026-10-07». */
+export function hoy(): string {
+  return new Intl.DateTimeFormat('en-CA', { timeZone: ZONA, year: 'numeric', month: '2-digit', day: '2-digit' }).format(new Date());
+}
+
 /** «2026-10-10» → «sáb 10 oct». Con año: «sáb 10 oct 2026». */
 export function fechaCorta(iso: string, conAnio = false): string {
   return sinPuntuacion(new Intl.DateTimeFormat('es-AR', {

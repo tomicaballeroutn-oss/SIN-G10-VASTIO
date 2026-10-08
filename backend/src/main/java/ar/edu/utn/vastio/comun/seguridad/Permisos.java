@@ -30,6 +30,9 @@ public final class Permisos {
     /** Consultar ubicaciones de stock: quienes las configuran y Compras (ingreso y stock). */
     public static final String CONSULTAR_UBICACIONES = CATALOGO_BEBIDA;
 
+    /** Carga inicial e ingreso de bebida: Administración y Compras, además del acceso total. */
+    public static final String INGRESO_BEBIDA = CATALOGO_BEBIDA;
+
     private Permisos() {
     }
 }

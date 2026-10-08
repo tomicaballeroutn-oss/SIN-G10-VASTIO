@@ -1,11 +1,16 @@
 import { useCallback, useEffect, useState } from 'react';
-import { ESTADO_STOCK, INTERVALO_STOCK_MS, stock, type UbicacionConsultable } from '../../api/stock';
+import { catalogos, type Motivo } from '../../api/catalogos';
+import { ESTADO_STOCK, INTERVALO_STOCK_MS, stock, type RenglonStock, type UbicacionConsultable } from '../../api/stock';
 import { useDatos } from '../../api/useDatos';
 import { NOMBRE_DE_TIPO } from '../../api/ubicaciones';
-import { Button, Card, EmptyState, Input, Select, StockLevel, cantidadLegible } from '../../ds';
+import { Alert, Button, Card, EmptyState, Input, Select, StockLevel, cantidadLegible } from '../../ds';
 import { Cargando } from '../comun/Cargando';
 import { Encabezado } from '../layout/paginas';
+import { DialogoRecuento, DialogoRotura } from './DialogosAjuste';
 import './existencias.css';
+
+/** Motivos activos del ámbito Ajuste, para el recuento y la rotura. */
+const cargarMotivos = () => catalogos.motivos().then((lista) => lista.filter((m) => m.ambito === 'AJUSTE' && m.activo));
 
 const TODAS = 'todas';
 
@@ -15,7 +20,7 @@ function etiqueta(u: UbicacionConsultable): string {
 }
 
 /**
- * UI-27 · Consultar stock. Dirección, Coordinación, Administración y Compras eligen cualquier ubicación o el total del
+ * UI-27 · Consultar stock (y UI-38 · ajuste: recuento y rotura desde cada bebida de una ubicación). Dirección, Coordinación, Administración y Compras eligen cualquier ubicación o el total del
  * complejo, con el estado de cada bebida. La encargada de barra elige entre las barras con evento en la jornada y ve solo
  * su saldo, sin estado (operación a ciegas). Se actualiza sola cada minuto.
  */
@@ -49,6 +54,11 @@ function Consulta({ ubicaciones }: { ubicaciones: UbicacionConsultable[] }) {
   const cargar = useCallback(() => stock.existencias(elegida === TODAS ? null : Number(elegida)), [elegida]);
   const datos = useDatos(cargar);
   const { recargar } = datos;
+  const [ajuste, setAjuste] = useState<{ tipo: 'recuento' | 'rotura'; renglon: RenglonStock } | null>(null);
+  const [aviso, setAviso] = useState<string | null>(null);
+  // El ajuste necesita una ubicación: no se ofrece en el total ni a la barra.
+  const ubicacion = elegida === TODAS ? undefined : ubicaciones.find((u) => String(u.ubicacion.id) === elegida)?.ubicacion;
+  const puedeAjustar = veTodo && ubicacion !== undefined;
 
   useEffect(() => {
     const intervalo = setInterval(recargar, INTERVALO_STOCK_MS);
@@ -60,10 +70,17 @@ function Consulta({ ubicaciones }: { ubicaciones: UbicacionConsultable[] }) {
     ...ubicaciones.map((u) => ({ value: String(u.ubicacion.id), label: etiqueta(u) })),
   ];
 
+  function registrado(mensaje: string) {
+    setAjuste(null);
+    setAviso(mensaje);
+    recargar();
+  }
+
   return (
     <>
+      {aviso && <Alert tone="success">{aviso}</Alert>}
       <div className="existencias__filtros">
-        <Select label="Ubicación" size="lg" options={opciones} value={elegida} onChange={(e) => setElegida(e.target.value)} />
+        <Select label="Ubicación" size="lg" options={opciones} value={elegida} onChange={(e) => { setElegida(e.target.value); setAviso(null); }} />
         <Input label="Buscar bebida" icon="search" size="lg" value={buscar} onChange={(e) => setBuscar(e.target.value)} />
         <Button variant="outline" icon="refresh-cw" size="lg" loading={datos.cargando && datos.datos !== undefined} onClick={recargar}>Actualizar</Button>
       </div>
@@ -90,6 +107,12 @@ function Consulta({ ubicaciones }: { ubicaciones: UbicacionConsultable[] }) {
                     cantidad={r.cantidad}
                     cantidadTexto={cantidadLegible(r.cantidad, r.bebida.unidadesPorBulto, r.bebida.unidad)}
                     status={r.estado ? ESTADO_STOCK[r.estado] : null}
+                    actions={puedeAjustar ? (
+                      <>
+                        <Button variant="outline" size="sm" icon="clipboard-list" onClick={() => setAjuste({ tipo: 'recuento', renglon: r })}>Registrar recuento</Button>
+                        <Button variant="text" size="sm" onClick={() => setAjuste({ tipo: 'rotura', renglon: r })}>Declarar rotura</Button>
+                      </>
+                    ) : undefined}
                   />
                 </li>
               ))}
@@ -98,6 +121,25 @@ function Consulta({ ubicaciones }: { ubicaciones: UbicacionConsultable[] }) {
           );
         }}
       </Cargando>
+      {ajuste && ubicacion && <DialogoAjuste tipo={ajuste.tipo} renglon={ajuste.renglon} ubicacion={ubicacion} alCerrar={() => setAjuste(null)} alRegistrar={registrado} />}
     </>
+  );
+}
+
+function DialogoAjuste({ tipo, renglon, ubicacion, alCerrar, alRegistrar }: {
+  tipo: 'recuento' | 'rotura';
+  renglon: RenglonStock;
+  ubicacion: { id: number; nombre: string };
+  alCerrar: () => void;
+  alRegistrar: (mensaje: string) => void;
+}) {
+  const motivos = useDatos(cargarMotivos);
+  return (
+    <Cargando datos={motivos}>
+      {(lista: Motivo[]) => {
+        const props = { ubicacion, renglon, motivos: lista, alCerrar, alRegistrar };
+        return tipo === 'recuento' ? <DialogoRecuento {...props} /> : <DialogoRotura {...props} />;
+      }}
+    </Cargando>
   );
 }

@@ -3,6 +3,7 @@ package ar.edu.utn.vastio.bebida.infraestructura;
 import java.math.BigDecimal;
 import java.util.Collection;
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -37,6 +38,10 @@ public interface MovimientoStockRepository extends JpaRepository<MovimientoStock
               AND (m.movimientoCorregidoId IS NULL OR m.movimientoCorregidoId NOT IN (SELECT i.id FROM MovimientoStock i
                        WHERE i.tipo = ar.edu.utn.vastio.bebida.dominio.TipoMovimiento.INVENTARIO_INICIAL AND i.destino.id = :ubicacionId))""")
     boolean tieneOtrosMovimientos(short ubicacionId);
+
+    /** Saldo de la bebida en la ubicación, bloqueando la fila hasta el final de la transacción (recuento). */
+    @Query(nativeQuery = true, value = "SELECT cantidad FROM stock_ubicacion WHERE ubicacion_id = :ubicacionId AND bebida_id = :bebidaId FOR UPDATE")
+    Optional<BigDecimal> saldoBloqueado(short ubicacionId, long bebidaId);
 
     /**
      * Suma {@code delta} (positivo o negativo) al saldo de la bebida en la ubicación y devuelve el saldo nuevo. Una sola

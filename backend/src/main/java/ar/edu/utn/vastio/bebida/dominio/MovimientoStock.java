@@ -106,10 +106,26 @@ public class MovimientoStock {
      */
     public static MovimientoStock correccion(MovimientoStock corregido, Ubicacion ubicacion, BigDecimal diferencia, short motivoId,
             String observacion, long usuarioId) {
-        boolean entra = diferencia.signum() > 0;
-        MovimientoStock m = new MovimientoStock(TipoMovimiento.AJUSTE, corregido.getBebida(), diferencia.abs(),
-                entra ? null : ubicacion, entra ? ubicacion : null, usuarioId);
+        MovimientoStock m = ajuste(corregido.getBebida(), ubicacion, diferencia, motivoId, observacion, usuarioId);
         m.movimientoCorregidoId = corregido.getId();
+        return m;
+    }
+
+    /** Ajuste por la diferencia (positiva: entra a la ubicación; negativa: sale), p. ej. un recuento físico. */
+    public static MovimientoStock ajuste(Bebida bebida, Ubicacion ubicacion, BigDecimal diferencia, short motivoId,
+            String observacion, long usuarioId) {
+        boolean entra = diferencia.signum() > 0;
+        MovimientoStock m = new MovimientoStock(TipoMovimiento.AJUSTE, bebida, diferencia.abs(), entra ? null : ubicacion,
+                entra ? ubicacion : null, usuarioId);
+        m.motivoId = motivoId;
+        m.observacion = observacion;
+        return m;
+    }
+
+    /** Mercadería que sale de la ubicación sin destino: una rotura declarada. */
+    public static MovimientoStock merma(Bebida bebida, Ubicacion ubicacion, BigDecimal cantidad, short motivoId, String observacion,
+            long usuarioId) {
+        MovimientoStock m = new MovimientoStock(TipoMovimiento.MERMA, bebida, cantidad, ubicacion, null, usuarioId);
         m.motivoId = motivoId;
         m.observacion = observacion;
         return m;

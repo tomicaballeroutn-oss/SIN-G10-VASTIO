@@ -1,3 +1,4 @@
+import type { ReactNode } from 'react';
 import type { SalonId, StockStatus } from '../tipos';
 import { cx } from '../util';
 import { Actor, Card } from './datos';
@@ -18,10 +19,12 @@ export interface StockLevelProps {
   unidadUno?: string;
   /** null: sin chip de estado (la encargada de barra no ve estado ni stock mínimo). */
   status?: StockStatus | null;
+  /** Botones al pie (p. ej. «Registrar recuento»). */
+  actions?: ReactNode;
   className?: string;
 }
 
-export function StockLevel({ name, presentacion, ubicacion, cantidad, cantidadTexto, comprometido, unidad = 'cajones', unidadUno = 'cajón', status, className }: StockLevelProps) {
+export function StockLevel({ name, presentacion, ubicacion, cantidad, cantidadTexto, comprometido, unidad = 'cajones', unidadUno = 'cajón', status, actions, className }: StockLevelProps) {
   const enUnidad = (n: number) => (n === 1 ? unidadUno : unidad);
   const estado: StockStatus | null = status === null ? null
     : status ?? (cantidad < 0 ? 'negativo' : cantidad === 0 ? 'sin-stock' : cantidad < (comprometido ?? 0) ? 'bajo' : 'ok');
@@ -45,6 +48,7 @@ export function StockLevel({ name, presentacion, ubicacion, cantidad, cantidadTe
         )}
       </p>
       {comprometido !== undefined && <Medidor name={name} cantidad={cantidad} comprometido={comprometido} estado={estado ?? 'ok'} enUnidad={enUnidad} />}
+      {actions && <div className="v-stock__acciones">{actions}</div>}
     </div>
   );
 }

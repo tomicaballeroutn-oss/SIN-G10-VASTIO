@@ -3,3 +3,4 @@
 @media (min-width: 720px) { .existencias__filtros { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) auto; } }
 .existencias__lista { list-style: none; margin: 0; padding: 0; display: grid; gap: var(--space-3); }
 @media (min-width: 720px) { .existencias__lista { grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); } }
+.existencias__form { display: flex; flex-direction: column; gap: var(--space-4); }

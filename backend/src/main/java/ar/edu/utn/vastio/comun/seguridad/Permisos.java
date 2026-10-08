@@ -36,6 +36,9 @@ public final class Permisos {
     /** Consultar stock: Administración y Compras ven todo; Barra, solo las barras de la jornada (en el servicio). */
     public static final String CONSULTAR_STOCK = "hasAnyRole('DIRECCION', 'COORDINACION', 'ADMINISTRACION', 'COMPRAS', 'BARRA')";
 
+    /** Ajuste de stock (recuento y rotura): Administración y Compras, además del acceso total. */
+    public static final String AJUSTE_STOCK = CATALOGO_BEBIDA;
+
     private Permisos() {
     }
 }

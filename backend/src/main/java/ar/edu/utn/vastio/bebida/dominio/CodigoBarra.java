@@ -20,7 +20,8 @@ public class CodigoBarra {
     @Column(name = "codigo", length = 20)
     private String codigo;
 
-    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    /** EAGER: leer un código es para saber de qué bebida es. */
+    @ManyToOne(fetch = FetchType.EAGER, optional = false)
     @JoinColumn(name = "bebida_id", nullable = false)
     private Bebida bebida;
 

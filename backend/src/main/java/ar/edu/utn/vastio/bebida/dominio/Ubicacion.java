@@ -36,8 +36,8 @@ public class Ubicacion {
     @Column(name = "salon_id")
     private Short salonId;
 
-    /** Solo barras: el depósito madre o la transición desde donde se abastece. */
-    @ManyToOne(fetch = FetchType.LAZY)
+    /** Solo barras: el depósito madre o la transición desde donde se abastece. EAGER: toda respuesta muestra su nombre. */
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "ubicacion_abastecimiento_id")
     private Ubicacion abastecimiento;
 

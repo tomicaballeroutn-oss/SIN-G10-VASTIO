@@ -57,7 +57,7 @@ public class Bebida {
     private BigDecimal stockMinimo;
 
     /** Las bebidas que provee un proveedor son las que lo tienen como habitual (Sprint 3, decisión 13). */
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "proveedor_habitual_id")
     private Proveedor proveedorHabitual;
 
@@ -67,7 +67,8 @@ public class Bebida {
     @Column(name = "fecha_baja")
     private OffsetDateTime fechaBaja;
 
-    @OneToMany(mappedBy = "bebida", cascade = CascadeType.ALL, orphanRemoval = true)
+    /** EAGER: son pocos y toda respuesta los lleva; con open-in-view apagado no se pueden cargar después. */
+    @OneToMany(mappedBy = "bebida", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
     private List<CodigoBarra> codigos = new ArrayList<>();
 
     protected Bebida() {

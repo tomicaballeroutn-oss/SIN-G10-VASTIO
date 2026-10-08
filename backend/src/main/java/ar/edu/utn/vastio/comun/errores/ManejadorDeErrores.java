@@ -46,7 +46,9 @@ public class ManejadorDeErrores extends ResponseEntityExceptionHandler {
             "ux_evento_unidad_activa", new Restriccion(Mensajes.CODIGO_FECHA_TOMADA, Mensajes.FECHA_TOMADA),
             // Dos altas simultáneas que pasaron el chequeo del servicio.
             "ux_bebida_nombre_presentacion_activa", new Restriccion("BEBIDA_REPETIDA", Mensajes.BEBIDA_REPETIDA),
-            "pk_codigo_barra", new Restriccion("CODIGO_DE_OTRA_BEBIDA", Mensajes.CODIGO_DE_OTRA_BEBIDA));
+            "pk_codigo_barra", new Restriccion("CODIGO_DE_OTRA_BEBIDA", Mensajes.CODIGO_DE_OTRA_BEBIDA),
+            "ux_ubicacion_deposito_madre", new Restriccion("DEPOSITO_MADRE_EXISTENTE", Mensajes.DEPOSITO_MADRE_EXISTENTE),
+            "ux_ubicacion_nombre", new Restriccion("NOMBRE_REPETIDO", Mensajes.UBICACION_REPETIDA));
 
     private record Restriccion(String codigo, String mensaje) {
     }

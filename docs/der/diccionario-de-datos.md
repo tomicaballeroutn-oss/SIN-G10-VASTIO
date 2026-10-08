@@ -19,13 +19,14 @@ Motor: PostgreSQL. Convenciones: nombres en `snake_case` y en español; claves p
 | Se agregaron `parametro` y `motivo` | Horizonte de cocina, expiración de sesión y listas de motivos configurables. |
 | Se agregaron `proveedor`, `codigo_barra`, `ingreso`, `consumo_evento` | Carga inicial de proveedores, varios códigos por artículo, cabecera del ingreso con remito y costo congelado al cierre. |
 | `bebida`: precio de referencia, stock mínimo, baja lógica, unidades por bulto | El `factorConversion` depende del artículo (un cajón de cerveza no trae lo mismo que uno de vino), por eso pasa a `bebida`. |
-| `ubicacion`: tipo, padre y salón | Sectores del depósito de Avril, depósito de transición configurable y barra de cada salón. |
+| `ubicacion`: tipo y salón | Depósito de transición configurable y barra de cada salón. (V6 quitó los sectores y la ubicación padre.) |
 | `movimiento_stock`: fecha y hora, motivo, movimiento corregido, ingreso | Auditoría (RNF-SEG-03) y asiento de ajuste que referencia al original (UI-38). |
 | `asistencia_segmento`: cantidad prevista además de la real; PK simple | UI-19 pide la prevista por segmento. La PK triple del v1 era redundante. |
 | `turno`: horario | Sin horario el sistema no puede pasar el evento a En curso ni a Realizado. |
 | `orden_preparacion`: estado, origen y destino | Tiene su propia máquina de estados (§6.1). |
 | `salon.color_hex` → `salon.codigo`; `turno.codigo` | El color de cada salón ya está en los tokens del sistema de diseño, con variante clara y oscura; un solo hex en la base lo duplicaba y rompía el tema oscuro. El código estable (avril, club, santa-barbara; mediodia, noche) es el que usa el frontend. |
 | Sin precios ni costos (V5, Sprint 3) | El sistema maneja cantidades; cada área calcula los costos con sus remitos. Se quitaron `bebida.precio_referencia` y el precio y el costo de `consumo_evento`. La seña es la única excepción. |
+| Ubicaciones: sin sectores; abastecimiento de la barra y máximo de barras por salón (V6, Sprint 3) | Las divisiones internas del depósito no se modelan. Cada barra se abastece del depósito madre o de una transición, con retiro directo del depósito madre como contingencia. Una barra por salón; Avril, hasta dos. |
 | Solo bebida con alcohol; «Cajón» pasa a «Caja» (V5) | Alcance de esta etapa. La caja es solo la forma de mostrar y cargar: todo se guarda en botellas. |
 | Correcciones menores | `cliente.nombre_cli` estaba marcado como FK; typos `CATEGORIASERIVICIO` y `tipoMovimiemto_id`; `unidadComerciable` → `unidad_comercializable`. |
 
@@ -119,6 +120,7 @@ Salón del complejo.
 | `capacidad` | integer |  | SÍ | Capacidad máxima de invitados. > 0. |
 | `codigo` | varchar(20) | UQ | NO | avril · club · santa-barbara. El color de la agenda (RNF-DIS-01) sale de los tokens del sistema de diseño según este código, con variante para tema claro y oscuro. |
 | `activo` | boolean |  | NO | Default true. |
+| `maximo_barras` | smallint |  | NO | Barras activas que puede tener: 1; Avril, 2 (V6). ≥ 1. Sin pantalla. |
 
 #### TURNO
 
@@ -453,16 +455,19 @@ Códigos de barras de un artículo. Un artículo puede tener varios (botella y c
 
 #### UBICACION
 
-Depósito, sector, depósito de transición o barra. Configurable: el circuito funciona con o sin transición.
+Depósito madre, depósito de transición o barra. Configurable: el circuito funciona con o sin transición. Las divisiones internas del depósito no se modelan (V6).
 
 | Campo | Tipo | Clave | Nulo | Descripción / valores posibles |
 |---|---|---|---|---|
 | `ubicacion_id` | smallint | PK | NO | Identificador. |
-| `nombre` | varchar(60) | UQ | NO | Ej.: Depósito principal · Sector A · Barra Avril. |
-| `tipo` | varchar(12) |  | NO | DEPOSITO · SECTOR · TRANSICION · BARRA. |
-| `ubicacion_padre_id` | smallint | FK | SÍ | → ubicacion. Obligatoria si tipo = SECTOR. |
-| `salon_id` | smallint | FK | SÍ | → salon. Obligatoria si tipo = BARRA. |
+| `nombre` | varchar(60) | UQ | NO | Ej.: Depósito principal · Transición Club de Campo · Barra Avril. Único sin distinguir mayúsculas (V6). |
+| `tipo` | varchar(12) |  | NO | DEPOSITO (depósito madre) · TRANSICION · BARRA. No cambia después del alta. |
+| `salon_id` | smallint | FK | SÍ | → salon. Obligatoria si tipo = BARRA; opcional en TRANSICION; nula en DEPOSITO. |
+| `ubicacion_abastecimiento_id` | smallint | FK | SÍ | → ubicacion. Solo barras, y obligatoria: el depósito madre o un depósito de transición (V6). |
+| `permite_retiro_directo` | boolean |  | NO | Solo barras abastecidas por una transición: habilita el retiro directo del depósito madre como contingencia. Default false (V6). |
 | `activo` | boolean |  | NO | Default true. |
+
+*Restricciones (V6):* `ux_ubicacion_deposito_madre` (un solo DEPOSITO activo); `ux_ubicacion_nombre` UNIQUE (lower(nombre)); `ck_ubicacion_abastecimiento` (solo las barras tienen origen y retiro directo). Máximo de barras activas por salón según `salon.maximo_barras`, validado en el backend.
 
 #### STOCK_UBICACION
 

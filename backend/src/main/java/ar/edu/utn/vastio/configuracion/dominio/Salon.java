@@ -32,6 +32,10 @@ public class Salon {
     @Column(name = "activo", nullable = false)
     private boolean activo = true;
 
+    /** Barras activas que puede tener: una; Avril, dos (V6). Sin pantalla. */
+    @Column(name = "maximo_barras", nullable = false)
+    private short maximoBarras = 1;
+
     protected Salon() {
     }
 
@@ -63,5 +67,9 @@ public class Salon {
 
     public boolean isActivo() {
         return activo;
+    }
+
+    public short getMaximoBarras() {
+        return maximoBarras;
     }
 }

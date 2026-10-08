@@ -27,6 +27,9 @@ public final class Permisos {
     /** Catálogo de bebidas y proveedores: Administración y Compras, además del acceso total. */
     public static final String CATALOGO_BEBIDA = "hasAnyRole('DIRECCION', 'COORDINACION', 'ADMINISTRACION', 'COMPRAS')";
 
+    /** Consultar ubicaciones de stock: quienes las configuran y Compras (ingreso y stock). */
+    public static final String CONSULTAR_UBICACIONES = CATALOGO_BEBIDA;
+
     private Permisos() {
     }
 }

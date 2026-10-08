@@ -10,6 +10,8 @@ public final class Mensajes {
     public static final String FECHA_TOMADA = "Esa fecha ya está tomada. Elegí otro salón, otra fecha u otro turno.";
     public static final String BEBIDA_REPETIDA = "Ya hay una bebida activa con ese nombre y presentación. Modificá esa en lugar de cargar otra.";
     public static final String CODIGO_DE_OTRA_BEBIDA = "Uno de los códigos ya es de otra bebida. Quitáselo a esa bebida antes de usarlo acá.";
+    public static final String DEPOSITO_MADRE_EXISTENTE = "Ya hay un depósito madre activo. Solo puede haber uno.";
+    public static final String UBICACION_REPETIDA = "Ya hay una ubicación con ese nombre.";
     public static final String DATO_DUPLICADO = "Ya hay un registro con esos datos. Revisalos y volvé a intentarlo.";
     public static final String EDICION_SIMULTANEA = "Otra persona guardó cambios al mismo tiempo. Volvé a abrir la pantalla y repetí lo que hiciste.";
     public static final String DATOS_INVALIDOS = "Revisá los datos marcados.";

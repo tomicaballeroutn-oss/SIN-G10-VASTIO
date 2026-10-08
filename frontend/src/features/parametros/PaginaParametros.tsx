@@ -5,6 +5,7 @@ import { Encabezado } from '../layout/paginas';
 import {
   SeccionCategorias, SeccionGenerales, SeccionMotivos, SeccionSalones, SeccionSegmentos, SeccionTiposEvento, SeccionTurnos,
 } from './secciones';
+import { SeccionUbicaciones } from './ubicaciones';
 import './parametros.css';
 
 const SECCIONES: { id: string; label: string; contenido: () => ReactNode }[] = [
@@ -14,6 +15,7 @@ const SECCIONES: { id: string; label: string; contenido: () => ReactNode }[] = [
   { id: 'segmentos', label: 'Segmentos de asistencia', contenido: () => <SeccionSegmentos /> },
   { id: 'categorias', label: 'Categorías de servicio', contenido: () => <SeccionCategorias /> },
   { id: 'motivos', label: 'Motivos', contenido: () => <SeccionMotivos /> },
+  { id: 'ubicaciones', label: 'Ubicaciones de stock', contenido: () => <SeccionUbicaciones /> },
   { id: 'generales', label: 'Sesión y cocina', contenido: () => <SeccionGenerales /> },
 ];
 

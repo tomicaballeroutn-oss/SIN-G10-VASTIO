@@ -29,9 +29,10 @@ public final class CatalogoDto {
 
     // ---------- salones ----------
 
-    public record SalonResponse(short id, String codigo, String nombre, Integer capacidad, boolean activo) {
+    /** {@code maximoBarras}: barras activas que puede tener (una; Avril, dos). */
+    public record SalonResponse(short id, String codigo, String nombre, Integer capacidad, boolean activo, short maximoBarras) {
         static SalonResponse de(Salon s) {
-            return new SalonResponse(s.getId(), s.getCodigo(), s.getNombre(), s.getCapacidad(), s.isActivo());
+            return new SalonResponse(s.getId(), s.getCodigo(), s.getNombre(), s.getCapacidad(), s.isActivo(), s.getMaximoBarras());
         }
     }
 

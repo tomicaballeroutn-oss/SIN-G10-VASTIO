@@ -64,7 +64,7 @@ class MigracionesIT {
         var indices = jdbc.queryForList(
                 "SELECT indexname FROM pg_indexes WHERE schemaname = 'public'", String.class);
 
-        assertThat(indices).contains("ux_evento_unidad_activa", "ux_orden_evento_vigente");
+        assertThat(indices).contains("ux_evento_unidad_activa", "ux_orden_evento_vigente", "ux_ubicacion_deposito_madre");
     }
 
     @Test

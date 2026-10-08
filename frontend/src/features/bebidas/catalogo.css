@@ -1,22 +1,22 @@
 /* UI-25: filtros en fila desde tableta; en teléfono, uno debajo del otro. */
-.catalogo__filtros { display: grid; gap: var(--space-3); align-items: end; }
-@media (min-width: 640px) { .catalogo__filtros { grid-template-columns: minmax(0, 1fr) 220px auto; } }
-.catalogo__buscar { display: flex; gap: var(--space-2); align-items: end; min-width: 0; }
-.catalogo__buscar > :first-child { flex: 1; }
-.catalogo__nombre { display: inline-flex; flex-wrap: wrap; align-items: center; gap: var(--space-2); }
-.catalogo__acciones { display: inline-flex; flex-wrap: wrap; gap: var(--space-1); }
+.bebidas__filtros { display: grid; gap: var(--space-3); align-items: end; }
+@media (min-width: 640px) { .bebidas__filtros { grid-template-columns: minmax(0, 1fr) 220px auto; } }
+.bebidas__buscar { display: flex; gap: var(--space-2); align-items: end; min-width: 0; }
+.bebidas__buscar > :first-child { flex: 1; }
+.bebidas__nombre { display: inline-flex; flex-wrap: wrap; align-items: center; gap: var(--space-2); }
+.bebidas__acciones { display: inline-flex; flex-wrap: wrap; gap: var(--space-1); }
 
-.catalogo__form { display: flex; flex-direction: column; gap: var(--space-4); }
-.catalogo__bulto { display: grid; gap: var(--space-3); }
-@media (min-width: 480px) { .catalogo__bulto { grid-template-columns: minmax(0, 1fr) 160px; align-items: start; } }
+.bebidas__form { display: flex; flex-direction: column; gap: var(--space-4); }
+.bebidas__bulto { display: grid; gap: var(--space-3); }
+@media (min-width: 480px) { .bebidas__bulto { grid-template-columns: minmax(0, 1fr) 160px; align-items: start; } }
 
-.catalogo__codigos { display: flex; flex-direction: column; gap: var(--space-2); margin: 0; padding: 0; border: 0; min-width: 0; }
-.catalogo__codigos legend { padding: 0; margin-bottom: var(--space-1); }
-.catalogo__lista-codigos { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: var(--space-2); }
-.catalogo__codigo { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 200px) auto; gap: var(--space-2); align-items: center;
+.bebidas__codigos { display: flex; flex-direction: column; gap: var(--space-2); margin: 0; padding: 0; border: 0; min-width: 0; }
+.bebidas__codigos legend { padding: 0; margin-bottom: var(--space-1); }
+.bebidas__lista-codigos { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: var(--space-2); }
+.bebidas__codigo { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 200px) auto; gap: var(--space-2); align-items: center;
   padding: var(--space-2) var(--space-2) var(--space-2) var(--space-3); background: var(--surface-sunken); border-radius: var(--radius-md); }
 /* La etiqueta del Select queda para el lector de pantalla: la fila ya dice de qué código se trata. */
-.catalogo__codigo-unidades .v-field__label { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
-.catalogo__nuevo-codigo { display: flex; flex-wrap: wrap; gap: var(--space-2); align-items: end; }
-.catalogo__nuevo-codigo > :first-child { flex: 1 1 200px; }
-.catalogo__saldos { margin: var(--space-2) 0; padding-left: var(--space-5); }
+.bebidas__codigo-unidades .v-field__label { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+.bebidas__nuevo-codigo { display: flex; flex-wrap: wrap; gap: var(--space-2); align-items: end; }
+.bebidas__nuevo-codigo > :first-child { flex: 1 1 200px; }
+.bebidas__saldos { margin: var(--space-2) 0; padding-left: var(--space-5); }

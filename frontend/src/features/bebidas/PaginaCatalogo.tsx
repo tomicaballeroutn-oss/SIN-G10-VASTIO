@@ -79,7 +79,7 @@ export function PaginaCatalogo() {
       key: 'nombre',
       header: 'Bebida',
       render: (b) => (
-        <span className="catalogo__nombre">
+        <span className="bebidas__nombre">
           {b.nombre}
           {!b.activo && <Badge>De baja</Badge>}
         </span>
@@ -102,7 +102,7 @@ export function PaginaCatalogo() {
       key: 'acciones',
       header: 'Acciones',
       render: (b) => (
-        <span className="catalogo__acciones">
+        <span className="bebidas__acciones">
           <Button variant="text" size="sm" icon="pencil" onClick={() => setEditando(b)}>Modificar</Button>
           {b.activo ? (
             <Button variant="text" tone="danger" size="sm" onClick={() => setADarDeBaja(b)}>Dar de baja</Button>
@@ -125,8 +125,8 @@ export function PaginaCatalogo() {
           const filtradas = lista.filter((b) => (verBajas || b.activo) && (!tipo || String(b.tipo.id) === tipo) && coincide(b, texto));
           return (
             <>
-              <div className="catalogo__filtros">
-                <div className="catalogo__buscar">
+              <div className="bebidas__filtros">
+                <div className="bebidas__buscar">
                   <Input label="Buscar" icon="search" placeholder="Nombre o código de barras" value={buscar} onChange={(e) => setBuscar(e.target.value)} />
                   <IconButton icon="scan-line" label="Buscar con la cámara" variant="outline" onClick={() => setLector(true)} />
                 </div>
@@ -256,7 +256,7 @@ function DialogoBebida({ bebida, tipos, unidades, alCerrar, alGuardar }: {
         </>
       }
     >
-      <div className="catalogo__form">
+      <div className="bebidas__form">
         {error && !error.errores.length && <Alert tone="danger">{error.message}</Alert>}
         <Input label="Nombre" placeholder="Por ejemplo, Fernet Branca" value={nombre} onChange={(e) => setNombre(e.target.value)} error={error?.errorDe('nombre')} required />
         <Input label="Presentación" placeholder="Por ejemplo, 750 ml" value={presentacion} onChange={(e) => setPresentacion(e.target.value)} error={error?.errorDe('presentacion')} required />
@@ -269,7 +269,7 @@ function DialogoBebida({ bebida, tipos, unidades, alCerrar, alGuardar }: {
           error={error?.errorDe('tipoId')}
           required
         />
-        <div className="catalogo__bulto">
+        <div className="bebidas__bulto">
           <Select
             label="Se mueve en"
             placeholder="Elegí la unidad"
@@ -300,17 +300,17 @@ function DialogoBebida({ bebida, tipos, unidades, alCerrar, alGuardar }: {
           unidad={nombreUnidad}
           error={error?.errorDe('stockMinimo')}
         />
-        <fieldset className="catalogo__codigos">
+        <fieldset className="bebidas__codigos">
           <legend className="label">Códigos de barras <span className="v-muted">(opcional)</span></legend>
           <p className="body-sm v-muted">El código identifica la bebida al leerlo; la cantidad se carga aparte. Puede tener el de la botella y el de la caja.</p>
           {codigos.length > 0 && (
-            <ul className="catalogo__lista-codigos">
+            <ul className="bebidas__lista-codigos">
               {codigos.map((c) => (
-                <li key={c.codigo} className="catalogo__codigo">
+                <li key={c.codigo} className="bebidas__codigo">
                   <span className="numeral-sm">{c.codigo}</span>
                   <Select
                     label={`Qué representa ${c.codigo}`}
-                    className="catalogo__codigo-unidades"
+                    className="bebidas__codigo-unidades"
                     options={opcionesDeUnidades(c.unidades)}
                     value={String(c.unidades)}
                     onChange={(e) => cambiarUnidades(c.codigo, Number(e.target.value))}
@@ -321,7 +321,7 @@ function DialogoBebida({ bebida, tipos, unidades, alCerrar, alGuardar }: {
             </ul>
           )}
           {erroresDeCodigos.map((m) => <p key={m} className="body-sm v-field__error" role="alert">{m}</p>)}
-          <div className="catalogo__nuevo-codigo">
+          <div className="bebidas__nuevo-codigo">
             <Input
               label="Agregar código"
               inputMode="numeric"
@@ -373,7 +373,7 @@ function DialogoBaja({ bebida, alCerrar, alConfirmar }: { bebida: Bebida; alCerr
         </>
       }
     >
-      <div className="catalogo__form">
+      <div className="bebidas__form">
         {error && <Alert tone="danger">{error.message}</Alert>}
         <p>
           {bebida.nombre} {bebida.presentacion} deja de ofrecerse para cargar. Lo que ya se registró se conserva y la podés reactivar cuando quieras.
@@ -382,7 +382,7 @@ function DialogoBaja({ bebida, alCerrar, alConfirmar }: { bebida: Bebida; alCerr
           {(lista) =>
             lista.length > 0 ? (
               <Alert tone="warning" icon="triangle-alert" title={lista.length === 1 ? 'Tiene saldo en 1 ubicación' : `Tiene saldo en ${lista.length} ubicaciones`}>
-                <ul className="catalogo__saldos">
+                <ul className="bebidas__saldos">
                   {lista.map((s) => (
                     <li key={s.ubicacionId}>
                       {s.ubicacion}: {cantidadLegible(s.cantidad, bebida.unidadesPorBulto, bebida.unidad.nombre)}

@@ -100,6 +100,33 @@ public class MovimientoStock {
         return m;
     }
 
+    /**
+     * Corrección de un asiento por la diferencia (positiva: entra a la ubicación; negativa: sale), como AJUSTE que
+     * referencia al corregido. El asiento original no se toca.
+     */
+    public static MovimientoStock correccion(MovimientoStock corregido, Ubicacion ubicacion, BigDecimal diferencia, short motivoId,
+            String observacion, long usuarioId) {
+        boolean entra = diferencia.signum() > 0;
+        MovimientoStock m = new MovimientoStock(TipoMovimiento.AJUSTE, corregido.getBebida(), diferencia.abs(),
+                entra ? null : ubicacion, entra ? ubicacion : null, usuarioId);
+        m.movimientoCorregidoId = corregido.getId();
+        m.motivoId = motivoId;
+        m.observacion = observacion;
+        return m;
+    }
+
+    /** Lo que suma (o resta) este asiento al saldo de la ubicación. */
+    public BigDecimal efectoEn(Ubicacion ubicacion) {
+        BigDecimal efecto = BigDecimal.ZERO;
+        if (destino != null && destino.getId().equals(ubicacion.getId())) {
+            efecto = efecto.add(cantidad);
+        }
+        if (origen != null && origen.getId().equals(ubicacion.getId())) {
+            efecto = efecto.subtract(cantidad);
+        }
+        return efecto;
+    }
+
     public Long getId() {
         return id;
     }

@@ -53,7 +53,7 @@ class IngresoConcurrenciaIT {
 
     @BeforeEach
     void bebida() {
-        bebida = bebidas.crear(new DatosBebida(NOMBRE, "750 ml", (short) 3, (short) 1, (short) 6, null, List.of())).getId();
+        bebida = bebidas.crear(new DatosBebida(NOMBRE, "750 ml", (short) 3, (short) 1, (short) 6, null, List.of(), null)).getId();
     }
 
     @RepeatedTest(3)

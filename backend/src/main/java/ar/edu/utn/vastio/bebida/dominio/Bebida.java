@@ -56,6 +56,11 @@ public class Bebida {
     @Column(name = "stock_minimo", precision = 10, scale = 2)
     private BigDecimal stockMinimo;
 
+    /** Las bebidas que provee un proveedor son las que lo tienen como habitual (Sprint 3, decisión 13). */
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "proveedor_habitual_id")
+    private Proveedor proveedorHabitual;
+
     @Column(name = "activo", nullable = false)
     private boolean activo = true;
 
@@ -102,6 +107,10 @@ public class Bebida {
         });
     }
 
+    public void asignarProveedor(Proveedor proveedor) {
+        this.proveedorHabitual = proveedor;
+    }
+
     public void darDeBaja() {
         if (activo) {
             activo = false;
@@ -145,6 +154,10 @@ public class Bebida {
 
     public BigDecimal getStockMinimo() {
         return stockMinimo;
+    }
+
+    public Proveedor getProveedorHabitual() {
+        return proveedorHabitual;
     }
 
     public boolean isActivo() {

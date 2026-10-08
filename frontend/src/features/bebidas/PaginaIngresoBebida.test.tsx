@@ -21,7 +21,7 @@ vi.mock('@zxing/browser', () => ({
 const CAJA = { id: 1, nombre: 'Caja', esBotella: false };
 const bebida = (id: number, nombre: string, extra: Partial<Bebida> = {}): Bebida => ({
   id, nombre, presentacion: '750 ml', tipo: { id: 3, nombre: 'Destilado' }, unidad: CAJA, unidadesPorBulto: 6, stockMinimo: null,
-  codigos: [], activo: true, fechaBaja: null, ...extra,
+  codigos: [], proveedorHabitual: null, activo: true, fechaBaja: null, ...extra,
 });
 const BEBIDAS: Bebida[] = [
   bebida(1, 'Fernet Branca', { codigos: [{ codigo: '17790000000016', unidades: 6 }] }),

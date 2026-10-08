@@ -15,6 +15,30 @@ public interface MovimientoStockRepository extends JpaRepository<MovimientoStock
     List<MovimientoStock> deIngresos(Collection<Long> ingresos);
 
     /**
+     * La carga inicial de la ubicación: sus INVENTARIO_INICIAL y los AJUSTE que los corrigen, en orden.
+     */
+    @Query("""
+            SELECT m FROM MovimientoStock m JOIN FETCH m.bebida
+            WHERE (m.destino.id = :ubicacionId OR m.origen.id = :ubicacionId)
+              AND (m.tipo = ar.edu.utn.vastio.bebida.dominio.TipoMovimiento.INVENTARIO_INICIAL
+                   OR m.movimientoCorregidoId IN (SELECT i.id FROM MovimientoStock i
+                       WHERE i.tipo = ar.edu.utn.vastio.bebida.dominio.TipoMovimiento.INVENTARIO_INICIAL AND i.destino.id = :ubicacionId))
+            ORDER BY m.id""")
+    List<MovimientoStock> cargaInicial(short ubicacionId);
+
+    /**
+     * Si la ubicación ya tiene un movimiento que no es de su carga inicial (un ingreso, una entrega, un recuento): desde
+     * ahí la carga inicial queda cerrada (docs/sprint-3.md, decisión 12).
+     */
+    @Query("""
+            SELECT count(m) > 0 FROM MovimientoStock m
+            WHERE (m.destino.id = :ubicacionId OR m.origen.id = :ubicacionId)
+              AND m.tipo <> ar.edu.utn.vastio.bebida.dominio.TipoMovimiento.INVENTARIO_INICIAL
+              AND (m.movimientoCorregidoId IS NULL OR m.movimientoCorregidoId NOT IN (SELECT i.id FROM MovimientoStock i
+                       WHERE i.tipo = ar.edu.utn.vastio.bebida.dominio.TipoMovimiento.INVENTARIO_INICIAL AND i.destino.id = :ubicacionId))""")
+    boolean tieneOtrosMovimientos(short ubicacionId);
+
+    /**
      * Suma {@code delta} (positivo o negativo) al saldo de la bebida en la ubicación y devuelve el saldo nuevo. Una sola
      * sentencia: dos movimientos simultáneos de la misma bebida y ubicación se suman, no se pisan. El saldo puede quedar
      * negativo (regla 5): no hay CHECK ≥ 0.

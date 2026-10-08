@@ -3,13 +3,21 @@ package ar.edu.utn.vastio.bebida.infraestructura;
 import java.util.List;
 import java.util.Optional;
 
+import jakarta.persistence.LockModeType;
+
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Lock;
 import org.springframework.data.jpa.repository.Query;
 
 import ar.edu.utn.vastio.bebida.dominio.TipoUbicacion;
 import ar.edu.utn.vastio.bebida.dominio.Ubicacion;
 
 public interface UbicacionRepository extends JpaRepository<Ubicacion, Short> {
+
+    /** Bloquea la ubicación hasta el final de la transacción: dos guardados de su carga inicial no se cruzan. */
+    @Lock(LockModeType.PESSIMISTIC_WRITE)
+    @Query("SELECT u FROM Ubicacion u WHERE u.id = :id")
+    Optional<Ubicacion> bloquear(short id);
 
     @Query("SELECT u FROM Ubicacion u LEFT JOIN FETCH u.abastecimiento")
     List<Ubicacion> findAllConAbastecimiento();

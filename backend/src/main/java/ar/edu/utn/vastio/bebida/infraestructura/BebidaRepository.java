@@ -10,7 +10,7 @@ import ar.edu.utn.vastio.bebida.dominio.Bebida;
 
 public interface BebidaRepository extends JpaRepository<Bebida, Long> {
 
-    @Query("SELECT DISTINCT b FROM Bebida b LEFT JOIN FETCH b.codigos")
+    @Query("SELECT DISTINCT b FROM Bebida b LEFT JOIN FETCH b.codigos LEFT JOIN FETCH b.proveedorHabitual")
     List<Bebida> findAllConCodigos();
 
     /** Otra bebida activa con el mismo nombre y presentación, sin distinguir mayúsculas (ux_bebida_nombre_presentacion_activa). */
@@ -19,6 +19,8 @@ public interface BebidaRepository extends JpaRepository<Bebida, Long> {
             WHERE b.activo AND lower(b.nombre) = lower(:nombre) AND lower(b.presentacion) = lower(:presentacion)
               AND b.id <> :id""")
     List<Bebida> activasConMismoNombre(String nombre, String presentacion, long id);
+
+    List<Bebida> findByProveedorHabitualId(Long proveedorId);
 
     /** Saldo de una ubicación con la bebida. */
     interface Saldo {

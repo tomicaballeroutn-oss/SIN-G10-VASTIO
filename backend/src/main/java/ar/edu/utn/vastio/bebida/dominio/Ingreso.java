@@ -67,6 +67,11 @@ public class Ingreso {
         return ingreso;
     }
 
+    /** Agrupa lo que se registra en un guardado de la carga inicial de una ubicación (cualquier tipo). */
+    public static Ingreso deInventarioInicial(Ubicacion ubicacion, LocalDate fecha, long usuarioId) {
+        return new Ingreso(ubicacion, fecha, true, usuarioId);
+    }
+
     public Long getId() {
         return id;
     }

@@ -411,7 +411,7 @@ Forma en que se mueve la mercadería.
 
 #### PROVEEDOR
 
-Proveedor de bebida (carga inicial de datos maestros).
+Proveedor de bebida (carga inicial de datos maestros). Las bebidas que provee son las que lo tienen como `bebida.proveedor_habitual_id`. Razón social sin repetir entre los activos y CUIT con dígito verificador válido, validados en el backend.
 
 | Campo | Tipo | Clave | Nulo | Descripción / valores posibles |
 |---|---|---|---|---|

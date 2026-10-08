@@ -95,5 +95,11 @@ class PerfilDevIT {
                 WHERE b.nombre = 'Fernet Branca' AND b.presentacion = '750 ml' AND b.activo""", Integer.class)).isEqualTo(2);
         assertThat(jdbc.queryForObject("""
                 SELECT unidades_por_bulto FROM bebida WHERE nombre = 'Vodka Smirnoff' AND activo""", Integer.class)).isEqualTo(1);
+        assertThat(jdbc.queryForObject("""
+                SELECT p.razon_social FROM bebida b JOIN proveedor p ON p.proveedor_id = b.proveedor_habitual_id
+                WHERE b.nombre = 'Fernet Branca' AND b.activo""", String.class)).isEqualTo("Distribuidora del Centro");
+        assertThat(jdbc.queryForObject("""
+                SELECT s.cantidad FROM stock_ubicacion s JOIN bebida b USING (bebida_id)
+                WHERE b.nombre = 'Fernet Branca' AND b.activo AND s.ubicacion_id = 2""", Integer.class)).isEqualTo(9);
     }
 }

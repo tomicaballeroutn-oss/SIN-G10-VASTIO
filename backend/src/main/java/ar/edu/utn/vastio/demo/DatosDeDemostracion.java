@@ -4,6 +4,7 @@ import java.math.BigDecimal;
 import java.nio.charset.StandardCharsets;
 import java.time.LocalDate;
 import java.time.ZoneId;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -37,6 +38,10 @@ import ar.edu.utn.vastio.agenda.dominio.Evento;
 import ar.edu.utn.vastio.bebida.aplicacion.BebidaService;
 import ar.edu.utn.vastio.bebida.aplicacion.BebidaService.Codigo;
 import ar.edu.utn.vastio.bebida.aplicacion.BebidaService.DatosBebida;
+import ar.edu.utn.vastio.bebida.aplicacion.InventarioInicialService;
+import ar.edu.utn.vastio.bebida.aplicacion.InventarioInicialService.Renglon;
+import ar.edu.utn.vastio.bebida.aplicacion.ProveedorService;
+import ar.edu.utn.vastio.bebida.aplicacion.ProveedorService.DatosProveedor;
 import ar.edu.utn.vastio.comun.seguridad.UsuarioActual;
 import ar.edu.utn.vastio.usuarios.aplicacion.UsuarioService;
 import ar.edu.utn.vastio.usuarios.dominio.RolCodigo;
@@ -44,7 +49,7 @@ import ar.edu.utn.vastio.usuarios.dominio.Usuario;
 
 /**
  * Solo en dev: un usuario de cada perfil, eventos (pre-reservas, señados, uno contratado y uno confirmado) en las próximas
- * semanas y un catálogo de bebidas, para que cualquiera del equipo
+ * semanas, un catálogo de bebidas con proveedores y la carga inicial del depósito y de la Barra Avril, para que cualquiera del equipo
  * pruebe sin cargar nada. Se crea una vez (si no existe lucia.ferreyra) y solo con VASTIO_DEMO_CONTRASENA.
  * Usa los casos de uso reales, así los eventos tienen código, historial y avisos como cualquier otro.
  * Nunca llega al ambiente de prueba: no está en las migraciones.
@@ -90,21 +95,34 @@ public class DatosDeDemostracion implements ApplicationRunner {
             new Reserva(31, 1, 2, 1, "Camila Ruiz y Joaquín Vera", "sofia.mendez", 800000, Etapa.CONFIRMADO),
             new Reserva(38, 3, 1, 2, "Valentina Paz", "lucia.ferreyra", null, Etapa.PRE_RESERVA));
 
-    /** Tipo (1 Vino, 2 Espumante, 3 Destilado, 4 Aperitivo, 5 Cerveza), unidad (1 Caja, 2 Pack, 3 Botella), botellas por bulto y stock mínimo en botellas. */
+    /**
+     * Tipo (1 Vino, 2 Espumante, 3 Destilado, 4 Aperitivo, 5 Cerveza), unidad (1 Caja, 2 Pack, 3 Botella), botellas por
+     * bulto, stock mínimo, proveedor habitual (índice en {@link #PROVEEDORES}) e inventario inicial del depósito y de la
+     * Barra Avril, en botellas.
+     */
     private record Articulo(String nombre, String presentacion, int tipo, int unidad, int porBulto, int stockMinimo,
-            String codigoCaja, String codigoBotella) {
+            String codigoCaja, String codigoBotella, int proveedor, int deposito, int barraAvril) {
     }
+
+    /** Proveedores de ejemplo, con CUIT válidos inventados. */
+    private static final List<DatosProveedor> PROVEEDORES = List.of(
+            new DatosProveedor("Distribuidora del Centro", "30711222339", "351 555-0101", "ventas@delcentro.example"),
+            new DatosProveedor("Bodegas y Bebidas del Norte", "30500000003", "351 555-0202", null));
 
     /** Catálogo de ejemplo, solo bebida con alcohol. Los códigos son inventados. */
     private static final List<Articulo> ARTICULOS = List.of(
-            new Articulo("Fernet Branca", "750 ml", 3, 1, 6, 24, "17790000000016", "7790000000019"),
-            new Articulo("Vino tinto Malbec Luigi Bosca", "750 ml", 1, 1, 6, 36, "17790000000023", "7790000000026"),
-            new Articulo("Vino blanco Chardonnay Alamos", "750 ml", 1, 1, 6, 24, "17790000000030", "7790000000033"),
-            new Articulo("Espumante Chandon Extra Brut", "750 ml", 2, 1, 6, 24, "17790000000047", "7790000000040"),
-            new Articulo("Cerveza Quilmes Clásica", "1 l", 5, 1, 12, 48, "17790000000054", "7790000000057"),
-            new Articulo("Gin Bombay Sapphire", "750 ml", 3, 1, 6, 6, "17790000000061", "7790000000064"),
-            new Articulo("Aperol", "750 ml", 4, 1, 6, 12, "17790000000078", "7790000000071"),
-            new Articulo("Vodka Smirnoff", "700 ml", 3, 3, 1, 6, null, "7790000000088"));
+            new Articulo("Fernet Branca", "750 ml", 3, 1, 6, 24, "17790000000016", "7790000000019", 0, 87, 9),
+            new Articulo("Vino tinto Malbec Luigi Bosca", "750 ml", 1, 1, 6, 36, "17790000000023", "7790000000026", 1, 120, 0),
+            new Articulo("Vino blanco Chardonnay Alamos", "750 ml", 1, 1, 6, 24, "17790000000030", "7790000000033", 1, 60, 0),
+            new Articulo("Espumante Chandon Extra Brut", "750 ml", 2, 1, 6, 24, "17790000000047", "7790000000040", 1, 72, 0),
+            new Articulo("Cerveza Quilmes Clásica", "1 l", 5, 1, 12, 48, "17790000000054", "7790000000057", 0, 240, 30),
+            new Articulo("Gin Bombay Sapphire", "750 ml", 3, 1, 6, 6, "17790000000061", "7790000000064", 0, 18, 0),
+            new Articulo("Aperol", "750 ml", 4, 1, 6, 12, "17790000000078", "7790000000071", 0, 30, 0),
+            new Articulo("Vodka Smirnoff", "700 ml", 3, 3, 1, 6, null, "7790000000088", 0, 4, 0));
+
+    /** Ubicaciones de V2. */
+    private static final short DEPOSITO_MADRE = 1;
+    private static final short BARRA_AVRIL = 2;
 
     /** Un PDF mínimo como contrato de ejemplo. */
     private static final byte[] CONTRATO_DEMO = "%PDF-1.4\n% Contrato de ejemplo (datos de demostración)\n%%EOF\n"
@@ -119,12 +137,15 @@ public class DatosDeDemostracion implements ApplicationRunner {
     private final ServiciosService servicios;
     private final ConfirmacionService confirmaciones;
     private final BebidaService bebidas;
+    private final ProveedorService proveedorService;
+    private final InventarioInicialService inventario;
     private final EntityManager entityManager;
     private final String contrasena;
 
     public DatosDeDemostracion(UsuarioService usuarios, PreReservaService preReservas, SenaService senas,
             ContratoService contratos, PlannerService planners, InvitadosService invitados, ServiciosService servicios,
-            ConfirmacionService confirmaciones, BebidaService bebidas, EntityManager entityManager,
+            ConfirmacionService confirmaciones, BebidaService bebidas, ProveedorService proveedorService,
+            InventarioInicialService inventario, EntityManager entityManager,
             @Value("${vastio.demo.contrasena:}") String contrasena) {
         this.entityManager = entityManager;
         this.senas = senas;
@@ -134,6 +155,8 @@ public class DatosDeDemostracion implements ApplicationRunner {
         this.servicios = servicios;
         this.confirmaciones = confirmaciones;
         this.bebidas = bebidas;
+        this.proveedorService = proveedorService;
+        this.inventario = inventario;
         this.usuarios = usuarios;
         this.preReservas = preReservas;
         this.contrasena = contrasena;
@@ -184,12 +207,22 @@ public class DatosDeDemostracion implements ApplicationRunner {
                 confirmaciones.confirmar(evento.getId(), new UsuarioActual(ana.getId(), Set.of(RolCodigo.PLANNER.name())));
             }
         }
+        List<Long> proveedores = PROVEEDORES.stream().map(p -> proveedorService.crear(p).proveedor().getId()).toList();
+        List<Renglon> deposito = new ArrayList<>();
+        List<Renglon> barraAvril = new ArrayList<>();
         for (Articulo a : ARTICULOS) {
             List<Codigo> codigos = a.codigoCaja() == null ? List.of(new Codigo(a.codigoBotella(), (short) 1))
                     : List.of(new Codigo(a.codigoCaja(), (short) a.porBulto()), new Codigo(a.codigoBotella(), (short) 1));
-            bebidas.crear(new DatosBebida(a.nombre(), a.presentacion(), (short) a.tipo(), (short) a.unidad(),
-                    (short) a.porBulto(), BigDecimal.valueOf(a.stockMinimo()), codigos));
+            long id = bebidas.crear(new DatosBebida(a.nombre(), a.presentacion(), (short) a.tipo(), (short) a.unidad(),
+                    (short) a.porBulto(), BigDecimal.valueOf(a.stockMinimo()), codigos, proveedores.get(a.proveedor()))).getId();
+            deposito.add(new Renglon(id, BigDecimal.valueOf(a.deposito())));
+            if (a.barraAvril() > 0) {
+                barraAvril.add(new Renglon(id, BigDecimal.valueOf(a.barraAvril())));
+            }
         }
+        long administracion = creados.get("gabriela.paz").getId();
+        inventario.guardar(DEPOSITO_MADRE, deposito, administracion);
+        inventario.guardar(BARRA_AVRIL, barraAvril, administracion);
         log.info("Datos de demostración cargados: {} usuarios, {} eventos y {} bebidas.", PERSONAS.size(), RESERVAS.size(),
                 ARTICULOS.size());
     }

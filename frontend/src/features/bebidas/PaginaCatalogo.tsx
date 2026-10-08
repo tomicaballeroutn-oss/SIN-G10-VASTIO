@@ -1,24 +1,53 @@
-import { useCallback, useState } from 'react';
+import { useCallback, useState, type ReactNode } from 'react';
+import { useSearchParams } from 'react-router';
 import {
   bebidas, presentacionDeBulto, type Bebida, type CodigoBarra, type TipoBebida, type UnidadManipulacion,
 } from '../../api/bebidas';
+import { proveedores, type Proveedor } from '../../api/proveedores';
 import { useDatos, useEnvio } from '../../api/useDatos';
 import {
-  Alert, Badge, Button, CantidadEnCajas, Card, Checkbox, Dialog, IconButton, Input, LectorCodigo, Select, Table,
+  Alert, Badge, Button, CantidadEnCajas, Card, Checkbox, Dialog, IconButton, Input, LectorCodigo, Select, Table, Tabs,
   cantidadLegible, type TableColumn,
 } from '../../ds';
 import { Cargando } from '../comun/Cargando';
 import { Encabezado } from '../layout/paginas';
+import { SeccionCargaInicial } from './SeccionCargaInicial';
+import { SeccionProveedores } from './SeccionProveedores';
 import './catalogo.css';
 
 interface Catalogo {
   lista: Bebida[];
   tipos: TipoBebida[];
   unidades: UnidadManipulacion[];
+  proveedores: Proveedor[];
 }
 
 const cargarCatalogo = (): Promise<Catalogo> =>
-  Promise.all([bebidas.listar(), bebidas.tipos(), bebidas.unidades()]).then(([lista, tipos, unidades]) => ({ lista, tipos, unidades }));
+  Promise.all([bebidas.listar(), bebidas.tipos(), bebidas.unidades(), proveedores.listar()])
+    .then(([lista, tipos, unidades, provs]) => ({ lista, tipos, unidades, proveedores: provs }));
+
+const PESTANAS: { id: string; label: string; contenido: (ir: (id: string) => void) => ReactNode }[] = [
+  { id: 'bebidas', label: 'Bebidas', contenido: () => <SeccionBebidas /> },
+  { id: 'proveedores', label: 'Proveedores', contenido: () => <SeccionProveedores /> },
+  { id: 'carga-inicial', label: 'Carga inicial', contenido: (ir) => <SeccionCargaInicial alSeguir={() => ir('proveedores')} /> },
+];
+
+/**
+ * Catálogo de bebidas con tres pestañas: las bebidas (UI-25), sus proveedores y la carga inicial de inventario (UI-28).
+ * La pestaña elegida queda en la dirección (?pestana=proveedores). Dirección, Coordinación, Administración y Compras.
+ */
+export function PaginaCatalogo() {
+  const [busqueda, setBusqueda] = useSearchParams();
+  const actual = PESTANAS.find((p) => p.id === busqueda.get('pestana')) ?? PESTANAS[0];
+  const ir = (id: string) => setBusqueda({ pestana: id }, { replace: true });
+  return (
+    <section className="pantalla">
+      <Encabezado titulo="Catálogo de bebidas" antetitulo="Bebidas" />
+      <Tabs label="Secciones del catálogo" items={PESTANAS} value={actual.id} onChange={ir} />
+      <div key={actual.id} className="bebidas__pestana">{actual.contenido(ir)}</div>
+    </section>
+  );
+}
 
 /** Solo dígitos, de 8 a 14 (EAN-8, EAN-13, DUN-14), como valida el backend. */
 const FORMATO_CODIGO = /^\d{8,14}$/;
@@ -31,11 +60,11 @@ function coincide(b: Bebida, texto: string): boolean {
 }
 
 /**
- * UI-25 · Catálogo de bebidas: listado con búsqueda por nombre o código (tipeado o leído con la cámara), filtro por
- * tipo, alta, modificación, baja lógica y reactivación. Antes de una baja se muestran las ubicaciones con saldo.
- * Dirección, Coordinación, Administración y Compras. Sin precios: el sistema no maneja dinero.
+ * UI-25 · Bebidas: listado con búsqueda por nombre o código (tipeado o leído con la cámara), filtro por tipo, alta,
+ * modificación, baja lógica y reactivación. Antes de una baja se muestran las ubicaciones con saldo. Sin precios: el
+ * sistema no maneja dinero.
  */
-export function PaginaCatalogo() {
+function SeccionBebidas() {
   const datos = useDatos(cargarCatalogo);
   const [buscar, setBuscar] = useState('');
   const [tipo, setTipo] = useState('');
@@ -115,12 +144,11 @@ export function PaginaCatalogo() {
   ];
 
   return (
-    <section className="pantalla">
-      <Encabezado titulo="Catálogo de bebidas" antetitulo="Bebidas" />
+    <>
       {aviso && <Alert tone="success">{aviso}</Alert>}
       {reactivacion.error && <Alert tone="danger">{reactivacion.error.message}</Alert>}
       <Cargando datos={datos}>
-        {({ lista, tipos, unidades }) => {
+        {({ lista, tipos, unidades, proveedores: provs }) => {
           const texto = buscar.trim();
           const filtradas = lista.filter((b) => (verBajas || b.activo) && (!tipo || String(b.tipo.id) === tipo) && coincide(b, texto));
           return (
@@ -147,6 +175,7 @@ export function PaginaCatalogo() {
                   bebida={editando === 'nueva' ? null : editando}
                   tipos={tipos}
                   unidades={unidades}
+                  proveedores={provs}
                   alCerrar={() => setEditando(null)}
                   alGuardar={(b) => guardada(b, editando === 'nueva')}
                 />
@@ -167,14 +196,15 @@ export function PaginaCatalogo() {
         onManual={() => setLector(false)}
       />
       {aDarDeBaja && <DialogoBaja bebida={aDarDeBaja} alCerrar={() => setADarDeBaja(null)} alConfirmar={dadaDeBaja} />}
-    </section>
+    </>
   );
 }
 
-function DialogoBebida({ bebida, tipos, unidades, alCerrar, alGuardar }: {
+function DialogoBebida({ bebida, tipos, unidades, proveedores: provs, alCerrar, alGuardar }: {
   bebida: Bebida | null;
   tipos: TipoBebida[];
   unidades: UnidadManipulacion[];
+  proveedores: Proveedor[];
   alCerrar: () => void;
   alGuardar: (b: Bebida) => void;
 }) {
@@ -185,6 +215,7 @@ function DialogoBebida({ bebida, tipos, unidades, alCerrar, alGuardar }: {
   const [porBulto, setPorBulto] = useState(bebida && !bebida.unidad.esBotella ? String(bebida.unidadesPorBulto) : '');
   const [stockMinimo, setStockMinimo] = useState(bebida?.stockMinimo ?? 0);
   const [codigos, setCodigos] = useState<CodigoBarra[]>(bebida?.codigos ?? []);
+  const [proveedorId, setProveedorId] = useState(bebida?.proveedorHabitual ? String(bebida.proveedorHabitual.id) : '');
   const [nuevoCodigo, setNuevoCodigo] = useState('');
   const [errorCodigo, setErrorCodigo] = useState<string | undefined>();
   const [lector, setLector] = useState(false);
@@ -235,6 +266,7 @@ function DialogoBebida({ bebida, tipos, unidades, alCerrar, alGuardar }: {
       unidadesPorBulto: bulto,
       stockMinimo: stockMinimo > 0 ? stockMinimo : null,
       codigos,
+      proveedorId: proveedorId ? Number(proveedorId) : null,
     };
     const guardada = await enviar(() => (bebida ? bebidas.modificar(bebida.id, datos) : bebidas.crear(datos)));
     if (guardada) alGuardar(guardada);
@@ -299,6 +331,19 @@ function DialogoBebida({ bebida, tipos, unidades, alCerrar, alGuardar }: {
           porBulto={Math.max(bulto, 1)}
           unidad={nombreUnidad}
           error={error?.errorDe('stockMinimo')}
+        />
+        <Select
+          label="Proveedor habitual"
+          optional
+          options={[
+            { value: '', label: 'Sin proveedor habitual' },
+            // Uno dado de baja solo aparece si ya es el de esta bebida.
+            ...provs
+              .filter((p) => p.activo || String(p.id) === proveedorId)
+              .map((p) => ({ value: String(p.id), label: p.activo ? p.razonSocial : `${p.razonSocial} (dado de baja)` })),
+          ]}
+          value={proveedorId}
+          onChange={(e) => setProveedorId(e.target.value)}
         />
         <fieldset className="bebidas__codigos">
           <legend className="label">Códigos de barras <span className="v-muted">(opcional)</span></legend>

@@ -44,25 +44,25 @@ E = ejecuta · P = ejecuta solo sobre sus propios eventos (vendedora: los que ve
 | Consultar vista de cocina | — | — | C | C | — | C |
 | Notificaciones | E | E | E | E | E | E |
 | Reporte de ocupación | C | — | — | — | — | — |
-| Catálogo de bebidas (ABM) | E | — | — | E | — | — |
+| Catálogo de bebidas y proveedores (ABM) | E | — | — | E | — | — |
 | Configurar ubicaciones de stock | E | — | — | — | — | — |
 | Carga inicial / ingreso de bebida | E | — | — | E | — | — |
 | Consultar stock | C | — | — | C | Solo su barra | — |
 | Orden de preparación | C | — | — | E | — | — |
 | Salida a barra, retiro adicional, devolución | — | — | — | E | E | — |
 | Cierre de evento | — | — | — | E | E | — |
-| Ajuste de stock | E | — | — | E | — | — |
+| Ajuste de stock (recuento y rotura) | E | — | — | E | — | — |
 | Movimientos de stock | C | — | — | C | — | — |
-| Consumo y costo por evento | C | — | — | C | — | — |
+| Consumo por evento | C | — | — | C | — | — |
 | Estadística de consumo | C | — | — | C | — | — |
 
 ## Reglas especiales
 
-- **Datos económicos** (importe de seña, precios, costos): Dirección, Coordinación y Administración ven todo; la vendedora solo los de sus eventos; Compras solo costos de bebida; el resto nada. El backend no los serializa para quien no corresponde (no alcanza con ocultarlos en la pantalla).
-- **Vendedora:** nada del histórico, nada de eventos de otras vendedoras en detalle (en la agenda ve la unidad ocupada y quién la tiene, no los datos del evento), ninguna lista de precios.
+- **Importe de la seña** (el único dato económico: el sistema no maneja precios ni costos): Dirección, Coordinación y Administración lo ven siempre; la vendedora solo el de sus eventos; el resto nada. El backend no lo serializa para quien no corresponde (no alcanza con ocultarlo en la pantalla).
+- **Vendedora:** nada del histórico, nada de eventos de otras vendedoras en detalle (en la agenda ve la unidad ocupada y quién la tiene, no los datos del evento).
 - **Planner:** ve toda la agenda, incluidos los eventos de la otra planner.
-- **Operación a ciegas (barra):** ve solo el saldo de su barra; registra retiros del depósito sin ver su saldo; si retira más que el saldo teórico, el sistema lo **acepta**, lo registra y alerta a Compras y Administración; al cerrar declara lo que devuelve sin ver lo esperado.
-- **Cocina:** solo la vista de cocina, dentro del horizonte del parámetro `HORIZONTE_COCINA_DIAS`, sin precios ni observaciones internas.
+- **Operación a ciegas (barra):** ve solo el saldo de su barra (las barras de los salones con evento en la jornada; las encargadas son fijas y no se asignan en el sistema); registra retiros del depósito sin ver su saldo; si retira más que el saldo teórico, el sistema lo **acepta**, lo registra y alerta a Compras y Administración; al cerrar declara lo que devuelve sin ver lo esperado.
+- **Cocina:** solo la vista de cocina, dentro del horizonte del parámetro `HORIZONTE_COCINA_DIAS`, sin importes ni observaciones internas.
 
 ## Supuestos a validar
 

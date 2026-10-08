@@ -12,7 +12,7 @@ Estados (valor en base → nombre en pantalla):
 | `CONFIRMADO` | Confirmado | Comercial | Datos operativos cerrados: planner, invitados definitivos, menú y tipo de barra. |
 | `EN_CURSO` | En curso | Operativa | Día del evento. Habilita salidas a barra. |
 | `REALIZADO` | Realizado | Operativa | Jornada terminada, pendiente de conciliar. |
-| `CERRADO` | Cerrado | Final | Consumo y costo fijados. Solo lectura; se corrige con asientos de ajuste. |
+| `CERRADO` | Cerrado | Final | Consumo fijado. Solo lectura; se corrige con asientos de ajuste. |
 | `LIBERADA` | Liberada | Final | Pre-reserva que no prosperó. **No es una cancelación.** |
 | `CANCELADO` | Cancelado | Final | Evento dado de baja con motivo. |
 
@@ -29,7 +29,7 @@ Estados activos (ocupan la unidad): todos salvo `LIBERADA` y `CANCELADO`.
 | CONTRATADO → CONFIRMADO | Confirmar evento | Planner asignada, Coordinación | Planner asignada, invitados definitivos, servicios en las categorías requeridas | Habilita la orden de preparación. Notifica a compras, cocina, administración y la vendedora titular. |
 | CONFIRMADO → EN_CURSO | Automático | Sistema | Llega la hora de inicio del turno | Bloquea la edición comercial. Habilita salidas a barra. |
 | EN_CURSO → REALIZADO | Automático | Sistema | Termina el turno (hora_fin, día siguiente si cruza medianoche) | — |
-| REALIZADO → CERRADO | Registrar cierre de evento | Encargada de barra, Compras | Entregas cerradas; si el tipo usa segmentos, asistencia real cargada | Escribe `consumo_evento` con el precio vigente. |
+| REALIZADO → CERRADO | Registrar cierre de evento | Encargada de barra, Compras | Entregas cerradas; si el tipo usa segmentos, asistencia real cargada | Escribe `consumo_evento` (cantidades por artículo). |
 | SENADO / CONTRATADO / CONFIRMADO → CANCELADO | Cancelar evento | Coordinación | Motivo obligatorio | Libera la unidad. Descarta la orden de preparación. Notifica a todas las áreas (salvo barra), la vendedora titular y la planner. |
 
 ### Operaciones que no cambian el estado

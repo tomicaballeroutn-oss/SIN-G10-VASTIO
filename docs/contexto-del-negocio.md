@@ -13,27 +13,28 @@ Complejo privado de salones de eventos en Córdoba con unos 20 años de operaci�
 No falta digitalización: falta un **modelo de datos común**. Hoy hay un Google Calendar compartido (se carga después de concretar la venta), planillas de compras y existencias, un cuaderno de barra en papel. Nada comparte un identificador de evento, así que:
 
 - La fecha en negociación no está representada y dos vendedoras pueden ofrecer la misma.
-- Nadie sabe cuánto consumió cada evento ni cuánto costó: la encargada de barra retira cajones, lo anota en papel y devuelve el sobrante sin verificación.
+- Nadie sabe cuánto consumió cada evento: la encargada de barra retira cajas, lo anota en papel y devuelve el sobrante sin verificación.
 
 ## El objetivo
 
-**Costo y margen, no vigilancia.** Palabras del dueño: todo negocio que quiere datos los quiere para conocer su costo. Corolarios de diseño:
+**Consumo, no vigilancia.** Palabras del dueño: todo negocio que quiere datos los quiere para conocer su costo. El sistema da las cantidades; el costo lo calcula cada área con sus remitos de compra, porque el sistema no maneja precios ni dinero (la única excepción es el importe de la seña). Corolarios de diseño:
 
 - Declarar una rotura o un faltante tiene que ser simple y sin castigo. Se miden tendencias, no incidentes.
 - El trabajador no debe hacer trabajo extra.
-- El lenguaje del sistema es de atribución de costos: «consumo real», «se corrige con un ajuste». Nunca «faltante» ni «sospechoso».
+- El lenguaje del sistema es de atribución de consumo: «consumo real», «se corrige con un ajuste». Nunca «faltante» ni «sospechoso».
 
-Criterio medible: para cualquier evento realizado con el sistema, responder qué se entregó a la barra, cuánto se consumió y cuánto costó por asistente.
+Criterio medible: para cualquier evento realizado con el sistema, responder qué se entregó a la barra, cuánto se consumió y cuánto por asistente.
 
 ## Circuito de la bebida
 
-Compra masiva una o dos veces al año. El encargado de compras (Nadir) recibe y cuenta contra remito. El depósito está a unos 30 m del salón. La encargada de barra retira **por cajones**, con retiros adicionales durante la noche. El sobrante de eventos grandes (sobre todo gaseosas) puede quedar en la barra para el día siguiente.
+Compra masiva una o dos veces al año. El encargado de compras (Nadir) recibe y cuenta contra remito. El depósito está a unos 30 m del salón. La encargada de barra retira **por cajas**, con retiros adicionales durante la noche. El sobrante de eventos grandes (sobre todo gaseosas) puede quedar en la barra para el día siguiente.
 
 Ecuación de conciliación por evento y artículo:
 
 `Consumo = Stock inicial de la barra + Entregado − Devuelto al depósito − Remanente en barra`
 
-- Granularidad por cajón en la operación; en la base todo se guarda en **botellas**.
+- Granularidad por caja en la operación; en la base todo se guarda en **botellas**. La caja es solo una forma de mostrar y cargar: cada artículo sabe cuántas botellas trae.
+- Tres tipos de ubicación: depósito madre, depósito de transición y barra (una por salón; Avril, hasta dos). Las divisiones internas del depósito no se modelan.
 - El código de barras del producto (leído con la cámara del celular) **identifica el artículo**, no cuenta unidades. La cantidad se tipea. Siempre existe carga manual.
 - No hay encargado de depósito y no lo va a haber.
 - El depósito de transición ya se probó y colapsó en diciembre: las ubicaciones son configurables y el circuito funciona con o sin él.
@@ -46,7 +47,7 @@ Entre noviembre y diciembre: cena hasta las 00:00 y fiesta de 00:00 a 05:00 con 
 
 ## Fuera de alcance
 
-Vajilla y cristalería, decoración, facturación y contabilidad, pagos reales, integración en línea con la plataforma de tickets, gestión gastronómica, personal, consumo por unidad servida, canal público para el cliente. Notificaciones por WhatsApp: expansión futura.
+Precios y costos (salvo el importe de la seña), bebidas sin alcohol (por ahora), hielo, vajilla y cristalería, decoración, facturación y contabilidad, pagos reales, integración en línea con la plataforma de tickets, gestión gastronómica, personal, consumo por unidad servida, canal público para el cliente. Notificaciones por WhatsApp: expansión futura.
 
 ## Piloto
 

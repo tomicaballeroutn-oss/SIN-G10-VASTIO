@@ -17,6 +17,12 @@ public interface MovimientoStockRepository extends JpaRepository<MovimientoStock
     @Query("SELECT m FROM MovimientoStock m JOIN FETCH m.bebida b JOIN FETCH b.unidad WHERE m.ingresoId IN :ingresos ORDER BY m.id")
     List<MovimientoStock> deIngresos(Collection<Long> ingresos);
 
+    /** Los movimientos de una entrega (salidas, retiros adicionales y, al cerrarla, la devolución), en orden. */
+    @Query("""
+            SELECT m FROM MovimientoStock m JOIN FETCH m.bebida b JOIN FETCH b.unidad LEFT JOIN FETCH m.origen
+            WHERE m.entregaId = :entregaId ORDER BY m.id""")
+    List<MovimientoStock> deEntrega(long entregaId);
+
     /**
      * La carga inicial de la ubicación: sus INVENTARIO_INICIAL y los AJUSTE que los corrigen, en orden.
      */

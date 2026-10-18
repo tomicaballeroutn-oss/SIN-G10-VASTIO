@@ -21,4 +21,10 @@ public interface EntregaRepository extends JpaRepository<Entrega, Long> {
     List<Entrega> abiertasDeOtroEvento(short barraId, long eventoId);
 
     List<Entrega> findByEventoIdOrderByIdAsc(long eventoId);
+
+    /** Las que esperan su devolución, de la más vieja a la más nueva. */
+    @Query("""
+            SELECT e FROM Entrega e WHERE e.estado = ar.edu.utn.vastio.bebida.dominio.EstadoEntrega.ABIERTA
+            ORDER BY e.fechaApertura, e.id""")
+    List<Entrega> abiertas();
 }

@@ -6,7 +6,10 @@ import java.util.List;
 import java.util.Map;
 
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.Digits;
 import jakarta.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.PositiveOrZero;
 import jakarta.validation.constraints.Size;
 
 import ar.edu.utn.vastio.agenda.aplicacion.ConsultaEventoService.EventoOperativo;
@@ -16,7 +19,11 @@ import ar.edu.utn.vastio.bebida.api.IngresoDto.RenglonRequest;
 import ar.edu.utn.vastio.bebida.api.IngresoDto.RenglonResponse;
 import ar.edu.utn.vastio.bebida.api.UbicacionDto.SalonResumen;
 import ar.edu.utn.vastio.bebida.api.UbicacionDto.UbicacionResumen;
+import ar.edu.utn.vastio.bebida.aplicacion.EntregaService.Consumo;
+import ar.edu.utn.vastio.bebida.aplicacion.EntregaService.DatosDevolucion;
 import ar.edu.utn.vastio.bebida.aplicacion.EntregaService.DatosRetiro;
+import ar.edu.utn.vastio.bebida.aplicacion.EntregaService.DevolucionRegistrada;
+import ar.edu.utn.vastio.bebida.aplicacion.EntregaService.RenglonDevolucion;
 import ar.edu.utn.vastio.bebida.aplicacion.EntregaService.Entregado;
 import ar.edu.utn.vastio.bebida.aplicacion.EntregaService.EventoConBarras;
 import ar.edu.utn.vastio.bebida.aplicacion.EntregaService.PantallaEntrega;
@@ -84,18 +91,70 @@ public final class EntregaDto {
      */
     public record EntregaResponse(EventoResumen evento, SalonResumen salon, UbicacionResumen barra, UbicacionResumen origen,
             UbicacionResumen depositoMadre, EstadoEntrega estadoEntrega, List<EntregadoResponse> yaEntregado,
-            List<RetiroResponse> retiros, List<BebidaParaRetiro> bebidas) {
+            List<RetiroResponse> retiros, List<BebidaParaRetiro> bebidas, List<BebidaParaRetiro> aDevolver,
+            List<BebidaParaRetiro> enTransicion) {
         static EntregaResponse de(PantallaEntrega p, Map<Long, String> nombres) {
             return new EntregaResponse(EventoResumen.de(p.evento()), SalonResumen.de(p.salon()), UbicacionResumen.de(p.barra()),
                     UbicacionResumen.de(p.origen()), resumen(p.depositoMadre()),
                     p.entrega() == null ? null : p.entrega().getEstado(),
                     p.yaEntregado().stream().map(EntregadoResponse::de).toList(),
                     p.retiros().stream().map(r -> RetiroResponse.de(r, nombres)).toList(),
-                    p.bebidas().stream().map(BebidaParaRetiro::de).toList());
+                    p.bebidas().stream().map(BebidaParaRetiro::de).toList(),
+                    p.aDevolver().stream().map(BebidaParaRetiro::de).toList(),
+                    p.enTransicion().stream().map(BebidaParaRetiro::de).toList());
         }
 
         private static UbicacionResumen resumen(Ubicacion u) {
             return u == null ? null : UbicacionResumen.de(u);
+        }
+    }
+
+    /** Lo que vuelve al depósito y lo que queda en la barra, en botellas enteras ≥ 0. */
+    public record RenglonDevolucionRequest(
+            @NotNull(message = "Elegí la bebida.") Long bebidaId,
+            @NotNull(message = "Cargá lo que vuelve al depósito.") @PositiveOrZero(message = "No puede ser negativo.")
+            @Digits(integer = 8, fraction = 0, message = "Cargá botellas enteras: las abiertas cuentan como consumidas.") BigDecimal devuelto,
+            @NotNull(message = "Cargá lo que queda en la barra.") @PositiveOrZero(message = "No puede ser negativo.")
+            @Digits(integer = 8, fraction = 0, message = "Cargá botellas enteras: las abiertas cuentan como consumidas.") BigDecimal remanente) {
+    }
+
+    /** Lo que queda en el depósito de transición y vuelve al madre, en botellas enteras ≥ 0. */
+    public record RenglonTransicionRequest(
+            @NotNull(message = "Elegí la bebida.") Long bebidaId,
+            @NotNull(message = "Cargá lo que queda en la transición.") @PositiveOrZero(message = "No puede ser negativo.")
+            @Digits(integer = 8, fraction = 0, message = "Cargá botellas enteras.") BigDecimal cantidad) {
+    }
+
+    /** Una bebida que falta en {@code renglones} cuenta como 0 y 0: se consumió todo. */
+    public record DevolucionRequest(
+            @Size(max = 200, message = "Cargá hasta 200 bebidas.") List<@Valid RenglonDevolucionRequest> renglones,
+            @Size(max = 200, message = "Cargá hasta 200 bebidas.") List<@Valid RenglonTransicionRequest> transicion) {
+
+        DatosDevolucion datos() {
+            return new DatosDevolucion(
+                    renglones == null ? List.of()
+                            : renglones.stream().map(r -> new RenglonDevolucion(r.bebidaId(), r.devuelto(), r.remanente())).toList(),
+                    transicion == null ? List.of()
+                            : transicion.stream().map(r -> new Renglon(r.bebidaId(), r.cantidad())).toList());
+        }
+    }
+
+    /** Consumo real de una bebida en la barra: entregado − devuelto − remanente, en botellas. */
+    public record ConsumoResponse(long bebidaId, String nombre, String presentacion, String unidad, short unidadesPorBulto,
+            BigDecimal entregado, BigDecimal devuelto, BigDecimal remanente, BigDecimal consumo) {
+        static ConsumoResponse de(Consumo c) {
+            Bebida b = c.bebida();
+            return new ConsumoResponse(b.getId(), b.getNombre(), b.getPresentacion(), b.getUnidad().getNombre(),
+                    b.getUnidadesPorBulto(), c.entregado(), c.devuelto(), c.remanente(), c.consumo());
+        }
+    }
+
+    /** Recién después de registrar: el consumo real por bebida y lo que volvió desde la transición. */
+    public record DevolucionResponse(EntregaResponse entrega, List<ConsumoResponse> consumo, List<EntregadoResponse> desdeTransicion) {
+        static DevolucionResponse de(DevolucionRegistrada d, Map<Long, String> nombres) {
+            return new DevolucionResponse(EntregaResponse.de(d.pantalla(), nombres),
+                    d.consumo().stream().map(ConsumoResponse::de).toList(),
+                    d.desdeTransicion().stream().map(EntregadoResponse::de).toList());
         }
     }
 

@@ -17,7 +17,10 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
+import ar.edu.utn.vastio.bebida.api.EntregaDto.DevolucionRequest;
+import ar.edu.utn.vastio.bebida.api.EntregaDto.DevolucionResponse;
 import ar.edu.utn.vastio.bebida.api.EntregaDto.EntregaResponse;
+import ar.edu.utn.vastio.bebida.aplicacion.EntregaService.DevolucionRegistrada;
 import ar.edu.utn.vastio.bebida.api.EntregaDto.EventoDeLaJornada;
 import ar.edu.utn.vastio.bebida.api.EntregaDto.RetiroRequest;
 import ar.edu.utn.vastio.bebida.aplicacion.EntregaService;
@@ -76,8 +79,26 @@ public class EntregaController {
         return respuesta(entregas.retirar(eventoId, barraId, pedido.datos(), UsuarioActual.de(jwt)));
     }
 
+    @PostMapping("/eventos/{eventoId}/entregas/{barraId}/devolucion")
+    @ResponseStatus(HttpStatus.CREATED)
+    @Operation(summary = "Registrar la devolución de la barra", description = """
+            Con el evento en curso o realizado y la entrega abierta (si no, 409). Por cada bebida de la barra, lo que vuelve
+            al depósito madre (DEVOLUCION) y lo que queda para el evento siguiente (REMANENTE), en botellas enteras: las
+            abiertas cuentan como consumidas. Una bebida que no viene cuenta como 0 y 0. Si lo que vuelve y lo que queda
+            supera lo que hay en la barra, 422 nombrando la bebida. Si la barra se abastece de una transición, lo que queda
+            ahí vuelve al madre. La entrega queda CERRADA. Recién la respuesta trae el consumo real: entregado (saldo de la
+            barra antes de devolver) − devuelto − remanente.""")
+    public DevolucionResponse devolver(@PathVariable long eventoId, @PathVariable short barraId,
+            @Valid @RequestBody DevolucionRequest pedido, @AuthenticationPrincipal Jwt jwt) {
+        DevolucionRegistrada registrada = entregas.devolver(eventoId, barraId, pedido.datos(), UsuarioActual.de(jwt));
+        return DevolucionResponse.de(registrada, nombres(registrada.pantalla()));
+    }
+
+    private Map<Long, String> nombres(PantallaEntrega pantalla) {
+        return usuarios.nombres(pantalla.retiros().stream().map(Retiro::usuarioId).distinct().toList());
+    }
+
     private EntregaResponse respuesta(PantallaEntrega pantalla) {
-        Map<Long, String> nombres = usuarios.nombres(pantalla.retiros().stream().map(Retiro::usuarioId).distinct().toList());
-        return EntregaResponse.de(pantalla, nombres);
+        return EntregaResponse.de(pantalla, nombres(pantalla));
     }
 }

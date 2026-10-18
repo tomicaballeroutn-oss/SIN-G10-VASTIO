@@ -1,10 +1,11 @@
 import { useState } from 'react';
 import { bebidas, presentacionDeBulto, type Bebida } from '../../api/bebidas';
 import { ingresos, type Ingreso } from '../../api/ingresos';
+import { proveedores } from '../../api/proveedores';
 import { ubicaciones } from '../../api/ubicaciones';
 import { useDatos, useEnvio } from '../../api/useDatos';
 import {
-  Actor, Alert, Button, CantidadEnCajas, Card, Combobox, Dialog, EmptyState, IconButton, Input, LectorCodigo,
+  Actor, Alert, Button, CantidadEnCajas, Card, Combobox, Dialog, EmptyState, IconButton, Input, LectorCodigo, Select,
   cantidadLegible, type ComboboxOption,
 } from '../../ds';
 import { Cargando } from '../comun/Cargando';
@@ -78,6 +79,8 @@ function FormularioIngreso({ catalogo, deposito, recientes, alRegistrar }: {
 }) {
   const [fecha, setFecha] = useState(hoy());
   const [remito, setRemito] = useState('');
+  const [proveedorId, setProveedorId] = useState('');
+  const datosProveedores = useDatos(proveedores.listar);
   const [renglones, setRenglones] = useState<Renglon[]>([]);
   const [buscar, setBuscar] = useState('');
   const [lector, setLector] = useState(false);
@@ -138,13 +141,15 @@ function FormularioIngreso({ catalogo, deposito, recientes, alRegistrar }: {
 
   async function registrar() {
     const registrado = await enviar(() =>
-      ingresos.registrar({ fecha, numeroRemito: remito, renglones: renglones.map((r) => ({ bebidaId: r.bebida.id, cantidad: r.cantidad })) }),
+      ingresos.registrar({ fecha, numeroRemito: remito, proveedorId: proveedorId ? Number(proveedorId) : null,
+        renglones: renglones.map((r) => ({ bebidaId: r.bebida.id, cantidad: r.cantidad })) }),
     );
     if (registrado) {
       alRegistrar(registrado);
       setRevisando(false);
       setRenglones([]);
       setRemito('');
+      setProveedorId('');
       setFecha(hoy());
       setAviso(`Ingreso registrado: ${plural(registrado.renglones.length, 'bebida', 'bebidas')} al ${registrado.destino.nombre}.`);
     }
@@ -157,8 +162,26 @@ function FormularioIngreso({ catalogo, deposito, recientes, alRegistrar }: {
         <div className="ingreso-bebida__cabecera">
           <Input label="Entra a" value={deposito.nombre} readOnly size="lg" hint="Los ingresos van siempre al depósito madre." />
           <Input label="Fecha de ingreso" type="date" size="lg" value={fecha} onChange={(e) => setFecha(e.target.value)} />
+          <Select
+            label="Proveedor"
+            optional
+            size="lg"
+            value={proveedorId}
+            onChange={(e) => setProveedorId(e.target.value)}
+            disabled={datosProveedores.cargando || !!datosProveedores.error}
+            hint={datosProveedores.cargando ? 'Cargando proveedores…' : undefined}
+            options={[
+              { value: '', label: 'Sin proveedor' },
+              ...(datosProveedores.datos ?? []).filter((p) => p.activo).map((p) => ({ value: String(p.id), label: p.razonSocial })),
+            ]}
+          />
           <Input label="Número de remito" optional size="lg" value={remito} onChange={(e) => setRemito(e.target.value)} />
         </div>
+        {datosProveedores.error && (
+          <Alert tone="warning" title="No pudimos cargar los proveedores" action={<Button variant="outline" onClick={datosProveedores.recargar}>Reintentar</Button>}>
+            Podés registrar el ingreso sin proveedor o reintentar. {datosProveedores.error.message}
+          </Alert>
+        )}
       </Card>
 
       <div className="ingreso-bebida__agregar">
@@ -246,6 +269,7 @@ function FormularioIngreso({ catalogo, deposito, recientes, alRegistrar }: {
           <p>
             Entran al {deposito.nombre} el {fechaCorta(fecha, true)}{remito.trim() && `, remito ${remito.trim()}`}:
           </p>
+          {proveedorId && <p>Proveedor: {datosProveedores.datos?.find((p) => String(p.id) === proveedorId)?.razonSocial}</p>}
           <ul className="ingreso-bebida__lista">
             {renglones.map((r) => (
               <li key={r.bebida.id}>
@@ -272,6 +296,7 @@ function UltimosIngresos({ recientes }: { recientes: Ingreso[] }) {
             <p className="label">
               {fechaCorta(i.fechaIngreso, true)}{i.numeroRemito && ` · remito ${i.numeroRemito}`}
             </p>
+            {i.proveedor && <p className="body-sm">Proveedor: {i.proveedor.razonSocial}{!i.proveedor.activo && ' (dado de baja)'}</p>}
             <ul className="ingreso-bebida__lista">
               {i.renglones.map((r) => (
                 <li key={r.bebidaId}>

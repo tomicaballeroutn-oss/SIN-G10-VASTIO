@@ -1,12 +1,15 @@
 package ar.edu.utn.vastio.bebida.aplicacion;
 
 import java.math.BigDecimal;
+import java.util.Objects;
+import java.util.stream.Stream;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import ar.edu.utn.vastio.bebida.dominio.MovimientoStock;
+import ar.edu.utn.vastio.bebida.dominio.Ubicacion;
 import ar.edu.utn.vastio.bebida.infraestructura.MovimientoStockRepository;
 
 /**
@@ -31,6 +34,10 @@ public class MovimientoService {
     }
 
     public Resultado registrar(MovimientoStock movimiento) {
+        // Misma ancla que el recuento y la carga inicial, antes de insertar el asiento o actualizar saldos.
+        // Si un movimiento usa dos ubicaciones, siempre las toma por id ascendente.
+        Stream.of(movimiento.getOrigen(), movimiento.getDestino()).filter(Objects::nonNull)
+                .map(Ubicacion::getId).distinct().sorted().forEach(movimientos::bloquearUbicacion);
         MovimientoStock guardado = movimientos.save(movimiento);
         long bebida = guardado.getBebida().getId();
         BigDecimal saldoOrigen = guardado.getOrigen() == null ? null

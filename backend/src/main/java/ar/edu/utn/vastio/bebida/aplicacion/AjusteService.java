@@ -78,7 +78,7 @@ public class AjusteService {
     public Resultado declararRotura(DatosAjuste datos, long usuarioId) {
         Ubicacion ubicacion = ubicacion(datos.ubicacionId());
         Bebida bebida = bebida(datos.bebidaId());
-        Motivo motivo = motivo(datos.motivoId(), datos.detalle());
+        Motivo motivo = motivoRotura(datos.motivoId());
         var registrado = movimientoService.registrar(MovimientoStock.merma(bebida, ubicacion, datos.cantidad(), motivo.getId(),
                 datos.detalle(), usuarioId));
         BigDecimal nuevo = registrado.saldoOrigen();
@@ -89,6 +89,16 @@ public class AjusteService {
                     usuarioId, List.of(RolCodigo.COMPRAS, RolCodigo.ADMINISTRACION));
         }
         return new Resultado(registrado.movimiento(), ubicacion, bebida, nuevo.add(datos.cantidad()), nuevo, negativo);
+    }
+
+    /** El catálogo es editable: no alcanza con el id sembrado por V2 ni con pertenecer al ámbito Ajuste. */
+    private Motivo motivoRotura(short id) {
+        Motivo motivo = catalogos.motivo(id);
+        if (motivo.getAmbito() != AmbitoMotivo.AJUSTE || !motivo.isActivo()
+                || !motivo.getNombre().trim().equalsIgnoreCase("Rotura")) {
+            throw ProblemaException.reglaDeNegocio("MOTIVO_INVALIDO", "Para declarar una rotura, usá el motivo activo «Rotura» del ámbito Ajuste.");
+        }
+        return motivo;
     }
 
     private Motivo motivo(short id, String detalle) {

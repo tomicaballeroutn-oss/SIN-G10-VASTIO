@@ -6,7 +6,9 @@ import { NOMBRE_DE_TIPO } from '../../api/ubicaciones';
 import { Alert, Button, Card, EmptyState, Input, Select, StockLevel, cantidadLegible } from '../../ds';
 import { Cargando } from '../comun/Cargando';
 import { Encabezado } from '../layout/paginas';
+import { useSesion } from '../sesion/contexto';
 import { DialogoRecuento, DialogoRotura } from './DialogosAjuste';
+import { SeleccionBebidaRecuento } from './SeleccionBebidaRecuento';
 import './existencias.css';
 
 /** Motivos activos del ámbito Ajuste, para el recuento y la rotura. */
@@ -47,6 +49,7 @@ export function PaginaExistencias() {
 }
 
 function Consulta({ ubicaciones }: { ubicaciones: UbicacionConsultable[] }) {
+  const { usuario } = useSesion();
   // Quien ve el depósito ve todo; la barra solo recibe barras (con su evento).
   const veTodo = ubicaciones.some((u) => u.ubicacion.tipo !== 'BARRA' || !u.evento);
   const [elegida, setElegida] = useState(String(ubicaciones[0].ubicacion.id));
@@ -56,9 +59,11 @@ function Consulta({ ubicaciones }: { ubicaciones: UbicacionConsultable[] }) {
   const { recargar } = datos;
   const [ajuste, setAjuste] = useState<{ tipo: 'recuento' | 'rotura'; renglon: RenglonStock } | null>(null);
   const [aviso, setAviso] = useState<string | null>(null);
+  const [seleccionandoRecuento, setSeleccionandoRecuento] = useState(false);
   // El ajuste necesita una ubicación: no se ofrece en el total ni a la barra.
   const ubicacion = elegida === TODAS ? undefined : ubicaciones.find((u) => String(u.ubicacion.id) === elegida)?.ubicacion;
-  const puedeAjustar = veTodo && ubicacion !== undefined;
+  const puedeAjustar = !!usuario?.roles.some((rol) => ['DIRECCION', 'COORDINACION', 'ADMINISTRACION', 'COMPRAS'].includes(rol)) && ubicacion !== undefined;
+  const saldoDisponible = datos.datos?.ubicacion?.id === ubicacion?.id && !datos.cargando && !datos.error;
 
   useEffect(() => {
     const intervalo = setInterval(recargar, INTERVALO_STOCK_MS);
@@ -80,10 +85,15 @@ function Consulta({ ubicaciones }: { ubicaciones: UbicacionConsultable[] }) {
     <>
       {aviso && <Alert tone="success">{aviso}</Alert>}
       <div className="existencias__filtros">
-        <Select label="Ubicación" size="lg" options={opciones} value={elegida} onChange={(e) => { setElegida(e.target.value); setAviso(null); }} />
+        <Select label="Ubicación" size="lg" options={opciones} value={elegida} onChange={(e) => { setElegida(e.target.value); setAviso(null); setSeleccionandoRecuento(false); setAjuste(null); }} />
         <Input label="Buscar bebida" icon="search" size="lg" value={buscar} onChange={(e) => setBuscar(e.target.value)} />
         <Button variant="outline" icon="refresh-cw" size="lg" loading={datos.cargando && datos.datos !== undefined} onClick={recargar}>Actualizar</Button>
       </div>
+      {puedeAjustar && (
+        <div>
+          <Button icon="clipboard-list" size="lg" disabled={!saldoDisponible} onClick={() => setSeleccionandoRecuento(true)}>Registrar recuento de bebida</Button>
+        </div>
+      )}
       <Cargando datos={datos}>
         {({ renglones }) => {
           const texto = buscar.trim().toLowerCase();
@@ -121,7 +131,15 @@ function Consulta({ ubicaciones }: { ubicaciones: UbicacionConsultable[] }) {
           );
         }}
       </Cargando>
-      {ajuste && ubicacion && <DialogoAjuste tipo={ajuste.tipo} renglon={ajuste.renglon} ubicacion={ubicacion} alCerrar={() => setAjuste(null)} alRegistrar={registrado} />}
+      {seleccionandoRecuento && puedeAjustar && ubicacion && datos.datos && (
+        <SeleccionBebidaRecuento
+          ubicacion={ubicacion}
+          renglones={datos.datos.renglones}
+          alCerrar={() => setSeleccionandoRecuento(false)}
+          alElegir={(renglon) => { setSeleccionandoRecuento(false); setAjuste({ tipo: 'recuento', renglon }); }}
+        />
+      )}
+      {ajuste && puedeAjustar && ubicacion && <DialogoAjuste tipo={ajuste.tipo} renglon={ajuste.renglon} ubicacion={ubicacion} alCerrar={() => setAjuste(null)} alRegistrar={registrado} />}
     </>
   );
 }

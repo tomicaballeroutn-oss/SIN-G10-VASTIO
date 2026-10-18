@@ -1,7 +1,6 @@
 import { api } from './cliente';
 
-/** Ids de V2 (ámbito Ajuste): los que se preseleccionan. */
-export const MOTIVO_ROTURA = 11;
+/** Id de V2 (ámbito Ajuste): preselección del recuento, si sigue activo. */
 export const MOTIVO_RECUENTO = 12;
 
 export interface DatosAjuste {

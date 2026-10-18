@@ -11,6 +11,7 @@ const UBICACIONES: UbicacionConsultable[] = [{ ubicacion: { id: 4, nombre: 'Barr
 const EXISTENCIAS: Existencias = { ubicacion: { id: 4, nombre: 'Barra Santa Bárbara' }, renglones: [{ bebida: FERNET, cantidad: 10, estado: 'OK' }] };
 const MOTIVOS: Motivo[] = [
   { id: 1, ambito: 'CANCELACION', nombre: 'Desistimiento del cliente', activo: true },
+  { id: 10, ambito: 'AJUSTE', nombre: 'Error de carga', activo: true },
   { id: 11, ambito: 'AJUSTE', nombre: 'Rotura', activo: true },
   { id: 12, ambito: 'AJUSTE', nombre: 'Recuento físico', activo: true },
   { id: 13, ambito: 'AJUSTE', nombre: 'Otro', activo: true },
@@ -83,19 +84,62 @@ describe('UI-38 · ajuste de stock', () => {
     montar('/existencias');
 
     const dialogo = await abrir(persona, 'Declarar rotura');
-    expect(within(dialogo).getByLabelText('Motivo')).toHaveValue('11');
+    expect(within(dialogo).getByLabelText('Motivo')).toHaveValue('Rotura');
+    expect(within(dialogo).getByLabelText('Motivo')).toHaveAttribute('readonly');
+    expect(within(dialogo).queryByRole('combobox', { name: 'Motivo' })).not.toBeInTheDocument();
     await persona.click(within(dialogo).getByRole('button', { name: 'Declarar rotura' }));
     expect(within(dialogo).getByText('Cargá cuántas botellas se rompieron.')).toBeInTheDocument();
     await persona.click(within(dialogo).getAllByRole('button', { name: 'Sumar 1' })[0]);
     await persona.click(within(dialogo).getAllByRole('button', { name: 'Sumar 1' })[0]);
-    await persona.selectOptions(within(dialogo).getByLabelText('Motivo'), '13');
-    await persona.type(within(dialogo).getByLabelText('Detalle'), 'Se cayó un cajón');
+    await persona.type(within(dialogo).getByRole('textbox', { name: /Detalle/ }), 'Se cayó un cajón');
     await persona.click(within(dialogo).getByRole('button', { name: 'Declarar rotura' }));
 
     expect(await screen.findByText(/El saldo quedó negativo: avisamos a Compras y Administración/)).toBeInTheDocument();
     expect(pedidos(fetchMock).find((p) => p.ruta === '/ajustes/rotura')?.cuerpo).toEqual({
-      ubicacionId: 4, bebidaId: 1, cantidad: 12, motivoId: 13, detalle: 'Se cayó un cajón',
+      ubicacionId: 4, bebidaId: 1, cantidad: 12, motivoId: 11, detalle: 'Se cayó un cajón',
     });
+  });
+
+  it('la rotura usa el id actual del catálogo sin depender del id inicial', async () => {
+    const fetchMock = backendFalso(sesionDe(['COMPRAS']), (p) => p.ruta === '/motivos'
+      ? json(200, MOTIVOS.map((m) => m.id === 11 ? { ...m, id: 80 } : m)) : backend(p));
+    const persona = userEvent.setup();
+    montar('/existencias');
+    const dialogo = await abrir(persona, 'Declarar rotura');
+    await persona.click(within(dialogo).getAllByRole('button', { name: 'Sumar 1' })[0]);
+    await persona.click(within(dialogo).getByRole('button', { name: 'Declarar rotura' }));
+    expect(pedidos(fetchMock).find((p) => p.ruta === '/ajustes/rotura')?.cuerpo).toMatchObject({ motivoId: 80 });
+  });
+
+  it.each(['ausente', 'inactivo', 'renombrado', 'otro ámbito'])('no declara rotura si el motivo está %s', async (caso) => {
+    const motivos = MOTIVOS.filter((m) => caso !== 'ausente' || m.id !== 11).map((m) => m.id !== 11 ? m : {
+      ...m,
+      activo: caso !== 'inactivo',
+      nombre: caso === 'renombrado' ? 'Motivo renombrado' : m.nombre,
+      ambito: caso === 'otro ámbito' ? 'CANCELACION' as const : m.ambito,
+    });
+    const fetchMock = backendFalso(sesionDe(['COMPRAS']), (p) => p.ruta === '/motivos' ? json(200, motivos) : backend(p));
+    const persona = userEvent.setup();
+    montar('/existencias');
+    const dialogo = await abrir(persona, 'Declarar rotura');
+    expect(within(dialogo).getByText(/No está disponible el motivo «Rotura»/)).toBeInTheDocument();
+    const declarar = within(dialogo).getByRole('button', { name: 'Declarar rotura' });
+    expect(declarar).toBeDisabled();
+    await persona.click(declarar);
+    expect(pedidos(fetchMock).some((p) => p.ruta === '/ajustes/rotura')).toBe(false);
+  });
+
+  it.each([10, 11, 13])('el recuento conserva la selección del motivo %s', async (motivoId) => {
+    const fetchMock = backendFalso(sesionDe(['COMPRAS']), backend);
+    const persona = userEvent.setup();
+    montar('/existencias');
+    const dialogo = await abrir(persona, 'Registrar recuento');
+    await persona.selectOptions(within(dialogo).getByRole('combobox', { name: 'Motivo' }), String(motivoId));
+    if (motivoId === 13) expect(within(dialogo).getByText('Con «Otro», contá qué pasó.')).toBeInTheDocument();
+    await persona.type(within(dialogo).getByRole('textbox', { name: /Detalle/ }), 'Detalle del recuento');
+    await persona.click(within(dialogo).getAllByRole('button', { name: 'Sumar 1' })[0]);
+    await persona.click(within(dialogo).getByRole('button', { name: 'Registrar recuento' }));
+    expect(pedidos(fetchMock).find((p) => p.ruta === '/ajustes/recuento')?.cuerpo).toMatchObject({ motivoId, detalle: 'Detalle del recuento' });
   });
 
   it('en el total del complejo no hay ajustes, porque hace falta una ubicación', async () => {

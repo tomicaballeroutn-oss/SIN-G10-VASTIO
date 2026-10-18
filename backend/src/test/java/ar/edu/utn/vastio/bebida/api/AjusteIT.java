@@ -14,7 +14,9 @@ import jakarta.persistence.EntityManager;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.EnumSource;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
@@ -150,9 +152,12 @@ class AjusteIT {
         List<Long> destinatarios = jdbc.queryForList("SELECT usuario_id FROM notificacion_destinatario WHERE notificacion_id = ?",
                 Long.class, aviso);
         assertThat(destinatarios).contains(otraCompras.getId(), administracion.getId()).doesNotContain(quienRegistra.getId());
-        Map<String, Object> merma = jdbc.queryForMap("SELECT ubicacion_origen_id, ubicacion_destino_id FROM movimiento_stock WHERE bebida_id = ? AND tipo = 'MERMA'", ron);
+        Map<String, Object> merma = jdbc.queryForMap("""
+                SELECT ubicacion_origen_id, ubicacion_destino_id, motivo.nombre, motivo.ambito, motivo.activo
+                FROM movimiento_stock JOIN motivo USING (motivo_id) WHERE bebida_id = ? AND tipo = 'MERMA'""", ron);
         assertThat(((Number) merma.get("ubicacion_origen_id")).intValue()).isEqualTo(4);
         assertThat(merma.get("ubicacion_destino_id")).isNull();
+        assertThat(merma).containsEntry("nombre", "Rotura").containsEntry("ambito", "AJUSTE").containsEntry("activo", true);
     }
 
     @Test
@@ -170,17 +175,62 @@ class AjusteIT {
         recuento(compras(), 6, 1, null)
                 .andExpect(status().isUnprocessableContent())
                 .andExpect(jsonPath("$.codigo").value("MOTIVO_INVALIDO"));
-        rotura(compras(), 1, 13, " ")
+        recuento(compras(), 6, 13, " ")
                 .andExpect(status().isUnprocessableContent())
                 .andExpect(jsonPath("$.detail").value("Con el motivo «Otro», contá qué pasó en el detalle."));
-        rotura(compras(), 1, 13, "Se cayó una caja al descargar").andExpect(status().isOk());
-        assertThat(jdbc.queryForObject("SELECT observacion FROM movimiento_stock WHERE bebida_id = ? AND tipo = 'MERMA'", String.class, ron))
+        recuento(compras(), 6, 13, "Se cayó una caja al descargar").andExpect(status().isOk());
+        assertThat(jdbc.queryForObject("SELECT observacion FROM movimiento_stock WHERE bebida_id = ? AND tipo = 'AJUSTE'", String.class, ron))
                 .isEqualTo("Se cayó una caja al descargar");
+    }
+
+    @ParameterizedTest
+    @ValueSource(ints = {1, 10, 12, 13})
+    void unaRoturaRechazaOtrosMotivosAunqueTenganDetalle(int motivo) throws Exception {
+        saldo(10);
+        rotura(compras(), 1, motivo, "Detalle válido")
+                .andExpect(status().isUnprocessableContent())
+                .andExpect(jsonPath("$.codigo").value("MOTIVO_INVALIDO"));
+        assertThat(saldoActual()).isEqualByComparingTo("10");
+        assertThat(jdbc.queryForObject("SELECT count(*) FROM movimiento_stock WHERE bebida_id = ?", Integer.class, ron)).isZero();
+    }
+
+    @ParameterizedTest
+    @CsvSource({"Rotura,false,AJUSTE", "Rotura renombrada,true,AJUSTE", "Rotura,true,CANCELACION"})
+    void elIdInicialNoAlcanzaSinNombreAmbitoYEstadoValidos(String nombre, boolean activo, String ambito) throws Exception {
+        jdbc.update("UPDATE motivo SET nombre = ?, activo = ?, ambito = ? WHERE motivo_id = 11", nombre, activo, ambito);
+        rotura(compras(), 1, 11, "Detalle válido")
+                .andExpect(status().isUnprocessableContent())
+                .andExpect(jsonPath("$.codigo").value("MOTIVO_INVALIDO"));
+    }
+
+    @Test
+    void unaRoturaAceptaElMotivoValidoSinDependerDelIdInicial() throws Exception {
+        jdbc.update("UPDATE motivo SET nombre = 'Rotura anterior' WHERE motivo_id = 11");
+        Short motivo = jdbc.queryForObject("INSERT INTO motivo (ambito, nombre) VALUES ('AJUSTE', 'Rotura') RETURNING motivo_id", Short.class);
+        rotura(compras(), 1, motivo, "Se rompió una botella")
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.tipo").value("MERMA"));
+        assertThat(jdbc.queryForObject("SELECT motivo_id FROM movimiento_stock WHERE bebida_id = ? AND tipo = 'MERMA'", Short.class, ron))
+                .isEqualTo(motivo);
+    }
+
+    @ParameterizedTest
+    @ValueSource(ints = {10, 11, 12, 13})
+    void elRecuentoConservaTodosLosMotivosValidosDeAjuste(int motivo) throws Exception {
+        recuento(compras(), 6, motivo, "Detalle del recuento")
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.tipo").value("AJUSTE"));
+        assertThat(jdbc.queryForObject("SELECT motivo_id FROM movimiento_stock WHERE bebida_id = ? AND tipo = 'AJUSTE'", Integer.class, ron))
+                .isEqualTo(motivo);
     }
 
     @Test
     void validaLasCantidades() throws Exception {
         rotura(compras(), 0, 11, null).andExpect(status().isBadRequest());
+        rotura(compras(), -1, 11, null).andExpect(status().isBadRequest());
+        enviar(compras(), "/api/v1/ajustes/rotura", """
+                {"ubicacionId":4,"bebidaId":%d,"cantidad":2.5,"motivoId":11}""".formatted(ron))
+                .andExpect(status().isBadRequest());
         recuento(compras(), -1, 12, null).andExpect(status().isBadRequest());
         enviar(compras(), "/api/v1/ajustes/recuento", """
                 {"ubicacionId":4,"bebidaId":%d,"cantidadContada":2.5,"motivoId":12}""".formatted(ron))
@@ -191,6 +241,9 @@ class AjusteIT {
     @Test
     void unaUbicacionDadaDeBajaNoSeAjusta() throws Exception {
         jdbc.update("UPDATE ubicacion SET activo = false WHERE ubicacion_id = 4");
+        rotura(compras(), 1, 11, null)
+                .andExpect(status().isUnprocessableContent())
+                .andExpect(jsonPath("$.codigo").value("UBICACION_INACTIVA"));
         recuento(compras(), 6, 12, null)
                 .andExpect(status().isUnprocessableContent())
                 .andExpect(jsonPath("$.codigo").value("UBICACION_INACTIVA"));

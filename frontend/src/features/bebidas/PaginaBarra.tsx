@@ -1,5 +1,5 @@
 import { useCallback, useState } from 'react';
-import { entregas, type BebidaParaRetiro, type Entrega, type EventoDeLaJornada } from '../../api/entregas';
+import { entregas, type BebidaParaRetiro, type Devolucion, type Entrega, type EventoDeLaJornada } from '../../api/entregas';
 import { useDatos, useEnvio } from '../../api/useDatos';
 import {
   Alert, Button, CantidadEnCajas, Card, Combobox, Dialog, EmptyState, ESTADO_POR_CODIGO, ESTADOS, IconButton, LectorCodigo,
@@ -8,6 +8,7 @@ import {
 import { Cargando } from '../comun/Cargando';
 import { fechaHora } from '../comun/formato';
 import { Encabezado } from '../layout/paginas';
+import { ConsumoDeLaDevolucion, DevolucionBarra } from './DevolucionBarra';
 import { resumenDeSalida } from './salida';
 import './barra.css';
 
@@ -105,32 +106,69 @@ function PantallaEntrega({ eventoId, barraId }: { eventoId: number; barraId: num
   );
 }
 
+/**
+ * Con el evento en curso: retiros y, cuando termina la noche, la devolución. Con el evento realizado y la entrega
+ * abierta, directo a la devolución. Después de devolver, el consumo real.
+ */
 function ContenidoEntrega({ entrega, alRegistrar }: { entrega: Entrega; alRegistrar: (e: Entrega) => void }) {
+  const [devolviendo, setDevolviendo] = useState(false);
+  const [devolucion, setDevolucion] = useState<Devolucion | null>(null);
   const estado = ESTADO_POR_CODIGO[entrega.evento.estado as keyof typeof ESTADO_POR_CODIGO];
   const enCurso = entrega.evento.estado === 'EN_CURSO';
+  const realizado = entrega.evento.estado === 'REALIZADO';
+  const abierta = entrega.estadoEntrega === 'ABIERTA';
   const cerrada = entrega.estadoEntrega === 'CERRADA';
+  const puedeDevolver = abierta && (enCurso || realizado);
+
+  const cabecera = (
+    <Card
+      title={entrega.evento.nombre}
+      subtitle={`${entrega.barra.nombre} · sale de ${entrega.origen.nombre}`}
+      actions={estado && <StatusChip status={estado} size="sm" />}
+    >
+      <SalonTag salon={entrega.salon.codigo as SalonId} label={entrega.salon.nombre} />
+    </Card>
+  );
+
+  if (devolucion) {
+    return <>{cabecera}<ConsumoDeLaDevolucion devolucion={devolucion} /></>;
+  }
+  if (puedeDevolver && (devolviendo || realizado)) {
+    return (
+      <>
+        {cabecera}
+        <DevolucionBarra
+          entrega={entrega}
+          alCancelar={enCurso ? () => setDevolviendo(false) : null}
+          alRegistrar={(d) => { setDevolucion(d); alRegistrar(d.entrega); }}
+        />
+      </>
+    );
+  }
   return (
     <>
-      <Card
-        title={entrega.evento.nombre}
-        subtitle={`${entrega.barra.nombre} · sale de ${entrega.origen.nombre}`}
-        actions={estado && <StatusChip status={estado} size="sm" />}
-      >
-        <SalonTag salon={entrega.salon.codigo as SalonId} label={entrega.salon.nombre} />
-      </Card>
+      {cabecera}
 
-      {!enCurso && (
+      {!enCurso && !cerrada && (
         <Alert tone="warning" icon="clock" title={`El evento está ${estado ? ESTADOS[estado].label.toLowerCase() : entrega.evento.estado}`}>
-          La salida a barra se registra con el evento en curso: empieza sola a la hora de inicio del turno.
+          {entrega.evento.estado === 'CONFIRMADO'
+            ? 'La salida a barra se registra con el evento en curso: empieza sola a la hora de inicio del turno.'
+            : 'La salida a barra se registra con el evento en curso.'}
         </Alert>
       )}
-      {enCurso && cerrada && (
+      {cerrada && (
         <Alert tone="info" title={`La entrega a ${entrega.barra.nombre} ya se cerró`}>
           Ya se registró la devolución: no admite más retiros.
         </Alert>
       )}
 
       <YaEntregado entrega={entrega} />
+
+      {enCurso && abierta && (
+        <div>
+          <Button variant="outline" icon="undo-2" size="lg" onClick={() => setDevolviendo(true)}>Registrar devolución</Button>
+        </div>
+      )}
 
       {enCurso && !cerrada && <NuevoRetiro entrega={entrega} alRegistrar={alRegistrar} />}
     </>

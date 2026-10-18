@@ -5,3 +5,6 @@ vastio:
     cookie-segura: false
   legajo:
     directorio: ${java.io.tmpdir}/vastio-legajo-test
+  realizacion:
+    # Los tests llaman a RealizacionService con un reloj fijo; el proceso programado movería sus eventos.
+    automatica: false

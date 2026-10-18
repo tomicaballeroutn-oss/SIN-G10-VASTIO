@@ -48,7 +48,7 @@ import ar.edu.utn.vastio.usuarios.dominio.RolCodigo;
 import ar.edu.utn.vastio.usuarios.dominio.Usuario;
 
 /**
- * Solo en dev: un usuario de cada perfil, eventos (pre-reservas, señados, uno contratado y uno confirmado) en las próximas
+ * Solo en dev: un usuario de cada perfil, eventos (pre-reservas, señados, uno contratado y dos confirmados, uno de hoy) en las próximas
  * semanas, un catálogo de bebidas con proveedores y la carga inicial del depósito y de la Barra Avril, para que cualquiera del equipo
  * pruebe sin cargar nada. Se crea una vez (si no existe lucia.ferreyra) y solo con VASTIO_DEMO_CONTRASENA.
  * Usa los casos de uso reales, así los eventos tienen código, historial y avisos como cualquier otro.
@@ -87,6 +87,8 @@ public class DatosDeDemostracion implements ApplicationRunner {
     }
 
     private static final List<Reserva> RESERVAS = List.of(
+            // Hoy a la noche en Avril: pasa solo a En curso a las 20:00 y es el que usa el objetivo del Sprint 3.
+            new Reserva(0, 1, 2, 2, "Martina Ortiz", "lucia.ferreyra", 500000, Etapa.CONFIRMADO),
             new Reserva(3, 1, 2, 2, "Delfina Ríos", "lucia.ferreyra", null, Etapa.PRE_RESERVA),
             new Reserva(3, 2, 1, 3, "Grupo Arcor", "sofia.mendez", 400000, Etapa.SENADO),
             new Reserva(10, 3, 2, 1, "Paula Gómez y Martín Paz", "lucia.ferreyra", 650000, Etapa.CONTRATADO),

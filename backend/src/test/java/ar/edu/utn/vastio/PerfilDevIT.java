@@ -6,6 +6,9 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import java.time.LocalDate;
+import java.time.ZoneId;
+
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -84,8 +87,13 @@ class PerfilDevIT {
         assertThat(jdbc.queryForObject("SELECT count(*) FROM evento WHERE estado = 'PRE_RESERVA'", Integer.class)).isEqualTo(4);
         assertThat(jdbc.queryForObject("SELECT count(*) FROM evento WHERE estado = 'SENADO'", Integer.class)).isEqualTo(1);
         assertThat(jdbc.queryForObject("SELECT count(*) FROM evento WHERE estado = 'CONTRATADO'", Integer.class)).isEqualTo(1);
-        assertThat(jdbc.queryForObject("SELECT count(*) FROM evento WHERE estado = 'CONFIRMADO'", Integer.class)).isEqualTo(1);
-        assertThat(jdbc.queryForObject("SELECT count(DISTINCT evento_id) FROM cambio_estado_evento", Integer.class)).isEqualTo(7);
+        assertThat(jdbc.queryForObject("SELECT count(*) FROM evento WHERE estado = 'CONFIRMADO'", Integer.class)).isEqualTo(2);
+        assertThat(jdbc.queryForObject("SELECT count(DISTINCT evento_id) FROM cambio_estado_evento", Integer.class)).isEqualTo(8);
+        // El del objetivo del Sprint 3: confirmado para hoy a la noche en Avril.
+        assertThat(jdbc.queryForObject("""
+                SELECT count(*) FROM evento e JOIN unidad_comercializable u USING (unidad_id)
+                WHERE e.estado = 'CONFIRMADO' AND u.fecha = ? AND u.salon_id = 1 AND u.turno_id = 2""",
+                Integer.class, LocalDate.now(ZoneId.of(VastioApplication.ZONA_HORARIA)))).isEqualTo(1);
     }
 
     @Test

@@ -90,6 +90,7 @@ Ramas: `mateo/S3-catalogo-bebidas`, `mateo/S3-ubicaciones-stock`, `mateo/S3-ingr
 
 - Lo registran Dirección, Coordinación, Administración y Compras. El resto recibe 403.
 - Recuento: muestra el saldo teórico, pide lo contado y el motivo; si no hay diferencia, no registra nada y lo dice. Rotura: pide la cantidad (mayor a 0).
+- Desde una ubicación específica, los perfiles con permiso de ajuste también pueden buscar una bebida activa del catálogo para iniciar el recuento aunque no figure entre sus existencias. Un saldo ausente se presenta como cero, sin crear filas de stock al seleccionar. La lista habitual de las barras conserva su filtro; las bebidas dadas de baja con saldo remanente siguen ajustándose desde su fila, sin ofrecerlas en la nueva búsqueda.
 - Ninguno edita ni borra movimientos: agregan un asiento con usuario y momento, y el saldo se actualiza en la misma transacción.
 - Si el saldo queda negativo, se avisa según la decisión 18.
 

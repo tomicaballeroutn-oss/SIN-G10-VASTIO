@@ -13,7 +13,14 @@ import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
 import jakarta.validation.constraints.Size;
 
+import tools.jackson.core.JsonParser;
+import tools.jackson.core.JsonToken;
+import tools.jackson.databind.DeserializationContext;
+import tools.jackson.databind.ValueDeserializer;
+import tools.jackson.databind.annotation.JsonDeserialize;
+
 import ar.edu.utn.vastio.bebida.api.UbicacionDto.UbicacionResumen;
+import ar.edu.utn.vastio.bebida.api.BebidaDto.ProveedorResumen;
 import ar.edu.utn.vastio.bebida.aplicacion.IngresoService.DatosIngreso;
 import ar.edu.utn.vastio.bebida.aplicacion.IngresoService.IngresoRegistrado;
 import ar.edu.utn.vastio.bebida.aplicacion.IngresoService.Renglon;
@@ -37,12 +44,25 @@ public final class IngresoDto {
     public record IngresoRequest(
             LocalDate fecha,
             @Size(max = 30, message = "Usá hasta 30 caracteres.") String numeroRemito,
+            @JsonDeserialize(using = ProveedorIdDeserializer.class)
+            @Positive(message = "Elegí un proveedor de la lista.") Long proveedorId,
             @NotEmpty(message = "Cargá al menos una bebida con su cantidad.")
             @Size(max = 200, message = "Cargá hasta 200 bebidas por ingreso.") List<@Valid RenglonRequest> renglones) {
 
         DatosIngreso datos() {
             String remito = numeroRemito == null || numeroRemito.isBlank() ? null : numeroRemito.trim();
-            return new DatosIngreso(fecha, remito, renglones.stream().map(r -> new Renglon(r.bebidaId(), r.cantidad())).toList());
+            return new DatosIngreso(fecha, remito, renglones.stream().map(r -> new Renglon(r.bebidaId(), r.cantidad())).toList(), proveedorId);
+        }
+    }
+
+    /** Un identificador entero: no truncar decimales ni convertir otros tipos de JSON a un proveedor distinto. */
+    public static class ProveedorIdDeserializer extends ValueDeserializer<Long> {
+        @Override
+        public Long deserialize(JsonParser parser, DeserializationContext contexto) {
+            if (!parser.hasToken(JsonToken.VALUE_NUMBER_INT)) {
+                return contexto.reportInputMismatch(Long.class, "El identificador del proveedor tiene que ser un número entero.");
+            }
+            return parser.getLongValue();
         }
     }
 
@@ -61,12 +81,12 @@ public final class IngresoDto {
 
     /** Quién lo registró y cuándo (regla 9). */
     public record IngresoResponse(long id, LocalDate fechaIngreso, String numeroRemito, UbicacionResumen destino,
-            List<RenglonResponse> renglones, Persona usuario, OffsetDateTime fechaRegistro) {
+            List<RenglonResponse> renglones, Persona usuario, OffsetDateTime fechaRegistro, ProveedorResumen proveedor) {
         static IngresoResponse de(IngresoRegistrado registrado, Map<Long, String> nombres) {
             Ingreso i = registrado.ingreso();
             return new IngresoResponse(i.getId(), i.getFechaIngreso(), i.getNumeroRemito(), UbicacionResumen.de(i.getDestino()),
                     registrado.renglones().stream().map(RenglonResponse::de).toList(),
-                    new Persona(i.getUsuarioId(), nombres.getOrDefault(i.getUsuarioId(), "")), i.getFechaRegistro());
+                    new Persona(i.getUsuarioId(), nombres.getOrDefault(i.getUsuarioId(), "")), i.getFechaRegistro(), ProveedorResumen.de(i.getProveedor()));
         }
     }
 }

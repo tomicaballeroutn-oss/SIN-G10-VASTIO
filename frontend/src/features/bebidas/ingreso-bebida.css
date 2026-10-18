@@ -1,6 +1,6 @@
 /* UI-29: mobile first. Cabecera y buscador en una columna; desde tableta, en fila. */
 .ingreso-bebida__cabecera { display: grid; gap: var(--space-4); }
-@media (min-width: 720px) { .ingreso-bebida__cabecera { grid-template-columns: minmax(0, 1fr) 200px minmax(0, 1fr); align-items: start; } }
+@media (min-width: 720px) { .ingreso-bebida__cabecera { grid-template-columns: repeat(2, minmax(0, 1fr)); align-items: start; } }
 .ingreso-bebida__agregar { display: flex; flex-wrap: wrap; gap: var(--space-3); align-items: end; }
 .ingreso-bebida__agregar > :first-child { flex: 1 1 260px; }
 

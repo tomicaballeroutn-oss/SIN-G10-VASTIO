@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { MOTIVO_RECUENTO, MOTIVO_ROTURA, ajustes, type ResultadoAjuste } from '../../api/ajustes';
+import { MOTIVO_RECUENTO, ajustes, type ResultadoAjuste } from '../../api/ajustes';
 import type { Motivo } from '../../api/catalogos';
 import type { RenglonStock } from '../../api/stock';
 import { useEnvio } from '../../api/useDatos';
@@ -104,19 +104,20 @@ export function DialogoRecuento({ ubicacion, renglon, motivos, alCerrar, alRegis
 /** Declarar rotura (UI-38): sale de la ubicación. Simple y sin castigo; si el saldo queda negativo, se avisa. */
 export function DialogoRotura({ ubicacion, renglon, motivos, alCerrar, alRegistrar }: Props) {
   const [cantidad, setCantidad] = useState(0);
-  const [motivoId, setMotivoId] = useState(inicial(motivos, MOTIVO_ROTURA));
+  const motivo = motivos.find((m) => m.activo && m.ambito === 'AJUSTE' && m.nombre.trim().toLowerCase() === 'rotura');
   const [detalle, setDetalle] = useState('');
   const [falta, setFalta] = useState<string | undefined>();
   const { guardando, error, enviar } = useEnvio();
   const nombre = `${renglon.bebida.nombre} ${renglon.bebida.presentacion}`;
 
   async function declarar() {
+    if (!motivo) return;
     if (cantidad <= 0) {
       setFalta('Cargá cuántas botellas se rompieron.');
       return;
     }
     const r = await enviar(() =>
-      ajustes.rotura({ ubicacionId: ubicacion.id, bebidaId: renglon.bebida.id, cantidad, motivoId: Number(motivoId), detalle }),
+      ajustes.rotura({ ubicacionId: ubicacion.id, bebidaId: renglon.bebida.id, cantidad, motivoId: motivo.id, detalle }),
     );
     if (!r) return;
     const texto = `Rotura de ${nombre} registrada en ${ubicacion.nombre}: ${cantidadLegible(cantidad, renglon.bebida.unidadesPorBulto, renglon.bebida.unidad)}.`;
@@ -131,7 +132,7 @@ export function DialogoRotura({ ubicacion, renglon, motivos, alCerrar, alRegistr
       actions={
         <>
           <Button variant="outline" onClick={alCerrar}>Cancelar</Button>
-          <Button icon="check" loading={guardando} onClick={() => void declarar()}>Declarar rotura</Button>
+          <Button icon="check" loading={guardando} disabled={!motivo} onClick={() => void declarar()}>Declarar rotura</Button>
         </>
       }
     >
@@ -151,7 +152,9 @@ export function DialogoRotura({ ubicacion, renglon, motivos, alCerrar, alRegistr
           unidad={renglon.bebida.unidad}
           error={falta}
         />
-        <CamposMotivo motivos={motivos} motivoId={motivoId} setMotivoId={setMotivoId} detalle={detalle} setDetalle={setDetalle} error={error?.errorDe('detalle')} />
+        <Input label="Motivo" value="Rotura" readOnly />
+        {!motivo && <Alert tone="danger">No está disponible el motivo «Rotura» del ámbito Ajuste. Revisá el catálogo de motivos.</Alert>}
+        <Input label="Detalle" optional multiline rows={2} value={detalle} onChange={(e) => setDetalle(e.target.value)} error={error?.errorDe('detalle')} />
       </div>
     </Dialog>
   );

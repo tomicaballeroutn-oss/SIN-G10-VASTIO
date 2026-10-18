@@ -7,6 +7,8 @@ import java.util.Optional;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
 
 import ar.edu.utn.vastio.bebida.dominio.MovimientoStock;
 
@@ -39,9 +41,25 @@ public interface MovimientoStockRepository extends JpaRepository<MovimientoStock
                        WHERE i.tipo = ar.edu.utn.vastio.bebida.dominio.TipoMovimiento.INVENTARIO_INICIAL AND i.destino.id = :ubicacionId))""")
     boolean tieneOtrosMovimientos(short ubicacionId);
 
-    /** Saldo de la bebida en la ubicación, bloqueando la fila hasta el final de la transacción (recuento). */
-    @Query(nativeQuery = true, value = "SELECT cantidad FROM stock_ubicacion WHERE ubicacion_id = :ubicacionId AND bebida_id = :bebidaId FOR UPDATE")
-    Optional<BigDecimal> saldoBloqueado(short ubicacionId, long bebidaId);
+    /**
+     * Ancla existente aunque todavía no haya stock. Todos los escritores toman este mismo bloqueo antes de mover.
+     * NO KEY UPDATE permite los KEY SHARE de las FK de ingreso/movimiento, evitando upgrades desde bloqueos compartidos.
+     */
+    @Transactional(propagation = Propagation.MANDATORY)
+    @Query(nativeQuery = true, value = "SELECT ubicacion_id FROM ubicacion WHERE ubicacion_id = :ubicacionId FOR NO KEY UPDATE")
+    Short bloquearUbicacion(short ubicacionId);
+
+    /**
+     * Bloquea primero y lee después, en otra sentencia: READ COMMITTED ve lo confirmado por quien nos hizo esperar.
+     * No crea una fila de saldo para bloquear. La exclusión se conserva hasta terminar la transacción del recuento.
+     */
+    default Optional<BigDecimal> saldoBloqueado(short ubicacionId, long bebidaId) {
+        bloquearUbicacion(ubicacionId);
+        return saldoDe(ubicacionId, bebidaId);
+    }
+
+    @Query(nativeQuery = true, value = "SELECT cantidad FROM stock_ubicacion WHERE ubicacion_id = :ubicacionId AND bebida_id = :bebidaId")
+    Optional<BigDecimal> saldoDe(short ubicacionId, long bebidaId);
 
     /**
      * Suma {@code delta} (positivo o negativo) al saldo de la bebida en la ubicación y devuelve el saldo nuevo. Una sola

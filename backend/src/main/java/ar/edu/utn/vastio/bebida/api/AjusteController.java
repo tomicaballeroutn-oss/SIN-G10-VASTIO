@@ -85,7 +85,8 @@ public class AjusteController {
 
     @PostMapping("/rotura")
     @Operation(summary = "Declarar una rotura", description = """
-            Registra una MERMA que sale de la ubicación. Nunca se rechaza por falta de saldo: si queda negativo, se avisa a
+            Registra una MERMA que sale de la ubicación. Requiere el motivo activo «Rotura» del ámbito Ajuste.
+            Nunca se rechaza por falta de saldo: si queda negativo, se avisa a
             Compras y Administración (ALERTA_STOCK).""")
     public AjusteResponse rotura(@Valid @RequestBody RoturaRequest pedido, @AuthenticationPrincipal Jwt jwt) {
         return AjusteResponse.de(ajustes.declararRotura(new DatosAjuste(pedido.ubicacionId(), pedido.bebidaId(), pedido.cantidad(),

@@ -1,4 +1,5 @@
 import { api } from './cliente';
+import type { Proveedor } from './proveedores';
 
 /** Una bebida del ingreso, en botellas enteras. */
 export interface RenglonIngreso {
@@ -14,6 +15,7 @@ export interface Ingreso {
   id: number;
   fechaIngreso: string;
   numeroRemito: string | null;
+  proveedor?: Pick<Proveedor, 'id' | 'razonSocial' | 'activo'> | null;
   destino: { id: number; nombre: string };
   renglones: RenglonIngreso[];
   usuario: { id: number; nombre: string };
@@ -24,6 +26,7 @@ export interface Ingreso {
 export interface DatosIngreso {
   fecha: string;
   numeroRemito: string;
+  proveedorId?: number | null;
   renglones: { bebidaId: number; cantidad: number }[];
 }
 

@@ -31,8 +31,9 @@ public class Ingreso {
     @JoinColumn(name = "ubicacion_destino_id", nullable = false)
     private Ubicacion destino;
 
-    @Column(name = "proveedor_id")
-    private Long proveedorId;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "proveedor_id")
+    private Proveedor proveedor;
 
     @Column(name = "numero_remito", length = 30)
     private String numeroRemito;
@@ -61,9 +62,10 @@ public class Ingreso {
     }
 
     /** Mercadería comprada que entra al depósito madre. */
-    public static Ingreso deMercaderia(Ubicacion deposito, LocalDate fecha, String numeroRemito, long usuarioId) {
+    public static Ingreso deMercaderia(Ubicacion deposito, LocalDate fecha, String numeroRemito, Proveedor proveedor, long usuarioId) {
         Ingreso ingreso = new Ingreso(deposito, fecha, false, usuarioId);
         ingreso.numeroRemito = numeroRemito;
+        ingreso.proveedor = proveedor;
         return ingreso;
     }
 
@@ -81,7 +83,11 @@ public class Ingreso {
     }
 
     public Long getProveedorId() {
-        return proveedorId;
+        return proveedor == null ? null : proveedor.getId();
+    }
+
+    public Proveedor getProveedor() {
+        return proveedor;
     }
 
     public String getNumeroRemito() {

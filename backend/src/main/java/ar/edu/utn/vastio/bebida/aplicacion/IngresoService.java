@@ -18,12 +18,14 @@ import ar.edu.utn.vastio.VastioApplication;
 import ar.edu.utn.vastio.bebida.dominio.Bebida;
 import ar.edu.utn.vastio.bebida.dominio.Ingreso;
 import ar.edu.utn.vastio.bebida.dominio.MovimientoStock;
+import ar.edu.utn.vastio.bebida.dominio.Proveedor;
 import ar.edu.utn.vastio.bebida.dominio.TipoMovimiento;
 import ar.edu.utn.vastio.bebida.dominio.TipoUbicacion;
 import ar.edu.utn.vastio.bebida.dominio.Ubicacion;
 import ar.edu.utn.vastio.bebida.infraestructura.BebidaRepository;
 import ar.edu.utn.vastio.bebida.infraestructura.IngresoRepository;
 import ar.edu.utn.vastio.bebida.infraestructura.MovimientoStockRepository;
+import ar.edu.utn.vastio.bebida.infraestructura.ProveedorRepository;
 import ar.edu.utn.vastio.bebida.infraestructura.UbicacionRepository;
 import ar.edu.utn.vastio.comun.errores.ProblemaException;
 
@@ -43,14 +45,16 @@ public class IngresoService {
     private final MovimientoService movimientoService;
     private final BebidaRepository bebidas;
     private final UbicacionRepository ubicaciones;
+    private final ProveedorRepository proveedores;
 
     public IngresoService(IngresoRepository ingresos, MovimientoStockRepository movimientos, MovimientoService movimientoService,
-            BebidaRepository bebidas, UbicacionRepository ubicaciones) {
+            BebidaRepository bebidas, UbicacionRepository ubicaciones, ProveedorRepository proveedores) {
         this.ingresos = ingresos;
         this.movimientos = movimientos;
         this.movimientoService = movimientoService;
         this.bebidas = bebidas;
         this.ubicaciones = ubicaciones;
+        this.proveedores = proveedores;
     }
 
     /** Una bebida del ingreso, en botellas enteras mayores a 0. */
@@ -58,7 +62,10 @@ public class IngresoService {
     }
 
     /** Sin fecha, hoy. */
-    public record DatosIngreso(LocalDate fecha, String numeroRemito, List<Renglon> renglones) {
+    public record DatosIngreso(LocalDate fecha, String numeroRemito, List<Renglon> renglones, Long proveedorId) {
+        public DatosIngreso(LocalDate fecha, String numeroRemito, List<Renglon> renglones) {
+            this(fecha, numeroRemito, renglones, null);
+        }
     }
 
     /** Un ingreso con sus bebidas, para mostrarlo con quién y cuándo. */
@@ -80,7 +87,8 @@ public class IngresoService {
         }
         Map<Long, Bebida> porId = bebidasActivas(datos.renglones());
 
-        Ingreso ingreso = ingresos.save(Ingreso.deMercaderia(deposito, fecha, datos.numeroRemito(), usuarioId));
+        Proveedor proveedor = proveedorActivo(datos.proveedorId());
+        Ingreso ingreso = ingresos.save(Ingreso.deMercaderia(deposito, fecha, datos.numeroRemito(), proveedor, usuarioId));
         List<MovimientoStock> registrados = datos.renglones().stream()
                 .map(r -> movimientoService.registrar(MovimientoStock.entrada(TipoMovimiento.INGRESO, porId.get(r.bebidaId()),
                         r.cantidad(), deposito, ingreso, usuarioId)).movimiento())
@@ -94,6 +102,20 @@ public class IngresoService {
         Map<Long, List<MovimientoStock>> porIngreso = movimientos.deIngresos(lista.stream().map(Ingreso::getId).toList())
                 .stream().collect(Collectors.groupingBy(MovimientoStock::getIngresoId));
         return lista.stream().map(i -> new IngresoRegistrado(i, porIngreso.getOrDefault(i.getId(), List.of()))).toList();
+    }
+
+    private Proveedor proveedorActivo(Long id) {
+        if (id == null) return null;
+        if (id <= 0) {
+            throw ProblemaException.reglaDeNegocio("PROVEEDOR_INVALIDO", "Elegí un proveedor de la lista.");
+        }
+        Proveedor proveedor = proveedores.findById(id).orElseThrow(() -> ProblemaException.reglaDeNegocio(
+                "PROVEEDOR_INEXISTENTE", "Elegí un proveedor de la lista."));
+        if (!proveedor.isActivo()) {
+            throw ProblemaException.reglaDeNegocio("PROVEEDOR_INACTIVO",
+                    "%s está dado de baja. Elegí un proveedor activo.".formatted(proveedor.getRazonSocial()));
+        }
+        return proveedor;
     }
 
     /** Cada bebida una sola vez y activa: una dada de baja no se ofrece para cargar (decisión 7). */

@@ -1,6 +1,6 @@
 # Vastio
 
-Sistema de gestión para un complejo de salones de eventos: agenda comercial y control de existencias de bebida con costo por evento.
+Sistema de gestión para un complejo de salones de eventos: agenda comercial y control de existencias de bebida con consumo por evento.
 
 Proyecto Integrador · Seminario Integrador · UTN Facultad Regional Córdoba · Grupo 10 · 3K2 · 2026.
 

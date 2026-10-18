@@ -46,7 +46,7 @@ public class CancelacionService {
 
     /** «Otro» exige contar qué pasó. */
     public static boolean pideDetalle(Motivo motivo) {
-        return motivo.getNombre().trim().equalsIgnoreCase("otro") || motivo.getNombre().trim().equalsIgnoreCase("otra");
+        return motivo.pideDetalle();
     }
 
     /**

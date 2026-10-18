@@ -28,3 +28,4 @@
 .catalogo__par { display: grid; gap: var(--space-4); }
 @media (min-width: 400px) { .catalogo__par { grid-template-columns: 1fr 1fr; } }
 .catalogo__generales { max-width: 560px; }
+.ubicaciones__acciones { flex-wrap: wrap; gap: var(--space-2); }

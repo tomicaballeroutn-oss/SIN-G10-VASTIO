@@ -6,7 +6,8 @@ export type TurnoId = 'mediodia' | 'noche';
 export type EventStatus =
   | 'disponible' | 'prereserva' | 'senado' | 'contratado' | 'confirmado' | 'en-curso' | 'realizado' | 'cerrado'
   | 'liberada' | 'cancelado' | 'bloqueado';
-export type StockStatus = 'ok' | 'bajo' | 'sin-stock';
+/** `negativo`: el saldo teórico quedó por debajo de cero porque falta registrar un movimiento (Sprint 3). */
+export type StockStatus = 'ok' | 'bajo' | 'sin-stock' | 'negativo';
 export type IconName = string;
 export type BadgeTone = 'neutral' | 'brand' | 'accent' | 'success' | 'warning' | 'danger' | 'info';
 export type TimelineTone = 'neutral' | 'brand' | 'success' | 'warning' | 'danger' | 'info';

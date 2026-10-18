@@ -190,4 +190,22 @@ public class ConsultaEventoService {
     public static ProblemaException sinPermiso() {
         return new ProblemaException(HttpStatus.FORBIDDEN, "SIN_PERMISO", "Sin permiso", Mensajes.SIN_PERMISO);
     }
+
+    /** Estados en los que el evento opera la barra: desde Confirmado hasta Realizado. */
+    private static final Set<EstadoEvento> OPERATIVOS = EnumSet.of(EstadoEvento.CONFIRMADO, EstadoEvento.EN_CURSO,
+            EstadoEvento.REALIZADO);
+
+    /** Evento que opera en un salón esa jornada: lo que necesita saber la barra (sin datos comerciales). */
+    public record EventoDeJornada(short salonId, long eventoId, String codigo, String nombre) {
+    }
+
+    /**
+     * Eventos confirmados, en curso o realizados de esa fecha de jornada (la de la unidad comercializable), por salón.
+     * Los usa bebida para saber qué barras opera la encargada.
+     */
+    public List<EventoDeJornada> eventosDeLaJornada(LocalDate fecha) {
+        return eventos.deLaFecha(fecha, OPERATIVOS).stream()
+                .map(e -> new EventoDeJornada(e.getUnidad().getSalonId(), e.getId(), e.getCodigo(), e.getNombre()))
+                .toList();
+    }
 }

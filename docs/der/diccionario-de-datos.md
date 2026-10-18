@@ -1,6 +1,6 @@
 # Vastio — Modelo de datos (DER v2) y diccionario de datos
 
-Motor: PostgreSQL. Convenciones: nombres en `snake_case` y en español; claves primarias sustitutas (`bigint` generado para tablas transaccionales, `smallint` para catálogos); importes en `numeric(14,2)` expresados en pesos argentinos; fechas y horas en `timestamptz`; cantidades de bebida en `numeric(10,2)` expresadas siempre en **botellas** (unidad base). Los estados y tipos fijos se modelan como `varchar` con restricción `CHECK`, no como tablas, porque el comportamiento del sistema depende de ellos y no son configurables.
+Motor: PostgreSQL. Convenciones: nombres en `snake_case` y en español; claves primarias sustitutas (`bigint` generado para tablas transaccionales, `smallint` para catálogos); importes en `numeric(14,2)` expresados en pesos argentinos (el único es el de la seña: el sistema no maneja precios ni costos); fechas y horas en `timestamptz`; cantidades de bebida en `numeric(10,2)` expresadas siempre en **botellas** (unidad base). Los estados y tipos fijos se modelan como `varchar` con restricción `CHECK`, no como tablas, porque el comportamiento del sistema depende de ellos y no son configurables.
 
 ## 1. Cambios respecto del DER v1
 
@@ -19,12 +19,15 @@ Motor: PostgreSQL. Convenciones: nombres en `snake_case` y en español; claves p
 | Se agregaron `parametro` y `motivo` | Horizonte de cocina, expiración de sesión y listas de motivos configurables. |
 | Se agregaron `proveedor`, `codigo_barra`, `ingreso`, `consumo_evento` | Carga inicial de proveedores, varios códigos por artículo, cabecera del ingreso con remito y costo congelado al cierre. |
 | `bebida`: precio de referencia, stock mínimo, baja lógica, unidades por bulto | El `factorConversion` depende del artículo (un cajón de cerveza no trae lo mismo que uno de vino), por eso pasa a `bebida`. |
-| `ubicacion`: tipo, padre y salón | Sectores del depósito de Avril, depósito de transición configurable y barra de cada salón. |
+| `ubicacion`: tipo y salón | Depósito de transición configurable y barra de cada salón. (V6 quitó los sectores y la ubicación padre.) |
 | `movimiento_stock`: fecha y hora, motivo, movimiento corregido, ingreso | Auditoría (RNF-SEG-03) y asiento de ajuste que referencia al original (UI-38). |
 | `asistencia_segmento`: cantidad prevista además de la real; PK simple | UI-19 pide la prevista por segmento. La PK triple del v1 era redundante. |
 | `turno`: horario | Sin horario el sistema no puede pasar el evento a En curso ni a Realizado. |
 | `orden_preparacion`: estado, origen y destino | Tiene su propia máquina de estados (§6.1). |
 | `salon.color_hex` → `salon.codigo`; `turno.codigo` | El color de cada salón ya está en los tokens del sistema de diseño, con variante clara y oscura; un solo hex en la base lo duplicaba y rompía el tema oscuro. El código estable (avril, club, santa-barbara; mediodia, noche) es el que usa el frontend. |
+| Sin precios ni costos (V5, Sprint 3) | El sistema maneja cantidades; cada área calcula los costos con sus remitos. Se quitaron `bebida.precio_referencia` y el precio y el costo de `consumo_evento`. La seña es la única excepción. |
+| Ubicaciones: sin sectores; abastecimiento de la barra y máximo de barras por salón (V6, Sprint 3) | Las divisiones internas del depósito no se modelan. Cada barra se abastece del depósito madre o de una transición, con retiro directo del depósito madre como contingencia. Una barra por salón; Avril, hasta dos. |
+| Solo bebida con alcohol; «Cajón» pasa a «Caja» (V5) | Alcance de esta etapa. La caja es solo la forma de mostrar y cargar: todo se guarda en botellas. |
 | Correcciones menores | `cliente.nombre_cli` estaba marcado como FK; typos `CATEGORIASERIVICIO` y `tipoMovimiemto_id`; `unidadComerciable` → `unidad_comercializable`. |
 
 ## 2. Reglas de integridad transversales
@@ -35,10 +38,10 @@ Motor: PostgreSQL. Convenciones: nombres en `snake_case` y en español; claves p
 - **Reprogramación.** No cambia el estado: actualiza `evento.unidad_id` y deja una fila en `reprogramacion` con la unidad anterior. Esto reemplaza al estado «Reprogramado» de la máquina de estados v1.
 - **Tablas de solo inserción.** `cambio_estado_evento`, `modificacion_evento`, `reprogramacion` y `movimiento_stock` no admiten UPDATE ni DELETE: un trigger (`fn_solo_insercion`, V3) los rechaza sin importar quién los intente, porque la aplicación es dueña de las tablas y revocarle permisos no alcanza. Las correcciones de stock se registran como asiento de ajuste con `movimiento_corregido_id`.
 - **Saldo teórico negativo permitido.** `stock_ubicacion.cantidad` no tiene `CHECK ≥ 0`: un retiro mayor al saldo se acepta y genera alerta a compras y administración (operación a ciegas).
-- **Costo congelado.** Al cerrar el evento se escribe `consumo_evento` con el precio vigente; cambios posteriores de `bebida.precio_referencia` no alteran eventos cerrados.
-- **Costo por asistente.** Se divide el costo total por la suma de `asistencia_segmento.cantidad_real` si el tipo de evento usa segmentos; si no, por `evento.cantidad_invitados`.
+- **Consumo congelado.** Al cerrar el evento se escribe `consumo_evento`; no se recalcula después.
+- **Consumo por asistente.** Se divide lo consumido por la suma de `asistencia_segmento.cantidad_real` si el tipo de evento usa segmentos; si no, por `evento.cantidad_invitados`.
 - **Obligatoriedad por estado** (validada en backend y con `CHECK`): desde SENADO, `importe_sena`, `fecha_sena` y `firmante_dni`; desde CONTRATADO, `fecha_firma_contrato` y un `documento_evento` de tipo CONTRATO; para CONFIRMADO, `planner_id`, `invitados_definitivos = true` y servicios cargados en las categorías con `requerida_para_confirmar`; en CANCELADO, `motivo_cancelacion_id`.
-- **Datos económicos** (`importe_sena`, `precio_referencia`, `consumo_evento`): se filtran por perfil en el backend según RNF-SEG-04; el modelo no los separa en otra tabla.
+- **Importe de la seña** (`importe_sena`, el único dato económico): se filtra por perfil en el backend según RNF-SEG-04; el modelo no lo separa en otra tabla.
 
 ## 3. Diccionario de datos
 
@@ -117,6 +120,7 @@ Salón del complejo.
 | `capacidad` | integer |  | SÍ | Capacidad máxima de invitados. > 0. |
 | `codigo` | varchar(20) | UQ | NO | avril · club · santa-barbara. El color de la agenda (RNF-DIS-01) sale de los tokens del sistema de diseño según este código, con variante para tema claro y oscuro. |
 | `activo` | boolean |  | NO | Default true. |
+| `maximo_barras` | smallint |  | NO | Barras activas que puede tener: 1; Avril, 2 (V6). ≥ 1. Sin pantalla. |
 
 #### TURNO
 
@@ -394,7 +398,7 @@ Clasificación de bebidas.
 | Campo | Tipo | Clave | Nulo | Descripción / valores posibles |
 |---|---|---|---|---|
 | `tipo_bebida_id` | smallint | PK | NO | Identificador. |
-| `nombre` | varchar(40) | UQ | NO | Vino · Espumante · Destilado · Aperitivo · Cerveza. |
+| `nombre` | varchar(40) | UQ | NO | Vino · Espumante · Destilado · Aperitivo · Cerveza. Solo bebida con alcohol (V5). |
 
 #### UNIDAD_MANIPULACION
 
@@ -403,11 +407,11 @@ Forma en que se mueve la mercadería.
 | Campo | Tipo | Clave | Nulo | Descripción / valores posibles |
 |---|---|---|---|---|
 | `unidad_manipulacion_id` | smallint | PK | NO | Identificador. |
-| `nombre` | varchar(20) | UQ | NO | Cajón · Pack · Botella. |
+| `nombre` | varchar(20) | UQ | NO | Caja · Pack · Botella. Solo para mostrar y cargar: las cantidades se guardan en botellas. |
 
 #### PROVEEDOR
 
-Proveedor de bebida (carga inicial de datos maestros).
+Proveedor de bebida (carga inicial de datos maestros). Las bebidas que provee son las que lo tienen como `bebida.proveedor_habitual_id`. Razón social sin repetir entre los activos y CUIT con dígito verificador válido, validados en el backend.
 
 | Campo | Tipo | Clave | Nulo | Descripción / valores posibles |
 |---|---|---|---|---|
@@ -428,36 +432,42 @@ Artículo del catálogo. Toda cantidad del sistema se expresa en su unidad base 
 | `nombre` | varchar(100) |  | NO | Ej.: Fernet Branca. |
 | `presentacion` | varchar(40) |  | NO | Ej.: 750 ml. |
 | `tipo_bebida_id` | smallint | FK | NO | → tipo_bebida. |
-| `unidad_manipulacion_id` | smallint | FK | NO | → unidad_manipulacion. Unidad en que se mueve (cajón). |
-| `unidades_por_bulto` | smallint |  | NO | Botellas por unidad de manipulación. > 0. Reemplaza al factorConversion. |
-| `precio_referencia` | numeric(14,2) |  | NO | Precio de compra vigente por botella, en ARS. ≥ 0. |
-| `stock_minimo` | numeric(10,2) |  | SÍ | Umbral de alerta de stock bajo (UI-27). |
+| `unidad_manipulacion_id` | smallint | FK | NO | → unidad_manipulacion. Unidad en que se mueve (caja). |
+| `unidades_por_bulto` | smallint |  | NO | Botellas por unidad de manipulación. > 0; 1 si la unidad es Botella. Reemplaza al factorConversion. |
+| `stock_minimo` | numeric(10,2) |  | SÍ | Umbral de stock bajo del depósito madre, en botellas (UI-27). |
 | `proveedor_habitual_id` | bigint | FK | SÍ | → proveedor. |
-| `activo` | boolean |  | NO | false = baja lógica. |
+| `activo` | boolean |  | NO | false = baja lógica. Default true (V5). |
 | `fecha_baja` | timestamptz |  | SÍ |  |
+
+*Restricciones (V5):* `ux_bebida_nombre_presentacion_activa` UNIQUE (lower(nombre), lower(presentacion)) WHERE activo.
 
 #### CODIGO_BARRA
 
-Códigos de barras de un artículo. Un artículo puede tener varios (botella y cajón).
+Códigos de barras de un artículo. Un artículo puede tener varios (botella y caja). El código identifica el artículo; la cantidad se tipea.
 
 | Campo | Tipo | Clave | Nulo | Descripción / valores posibles |
 |---|---|---|---|---|
 | `codigo` | varchar(20) | PK | NO | Código leído (EAN-13, DUN-14, etc.). |
 | `bebida_id` | bigint | FK | NO | → bebida. |
-| `unidades` | smallint |  | NO | Botellas que representa una lectura: 1 para botella, 6 o 12 para cajón. |
+| `unidades` | smallint |  | NO | Botellas que representa una lectura: 1 para botella, 6 o 12 para caja. |
+
+*Restricciones (V5):* `ck_codigo_barra_formato` CHECK (codigo ~ '^[0-9]{8,14}$'); índice `ix_codigo_barra_bebida` (bebida_id).
 
 #### UBICACION
 
-Depósito, sector, depósito de transición o barra. Configurable: el circuito funciona con o sin transición.
+Depósito madre, depósito de transición o barra. Configurable: el circuito funciona con o sin transición. Las divisiones internas del depósito no se modelan (V6).
 
 | Campo | Tipo | Clave | Nulo | Descripción / valores posibles |
 |---|---|---|---|---|
 | `ubicacion_id` | smallint | PK | NO | Identificador. |
-| `nombre` | varchar(60) | UQ | NO | Ej.: Depósito principal · Sector A · Barra Avril. |
-| `tipo` | varchar(12) |  | NO | DEPOSITO · SECTOR · TRANSICION · BARRA. |
-| `ubicacion_padre_id` | smallint | FK | SÍ | → ubicacion. Obligatoria si tipo = SECTOR. |
-| `salon_id` | smallint | FK | SÍ | → salon. Obligatoria si tipo = BARRA. |
+| `nombre` | varchar(60) | UQ | NO | Ej.: Depósito principal · Transición Club de Campo · Barra Avril. Único sin distinguir mayúsculas (V6). |
+| `tipo` | varchar(12) |  | NO | DEPOSITO (depósito madre) · TRANSICION · BARRA. No cambia después del alta. |
+| `salon_id` | smallint | FK | SÍ | → salon. Obligatoria si tipo = BARRA; opcional en TRANSICION; nula en DEPOSITO. |
+| `ubicacion_abastecimiento_id` | smallint | FK | SÍ | → ubicacion. Solo barras, y obligatoria: el depósito madre o un depósito de transición (V6). |
+| `permite_retiro_directo` | boolean |  | NO | Solo barras abastecidas por una transición: habilita el retiro directo del depósito madre como contingencia. Default false (V6). |
 | `activo` | boolean |  | NO | Default true. |
+
+*Restricciones (V6):* `ux_ubicacion_deposito_madre` (un solo DEPOSITO activo); `ux_ubicacion_nombre` UNIQUE (lower(nombre)); `ck_ubicacion_abastecimiento` (solo las barras tienen origen y retiro directo). Máximo de barras activas por salón según `salon.maximo_barras`, validado en el backend.
 
 #### STOCK_UBICACION
 
@@ -559,7 +569,7 @@ Asiento inalterable de mercadería (RNF-SEG-03). Solo inserción: las correccion
 
 #### CONSUMO_EVENTO
 
-Resultado del cierre por artículo, congelado. Un cambio posterior del precio de referencia no altera el costo de eventos cerrados.
+Resultado del cierre por artículo, congelado. Solo cantidades, en botellas: el precio y el costo se quitaron en V5.
 
 | Campo | Tipo | Clave | Nulo | Descripción / valores posibles |
 |---|---|---|---|---|
@@ -569,8 +579,6 @@ Resultado del cierre por artículo, congelado. Un cambio posterior del precio de
 | `cantidad_devuelta` | numeric(10,2) |  | NO | Devuelto al depósito. |
 | `cantidad_remanente` | numeric(10,2) |  | NO | Queda en barra para el evento siguiente. |
 | `cantidad_consumida` | numeric(10,2) |  | NO | Entregada − devuelta − remanente. |
-| `precio_referencia_aplicado` | numeric(14,2) |  | NO | Precio por botella vigente al cierre. |
-| `costo_total` | numeric(14,2) |  | NO | cantidad_consumida × precio_referencia_aplicado. |
 
 #### PROPORCION_CONSUMO
 

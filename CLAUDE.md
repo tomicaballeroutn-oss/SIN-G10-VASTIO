@@ -3,9 +3,9 @@
 Proyecto Integrador de Seminario Integrador (UTN FRC, Grupo 10, 3K2, 2026). Sistema web interno para un complejo de tres salones de eventos. **Un solo sistema con dos módulos** sobre una base común:
 
 - **Módulo A — Agenda de eventos:** qué se vendió, para cuándo y con qué servicios.
-- **Módulo B — Control de existencias de bebida:** qué consumió cada evento y cuánto costó.
+- **Módulo B — Control de existencias de bebida:** qué consumió cada evento.
 
-Los une la entidad **Evento**. El objetivo del negocio es **conocer costo y margen, no vigilar al personal**.
+Los une la entidad **Evento**. El objetivo del negocio es **conocer qué consume cada evento, no vigilar al personal**. El sistema maneja cantidades, no dinero: la única excepción es el importe de la seña.
 
 ## Antes de escribir código, leé
 
@@ -58,7 +58,7 @@ design/    Sistema de diseño y prototipos originales (solo referencia, no se co
 - Base en `snake_case`; tablas y columnas exactamente como en el diccionario de datos.
 - API REST bajo `/api/v1`, recursos en plural y en español (`/api/v1/eventos/{id}/sena`). DTO propios; nunca exponer entidades JPA.
 - Estados y tipos fijos como `enum` Java mapeados a `varchar` (`@Enumerated(EnumType.STRING)`), con los mismos valores que los `CHECK` de la base.
-- Importes: `BigDecimal`, pesos argentinos. Cantidades de bebida: `BigDecimal` en **botellas**; la pantalla convierte a cajones con `unidades_por_bulto`.
+- Importes (solo el de la seña): `BigDecimal`, pesos argentinos. Cantidades de bebida: `BigDecimal` en **botellas**; la pantalla carga y muestra cajas y botellas sueltas con `unidades_por_bulto`.
 - Fechas y horas: `OffsetDateTime` / `timestamptz`; zona `America/Argentina/Cordoba`.
 
 ## Reglas que no se negocian
@@ -69,8 +69,8 @@ design/    Sistema de diseño y prototipos originales (solo referencia, no se co
 4. **Toda transición de estado** pasa por un único servicio de la máquina de estados, que valida la condición, escribe `cambio_estado_evento` y dispara las notificaciones.
 5. **Saldo negativo permitido:** `stock_ubicacion` puede quedar negativo; se acepta el movimiento y se genera una notificación `ALERTA_STOCK` a Compras y Administración. Nunca se rechaza un retiro por falta de saldo teórico.
 6. **Operación a ciegas:** a la encargada de barra el backend no le envía saldos del depósito ni cantidades esperadas al cierre.
-7. **Costo congelado:** al cerrar el evento se escribe `consumo_evento` con el precio de referencia vigente; no se recalcula después.
-8. **Datos económicos** filtrados en el backend según perfil (ver `docs/perfiles-y-permisos.md`). La autorización se verifica siempre en el backend, con `@PreAuthorize` y, para «solo sus eventos», en el servicio.
+7. **Consumo congelado:** al cerrar el evento se escribe `consumo_evento`; no se recalcula después. El sistema no guarda precios ni costos.
+8. **Importe de la seña** (único dato económico) filtrado en el backend según perfil (ver `docs/perfiles-y-permisos.md`). La autorización se verifica siempre en el backend, con `@PreAuthorize` y, para «solo sus eventos», en el servicio.
 9. **Auditoría:** toda acción que compromete o libera una unidad y todo movimiento de mercadería guarda usuario y momento, y la pantalla lo muestra con el componente `Actor`.
 
 ## Frontend

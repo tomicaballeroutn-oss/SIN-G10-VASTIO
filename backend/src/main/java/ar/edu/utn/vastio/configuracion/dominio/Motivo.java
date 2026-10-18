@@ -45,6 +45,11 @@ public class Motivo {
         this.activo = activo;
     }
 
+    /** «Otro» exige contar qué pasó (cancelaciones, ajustes de stock). */
+    public boolean pideDetalle() {
+        return nombre.trim().equalsIgnoreCase("otro") || nombre.trim().equalsIgnoreCase("otra");
+    }
+
     public Short getId() {
         return id;
     }

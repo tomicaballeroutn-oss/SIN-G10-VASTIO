@@ -6,13 +6,13 @@ const ids = (roles: Rol[]) => itemsPara(roles).map((it) => it.id);
 
 describe('menú por perfil', () => {
   it('Dirección y Coordinación ven todo', () => {
-    const todo = ['inicio', 'notificaciones', 'agenda', 'eventos', 'bloqueos', 'cocina', 'barra', 'existencias', 'movimientos', 'ordenes', 'catalogo', 'reportes', 'usuarios', 'parametros'];
+    const todo = ['inicio', 'notificaciones', 'agenda', 'eventos', 'bloqueos', 'cocina', 'barra', 'existencias', 'ingreso', 'movimientos', 'ordenes', 'catalogo', 'reportes', 'usuarios', 'parametros'];
     expect(ids(['DIRECCION'])).toEqual(todo);
     expect(ids(['COORDINACION'])).toEqual(todo);
   });
 
   it('Administración no administra usuarios ni opera la barra', () => {
-    expect(ids(['ADMINISTRACION'])).toEqual(['inicio', 'notificaciones', 'agenda', 'eventos', 'bloqueos', 'existencias', 'movimientos', 'ordenes', 'catalogo', 'reportes', 'parametros']);
+    expect(ids(['ADMINISTRACION'])).toEqual(['inicio', 'notificaciones', 'agenda', 'eventos', 'bloqueos', 'existencias', 'ingreso', 'movimientos', 'ordenes', 'catalogo', 'reportes', 'parametros']);
   });
 
   it('la vendedora ve la agenda y sus eventos', () => {
@@ -31,7 +31,7 @@ describe('menú por perfil', () => {
   });
 
   it('Compras ve bebidas, reportes y la agenda en consulta', () => {
-    expect(ids(['COMPRAS'])).toEqual(['inicio', 'notificaciones', 'agenda', 'eventos', 'cocina', 'barra', 'existencias', 'movimientos', 'ordenes', 'catalogo', 'reportes']);
+    expect(ids(['COMPRAS'])).toEqual(['inicio', 'notificaciones', 'agenda', 'eventos', 'cocina', 'barra', 'existencias', 'ingreso', 'movimientos', 'ordenes', 'catalogo', 'reportes']);
     expect(itemsPara(['COMPRAS']).find((it) => it.id === 'eventos')?.label).toBe('Eventos');
   });
 

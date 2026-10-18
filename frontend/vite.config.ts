@@ -1,9 +1,9 @@
 /// <reference types="vitest/config" />
-import { defineConfig } from 'vite';
+import { defineConfig, loadEnv } from 'vite';
 import react from '@vitejs/plugin-react';
 import { VitePWA } from 'vite-plugin-pwa';
 
-export default defineConfig({
+export default defineConfig(({ mode }) => ({
   plugins: [
     react(),
     // PWA mínima: se instala en el celular. La app necesita conexión: el service worker solo guarda
@@ -38,13 +38,15 @@ export default defineConfig({
     port: 5173,
     // El backend queda en el mismo origen: la cookie de refresco (SameSite=Strict, path /api/v1/auth) viaja sola.
     proxy: {
-      '/api': 'http://localhost:8080',
+      '/api': loadEnv(mode, process.cwd(), 'VASTIO_').VASTIO_API_TARGET || 'http://localhost:8080',
     },
   },
   test: {
+    // Evita saturar la CPU con un entorno jsdom por archivo y provocar timeouts de la interfaz.
+    maxWorkers: 2,
     environment: 'jsdom',
     setupFiles: ['./src/test/setup.ts'],
     css: false,
     include: ['src/**/*.test.{ts,tsx}'],
   },
-});
+}));

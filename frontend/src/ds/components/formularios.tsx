@@ -1,5 +1,6 @@
 import { useState, type ChangeEvent, type KeyboardEvent, type ReactNode } from 'react';
 import type { IconName } from '../tipos';
+import { enBultos, plural } from '../cantidad';
 import { cx, tamanoLegible, useFieldId } from '../util';
 import { Icon } from './Icon';
 
@@ -425,5 +426,65 @@ export function SelectorArchivos(p: SelectorArchivosProps) {
         </ul>
       )}
     </Field>
+  );
+}
+
+export interface CantidadEnCajasProps {
+  label: string;
+  /** Cantidad en botellas (entero ≥ 0). */
+  value: number;
+  onChange: (botellas: number) => void;
+  /** Botellas por bulto de la bebida (`unidades_por_bulto`). Con 1, se cargan solo botellas. */
+  porBulto: number;
+  /** Nombre de la unidad de manipulación: «Caja», «Pack». */
+  unidad: string;
+  hint?: string;
+  error?: string;
+  optional?: boolean;
+  disabled?: boolean;
+  className?: string;
+}
+
+/**
+ * Cantidad de bebida cargada en cajas (o packs) y botellas sueltas, que se convierte a botellas: el sistema guarda
+ * todo en botellas. Las sueltas no llegan a un bulto entero. Con 1 botella por bulto, un solo contador de botellas.
+ */
+export function CantidadEnCajas(p: CantidadEnCajasProps) {
+  const id = useFieldId();
+  const mensaje = p.error ?? p.hint;
+  const describedBy = mensaje ? `${id}-msg` : undefined;
+  const { bultos, sueltas } = enBultos(p.value, p.porBulto);
+  return (
+    <fieldset className={cx('v-field', 'v-cantidad', p.className)} aria-describedby={describedBy} disabled={p.disabled}>
+      <legend className="label v-field__label">
+        {p.label}
+        {p.optional && <span className="v-muted"> (opcional)</span>}
+      </legend>
+      <div className="v-cantidad__controles">
+        {p.porBulto > 1 && (
+          <Stepper
+            label={`${plural(p.unidad).replace(/^./, (c) => c.toUpperCase())} de ${p.porBulto}`}
+            value={bultos}
+            unit={plural(p.unidad)}
+            onChange={(n) => p.onChange(n * p.porBulto + sueltas)}
+          />
+        )}
+        <Stepper
+          label={p.porBulto > 1 ? 'Botellas sueltas' : 'Botellas'}
+          value={sueltas}
+          max={p.porBulto > 1 ? p.porBulto - 1 : undefined}
+          unit="botellas"
+          onChange={(n) => p.onChange(bultos * p.porBulto + n)}
+        />
+      </div>
+      {p.error ? (
+        <p id={`${id}-msg`} className="body-sm v-field__error" role="alert">
+          <Icon name="circle-alert" size={16} />
+          <span>{p.error}</span>
+        </p>
+      ) : (
+        p.hint && <p id={`${id}-msg`} className="body-sm v-muted">{p.hint}</p>
+      )}
+    </fieldset>
   );
 }

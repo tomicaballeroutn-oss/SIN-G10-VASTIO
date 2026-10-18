@@ -100,7 +100,11 @@ export function ListaNotificaciones({ alIrAlEvento }: { alIrAlEvento?: () => voi
         // si falla, el aviso sigue sin leer: no impide ir a la ficha
       }
     }
-    if (abreFicha && n.eventoId) {
+    if (n.tipo === 'ALERTA_STOCK') {
+      // Sin evento: el saldo negativo se mira en Existencias (docs/sprint-3.md, decisión 18).
+      alIrAlEvento?.();
+      navegar('/existencias');
+    } else if (abreFicha && n.eventoId) {
       alIrAlEvento?.();
       navegar(`/eventos/${n.eventoId}`);
     }

@@ -24,6 +24,21 @@ public final class Permisos {
     /** Registrar o modificar datos de un evento; la regla «solo los suyos» se verifica en el servicio. */
     public static final String EDITAR_EVENTOS = "hasAnyRole('DIRECCION', 'COORDINACION', 'VENDEDORA', 'PLANNER')";
 
+    /** Catálogo de bebidas y proveedores: Administración y Compras, además del acceso total. */
+    public static final String CATALOGO_BEBIDA = "hasAnyRole('DIRECCION', 'COORDINACION', 'ADMINISTRACION', 'COMPRAS')";
+
+    /** Consultar ubicaciones de stock: quienes las configuran y Compras (ingreso y stock). */
+    public static final String CONSULTAR_UBICACIONES = CATALOGO_BEBIDA;
+
+    /** Carga inicial e ingreso de bebida: Administración y Compras, además del acceso total. */
+    public static final String INGRESO_BEBIDA = CATALOGO_BEBIDA;
+
+    /** Consultar stock: Administración y Compras ven todo; Barra, solo las barras de la jornada (en el servicio). */
+    public static final String CONSULTAR_STOCK = "hasAnyRole('DIRECCION', 'COORDINACION', 'ADMINISTRACION', 'COMPRAS', 'BARRA')";
+
+    /** Ajuste de stock (recuento y rotura): Administración y Compras, además del acceso total. */
+    public static final String AJUSTE_STOCK = CATALOGO_BEBIDA;
+
     private Permisos() {
     }
 }

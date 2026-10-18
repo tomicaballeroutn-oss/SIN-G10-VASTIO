@@ -131,9 +131,41 @@ class DevolucionIT {
         assertThat(entrega).containsEntry("estado", "CERRADA");
         assertThat(((Number) entrega.get("usuario_cierre_id")).longValue()).isEqualTo(barra.getId());
         assertThat(entrega.get("fecha_cierre")).isNotNull();
-        // Lo devuelto vuelve al madre; en la barra queda lo no devuelto hasta el cierre (remanente + consumo).
+        // Lo devuelto vuelve al madre; lo consumido sale de la barra, que queda con lo que de verdad hay: el remanente.
         assertThat(saldoDe(DEPOSITO, ron)).isEqualByComparingTo("42");
-        assertThat(saldoDe(BARRA_AVRIL, ron)).isEqualByComparingTo("6");
+        assertThat(saldoDe(BARRA_AVRIL, ron)).isEqualByComparingTo("2");
+        assertThat(saldoDe(BARRA_AVRIL, gin)).isEqualByComparingTo("0");
+        assertThat(jdbc.queryForList("""
+                SELECT bebida_id, cantidad, ubicacion_origen_id, ubicacion_destino_id FROM movimiento_stock
+                WHERE evento_id = ? AND tipo = 'CONSUMO' ORDER BY bebida_id""", evento))
+                .extracting(m -> ((Number) m.get("bebida_id")).longValue(), m -> ((BigDecimal) m.get("cantidad")).intValue(),
+                        m -> ((Number) m.get("ubicacion_origen_id")).intValue(), m -> m.get("ubicacion_destino_id"))
+                .containsExactlyInAnyOrder(org.assertj.core.groups.Tuple.tuple(ron, 4, BARRA_AVRIL, null),
+                        org.assertj.core.groups.Tuple.tuple(gin, 6, BARRA_AVRIL, null));
+    }
+
+    @Test
+    void elEventoSiguienteEnLaMismaBarraArrancaDelRemanenteYNoSeLlevaElConsumoDelAnterior() throws Exception {
+        retirar(ron, 12);
+        devolver(RolCodigo.BARRA, "{\"renglones\":[{\"bebidaId\":%d,\"devuelto\":6,\"remanente\":2}]}".formatted(ron))
+                .andExpect(status().isCreated());
+        // Mismo día, otro evento en la misma barra, sin esperar a ningún cierre.
+        long almuerzo = escenario.evento("avril", JORNADA.plusDays(1), "mediodia", "EN_CURSO", personas.de(RolCodigo.VENDEDORA),
+                personas.de(RolCodigo.PLANNER), "Almuerzo del día siguiente");
+        mvc.perform(post("/api/v1/eventos/{id}/entregas/{barra}/retiros", almuerzo, BARRA_AVRIL)
+                        .header(HttpHeaders.AUTHORIZATION, personas.bearer(RolCodigo.COMPRAS)).contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"renglones\":[{\"bebidaId\":%d,\"cantidad\":6}]}".formatted(ron)))
+                .andExpect(status().isCreated());
+
+        mvc.perform(post("/api/v1/eventos/{id}/entregas/{barra}/devolucion", almuerzo, BARRA_AVRIL)
+                        .header(HttpHeaders.AUTHORIZATION, personas.bearer(RolCodigo.COMPRAS)).contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"renglones\":[{\"bebidaId\":%d,\"devuelto\":0,\"remanente\":3}]}".formatted(ron)))
+                .andExpect(status().isCreated())
+                // Recibió los 2 que quedaron más los 6 retirados; quedan 3: se tomaron 5, ni una del evento anterior.
+                .andExpect(jsonPath("$.consumo[?(@.bebidaId == %d)].entregado".formatted(ron)).value(hasItem(8.0)))
+                .andExpect(jsonPath("$.consumo[?(@.bebidaId == %d)].consumo".formatted(ron)).value(hasItem(5.0)));
+        entityManager.flush();
+        assertThat(saldoDe(BARRA_AVRIL, ron)).isEqualByComparingTo("3");
     }
 
     @Test
@@ -261,6 +293,7 @@ class DevolucionIT {
         entityManager.flush();
 
         assertThat(saldoDe(transicion, ron)).isEqualByComparingTo("2");
+        assertThat(saldoDe(BARRA_AVRIL, ron)).isEqualByComparingTo("0"); // vuelven 6, se tomaron 6
         assertThat(saldoDe(DEPOSITO, ron)).isEqualByComparingTo("64"); // 48 + 6 de la barra + 10 de la transición
         assertThat(jdbc.queryForObject("""
                 SELECT count(*) FROM movimiento_stock WHERE evento_id = ? AND tipo = 'DEVOLUCION' AND ubicacion_origen_id = ?""",

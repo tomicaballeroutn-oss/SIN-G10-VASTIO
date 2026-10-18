@@ -161,6 +161,15 @@ public class MovimientoStock {
                 momento);
     }
 
+    /**
+     * Lo que se consumió en la barra: sale de ella sin destino, imputado al evento. Es un asiento de cuentas (no se mueve
+     * mercadería): deja el saldo de la barra igual a lo que hay en ella (V7).
+     */
+    public static MovimientoStock consumo(Bebida bebida, BigDecimal cantidad, Entrega entrega, long usuarioId,
+            OffsetDateTime momento) {
+        return deEntrega(TipoMovimiento.CONSUMO, bebida, cantidad, entrega.getBarra(), null, entrega, usuarioId, momento);
+    }
+
     private static MovimientoStock deEntrega(TipoMovimiento tipo, Bebida bebida, BigDecimal cantidad, Ubicacion origen,
             Ubicacion destino, Entrega entrega, long usuarioId, OffsetDateTime momento) {
         MovimientoStock m = new MovimientoStock(tipo, bebida, cantidad, origen, destino, usuarioId);

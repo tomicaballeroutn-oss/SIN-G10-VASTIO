@@ -216,8 +216,9 @@ public class EntregaService {
     /**
      * Devolución de bebida (UI-32, decisiones 8 a 11): por cada bebida de la barra, lo que vuelve al depósito madre
      * (DEVOLUCION) y lo que queda para el evento siguiente (REMANENTE). Si la barra se abastece de una transición, lo que
-     * queda ahí también vuelve al madre. La entrega queda CERRADA. La encargada declara sin ver lo esperado: el consumo
-     * se devuelve recién ahora.
+     * queda ahí también vuelve al madre. Lo consumido sale de la barra (CONSUMO), así su saldo queda en el remanente y el
+     * evento siguiente arranca de lo que de verdad hay. La entrega queda CERRADA. La encargada declara sin ver lo
+     * esperado: el consumo se devuelve recién ahora.
      */
     @Transactional
     public DevolucionRegistrada devolver(long eventoId, short barraId, DatosDevolucion datos, UsuarioActual quien) {
@@ -263,7 +264,12 @@ public class EntregaService {
             if (remanente.signum() > 0) {
                 movimientoService.registrar(MovimientoStock.remanente(bebida, remanente, entrega, quien.id(), momento));
             }
-            consumo.add(new Consumo(bebida, entregado, devuelto, remanente, entregado.subtract(suma)));
+            BigDecimal consumido = entregado.subtract(suma);
+            // Sale de la barra lo que se tomó: su saldo queda en el remanente, que es lo que hay (decisiones 12 y 13).
+            if (consumido.signum() > 0) {
+                movimientoService.registrar(MovimientoStock.consumo(bebida, consumido, entrega, quien.id(), momento));
+            }
+            consumo.add(new Consumo(bebida, entregado, devuelto, remanente, consumido));
         }
         List<Entregado> desdeTransicion = devolverTransicion(transicion, madre, datos.transicion(), entrega, quien.id(), momento);
         entrega.cerrar(quien.id(), momento);

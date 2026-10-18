@@ -40,7 +40,7 @@ Estados activos (ocupan la unidad): todos salvo `LIBERADA` y `CANCELADO`.
 | Reprogramar | PRE_RESERVA*, SENADO, CONTRATADO, CONFIRMADO | Coordinación, Vendedora titular | `reprogramacion` (conserva la unidad original). *En pre-reserva es simplemente modificar la fecha. |
 | Asignar planner | CONTRATADO, CONFIRMADO | Coordinación | `modificacion_evento` + notificación a la planner |
 | Registrar servicios contratados | PRE_RESERVA a CONFIRMADO | Vendedora titular, Planner asignada, Coordinación | `servicio_contratado` |
-| Registrar salida / retiro / devolución | EN_CURSO (devolución también en REALIZADO) | Encargada de barra, Compras | `movimiento_stock` |
+| Registrar salida / retiro / devolución | EN_CURSO (devolución también en REALIZADO) | Encargada de barra, Compras | `movimiento_stock` (la devolución registra también el `CONSUMO`, que deja la barra en el remanente) |
 
 > Corrección respecto de la Definición del Producto v1: **«Reprogramado» no es un estado**. Reprogramar le pasa al evento; si fuera un estado, se perdería si estaba Señado, Contratado o Confirmado.
 

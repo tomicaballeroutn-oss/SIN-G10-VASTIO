@@ -1,0 +1,14 @@
+/* UI-31: mobile first, controles grandes (se usa de pie y de noche). */
+.barra__entregado,
+.barra__retiro { display: flex; flex-direction: column; gap: var(--space-3); }
+.barra__agregar { display: flex; flex-wrap: wrap; gap: var(--space-3); align-items: end; }
+.barra__agregar > :first-child { flex: 1 1 260px; }
+
+.barra__renglones { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: var(--space-3); }
+.barra__pie { position: sticky; bottom: 0; z-index: 1; display: flex; flex-direction: column; gap: var(--space-3); padding: var(--space-4);
+  background: var(--surface-raised); border: 1px solid var(--line); border-radius: var(--radius-lg); box-shadow: var(--shadow-md); }
+@media (min-width: 640px) { .barra__pie { flex-direction: row; flex-wrap: wrap; align-items: center; justify-content: space-between; } }
+
+.barra__revision { display: flex; flex-direction: column; gap: var(--space-3); }
+.barra__lista { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: var(--space-1); }
+.barra__lista li { display: flex; justify-content: space-between; gap: var(--space-3); }

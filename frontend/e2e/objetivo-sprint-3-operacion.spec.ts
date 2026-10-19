@@ -98,8 +98,8 @@ test('la noche del evento: en curso, salida y retiro, devolución, realizado, ci
     await expect(barra.getByText(/Retiro adicional registrado/)).toBeVisible();
     const entregado = barra.getByRole('region', { name: 'Ya entregado' });
     await expect(entregado.getByText('Retiro adicional')).toBeVisible();
-    // A ciegas: nunca el saldo del depósito.
-    await expect(barra.getByText(/Depósito principal.*(cajas|botellas)/)).toHaveCount(0);
+    // A ciegas: nunca el saldo del depósito (le quedan 87 − 12 = 75 botellas de Fernet: 12 cajas y 3 botellas).
+    await expect(barra.getByText('12 cajas y 3 botellas')).toHaveCount(0);
 
     // 3. Devolución a ciegas. Fernet: había 9 + 12; vuelve 1 caja y quedan 2 botellas. Cerveza: había 30 + 12; vuelven 3 cajas.
     await barra.getByRole('button', { name: 'Registrar devolución' }).click();

@@ -36,6 +36,7 @@ Estados activos (ocupan la unidad): todos salvo `LIBERADA` y `CANCELADO`.
 
 | Operación | Estados permitidos | Quién | Registro |
 |---|---|---|---|
+| Registrar preparación del evento | CONFIRMADO, EN_CURSO | Dirección, Coordinación, Administración, Compras | `preparacion_evento` + `movimiento_stock` PREPARACION; no cambia el estado |
 | Modificar evento | PRE_RESERVA a CONFIRMADO | Vendedora titular, Planner asignada, Coordinación | `modificacion_evento` |
 | Reprogramar | PRE_RESERVA*, SENADO, CONTRATADO, CONFIRMADO | Coordinación, Vendedora titular | `reprogramacion` (conserva la unidad original). *En pre-reserva es simplemente modificar la fecha. |
 | Asignar planner | CONTRATADO, CONFIRMADO | Coordinación | `modificacion_evento` + notificación a la planner |

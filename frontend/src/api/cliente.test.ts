@@ -34,6 +34,17 @@ function authorizationDe(llamada: number): string | undefined {
 }
 
 describe('cliente de la API', () => {
+  it('conserva cuerpo y clave de idempotencia al renovar un POST', async () => {
+    fetchMock.mockResolvedValueOnce(problema(401, 'SESION_VENCIDA', 'Renová la sesión.'))
+      .mockResolvedValueOnce(json(200, sesion('nuevo'))).mockResolvedValueOnce(json(200, { id: 90 }));
+    const cuerpo = { barraId: 2, destinoId: 7, renglones: [{ bebidaId: 12, cantidad: 13 }] };
+    await api('/eventos/5/preparaciones', { metodo: 'POST', cuerpo, cabeceras: { 'Idempotency-Key': 'operacion-1' } });
+    const primero = fetchMock.mock.calls[0][1] as RequestInit;
+    const segundo = fetchMock.mock.calls[2][1] as RequestInit;
+    expect(segundo.body).toBe(primero.body);
+    expect((segundo.headers as Record<string, string>)['Idempotency-Key']).toBe('operacion-1');
+    expect(authorizationDe(2)).toBe('Bearer nuevo');
+  });
   it('después del login manda el token de acceso en cada llamada', async () => {
     fetchMock.mockResolvedValueOnce(json(200, sesion('t1'))).mockResolvedValueOnce(json(200, { ok: true }));
 

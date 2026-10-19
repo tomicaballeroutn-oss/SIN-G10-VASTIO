@@ -5,6 +5,7 @@ package ar.edu.utn.vastio.bebida.dominio;
  * origen y el destino; la cantidad siempre es positiva y en botellas.
  */
 public enum TipoMovimiento {
+    PREPARACION,
     INGRESO,
     INVENTARIO_INICIAL,
     SALIDA_BARRA,

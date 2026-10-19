@@ -60,6 +60,9 @@ public class MovimientoStock {
     @Column(name = "ingreso_id")
     private Long ingresoId;
 
+    @Column(name = "preparacion_id")
+    private Long preparacionId;
+
     @Column(name = "movimiento_corregido_id")
     private Long movimientoCorregidoId;
 
@@ -76,6 +79,16 @@ public class MovimientoStock {
     private OffsetDateTime fechaHora;
 
     protected MovimientoStock() {
+    }
+
+    /** Traspaso madre → transición; nunca abre una entrega ni constituye consumo. */
+    public static MovimientoStock preparacion(Bebida bebida, BigDecimal cantidad, PreparacionEvento preparacion) {
+        MovimientoStock m = new MovimientoStock(TipoMovimiento.PREPARACION, bebida, cantidad,
+                preparacion.getOrigen(), preparacion.getDestino(), preparacion.getUsuarioId());
+        m.eventoId = preparacion.getEventoId();
+        m.preparacionId = preparacion.getId();
+        m.fechaHora = preparacion.getFechaHora();
+        return m;
     }
 
     private MovimientoStock(TipoMovimiento tipo, Bebida bebida, BigDecimal cantidad, Ubicacion origen, Ubicacion destino,

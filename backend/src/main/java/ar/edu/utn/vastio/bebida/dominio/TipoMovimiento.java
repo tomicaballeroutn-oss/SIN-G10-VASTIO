@@ -11,6 +11,8 @@ public enum TipoMovimiento {
     RETIRO_ADICIONAL,
     DEVOLUCION,
     REMANENTE,
+    /** Lo consumido en la barra, que sale de ella con la devolución (V7). Asiento de cuentas: no se mueve mercadería. */
+    CONSUMO,
     AJUSTE,
     MERMA
 }

@@ -140,7 +140,39 @@ public class MovimientoStock {
         if (tipo != TipoMovimiento.SALIDA_BARRA && tipo != TipoMovimiento.RETIRO_ADICIONAL) {
             throw new IllegalArgumentException("Un retiro a barra es SALIDA_BARRA o RETIRO_ADICIONAL.");
         }
-        MovimientoStock m = new MovimientoStock(tipo, bebida, cantidad, origen, entrega.getBarra(), usuarioId);
+        return deEntrega(tipo, bebida, cantidad, origen, entrega.getBarra(), entrega, usuarioId, momento);
+    }
+
+    /**
+     * Lo que vuelve al depósito madre con la devolución: desde la barra o desde la transición que la abastece.
+     */
+    public static MovimientoStock devolucion(Bebida bebida, BigDecimal cantidad, Ubicacion origen, Ubicacion depositoMadre,
+            Entrega entrega, long usuarioId, OffsetDateTime momento) {
+        return deEntrega(TipoMovimiento.DEVOLUCION, bebida, cantidad, origen, depositoMadre, entrega, usuarioId, momento);
+    }
+
+    /**
+     * Lo que queda en la barra para el evento siguiente. Origen y destino son la barra: no cambia el saldo, deja la
+     * constancia de quién lo declaró y cuándo (docs/sprint-3-operacion.md, decisión 9).
+     */
+    public static MovimientoStock remanente(Bebida bebida, BigDecimal cantidad, Entrega entrega, long usuarioId,
+            OffsetDateTime momento) {
+        return deEntrega(TipoMovimiento.REMANENTE, bebida, cantidad, entrega.getBarra(), entrega.getBarra(), entrega, usuarioId,
+                momento);
+    }
+
+    /**
+     * Lo que se consumió en la barra: sale de ella sin destino, imputado al evento. Es un asiento de cuentas (no se mueve
+     * mercadería): deja el saldo de la barra igual a lo que hay en ella (V7).
+     */
+    public static MovimientoStock consumo(Bebida bebida, BigDecimal cantidad, Entrega entrega, long usuarioId,
+            OffsetDateTime momento) {
+        return deEntrega(TipoMovimiento.CONSUMO, bebida, cantidad, entrega.getBarra(), null, entrega, usuarioId, momento);
+    }
+
+    private static MovimientoStock deEntrega(TipoMovimiento tipo, Bebida bebida, BigDecimal cantidad, Ubicacion origen,
+            Ubicacion destino, Entrega entrega, long usuarioId, OffsetDateTime momento) {
+        MovimientoStock m = new MovimientoStock(tipo, bebida, cantidad, origen, destino, usuarioId);
         m.eventoId = entrega.getEventoId();
         m.entregaId = entrega.getId();
         m.fechaHora = momento;

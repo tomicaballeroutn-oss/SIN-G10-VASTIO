@@ -27,6 +27,7 @@ Motor: PostgreSQL. Convenciones: nombres en `snake_case` y en español; claves p
 | `salon.color_hex` → `salon.codigo`; `turno.codigo` | El color de cada salón ya está en los tokens del sistema de diseño, con variante clara y oscura; un solo hex en la base lo duplicaba y rompía el tema oscuro. El código estable (avril, club, santa-barbara; mediodia, noche) es el que usa el frontend. |
 | Sin precios ni costos (V5, Sprint 3) | El sistema maneja cantidades; cada área calcula los costos con sus remitos. Se quitaron `bebida.precio_referencia` y el precio y el costo de `consumo_evento`. La seña es la única excepción. |
 | Ubicaciones: sin sectores; abastecimiento de la barra y máximo de barras por salón (V6, Sprint 3) | Las divisiones internas del depósito no se modelan. Cada barra se abastece del depósito madre o de una transición, con retiro directo del depósito madre como contingencia. Una barra por salón; Avril, hasta dos. |
+| Tipo de movimiento CONSUMO (V7, Sprint 3) | Lo consumido sale de la barra con la devolución, así su saldo es siempre lo que de verdad hay (la barra sigue de un evento a otro). Ver docs/sprint-3-operacion.md, decisión 13. |
 | Solo bebida con alcohol; «Cajón» pasa a «Caja» (V5) | Alcance de esta etapa. La caja es solo la forma de mostrar y cargar: todo se guarda en botellas. |
 | Correcciones menores | `cliente.nombre_cli` estaba marcado como FK; typos `CATEGORIASERIVICIO` y `tipoMovimiemto_id`; `unidadComerciable` → `unidad_comercializable`. |
 
@@ -551,12 +552,12 @@ Asiento inalterable de mercadería (RNF-SEG-03). Solo inserción: las correccion
 | Campo | Tipo | Clave | Nulo | Descripción / valores posibles |
 |---|---|---|---|---|
 | `movimiento_id` | bigint | PK | NO | Identificador. |
-| `tipo` | varchar(18) |  | NO | INGRESO · INVENTARIO_INICIAL · SALIDA_BARRA · RETIRO_ADICIONAL · DEVOLUCION · REMANENTE · AJUSTE · MERMA. |
+| `tipo` | varchar(18) |  | NO | INGRESO · INVENTARIO_INICIAL · SALIDA_BARRA · RETIRO_ADICIONAL · DEVOLUCION · REMANENTE · CONSUMO · AJUSTE · MERMA. REMANENTE tiene origen y destino la barra (constancia, no cambia el saldo). CONSUMO (V7) sale de la barra sin destino con la devolución: asiento de cuentas que deja el saldo de la barra en el remanente. |
 | `bebida_id` | bigint | FK | NO | → bebida. |
 | `cantidad` | numeric(10,2) |  | NO | En botellas. > 0; el sentido lo dan origen y destino. |
 | `ubicacion_origen_id` | smallint | FK | SÍ | → ubicacion. Null en ingresos. |
 | `ubicacion_destino_id` | smallint | FK | SÍ | → ubicacion. Null en mermas. |
-| `evento_id` | bigint | FK | SÍ | → evento. Obligatorio en salidas, retiros, devoluciones y remanentes. |
+| `evento_id` | bigint | FK | SÍ | → evento. Obligatorio en salidas, retiros, devoluciones, remanentes y consumos. |
 | `entrega_id` | bigint | FK | SÍ | → entrega. |
 | `ingreso_id` | bigint | FK | SÍ | → ingreso. |
 | `movimiento_corregido_id` | bigint | FK | SÍ | → movimiento_stock. Asiento que corrige este ajuste. |

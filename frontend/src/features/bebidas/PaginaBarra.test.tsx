@@ -34,14 +34,14 @@ const JORNADA: EventoDeLaJornada[] = [{ evento: EVENTO, salon: { id: 1, codigo: 
 
 const SIN_RETIROS: Entrega = {
   evento: EVENTO, salon: JORNADA[0].salon, barra: BARRA, origen: DEPOSITO, depositoMadre: null, estadoEntrega: null,
-  yaEntregado: [], retiros: [], bebidas: BEBIDAS,
+  yaEntregado: [], retiros: [], bebidas: BEBIDAS, aDevolver: [], enTransicion: [],
 };
 const SALIDA: Retiro = {
   tipo: 'SALIDA_BARRA', origen: DEPOSITO, usuario: { id: 7, nombre: 'Rocío Blanco' }, fechaHora: '2026-10-18T21:10:00-03:00',
   renglones: [{ bebidaId: 1, nombre: 'Fernet Branca', presentacion: '750 ml', unidad: 'Caja', unidadesPorBulto: 6, cantidad: 12 }],
 };
 const CON_ENTREGA: Entrega = {
-  ...SIN_RETIROS, estadoEntrega: 'ABIERTA', retiros: [SALIDA], yaEntregado: SALIDA.renglones,
+  ...SIN_RETIROS, estadoEntrega: 'ABIERTA', retiros: [SALIDA], yaEntregado: SALIDA.renglones, aDevolver: [BEBIDAS[0]],
 };
 
 function backend(pantalla: Entrega = SIN_RETIROS, jornada: EventoDeLaJornada[] = JORNADA) {

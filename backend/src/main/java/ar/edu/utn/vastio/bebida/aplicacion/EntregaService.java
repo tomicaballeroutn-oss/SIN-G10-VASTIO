@@ -7,8 +7,10 @@ import java.time.Instant;
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -16,6 +18,8 @@ import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+
+import jakarta.persistence.EntityManager;
 
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
@@ -31,6 +35,7 @@ import ar.edu.utn.vastio.bebida.dominio.TipoMovimiento;
 import ar.edu.utn.vastio.bebida.dominio.TipoUbicacion;
 import ar.edu.utn.vastio.bebida.dominio.Ubicacion;
 import ar.edu.utn.vastio.bebida.infraestructura.BebidaRepository;
+import ar.edu.utn.vastio.bebida.infraestructura.BebidaRepository.SaldoBebida;
 import ar.edu.utn.vastio.bebida.infraestructura.EntregaRepository;
 import ar.edu.utn.vastio.bebida.infraestructura.MovimientoStockRepository;
 import ar.edu.utn.vastio.bebida.infraestructura.UbicacionRepository;
@@ -70,11 +75,14 @@ public class EntregaService {
     private final StockService stock;
     private final CatalogoService catalogos;
     private final NotificacionService notificaciones;
+    private final EntityManager entityManager;
     private final Clock reloj;
 
     public EntregaService(EntregaRepository entregas, UbicacionRepository ubicaciones, BebidaRepository bebidas,
             MovimientoStockRepository movimientos, MovimientoService movimientoService, ConsultaEventoService eventos,
-            StockService stock, CatalogoService catalogos, NotificacionService notificaciones, Clock reloj) {
+            StockService stock, CatalogoService catalogos, NotificacionService notificaciones, EntityManager entityManager,
+            Clock reloj) {
+        this.entityManager = entityManager;
         this.entregas = entregas;
         this.ubicaciones = ubicaciones;
         this.bebidas = bebidas;
@@ -106,9 +114,12 @@ public class EntregaService {
      * @param entrega         null si todavía no hubo retiros.
      * @param depositoMadre   solo si la barra permite el retiro directo.
      * @param bebidas         las activas, para el buscador y el lector.
+     * @param aDevolver       con la entrega abierta, las bebidas de la barra (solo los nombres: se declara a ciegas).
+     * @param enTransicion    con la entrega abierta y una barra abastecida por una transición, las bebidas que hay ahí.
      */
     public record PantallaEntrega(EventoOperativo evento, Salon salon, Ubicacion barra, Ubicacion origen,
-            Ubicacion depositoMadre, Entrega entrega, List<Retiro> retiros, List<Entregado> yaEntregado, List<Bebida> bebidas) {
+            Ubicacion depositoMadre, Entrega entrega, List<Retiro> retiros, List<Entregado> yaEntregado, List<Bebida> bebidas,
+            List<Bebida> aDevolver, List<Bebida> enTransicion) {
     }
 
     /** Una bebida del retiro, en botellas enteras mayores a 0. */
@@ -119,10 +130,32 @@ public class EntregaService {
     public record DatosRetiro(boolean directo, List<Renglon> renglones) {
     }
 
-    /** Los eventos de la jornada que la persona puede operar, con sus barras. */
+    /** Lo que vuelve y lo que queda de una bebida, en botellas enteras ≥ 0. Si falta, 0 y 0: se consumió todo. */
+    public record RenglonDevolucion(long bebidaId, BigDecimal devuelto, BigDecimal remanente) {
+    }
+
+    /** {@code transicion}: lo que queda en el depósito de transición y vuelve al madre (si la barra se abastece de uno). */
+    public record DatosDevolucion(List<RenglonDevolucion> renglones, List<Renglon> transicion) {
+    }
+
+    /** El consumo real de una bebida en la barra: entregado − devuelto − remanente, en botellas. */
+    public record Consumo(Bebida bebida, BigDecimal entregado, BigDecimal devuelto, BigDecimal remanente, BigDecimal consumo) {
+    }
+
+    /** Recién después de registrar se muestra el consumo (decisión 10). */
+    public record DevolucionRegistrada(PantallaEntrega pantalla, List<Consumo> consumo, List<Entregado> desdeTransicion) {
+    }
+
+    /**
+     * Los eventos de la jornada con sus barras, y los que todavía esperan una devolución aunque ya no sean de la jornada
+     * (p. ej. después de las 06:00).
+     */
     public List<EventoConBarras> jornada() {
-        return eventos.eventosDeLaJornada(stock.jornada()).stream()
-                .map(e -> eventos.operativo(e.eventoId()))
+        Set<Long> ids = new LinkedHashSet<>();
+        eventos.eventosDeLaJornada(stock.jornada()).forEach(e -> ids.add(e.eventoId()));
+        entregas.abiertas().forEach(e -> ids.add(e.getEventoId()));
+        return ids.stream()
+                .map(eventos::operativo)
                 .map(e -> new EventoConBarras(e, catalogos.salon(e.salonId()), barrasDelSalon(e.salonId())))
                 .toList();
     }
@@ -180,11 +213,165 @@ public class EntregaService {
         return pantalla(evento, barra, entrega);
     }
 
+    /**
+     * Devolución de bebida (UI-32, decisiones 8 a 11): por cada bebida de la barra, lo que vuelve al depósito madre
+     * (DEVOLUCION) y lo que queda para el evento siguiente (REMANENTE). Si la barra se abastece de una transición, lo que
+     * queda ahí también vuelve al madre. Lo consumido sale de la barra (CONSUMO), así su saldo queda en el remanente y el
+     * evento siguiente arranca de lo que de verdad hay. La entrega queda CERRADA. La encargada declara sin ver lo
+     * esperado: el consumo se devuelve recién ahora.
+     */
+    @Transactional
+    public DevolucionRegistrada devolver(long eventoId, short barraId, DatosDevolucion datos, UsuarioActual quien) {
+        Ubicacion barra = barra(barraId);
+        EventoOperativo evento = evento(eventoId, barra, quien);
+        if (evento.estado() != EstadoEvento.EN_CURSO && evento.estado() != EstadoEvento.REALIZADO) {
+            throw ProblemaException.conflicto("ESTADO_NO_PERMITE",
+                    "El evento está en %s: la devolución se registra con el evento en curso o realizado."
+                            .formatted(evento.nombreDelEstado()));
+        }
+        Ubicacion madre = depositoMadre();
+        Ubicacion transicion = barra.getAbastecimiento().getTipo() == TipoUbicacion.TRANSICION ? barra.getAbastecimiento() : null;
+        // Mismo orden que MovimientoService (por id). Después se vuelve a leer todo: lo leído antes puede estar viejo.
+        Stream.of(madre, barra, transicion).filter(Objects::nonNull).map(Ubicacion::getId).distinct().sorted()
+                .forEach(movimientos::bloquearUbicacion);
+        Entrega entrega = entregas.findByEventoIdAndBarraId(eventoId, barraId).orElseThrow(() -> ProblemaException.conflicto(
+                "SIN_ENTREGA", "No hubo retiros a %s para este evento: no hay nada que devolver.".formatted(barra.getNombre())));
+        entityManager.refresh(entrega);
+        if (!entrega.isAbierta()) {
+            throw ProblemaException.conflicto("DEVOLUCION_REGISTRADA",
+                    "La devolución de %s ya se registró.".formatted(barra.getNombre()));
+        }
+        OffsetDateTime momento = OffsetDateTime.now(reloj);
+        Map<Long, BigDecimal> saldos = saldos(barra.getId());
+        List<Bebida> enLaBarra = paraDevolver(barra.getId(), entrega);
+        Map<Long, RenglonDevolucion> declarado = declarado(datos.renglones(), enLaBarra);
+        List<Consumo> consumo = new ArrayList<>();
+        for (Bebida bebida : enLaBarra) {
+            RenglonDevolucion r = declarado.getOrDefault(bebida.getId(),
+                    new RenglonDevolucion(bebida.getId(), BigDecimal.ZERO, BigDecimal.ZERO));
+            BigDecimal devuelto = enBotellas(r.devuelto());
+            BigDecimal remanente = enBotellas(r.remanente());
+            BigDecimal entregado = saldos.getOrDefault(bebida.getId(), BigDecimal.ZERO).setScale(2, RoundingMode.UNNECESSARY);
+            BigDecimal suma = devuelto.add(remanente);
+            if (suma.signum() > 0 && suma.compareTo(entregado) > 0) {
+                throw ProblemaException.reglaDeNegocio("SUPERA_LO_DE_LA_BARRA",
+                        "%s: lo que vuelve y lo que queda suman más de lo que hay en la barra. Revisá el conteo."
+                                .formatted(bebida.descripcion()));
+            }
+            if (devuelto.signum() > 0) {
+                movimientoService.registrar(MovimientoStock.devolucion(bebida, devuelto, barra, madre, entrega, quien.id(), momento));
+            }
+            if (remanente.signum() > 0) {
+                movimientoService.registrar(MovimientoStock.remanente(bebida, remanente, entrega, quien.id(), momento));
+            }
+            BigDecimal consumido = entregado.subtract(suma);
+            // Sale de la barra lo que se tomó: su saldo queda en el remanente, que es lo que hay (decisiones 12 y 13).
+            if (consumido.signum() > 0) {
+                movimientoService.registrar(MovimientoStock.consumo(bebida, consumido, entrega, quien.id(), momento));
+            }
+            consumo.add(new Consumo(bebida, entregado, devuelto, remanente, consumido));
+        }
+        List<Entregado> desdeTransicion = devolverTransicion(transicion, madre, datos.transicion(), entrega, quien.id(), momento);
+        entrega.cerrar(quien.id(), momento);
+        return new DevolucionRegistrada(pantalla(evento, barra, entrega), consumo, desdeTransicion);
+    }
+
+    /** Lo que queda en la transición vuelve al madre. Nunca se rechaza por saldo (regla 5): si queda negativo, se avisa. */
+    private List<Entregado> devolverTransicion(Ubicacion transicion, Ubicacion madre, List<Renglon> renglones, Entrega entrega,
+            long usuarioId, OffsetDateTime momento) {
+        List<Renglon> lista = renglones == null ? List.of() : renglones;
+        if (transicion == null) {
+            if (!lista.isEmpty()) {
+                throw ProblemaException.reglaDeNegocio("SIN_TRANSICION",
+                        "%s no se abastece de un depósito de transición.".formatted(entrega.getBarra().getNombre()));
+            }
+            return List.of();
+        }
+        Map<Long, Bebida> permitidas = enTransicion(transicion.getId()).stream()
+                .collect(Collectors.toMap(Bebida::getId, Function.identity()));
+        Set<Long> vistas = new HashSet<>();
+        List<Entregado> devuelto = new ArrayList<>();
+        List<String> negativos = new ArrayList<>();
+        for (Renglon r : lista) {
+            if (!vistas.add(r.bebidaId())) {
+                throw ProblemaException.reglaDeNegocio("BEBIDA_REPETIDA_EN_DEVOLUCION",
+                        "Una bebida aparece dos veces en la transición. Sumá las cantidades en un solo renglón.");
+            }
+            Bebida bebida = permitidas.get(r.bebidaId());
+            if (bebida == null) {
+                throw ProblemaException.reglaDeNegocio("BEBIDA_FUERA_DE_LA_TRANSICION",
+                        "Una de las bebidas no está en %s. Volvé a cargar la pantalla.".formatted(transicion.getNombre()));
+            }
+            BigDecimal cantidad = enBotellas(r.cantidad());
+            if (cantidad.signum() > 0) {
+                var registrado = movimientoService.registrar(MovimientoStock.devolucion(bebida, cantidad, transicion, madre, entrega,
+                        usuarioId, momento));
+                if (registrado.saldoOrigen().signum() < 0) {
+                    negativos.add(bebida.descripcion());
+                }
+                devuelto.add(new Entregado(bebida, cantidad));
+            }
+        }
+        if (!negativos.isEmpty()) {
+            notificaciones.notificar(null, TipoNotificacion.ALERTA_STOCK, recortar(
+                    "Saldo negativo en %s después de una devolución: %s. Falta registrar un movimiento."
+                            .formatted(transicion.getNombre(), String.join(", ", negativos))),
+                    usuarioId, List.of(RolCodigo.COMPRAS, RolCodigo.ADMINISTRACION));
+        }
+        return devuelto;
+    }
+
+    /** Cada bebida una sola vez y de las que están en la barra. */
+    private static Map<Long, RenglonDevolucion> declarado(List<RenglonDevolucion> renglones, List<Bebida> enLaBarra) {
+        Set<Long> permitidas = enLaBarra.stream().map(Bebida::getId).collect(Collectors.toSet());
+        Map<Long, RenglonDevolucion> porBebida = new HashMap<>();
+        for (RenglonDevolucion r : renglones == null ? List.<RenglonDevolucion>of() : renglones) {
+            if (!permitidas.contains(r.bebidaId())) {
+                throw ProblemaException.reglaDeNegocio("BEBIDA_FUERA_DE_LA_BARRA",
+                        "Una de las bebidas no está en la barra. Volvé a cargar la pantalla.");
+            }
+            if (porBebida.put(r.bebidaId(), r) != null) {
+                throw ProblemaException.reglaDeNegocio("BEBIDA_REPETIDA_EN_DEVOLUCION",
+                        "Una bebida aparece dos veces. Cargá lo que vuelve y lo que queda en un solo renglón.");
+            }
+        }
+        return porBebida;
+    }
+
+    private static BigDecimal enBotellas(BigDecimal cantidad) {
+        return (cantidad == null ? BigDecimal.ZERO : cantidad).setScale(2, RoundingMode.UNNECESSARY);
+    }
+
+    /** Saldo teórico de la ubicación por bebida, en botellas. Lo lee el backend; nunca va a la barra. */
+    private Map<Long, BigDecimal> saldos(short ubicacionId) {
+        return bebidas.saldosDe(ubicacionId).stream()
+                .collect(Collectors.toMap(SaldoBebida::getBebidaId, SaldoBebida::getCantidad));
+    }
+
+    /** Las bebidas con saldo en la barra y las retiradas en esta entrega, por nombre. Sin cantidades. */
+    private List<Bebida> paraDevolver(short barraId, Entrega entrega) {
+        Set<Long> ids = new HashSet<>();
+        bebidas.saldosDe(barraId).stream().filter(s -> s.getCantidad().signum() != 0).forEach(s -> ids.add(s.getBebidaId()));
+        movimientos.deEntrega(entrega.getId()).forEach(m -> ids.add(m.getBebida().getId()));
+        return bebidas.findAllById(ids).stream().sorted(POR_NOMBRE).toList();
+    }
+
+    /** Las bebidas con saldo en la transición, por nombre. Sin cantidades. */
+    private List<Bebida> enTransicion(short transicionId) {
+        Set<Long> ids = bebidas.saldosDe(transicionId).stream().filter(s -> s.getCantidad().signum() != 0)
+                .map(SaldoBebida::getBebidaId).collect(Collectors.toSet());
+        return bebidas.findAllById(ids).stream().sorted(POR_NOMBRE).toList();
+    }
+
     private PantallaEntrega pantalla(EventoOperativo evento, Ubicacion barra, Entrega entrega) {
         List<MovimientoStock> lista = entrega == null ? List.of() : movimientos.deEntrega(entrega.getId());
-        return new PantallaEntrega(evento, catalogos.salon(evento.salonId()), barra, barra.getAbastecimiento(),
+        boolean devolviendo = entrega != null && entrega.isAbierta();
+        Ubicacion origen = barra.getAbastecimiento();
+        return new PantallaEntrega(evento, catalogos.salon(evento.salonId()), barra, origen,
                 barra.isPermiteRetiroDirecto() ? depositoMadre() : null, entrega, retiros(lista), entregado(lista),
-                bebidas.findAllConCodigos().stream().filter(Bebida::isActivo).sorted(POR_NOMBRE).toList());
+                bebidas.findAllConCodigos().stream().filter(Bebida::isActivo).sorted(POR_NOMBRE).toList(),
+                devolviendo ? paraDevolver(barra.getId(), entrega) : List.of(),
+                devolviendo && origen.getTipo() == TipoUbicacion.TRANSICION ? enTransicion(origen.getId()) : List.of());
     }
 
     /** Agrupa por retiro: mismo tipo, origen, persona y momento. */
@@ -224,7 +411,9 @@ public class EntregaService {
         EventoOperativo evento = eventos.operativo(eventoId);
         boolean delSalon = Objects.equals(barra.getSalonId(), evento.salonId());
         if (!quien.tieneAlguno(OPERAN_CUALQUIER_EVENTO)) {
-            boolean enLaJornada = eventos.eventosDeLaJornada(stock.jornada()).stream().anyMatch(e -> e.eventoId() == eventoId);
+            // Fuera de la jornada, solo si en esa barra espera la devolución (p. ej. pasadas las 06:00).
+            boolean enLaJornada = eventos.eventosDeLaJornada(stock.jornada()).stream().anyMatch(e -> e.eventoId() == eventoId)
+                    || entregas.findByEventoIdAndBarraId(eventoId, barra.getId()).filter(Entrega::isAbierta).isPresent();
             if (!enLaJornada || !delSalon) {
                 throw new AccessDeniedException("La barra solo opera los eventos de la jornada, en las barras de su salón.");
             }

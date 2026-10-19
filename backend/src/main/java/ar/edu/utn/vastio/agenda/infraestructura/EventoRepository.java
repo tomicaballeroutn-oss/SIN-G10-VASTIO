@@ -39,6 +39,10 @@ public interface EventoRepository extends JpaRepository<Evento, Long> {
             """)
     List<Long> idsHasta(LocalDate hasta, Collection<EstadoEvento> estados);
 
+    /** Eventos en ese estado, del más viejo al más nuevo. */
+    @Query("select e from Evento e join fetch e.unidad u where e.estado = :estado order by u.fecha, u.turnoId, u.salonId")
+    List<Evento> enEstado(EstadoEvento estado);
+
     /** Eventos activos desde esa fecha, por fecha, turno y salón. */
     @Query("""
             select e from Evento e join fetch e.unidad u join fetch e.cliente

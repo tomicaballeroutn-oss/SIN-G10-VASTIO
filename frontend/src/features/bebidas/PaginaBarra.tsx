@@ -1,4 +1,6 @@
 import { useCallback, useState } from 'react';
+import { useNavigate } from 'react-router';
+import { cierres, type EventoPorCerrar } from '../../api/cierres';
 import { entregas, type BebidaParaRetiro, type Devolucion, type Entrega, type EventoDeLaJornada } from '../../api/entregas';
 import { useDatos, useEnvio } from '../../api/useDatos';
 import {
@@ -54,6 +56,8 @@ function coincide(b: BebidaParaRetiro, texto: string): boolean {
  */
 export function PaginaBarra() {
   const jornada = useDatos(entregas.jornada);
+  // Si no se pueden cargar, la pantalla sigue andando para retirar y devolver.
+  const porCerrar = useDatos(cierres.pendientes).datos ?? [];
   return (
     <section className="pantalla">
       {/* El título es el del menú: acá también van la devolución y el cierre de la noche. */}
@@ -62,7 +66,7 @@ export function PaginaBarra() {
         {(lista) => {
           const lugares = opciones(lista);
           if (lugares.length === 0) {
-            return (
+            return porCerrar.length > 0 ? null : (
               <Card flush>
                 <EmptyState icon="martini" title="Hoy no hay eventos en tus barras">
                   Cuando haya un evento en tu salón, vas a poder retirar bebida para su barra desde acá.
@@ -73,6 +77,31 @@ export function PaginaBarra() {
           return <Seleccion lugares={lugares} />;
         }}
       </Cargando>
+      <EventosPorCerrar eventos={porCerrar} />
+    </section>
+  );
+}
+
+/** Los eventos realizados que esperan su cierre (UI-33), aunque ya no sean de la jornada. */
+function EventosPorCerrar({ eventos }: { eventos: EventoPorCerrar[] }) {
+  const navegar = useNavigate();
+  if (eventos.length === 0) return null;
+  return (
+    <section className="barra__entregado" aria-label="Eventos para cerrar">
+      <h2 className="h4">Eventos para cerrar</h2>
+      <ul className="barra__renglones">
+        {eventos.map((e) => (
+          <li key={e.evento.id}>
+            <Card
+              title={e.evento.nombre}
+              subtitle={e.evento.codigo}
+              actions={<Button size="sm" icon="archive" onClick={() => navegar(`/barra/cierre/${e.evento.id}`)}>Ir al cierre</Button>}
+            >
+              <SalonTag salon={e.salon.codigo as SalonId} label={e.salon.nombre} />
+            </Card>
+          </li>
+        ))}
+      </ul>
     </section>
   );
 }
@@ -111,6 +140,7 @@ function PantallaEntrega({ eventoId, barraId }: { eventoId: number; barraId: num
  * abierta, directo a la devolución. Después de devolver, el consumo real.
  */
 function ContenidoEntrega({ entrega, alRegistrar }: { entrega: Entrega; alRegistrar: (e: Entrega) => void }) {
+  const navegar = useNavigate();
   const [devolviendo, setDevolviendo] = useState(false);
   const [devolucion, setDevolucion] = useState<Devolucion | null>(null);
   const estado = ESTADO_POR_CODIGO[entrega.evento.estado as keyof typeof ESTADO_POR_CODIGO];
@@ -130,8 +160,14 @@ function ContenidoEntrega({ entrega, alRegistrar }: { entrega: Entrega; alRegist
     </Card>
   );
 
+  const alCierre = realizado && (
+    <div>
+      <Button size="lg" icon="archive" onClick={() => navegar(`/barra/cierre/${entrega.evento.id}`)}>Ir al cierre del evento</Button>
+    </div>
+  );
+
   if (devolucion) {
-    return <>{cabecera}<ConsumoDeLaDevolucion devolucion={devolucion} /></>;
+    return <>{cabecera}<ConsumoDeLaDevolucion devolucion={devolucion} />{alCierre}</>;
   }
   if (puedeDevolver && (devolviendo || realizado)) {
     return (
@@ -161,6 +197,7 @@ function ContenidoEntrega({ entrega, alRegistrar }: { entrega: Entrega; alRegist
           Ya se registró la devolución: no admite más retiros.
         </Alert>
       )}
+      {cerrada && alCierre}
 
       <YaEntregado entrega={entrega} />
 

@@ -73,8 +73,17 @@ test('una bebida nueva entra al depósito, se ve en Existencias y se corrige con
   await expect(compras.getByText(`Recuento de ${nombre} 700 ml registrado`, { exact: false })).toBeVisible();
   await expect(tarjeta).toContainText('2 cajas y 1 botella');
 
-  // 5. La encargada de barra no ve stock si no tiene evento en la jornada (los de demostración son de otros días).
+  // 5. La encargada de barra solo ve las barras con evento en la jornada, nunca el depósito. Los datos de demostración
+  //    tienen un evento hoy en Avril (objetivo de la operación del evento): ve la Barra Avril mientras no esté cerrado.
   const barra = await ingresar(browser, 'rocio.blanco', contexto);
   await barra.goto('/existencias');
-  await expect(barra.getByText('Hoy no hay eventos en tus barras')).toBeVisible();
+  const sinEventos = barra.getByText('Hoy no hay eventos en tus barras');
+  const ubicacion = barra.getByLabel('Ubicación');
+  await expect(sinEventos.or(ubicacion)).toBeVisible();
+  if (await ubicacion.isVisible()) {
+    const opciones = await ubicacion.locator('option').allTextContents();
+    expect(opciones.length).toBeGreaterThan(0);
+    expect(opciones.every((o) => o.startsWith('Barra'))).toBe(true);
+  }
+  await expect(barra.getByText(nombre)).toHaveCount(0);
 });

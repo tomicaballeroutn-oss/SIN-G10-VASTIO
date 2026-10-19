@@ -2,6 +2,7 @@ import type { ReactNode } from 'react';
 import type { RouteObject } from 'react-router';
 import { PaginaAgenda } from './features/agenda/PaginaAgenda';
 import { PaginaBarra } from './features/bebidas/PaginaBarra';
+import { PaginaCierre } from './features/bebidas/PaginaCierre';
 import { PaginaCatalogo } from './features/bebidas/PaginaCatalogo';
 import { PaginaExistencias } from './features/bebidas/PaginaExistencias';
 import { PaginaIngresoBebida } from './features/bebidas/PaginaIngresoBebida';
@@ -43,6 +44,10 @@ export const rutas: RouteObject[] = [
         path: item.ruta.slice(1),
         element: <ConPermiso item={item}>{PANTALLAS[item.id] ?? <PaginaPendiente item={item} />}</ConPermiso>,
       })),
+      {
+        path: 'barra/cierre/:id',
+        element: <ConPermiso item={MENU.find((it) => it.id === 'barra')!}><PaginaCierre /></ConPermiso>,
+      },
       {
         path: 'eventos/:id',
         element: <ConPermiso item={MENU.find((it) => it.id === 'eventos')!}><PaginaEvento /></ConPermiso>,

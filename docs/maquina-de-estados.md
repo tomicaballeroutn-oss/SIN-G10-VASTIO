@@ -29,7 +29,7 @@ Estados activos (ocupan la unidad): todos salvo `LIBERADA` y `CANCELADO`.
 | CONTRATADO → CONFIRMADO | Confirmar evento | Planner asignada, Coordinación | Planner asignada, invitados definitivos, servicios en las categorías requeridas | Habilita la orden de preparación. Notifica a compras, cocina, administración y la vendedora titular. |
 | CONFIRMADO → EN_CURSO | Automático | Sistema | Llega la hora de inicio del turno | Bloquea la edición comercial. Habilita salidas a barra. |
 | EN_CURSO → REALIZADO | Automático | Sistema | Termina el turno (hora_fin, día siguiente si cruza medianoche) | — |
-| REALIZADO → CERRADO | Registrar cierre de evento | Encargada de barra, Compras | Entregas cerradas; si el tipo usa segmentos, asistencia real cargada | Escribe `consumo_evento` (cantidades por artículo). |
+| REALIZADO → CERRADO | Registrar cierre de evento | Encargada de barra, Compras, Coordinación, Dirección | Entregas cerradas (todas las devoluciones registradas). La asistencia real por segmento todavía no se exige: llega en el Sprint 4 y mientras tanto se divide por la cantidad de invitados | Escribe `consumo_evento` (cantidades por artículo, congeladas) y deja CERRADA la orden de preparación. No mueve stock: lo consumido salió con la devolución. |
 | SENADO / CONTRATADO / CONFIRMADO → CANCELADO | Cancelar evento | Coordinación | Motivo obligatorio | Libera la unidad. Descarta la orden de preparación. Notifica a todas las áreas (salvo barra), la vendedora titular y la planner. |
 
 ### Operaciones que no cambian el estado

@@ -570,13 +570,13 @@ Asiento inalterable de mercadería (RNF-SEG-03). Solo inserción: las correccion
 
 #### CONSUMO_EVENTO
 
-Resultado del cierre por artículo, congelado. Solo cantidades, en botellas: el precio y el costo se quitaron en V5.
+Resultado del cierre por artículo, congelado: se escribe al registrar el cierre del evento y no se recalcula. Suma todas las barras del evento. Solo cantidades, en botellas (las botellas abiertas cuentan como consumidas, así que devuelto y remanente son enteros): el precio y el costo se quitaron en V5.
 
 | Campo | Tipo | Clave | Nulo | Descripción / valores posibles |
 |---|---|---|---|---|
 | `evento_id` | bigint | PK/FK | NO | → evento. |
 | `bebida_id` | bigint | PK/FK | NO | → bebida. |
-| `cantidad_entregada` | numeric(10,2) |  | NO | Salidas + retiros adicionales + remanente inicial. |
+| `cantidad_entregada` | numeric(10,2) |  | NO | Saldo de la barra antes de la devolución: remanente heredado + salidas + retiros adicionales ± ajustes. Es devuelta + remanente + consumida. |
 | `cantidad_devuelta` | numeric(10,2) |  | NO | Devuelto al depósito. |
 | `cantidad_remanente` | numeric(10,2) |  | NO | Queda en barra para el evento siguiente. |
 | `cantidad_consumida` | numeric(10,2) |  | NO | Entregada − devuelta − remanente. |
@@ -598,6 +598,5 @@ Estimación de consumo por asistente según tipo de evento. Alimenta la orden su
 
 - **Señado y Contratado como estados distintos** (a confirmar con Meli). Si se fusionan, se quita un valor del `CHECK`; ninguna tabla cambia.
 - **Quién registra la seña** (vendedora o administración). No afecta al modelo, solo a la autorización.
-- **Botellas abiertas al cierre.** Las cantidades admiten decimales para registrar, por ejemplo, 0,5 botella si se decide contarlas; si se cuentan solo cerradas, se usan enteros.
 - **Almacenamiento de archivos del legajo.** Resuelto en el Sprint 2: disco local, en el volumen `legajo` del ambiente de prueba (`vastio.legajo.directorio`); `documento_evento.ruta` es relativa a ese directorio (`<evento_id>/<uuid>.<extensión>`). Pasar a un almacenamiento de objetos no cambia el modelo.
 - **Revocación de sesiones.** Si se requiere cerrar sesiones de forma remota (por ejemplo al dar de baja un usuario), se agrega una tabla de tokens de refresco.

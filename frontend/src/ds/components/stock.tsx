@@ -24,7 +24,7 @@ export interface StockLevelProps {
   className?: string;
 }
 
-export function StockLevel({ name, presentacion, ubicacion, cantidad, cantidadTexto, comprometido, unidad = 'cajones', unidadUno = 'cajón', status, actions, className }: StockLevelProps) {
+export function StockLevel({ name, presentacion, ubicacion, cantidad, cantidadTexto, comprometido, unidad = 'cajas', unidadUno = 'caja', status, actions, className }: StockLevelProps) {
   const enUnidad = (n: number) => (n === 1 ? unidadUno : unidad);
   const estado: StockStatus | null = status === null ? null
     : status ?? (cantidad < 0 ? 'negativo' : cantidad === 0 ? 'sin-stock' : cantidad < (comprometido ?? 0) ? 'bajo' : 'ok');
@@ -99,7 +99,8 @@ export interface MovementCardProps {
   salon?: SalonId;
   desde?: string;
   hasta?: string;
-  items: { nombre: string; cantidad: number; unidad?: string; unidadUno?: string }[];
+  /** `cantidadTexto`: la cantidad ya armada («2 cajas y 3 botellas»), en lugar del número y la unidad. */
+  items: { nombre: string; cantidad: number; cantidadTexto?: string; unidad?: string; unidadUno?: string }[];
   nota?: string;
   actor: string;
   at?: string;
@@ -127,7 +128,7 @@ export function MovementCard({ tipo, evento, salon, desde, hasta, items, nota, a
         {items.map((it, i) => (
           <li key={i} className="body-sm">
             <span>{it.nombre}</span>
-            <span className="numeral-sm">{it.cantidad} {it.cantidad === 1 ? (it.unidadUno ?? 'cajón') : (it.unidad ?? 'cajones')}</span>
+            <span className="numeral-sm">{it.cantidadTexto ?? `${it.cantidad} ${it.cantidad === 1 ? (it.unidadUno ?? 'caja') : (it.unidad ?? 'cajas')}`}</span>
           </li>
         ))}
       </ul>

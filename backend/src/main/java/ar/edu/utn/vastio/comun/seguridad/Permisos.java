@@ -39,6 +39,12 @@ public final class Permisos {
     /** Ajuste de stock (recuento y rotura): Administración y Compras, además del acceso total. */
     public static final String AJUSTE_STOCK = CATALOGO_BEBIDA;
 
+    /**
+     * Salida a barra, retiro adicional, devolución y cierre: la encargada de barra y Compras, además del acceso total
+     * (docs/sprint-3-operacion.md, decisiones 3, 9 y 12). La barra, solo los eventos de la jornada (en el servicio).
+     */
+    public static final String OPERAR_BARRA = "hasAnyRole('DIRECCION', 'COORDINACION', 'COMPRAS', 'BARRA')";
+
     private Permisos() {
     }
 }

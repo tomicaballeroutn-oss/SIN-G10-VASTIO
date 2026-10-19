@@ -208,4 +208,24 @@ public class ConsultaEventoService {
                 .map(e -> new EventoDeJornada(e.getUnidad().getSalonId(), e.getId(), e.getCodigo(), e.getNombre()))
                 .toList();
     }
+
+    /** Evento visto desde la barra: salón y estado, sin datos comerciales. */
+    public record EventoOperativo(long eventoId, String codigo, String nombre, short salonId, EstadoEvento estado) {
+
+        /** «En curso», «Realizado», … */
+        public String nombreDelEstado() {
+            return MaquinaDeEstados.nombre(estado);
+        }
+    }
+
+    /**
+     * Lo usa bebida para validar salidas, devoluciones y cierres contra el estado y el salón del evento.
+     *
+     * @throws ProblemaException 404 si el evento no existe.
+     */
+    public EventoOperativo operativo(long eventoId) {
+        Evento e = eventos.conDetalle(eventoId).orElseThrow(() -> ProblemaException.noEncontrado("EVENTO_INEXISTENTE",
+                "No encontramos ese evento."));
+        return new EventoOperativo(e.getId(), e.getCodigo(), e.getNombre(), e.getUnidad().getSalonId(), e.getEstado());
+    }
 }

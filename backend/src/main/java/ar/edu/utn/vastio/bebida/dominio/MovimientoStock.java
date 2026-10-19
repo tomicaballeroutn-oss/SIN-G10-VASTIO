@@ -131,6 +131,22 @@ public class MovimientoStock {
         return m;
     }
 
+    /**
+     * Salida a barra o retiro adicional, imputado al evento y a su entrega. Los renglones de un mismo retiro comparten el
+     * momento, así se muestran juntos.
+     */
+    public static MovimientoStock retiroABarra(TipoMovimiento tipo, Bebida bebida, BigDecimal cantidad, Ubicacion origen,
+            Entrega entrega, long usuarioId, OffsetDateTime momento) {
+        if (tipo != TipoMovimiento.SALIDA_BARRA && tipo != TipoMovimiento.RETIRO_ADICIONAL) {
+            throw new IllegalArgumentException("Un retiro a barra es SALIDA_BARRA o RETIRO_ADICIONAL.");
+        }
+        MovimientoStock m = new MovimientoStock(tipo, bebida, cantidad, origen, entrega.getBarra(), usuarioId);
+        m.eventoId = entrega.getEventoId();
+        m.entregaId = entrega.getId();
+        m.fechaHora = momento;
+        return m;
+    }
+
     /** Lo que suma (o resta) este asiento al saldo de la ubicación. */
     public BigDecimal efectoEn(Ubicacion ubicacion) {
         BigDecimal efecto = BigDecimal.ZERO;

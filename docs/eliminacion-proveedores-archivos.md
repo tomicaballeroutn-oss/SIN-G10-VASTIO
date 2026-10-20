@@ -1,6 +1,6 @@
 # Archivos de la eliminación de proveedores
 
-Inventario del cambio contra `origin/main` (`02c3564`), base confirmada tras `git fetch origin` para la publicación autorizada. Incluye los anexos de Fases 1–2 y esta lista.
+Inventario contra `origin/main` (`02c3564`), incluida la corrección documental de Albert en PR #34.
 
 | Estado | Archivo |
 | --- | --- |
@@ -41,6 +41,8 @@ Inventario del cambio contra `origin/main` (`02c3564`), base confirmada tras `gi
 | Modificado | `backend/src/test/java/ar/edu/utn/vastio/bebida/aplicacion/SalidaBarraConcurrenciaIT.java` |
 | Modificado | `design/pantallas/UI28-CargaInicial.dc.html` |
 | Modificado | `docs/b5-04-implementacion.md` |
+| Agregado | `docs/der/DER_3_bebida.dot` |
+| Modificado | `docs/der/DER_3_bebida.png` |
 | Modificado | `docs/der/diccionario-de-datos.md` |
 | Agregado | `docs/der/modelo-bebida-v9.md` |
 | Modificado | `docs/despliegue.md` |
@@ -70,4 +72,4 @@ Inventario del cambio contra `origin/main` (`02c3564`), base confirmada tras `gi
 | Agregado | `scripts/probar_resguardo_proveedores.py` |
 | Agregado | `scripts/resguardo_proveedores.py` |
 
-Total: 65 archivos; 9 eliminados, 42 modificados y 14 agregados. `CargaInicialYProveedores.test.tsx` se reemplaza por `CargaInicial.test.tsx`, que conserva inventario.
+Total: 67 archivos; 9 eliminados, 43 modificados y 15 agregados. `CargaInicialYProveedores.test.tsx` se reemplaza por `CargaInicial.test.tsx`, que conserva inventario.

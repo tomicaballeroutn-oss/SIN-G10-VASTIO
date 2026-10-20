@@ -1,6 +1,6 @@
 # Vastio — Modelo de datos y diccionario de datos
 
-Modelo operativo actualizado a V9. Los PNG `DER_1`, `DER_2` y `DER_3` son referencias históricas del DER v2; `DER_3_bebida.png` conserva proveedores y no representa el esquema vigente. Ver [relaciones vigentes del módulo B](modelo-bebida-v9.md) y [resguardo antes de V9](../eliminacion-proveedores-despliegue.md).
+Modelo operativo actualizado a V9. Los PNG `DER_1` y `DER_2` son referencias históricas del DER v2. [DER_3_bebida.png](DER_3_bebida.png) fue regenerado desde PostgreSQL posterior a V9, con [fuente editable DOT](DER_3_bebida.dot). Ver [alcance y reproducción del módulo B](modelo-bebida-v9.md) y [resguardo antes de V9](../eliminacion-proveedores-despliegue.md).
 
 Motor: PostgreSQL. Convenciones: nombres en `snake_case` y en español; claves primarias sustitutas (`bigint` generado para tablas transaccionales, `smallint` para catálogos); importes en `numeric(14,2)` expresados en pesos argentinos (el único es el de la seña: el sistema no maneja precios ni costos); fechas y horas en `timestamptz`; cantidades de bebida en `numeric(10,2)` expresadas siempre en **botellas** (unidad base). Los estados y tipos fijos se modelan como `varchar` con restricción `CHECK`, no como tablas, porque el comportamiento del sistema depende de ellos y no son configurables.
 

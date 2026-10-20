@@ -17,7 +17,7 @@ Fecha: 20/10/2026. Decisión de producto comunicada por el equipo: reunión del 
 
 ## Inventario de dependencias
 
-Los paths de esta sección son relativos al repositorio. El anexo `eliminacion-proveedores-referencias.txt` contiene todas las coincidencias textuales en los archivos versionados del HEAD auditado, con línea. Se buscaron `proveedor`, `supplier` y `cuit`, sin distinguir mayúsculas. Se inspeccionó además el DER binario, que no aparece en búsquedas de texto.
+Los paths de esta sección son relativos al repositorio. El anexo `eliminacion-proveedores-referencias.txt` resume la búsqueda reproducible en el HEAD auditado; el volcado original de 625 coincidencias quedó en el historial Git del PR. Se buscaron `proveedor`, `supplier` y `cuit`, sin distinguir mayúsculas. Se inspeccionó además el DER binario, que no aparece en búsquedas de texto. La revisión de Albert motivó regenerar el PNG con fuente editable y esquema V9; esta auditoría conserva el estado histórico observado en Fases 1–2.
 
 ### Backend
 

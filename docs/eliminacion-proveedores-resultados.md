@@ -8,7 +8,7 @@ Se eliminó el ABM completo de proveedores y sus seis endpoints, servicio, DTO, 
 
 Se conservaron los permisos compartidos de catálogo, ubicaciones e ingresos. Se retiraron validaciones y mensajes exclusivos de proveedores, incluidos CUIT y deserialización de su ID. La validación de documento DNI/CUIT de clientes es independiente y sigue vigente.
 
-Se actualizaron datos de demostración, fixtures y regresiones, prototipo UI-28 y documentación vigente. Las referencias históricas permanecen identificadas en la auditoría, las migraciones V1–V8 y el registro de decisiones. El DER PNG anterior queda explícitamente identificado como histórico; se agregó un diagrama Mermaid de relaciones vigentes. No se modificó Google Drive.
+Se actualizaron datos de demostración, fixtures y regresiones, prototipo UI-28 y documentación vigente. Las referencias históricas permanecen identificadas en la auditoría, las migraciones V1–V8 y el registro de decisiones. El DER PNG se regeneró después de la revisión de Albert desde el esquema V9 y se agregó una fuente DOT editable; el resumen Mermaid complementa las relaciones detalladas. No se modificó Google Drive.
 
 Inventario previo: [auditoría de dependencias](eliminacion-proveedores-auditoria.md). Lista exacta final: [archivos agregados, modificados y eliminados](eliminacion-proveedores-archivos.md). El test combinado de carga inicial/proveedores se reemplazó por `CargaInicial.test.tsx`, conservando las verificaciones de inventario. Las pruebas exclusivas del ABM fueron sustituidas por ausencia de mappings/endpoints y navegación.
 
@@ -70,8 +70,18 @@ Evidencia local (fuera del diff, sin datos reales):
 
 ## Diff y rama
 
-El inventario del cambio contiene 65 archivos: 9 eliminados, 42 modificados y 14 agregados. El cambio adicional de preparación del PR está limitado a CI y a reflejarlo en esta documentación; el código operativo, V9 y los scripts de resguardo permanecen como fueron auditados.
+El inventario del cambio contiene 67 archivos: 9 eliminados, 43 modificados y 15 agregados. Los cambios adicionales para publicar y atender la revisión están limitados a CI, documentación y regeneración del DER; el código operativo, V9 y los scripts de resguardo permanecen como fueron auditados.
 
 La base remota confirmada con `git fetch origin` para publicar es `02c35649a156c2eea073106a9b9f8a2d28c53860`; coincide con el HEAD previo a crear el commit de esta entrega, por lo que no hay cambios remotos pendientes ni conflictos de integración. El diff publicado se consulta en el PR contra `main`. El checkout original, sus cambios y stash y los demás worktrees no fueron modificados.
 
 El detalle de las suites completas y E2E de arriba corresponde a la implementación previa. La preparación del PR ejecutó nuevamente `mvn -B -Dtest=IngresoDtoTest -Dit.test=MigracionProveedoresIT,ProveedoresEliminadosIT,PerfilDevIT verify` con Python 3.12.14 explícito: **BUILD SUCCESS**, 1 unitaria y 14 integraciones, 0 fallos, errores u omitidas (20/10/2026, 15:56 ART). Incluye los 7 casos de migración y el ensayo real de resguardo/restauración. Evidencia local ignorada: `vastio-proveedores-ci-verificacion.log`, en la raíz del worktree. El CI del PR debe comprobarse por separado y no se considera aprobado por la sola configuración del workflow.
+
+## Correcciones de la revisión de Albert
+
+Se agregó en `docs/despliegue.md` una receta manual de recreación solo para bases de desarrollo descartables, con identificación de contexto/proyecto, contenedor, montaje, base y usuario reales; pausa por pérdida completa de datos y comprobación de Flyway V9. Las bases con información histórica mantienen el respaldo y autorización obligatorios. No se ejecutaron borrados de bases o volúmenes existentes.
+
+Se regeneró `DER_3_bebida.png` y se incorporó su fuente DOT desde metadatos de PostgreSQL descartable migrado con el backend: 14 tablas, 90 columnas y 39 FK del módulo, más cinco referencias externas. Se preservaron V1–V9 y todo el código operativo. El anexo de 625 coincidencias se redujo a búsqueda reproducible, síntesis y pendientes de Drive; el original permanece en Git. Auditoría, hashes y procedimiento de respaldo/restauración se conservan por su función de seguridad.
+
+Verificación de esta corrección: arranque real del backend sobre un PostgreSQL 17 nuevo y descartable, con las nueve migraciones exitosas y validación Hibernate; comparación automática del DOT con columnas, tipos, nulabilidad, PK y las 39 FK de `pg_catalog`; renderizado y revisión visual del PNG; sintaxis de los cuatro bloques PowerShell y `git diff --check` correctos. Se repitió `mvn -B -Dit.test=MigracionProveedoresIT failsafe:integration-test failsafe:verify` con `VASTIO_TEST_PYTHON` explícito: 7 integraciones, 0 fallos, errores u omitidas, BUILD SUCCESS (20/10/2026, 18:37 ART). Incluye el ensayo real de dump/restauración. Log local ignorado: `vastio-revision-albert-migracion.log`. El proceso y contenedor exclusivos del DER se retiraron después de consultar el esquema; ninguna base existente fue modificada.
+
+Los comandos destructivos de la receta de recreación no se ejecutaron, tampoco sobre una base local existente. No se repitieron localmente frontend ni E2E en esta corrección solo documental; el CI del commit adicional debe comprobarse separadamente. La aprobación de Albert sigue pendiente; no se descarta ni se sustituye su revisión solicitando cambios.

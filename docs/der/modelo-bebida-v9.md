@@ -1,6 +1,10 @@
 # Relaciones vigentes del módulo B — V9
 
-Este diagrama complementa el diccionario de datos. El PNG `DER_3_bebida.png` es el DER v2 histórico, anterior a V5–V9; no usarlo como esquema vigente. Proveedores y sus dos relaciones se retiraron en V9 por decisión del 19/10/2026. Sus datos históricos se conservan fuera de la base operativa mediante el [procedimiento de resguardo](../eliminacion-proveedores-despliegue.md).
+El [PNG DER_3_bebida.png](DER_3_bebida.png) representa el esquema posterior a V9. Se reconstruyó desde `pg_catalog` de PostgreSQL 17 descartable después de ejecutar Flyway V1–V9 con el backend, porque no había una fuente editable original confiable en el repositorio. La nueva [fuente DOT](DER_3_bebida.dot) conserva las 14 tablas del módulo, sus 90 columnas y las 39 FK salientes, incluidas correcciones, responsables, apertura/cierre y preparación B5-04; las cinco entidades externas aparecen solo con su PK. Se contrastó cada columna, tipo, nulabilidad, PK y FK con esa base. Proveedores y sus relaciones se retiraron en V9; su conservación histórica exige el [procedimiento de resguardo](../eliminacion-proveedores-despliegue.md).
+
+Para regenerar el PNG desde la fuente editable con Graphviz: `dot -Tpng docs/der/DER_3_bebida.dot -o docs/der/DER_3_bebida.png`. No requiere conexión a ninguna base. Al cambiar el esquema, contrastar nuevamente con los metadatos de una base **descartable** migrada antes de actualizar el DOT; no inferir relaciones desde un PNG anterior. La flecha va de FK a PK: extremo lleno para referencia obligatoria y círculo para nullable; cada padre admite cero o múltiples hijos salvo restricciones únicas del esquema. PK compuestas y FK se indican en las filas. El diagrama no sustituye checks, índices únicos, triggers ni las migraciones.
+
+El siguiente resumen Mermaid muestra solo las relaciones principales para lectura rápida:
 
 ```mermaid
 erDiagram

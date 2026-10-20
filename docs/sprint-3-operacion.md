@@ -69,6 +69,7 @@ Se apoya en lo construido en la primera parte del sprint: `MovimientoService` (a
 - La registran la encargada de barra, Compras, Coordinación y Dirección, con el evento En curso o Realizado y la entrega abierta. El resto recibe 403.
 - Lista cada bebida con saldo en la barra; pide devuelto y remanente en cajas y botellas enteras, ≥ 0.
 - Si devuelto + remanente supera lo que tiene la barra, se rechaza con un mensaje que nombra la bebida.
+- La comparación también se aplica cuando devuelto y remanente son cero, incluso si se omitió la bebida: cero supera un saldo negativo. Se rechaza toda la devolución, sin movimientos ni cierre de la entrega, y el evento sigue sin poder cerrarse mientras esa devolución esté pendiente. No se recorta el consumo a cero ni se crea un ajuste automático; los retiros y las roturas siguen admitiendo saldos negativos con sus alertas. Un saldo cero con devolución y remanente cero sí es válido.
 - Registra `DEVOLUCION` (barra → depósito madre), `REMANENTE` y `CONSUMO` por bebida, y la devolución desde la transición si corresponde, en una transacción. El saldo de la barra queda igual al remanente. La entrega queda CERRADA.
 - Antes de registrar no se muestra ni el saldo teórico ni lo esperado; después se muestra el consumo real.
 

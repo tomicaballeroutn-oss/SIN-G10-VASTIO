@@ -87,7 +87,10 @@ def restore_and_snapshot(folder):
         run(["docker", "run", "--rm", "-d", "--name", name, "--network", "none",
              "-e", "POSTGRES_HOST_AUTH_METHOD=trust", "postgres:17"])
         started = True
-        cmd = ["docker", "exec", "-i", name, "psql", "-U", "postgres", "-d", "postgres"]
+        # El servidor temporal del entrypoint acepta sockets, pero se reinicia.
+        # Solo el servidor definitivo escucha TCP; loopback sigue aislado sin red/puertos.
+        cmd = ["docker", "exec", "-i", name, "psql", "-h", "127.0.0.1",
+               "-U", "postgres", "-d", "postgres"]
         for attempt in range(60):
             try:
                 query(cmd, "SELECT 1")
@@ -97,7 +100,7 @@ def restore_and_snapshot(folder):
                     raise
                 time.sleep(0.5)
         with (folder / "v8.dump").open("rb") as dump:
-            restored = subprocess.run(["docker", "exec", "-i", name, "pg_restore", "-U", "postgres",
+            restored = subprocess.run(["docker", "exec", "-i", name, "pg_restore", "-h", "127.0.0.1", "-U", "postgres",
                                        "-d", "postgres", "--exit-on-error", "--no-owner", "--no-privileges"],
                                       stdin=dump, capture_output=True, timeout=600)
         if restored.returncode:

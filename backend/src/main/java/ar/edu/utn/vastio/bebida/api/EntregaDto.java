@@ -56,7 +56,7 @@ public final class EntregaDto {
         }
     }
 
-    /** Para el buscador y el lector de códigos: sin stock mínimo ni proveedor. */
+    /** Para el buscador y el lector de códigos: sin stock mínimo. */
     public record BebidaParaRetiro(long id, String nombre, String presentacion, String unidad, short unidadesPorBulto,
             List<CodigoDto> codigos) {
         static BebidaParaRetiro de(Bebida b) {

@@ -19,7 +19,6 @@ import ar.edu.utn.vastio.bebida.aplicacion.BebidaService;
 import ar.edu.utn.vastio.bebida.aplicacion.BebidaService.DatosBebida;
 import ar.edu.utn.vastio.bebida.dominio.Bebida;
 import ar.edu.utn.vastio.bebida.dominio.CodigoBarra;
-import ar.edu.utn.vastio.bebida.dominio.Proveedor;
 import ar.edu.utn.vastio.bebida.dominio.TipoBebida;
 import ar.edu.utn.vastio.bebida.dominio.UnidadManipulacion;
 
@@ -53,20 +52,14 @@ public final class BebidaDto {
         }
     }
 
-    public record ProveedorResumen(long id, String razonSocial, boolean activo) {
-        static ProveedorResumen de(Proveedor p) {
-            return p == null ? null : new ProveedorResumen(p.getId(), p.getRazonSocial(), p.isActivo());
-        }
-    }
-
     /** Las cantidades van en botellas. Sin precio: el sistema no maneja dinero. */
     public record BebidaResponse(long id, String nombre, String presentacion, TipoResponse tipo, UnidadResponse unidad,
-            short unidadesPorBulto, BigDecimal stockMinimo, List<CodigoDto> codigos, ProveedorResumen proveedorHabitual,
+            short unidadesPorBulto, BigDecimal stockMinimo, List<CodigoDto> codigos,
             boolean activo, OffsetDateTime fechaBaja) {
         static BebidaResponse de(Bebida b) {
             return new BebidaResponse(b.getId(), b.getNombre(), b.getPresentacion(), TipoResponse.de(b.getTipo()),
                     UnidadResponse.de(b.getUnidad()), b.getUnidadesPorBulto(), b.getStockMinimo(),
-                    b.getCodigos().stream().map(CodigoDto::de).toList(), ProveedorResumen.de(b.getProveedorHabitual()),
+                    b.getCodigos().stream().map(CodigoDto::de).toList(),
                     b.isActivo(), b.getFechaBaja());
         }
     }
@@ -84,13 +77,12 @@ public final class BebidaDto {
             @PositiveOrZero(message = "El stock mínimo no puede ser negativo.")
             @DecimalMax(value = "99999999", message = "Revisá el stock mínimo.")
             @Digits(integer = 8, fraction = 2, message = "Revisá el stock mínimo.") BigDecimal stockMinimo,
-            @Size(max = 20, message = "Cargá hasta 20 códigos.") List<@Valid CodigoDto> codigos,
-            Long proveedorId) {
+            @Size(max = 20, message = "Cargá hasta 20 códigos.") List<@Valid CodigoDto> codigos) {
 
         DatosBebida datos() {
             List<BebidaService.Codigo> lista = codigos == null ? List.of()
                     : codigos.stream().map(c -> new BebidaService.Codigo(c.codigo().trim(), c.unidades())).toList();
-            return new DatosBebida(nombre.trim(), presentacion.trim(), tipoId, unidadId, unidadesPorBulto, stockMinimo, lista, proveedorId);
+            return new DatosBebida(nombre.trim(), presentacion.trim(), tipoId, unidadId, unidadesPorBulto, stockMinimo, lista);
         }
     }
 

@@ -15,7 +15,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
-import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
@@ -32,9 +31,6 @@ import ar.edu.utn.vastio.PruebaDeIntegracion;
 import ar.edu.utn.vastio.VastioApplication;
 import ar.edu.utn.vastio.usuarios.dominio.RolCodigo;
 import ar.edu.utn.vastio.usuarios.dominio.Usuario;
-import ar.edu.utn.vastio.bebida.dominio.Proveedor;
-import ar.edu.utn.vastio.bebida.infraestructura.ProveedorRepository;
-import jakarta.persistence.EntityManager;
 
 /**
  * Registrar ingreso de bebida (UI-29). Las bebidas se crean en cada test; el depósito madre es el de V2 (id 1).
@@ -54,12 +50,6 @@ class IngresoIT {
 
     @Autowired
     JdbcTemplate jdbc;
-
-    @Autowired
-    ProveedorRepository proveedores;
-
-    @Autowired
-    EntityManager entityManager;
 
     long ron;
     long gin;
@@ -138,72 +128,6 @@ class IngresoIT {
                 .andExpect(jsonPath("$[0].renglones[0].nombre").value("Gin de prueba"))
                 .andExpect(jsonPath("$[0].usuario.nombre").value("Prueba compras"))
                 .andExpect(jsonPath("$[1].numeroRemito").value("primero"));
-    }
-
-    @Test
-    void guardaElProveedorYLoConsultaAunqueDespuesSeDeDeBaja() throws Exception {
-        Proveedor proveedor = proveedores.saveAndFlush(new Proveedor("Distribuidora de prueba"));
-        String respuesta = registrar(RolCodigo.COMPRAS, """
-                {"proveedorId":%d,"renglones":[{"bebidaId":%d,"cantidad":6}]}""".formatted(proveedor.getId(), ron))
-                .andExpect(status().isCreated())
-                .andExpect(jsonPath("$.proveedor.id").value(proveedor.getId()))
-                .andExpect(jsonPath("$.proveedor.razonSocial").value("Distribuidora de prueba"))
-                .andReturn().getResponse().getContentAsString();
-        long ingresoId = ((Number) JsonPath.read(respuesta, "$.id")).longValue();
-        assertThat(jdbc.queryForObject("SELECT proveedor_id FROM ingreso WHERE ingreso_id = ?", Long.class, ingresoId))
-                .isEqualTo(proveedor.getId());
-        assertThat(saldo(1, ron)).isEqualByComparingTo("6");
-        assertThat(jdbc.queryForObject("SELECT tipo FROM movimiento_stock WHERE ingreso_id = ?", String.class, ingresoId)).isEqualTo("INGRESO");
-
-        pedir(post("/api/v1/proveedores/" + proveedor.getId() + "/baja"), RolCodigo.COMPRAS).andExpect(status().isOk());
-        entityManager.flush();
-        entityManager.clear();
-        pedir(get("/api/v1/ingresos"), RolCodigo.COMPRAS)
-                .andExpect(jsonPath("$[0].proveedor.razonSocial").value("Distribuidora de prueba"))
-                .andExpect(jsonPath("$[0].proveedor.activo").value(false));
-    }
-
-    @Test
-    void proveedorOmitidoONuloNoUsaElHabitualDeLaBebida() throws Exception {
-        Proveedor habitual = proveedores.saveAndFlush(new Proveedor("Proveedor habitual"));
-        jdbc.update("UPDATE bebida SET proveedor_habitual_id = ? WHERE bebida_id = ?", habitual.getId(), ron);
-        for (String campo : new String[]{"", "\"proveedorId\":null,"}) {
-            String respuesta = registrar(RolCodigo.COMPRAS, """
-                    {%s"renglones":[{"bebidaId":%d,"cantidad":6}]}""".formatted(campo, ron))
-                    .andExpect(status().isCreated())
-                    .andExpect(jsonPath("$.proveedor").doesNotExist())
-                    .andReturn().getResponse().getContentAsString();
-            long id = ((Number) JsonPath.read(respuesta, "$.id")).longValue();
-            assertThat(jdbc.queryForObject("SELECT proveedor_id FROM ingreso WHERE ingreso_id = ?", Long.class, id)).isNull();
-        }
-        entityManager.clear();
-        pedir(get("/api/v1/ingresos?limite=2"), RolCodigo.COMPRAS)
-                .andExpect(jsonPath("$[0].proveedor").doesNotExist())
-                .andExpect(jsonPath("$[1].proveedor").doesNotExist());
-    }
-
-    @Test
-    void rechazaProveedorInexistenteOInactivoSinRegistrarIngreso() throws Exception {
-        registrar(RolCodigo.COMPRAS, """
-                {"proveedorId":9223372036854775807,"renglones":[{"bebidaId":%d,"cantidad":6}]}""".formatted(ron))
-                .andExpect(status().isUnprocessableContent())
-                .andExpect(jsonPath("$.codigo").value("PROVEEDOR_INEXISTENTE"));
-        Proveedor proveedor = new Proveedor("Proveedor dado de baja");
-        proveedor.darDeBaja();
-        proveedores.saveAndFlush(proveedor);
-        registrar(RolCodigo.COMPRAS, """
-                {"proveedorId":%d,"renglones":[{"bebidaId":%d,"cantidad":6}]}""".formatted(proveedor.getId(), ron))
-                .andExpect(status().isUnprocessableContent())
-                .andExpect(jsonPath("$.codigo").value("PROVEEDOR_INACTIVO"));
-        assertThat(jdbc.queryForObject("SELECT count(*) FROM movimiento_stock WHERE bebida_id = ?", Integer.class, ron)).isZero();
-    }
-
-    @ParameterizedTest
-    @ValueSource(strings = {"0", "-1", "\"incorrecto\"", "9223372036854775808", "1.5"})
-    void rechazaIdentificadoresDeProveedorInvalidos(String proveedorId) throws Exception {
-        registrar(RolCodigo.COMPRAS, """
-                {"proveedorId":%s,"renglones":[{"bebidaId":%d,"cantidad":6}]}""".formatted(proveedorId, ron))
-                .andExpect(status().isBadRequest());
     }
 
     // ---------- validaciones ----------

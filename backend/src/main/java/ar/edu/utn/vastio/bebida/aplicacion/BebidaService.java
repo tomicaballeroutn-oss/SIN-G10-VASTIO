@@ -11,12 +11,10 @@ import org.springframework.transaction.annotation.Transactional;
 
 import ar.edu.utn.vastio.bebida.dominio.Bebida;
 import ar.edu.utn.vastio.bebida.dominio.CodigoBarra;
-import ar.edu.utn.vastio.bebida.dominio.Proveedor;
 import ar.edu.utn.vastio.bebida.dominio.TipoBebida;
 import ar.edu.utn.vastio.bebida.dominio.UnidadManipulacion;
 import ar.edu.utn.vastio.bebida.infraestructura.BebidaRepository;
 import ar.edu.utn.vastio.bebida.infraestructura.CodigoBarraRepository;
-import ar.edu.utn.vastio.bebida.infraestructura.ProveedorRepository;
 import ar.edu.utn.vastio.bebida.infraestructura.TipoBebidaRepository;
 import ar.edu.utn.vastio.bebida.infraestructura.UnidadManipulacionRepository;
 import ar.edu.utn.vastio.comun.errores.ProblemaException;
@@ -37,24 +35,22 @@ public class BebidaService {
     private final CodigoBarraRepository codigos;
     private final TipoBebidaRepository tipos;
     private final UnidadManipulacionRepository unidades;
-    private final ProveedorRepository proveedores;
 
     public BebidaService(BebidaRepository bebidas, CodigoBarraRepository codigos, TipoBebidaRepository tipos,
-            UnidadManipulacionRepository unidades, ProveedorRepository proveedores) {
+            UnidadManipulacionRepository unidades) {
         this.bebidas = bebidas;
         this.codigos = codigos;
         this.tipos = tipos;
         this.unidades = unidades;
-        this.proveedores = proveedores;
     }
 
     /** Código de barras y botellas que representa una lectura. */
     public record Codigo(String codigo, short unidades) {
     }
 
-    /** Datos editables de una bebida. Las cantidades van en botellas. Sin proveedor habitual, {@code proveedorId} null. */
+    /** Datos editables de una bebida. Las cantidades van en botellas. */
     public record DatosBebida(String nombre, String presentacion, short tipoId, short unidadId, short unidadesPorBulto,
-            BigDecimal stockMinimo, List<Codigo> codigos, Long proveedorId) {
+            BigDecimal stockMinimo, List<Codigo> codigos) {
     }
 
     /** Ubicación donde la bebida tiene saldo distinto de cero, en botellas. */
@@ -102,7 +98,6 @@ public class BebidaService {
         Bebida bebida = new Bebida(datos.nombre(), datos.presentacion(), tipo(datos.tipoId()), unidad(datos.unidadId()),
                 datos.unidadesPorBulto(), datos.stockMinimo());
         bebida.fijarCodigos(nuevos);
-        bebida.asignarProveedor(proveedor(datos.proveedorId(), null));
         return bebidas.save(bebida);
     }
 
@@ -117,7 +112,6 @@ public class BebidaService {
         bebida.actualizar(datos.nombre(), datos.presentacion(), tipo(datos.tipoId()), unidad(datos.unidadId()),
                 datos.unidadesPorBulto(), datos.stockMinimo());
         bebida.fijarCodigos(nuevos);
-        bebida.asignarProveedor(proveedor(datos.proveedorId(), bebida.getProveedorHabitual()));
         return bebida;
     }
 
@@ -164,23 +158,6 @@ public class BebidaService {
             }
         }
         return resultado;
-    }
-
-    /** Un proveedor activo; uno dado de baja solo si ya era el habitual de la bebida. */
-    private Proveedor proveedor(Long id, Proveedor actual) {
-        if (id == null) {
-            return null;
-        }
-        if (actual != null && actual.getId().equals(id)) {
-            return actual;
-        }
-        Proveedor proveedor = proveedores.findById(id).orElseThrow(() -> ProblemaException.reglaDeNegocio(
-                "PROVEEDOR_INEXISTENTE", "Elegí un proveedor de la lista."));
-        if (!proveedor.isActivo()) {
-            throw ProblemaException.reglaDeNegocio("PROVEEDOR_INACTIVO",
-                    "%s está dado de baja. Elegí un proveedor activo.".formatted(proveedor.getRazonSocial()));
-        }
-        return proveedor;
     }
 
     private TipoBebida tipo(short id) {

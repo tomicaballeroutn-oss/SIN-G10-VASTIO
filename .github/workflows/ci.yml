@@ -30,8 +30,20 @@ jobs:
           distribution: temurin
           java-version: '25'
           cache: maven
-      # Unitarios y de integración (Testcontainers usa el Docker del runner).
-      - run: ./mvnw -B verify
+      - name: Python para verificar el resguardo V9
+        id: python
+        uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7
+        with:
+          python-version: '3.12'
+      # Unitarios e integraciones con PostgreSQL descartable de Testcontainers.
+      # El ensayo real de dump/restauración no debe omitirse en CI.
+      - name: Verificar backend y resguardo
+        env:
+          VASTIO_TEST_PYTHON: ${{ steps.python.outputs.python-path }}
+        run: |
+          test -x "$VASTIO_TEST_PYTHON"
+          "$VASTIO_TEST_PYTHON" --version
+          ./mvnw -B verify
       - name: Reportes de tests
         if: failure()
         uses: actions/upload-artifact@v7

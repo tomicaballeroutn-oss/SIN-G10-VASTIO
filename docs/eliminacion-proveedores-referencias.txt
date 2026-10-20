@@ -1,0 +1,27 @@
+Referencias de la auditoría de proveedores (resumen histórico)
+
+Base auditada: 02c35649a156c2eea073106a9b9f8a2d28c53860.
+La auditoría de dependencias y sus decisiones están en eliminacion-proveedores-auditoria.md.
+La lista original de 625 coincidencias es recuperable sin duplicarla en la documentación vigente:
+  git show 18dd3d8:docs/eliminacion-proveedores-referencias.txt
+Para repetir la búsqueda sobre la base auditada (puede terminar con salida 1 si no hay coincidencias):
+  git grep -n -i -E 'proveedor|supplier|cuit' 02c35649a156c2eea073106a9b9f8a2d28c53860 -- .
+
+Dependencias encontradas y tratadas:
+- Backend: ProveedorController/Dto/Service/Repository/entidad retirados; Bebida e Ingreso desvinculados.
+- Frontend: sección, cliente, tipos, pestaña y selector retirados; inventario inicial conservado.
+- PostgreSQL: proveedor y las FK/columnas de bebida e ingreso retiradas exclusivamente en V9.
+- Migraciones V1-V8 intactas; referencias históricas necesarias para instalaciones existentes.
+- Tests: reemplazo del ABM por regresiones de ausencia y migración/resguardo; circuitos vigentes preservados.
+- Documentación: decisión y auditoría históricas conservadas; DER_3 regenerado desde el esquema V9.
+- DNI/CUIT de clientes y SesionProvider de React son ajenos a proveedores de bebidas.
+
+Pendientes externos señalados por Albert (revisión del PR #34, 20/10/2026):
+- Definición del Producto: revisar B6-01 y UI-28; retirar gestión/selector de proveedores,
+  conservar carga de inventario e ingresos y sus criterios vigentes.
+- Plan: retirar proveedores del alcance y tareas vigentes; conservar la decisión del 19/10 y su trazabilidad.
+- Seguimiento: actualizar historias/tareas/estado y vínculos al PR #34; distinguir trabajo retirado de entregado.
+- Revisar enlaces al DER del módulo B para que apunten a la versión V9.
+No se inspeccionaron ni modificaron documentos de Google Drive en esta corrección.
+Los nombres y secciones anteriores proceden de la revisión de Albert; ubicación/IDs y texto exacto
+quedan por verificar en Drive antes de una edición autorizada. No se afirma que estén actualizados.

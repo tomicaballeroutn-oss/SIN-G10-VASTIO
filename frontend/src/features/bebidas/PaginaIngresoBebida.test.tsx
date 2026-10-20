@@ -4,7 +4,6 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import type { Bebida } from '../../api/bebidas';
 import { _reiniciarCliente } from '../../api/cliente';
 import type { Ingreso } from '../../api/ingresos';
-import type { Proveedor } from '../../api/proveedores';
 import type { Ubicacion } from '../../api/ubicaciones';
 import { backendFalso, json, montar, pedidos, problema, sesionDe, type Pedido } from '../../test/backendFalso';
 
@@ -22,18 +21,14 @@ vi.mock('@zxing/browser', () => ({
 const CAJA = { id: 1, nombre: 'Caja', esBotella: false };
 const bebida = (id: number, nombre: string, extra: Partial<Bebida> = {}): Bebida => ({
   id, nombre, presentacion: '750 ml', tipo: { id: 3, nombre: 'Destilado' }, unidad: CAJA, unidadesPorBulto: 6, stockMinimo: null,
-  codigos: [], proveedorHabitual: null, activo: true, fechaBaja: null, ...extra,
+  codigos: [], activo: true, fechaBaja: null, ...extra,
 });
 const BEBIDAS: Bebida[] = [
-  bebida(1, 'Fernet Branca', { codigos: [{ codigo: '17790000000016', unidades: 6 }], proveedorHabitual: { id: 90, razonSocial: 'Proveedor habitual', activo: true } }),
+  bebida(1, 'Fernet Branca', { codigos: [{ codigo: '17790000000016', unidades: 6 }] }),
   bebida(2, 'Cerveza Quilmes', { presentacion: '1 l', unidadesPorBulto: 12 }),
   bebida(3, 'Gin discontinuado', { activo: false, codigos: [{ codigo: '7790000000064', unidades: 1 }] }),
 ];
 const DEPOSITO: Ubicacion = { id: 1, nombre: 'Depósito Avril', tipo: 'DEPOSITO', salon: null, abastecimiento: null, permiteRetiroDirecto: false, activo: true };
-const PROVEEDORES: Proveedor[] = [
-  { id: 80, razonSocial: 'Distribuidora del Centro', cuit: null, telefono: null, email: null, activo: true, bebidas: [] },
-  { id: 81, razonSocial: 'Distribuidora dada de baja', cuit: null, telefono: null, email: null, activo: false, bebidas: [] },
-];
 const ANTERIOR: Ingreso = {
   id: 7, fechaIngreso: '2026-10-01', numeroRemito: 'R-0001', destino: { id: 1, nombre: 'Depósito Avril' },
   renglones: [{ bebidaId: 2, nombre: 'Cerveza Quilmes', presentacion: '1 l', unidad: 'Caja', unidadesPorBulto: 12, cantidad: 48 }],
@@ -44,14 +39,12 @@ function backend(conDeposito = true) {
   return ({ metodo, ruta, cuerpo }: Pedido) => {
     if (metodo === 'GET' && ruta === '/bebidas') return json(200, BEBIDAS);
     if (metodo === 'GET' && ruta === '/ubicaciones') return json(200, conDeposito ? [DEPOSITO] : []);
-    if (metodo === 'GET' && ruta === '/proveedores') return json(200, PROVEEDORES);
     if (metodo === 'GET' && ruta === '/ingresos?limite=10') return json(200, [ANTERIOR]);
     if (metodo === 'POST' && ruta === '/ingresos') {
-      const datos = cuerpo as { numeroRemito: string; proveedorId: number | null; renglones: { bebidaId: number; cantidad: number }[] };
+      const datos = cuerpo as { numeroRemito: string; renglones: { bebidaId: number; cantidad: number }[] };
       if (datos.numeroRemito === 'falla') return problema(422, 'BEBIDA_DADA_DE_BAJA', 'Fernet Branca 750 ml está dada de baja. Sacala del ingreso o reactivala en el catálogo.');
       return json(201, {
         ...ANTERIOR, id: 8, numeroRemito: datos.numeroRemito, fechaRegistro: '2026-10-07T09:00:00-03:00', usuario: { id: 1, nombre: 'Gabriela Paz' },
-        proveedor: PROVEEDORES.find((p) => p.id === datos.proveedorId) ?? null,
         renglones: datos.renglones.map((r) => ({ ...ANTERIOR.renglones[0], bebidaId: r.bebidaId, nombre: BEBIDAS.find((b) => b.id === r.bebidaId)!.nombre, cantidad: r.cantidad })),
       });
     }
@@ -102,8 +95,10 @@ describe('UI-29 · ingreso de mercadería', () => {
     await persona.click(within(revision).getByRole('button', { name: 'Registrar ingreso' }));
 
     expect(await screen.findByText('Ingreso registrado: 1 bebida al Depósito Avril.')).toBeInTheDocument();
+    expect(screen.queryByLabelText(/Proveedor/)).not.toBeInTheDocument();
+    expect(pedidos(fetchMock).some((p) => p.ruta.includes('proveedores'))).toBe(false);
     expect(pedidos(fetchMock).find((p) => p.metodo === 'POST')?.cuerpo).toEqual({
-      fecha: '2026-10-06', numeroRemito: 'R-0002', proveedorId: null, renglones: [{ bebidaId: 1, cantidad: 13 }],
+      fecha: '2026-10-06', numeroRemito: 'R-0002', renglones: [{ bebidaId: 1, cantidad: 13 }],
     });
     expect(screen.queryByRole('group', { name: 'Cantidad de Fernet Branca' })).not.toBeInTheDocument();
     const ultimos = screen.getByText('Últimos ingresos').closest('.v-card') as HTMLElement;
@@ -169,75 +164,6 @@ describe('UI-29 · ingreso de mercadería', () => {
     expect(await screen.findByText('Últimos ingresos')).toBeInTheDocument();
     expect(screen.getByText('4 cajas')).toBeInTheDocument();
     expect(screen.getByText('Nicolás Herrera')).toBeInTheDocument();
-  });
-
-  it('carga proveedores activos, envía el seleccionado y lo muestra en recientes', async () => {
-    const fetchMock = backendFalso(sesionDe(['COMPRAS']), backend());
-    const persona = userEvent.setup();
-    montar('/ingreso');
-    await screen.findByRole('option', { name: 'Distribuidora del Centro' });
-    const selector = screen.getByRole('combobox', { name: /Proveedor/ });
-    expect(selector).toHaveValue('');
-    expect(within(selector).queryByRole('option', { name: 'Distribuidora dada de baja' })).not.toBeInTheDocument();
-    await persona.selectOptions(selector, '80');
-    await agregarPorNombre(persona, 'fer', 'Fernet Branca');
-    await persona.click(within(screen.getByRole('group', { name: 'Cantidad de Fernet Branca' })).getAllByRole('button', { name: 'Sumar 1' })[0]);
-    await persona.click(screen.getByRole('button', { name: 'Revisar ingreso' }));
-    const revision = screen.getByRole('dialog', { name: 'Revisá el ingreso' });
-    expect(within(revision).getByText('Proveedor: Distribuidora del Centro')).toBeInTheDocument();
-    await persona.click(within(revision).getByRole('button', { name: 'Registrar ingreso' }));
-    expect(await screen.findByText('Ingreso registrado: 1 bebida al Depósito Avril.')).toBeInTheDocument();
-    expect(pedidos(fetchMock).find((p) => p.metodo === 'POST')?.cuerpo).toMatchObject({ proveedorId: 80, numeroRemito: '' });
-    expect(screen.getByText('Proveedor: Distribuidora del Centro')).toBeInTheDocument();
-    expect(screen.getByRole('combobox', { name: /Proveedor/ })).toHaveValue('');
-  });
-
-  it('muestra la carga de proveedores sin bloquear la carga de bebidas', async () => {
-    let resolver!: (respuesta: Response) => void;
-    const respuesta = new Promise<Response>((resolve) => { resolver = resolve; });
-    backendFalso(sesionDe(['COMPRAS']), (p) => p.ruta === '/proveedores' ? respuesta : backend()(p));
-    montar('/ingreso');
-    expect(await screen.findByText('Cargando proveedores…')).toBeInTheDocument();
-    expect(screen.getByRole('combobox', { name: /Proveedor/ })).toBeDisabled();
-    expect(screen.getByLabelText('Agregar bebida')).toBeEnabled();
-    await act(async () => resolver(json(200, PROVEEDORES)));
-    await screen.findByRole('option', { name: 'Distribuidora del Centro' });
-    expect(screen.getByRole('combobox', { name: /Proveedor/ })).toBeEnabled();
-  });
-
-  it('permite registrar sin proveedor si falla su carga', async () => {
-    const fetchMock = backendFalso(sesionDe(['COMPRAS']), (p) => p.ruta === '/proveedores'
-      ? problema(503, 'NO_DISPONIBLE', 'Servicio temporalmente no disponible.') : backend()(p));
-    const persona = userEvent.setup();
-    montar('/ingreso');
-    await screen.findByText('No pudimos cargar los proveedores');
-    expect(screen.getByRole('combobox', { name: /Proveedor/ })).toBeDisabled();
-    await agregarPorNombre(persona, 'fer', 'Fernet Branca');
-    await persona.click(within(screen.getByRole('group', { name: 'Cantidad de Fernet Branca' })).getAllByRole('button', { name: 'Sumar 1' })[0]);
-    await persona.click(screen.getByRole('button', { name: 'Revisar ingreso' }));
-    await persona.click(within(screen.getByRole('dialog', { name: 'Revisá el ingreso' })).getByRole('button', { name: 'Registrar ingreso' }));
-    expect(await screen.findByText('Ingreso registrado: 1 bebida al Depósito Avril.')).toBeInTheDocument();
-    expect(pedidos(fetchMock).find((p) => p.metodo === 'POST')?.cuerpo).toMatchObject({ proveedorId: null });
-  });
-
-  it('permite reintentar la carga de proveedores', async () => {
-    let intentos = 0;
-    backendFalso(sesionDe(['COMPRAS']), (p) => p.ruta === '/proveedores' && ++intentos === 1
-      ? problema(503, 'NO_DISPONIBLE', 'Servicio temporalmente no disponible.') : backend()(p));
-    const persona = userEvent.setup();
-    montar('/ingreso');
-    await persona.click(await screen.findByRole('button', { name: 'Reintentar' }));
-    await screen.findByRole('option', { name: 'Distribuidora del Centro' });
-    expect(screen.queryByText('No pudimos cargar los proveedores')).not.toBeInTheDocument();
-    expect(screen.getByRole('combobox', { name: /Proveedor/ })).toBeEnabled();
-  });
-
-  it('muestra el proveedor histórico aunque esté dado de baja y admite históricos sin proveedor', async () => {
-    backendFalso(sesionDe(['COMPRAS']), (p) => p.ruta === '/ingresos?limite=10'
-      ? json(200, [{ ...ANTERIOR, proveedor: PROVEEDORES[1] }, { ...ANTERIOR, id: 9, proveedor: null }]) : backend()(p));
-    montar('/ingreso');
-    expect(await screen.findByText('Proveedor: Distribuidora dada de baja (dado de baja)')).toBeInTheDocument();
-    expect(screen.getAllByText('4 cajas')).toHaveLength(2);
   });
 
   it('sin depósito madre lo dice y no deja cargar', async () => {

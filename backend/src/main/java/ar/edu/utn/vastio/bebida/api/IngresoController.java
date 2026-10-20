@@ -48,8 +48,8 @@ public class IngresoController {
     @ResponseStatus(HttpStatus.CREATED)
     @Operation(summary = "Registrar un ingreso", description = """
             Entra al depósito madre: un movimiento INGRESO por bebida, que suma al saldo. Fecha no futura (sin fecha, hoy);
-            bebidas activas, sin repetir, en botellas enteras. Proveedor y remito opcionales; si se indica un proveedor,
-            debe existir y estar activo. No se edita ni se anula: un error se corrige con un recuento.""")
+            bebidas activas, sin repetir, en botellas enteras. Remito opcional.
+            No se edita ni se anula: un error se corrige con un recuento.""")
     public IngresoResponse registrar(@Valid @RequestBody IngresoRequest pedido, @AuthenticationPrincipal Jwt jwt) {
         return respuesta(List.of(ingresos.registrar(pedido.datos(), UsuarioActual.de(jwt).id()))).getFirst();
     }

@@ -20,6 +20,8 @@ frontend/dev-dist/
 !.env.prod.example
 # Respaldos del ambiente de prueba
 respaldos/
+# Bytecode de las herramientas de resguardo
+scripts/__pycache__/
 # IDE y sistema
 .idea/
 .vscode/

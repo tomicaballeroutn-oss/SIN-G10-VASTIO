@@ -258,7 +258,7 @@ class RecuentoConcurrenciaIT {
 
     private long nuevaBebida() {
         long id = bebidas.crear(new DatosBebida("Concurrencia " + UUID.randomUUID(), "750 ml", (short) 3, (short) 1,
-                (short) 6, null, List.of(), null)).getId();
+                (short) 6, null, List.of())).getId();
         bebidasCreadas.add(id);
         return id;
     }

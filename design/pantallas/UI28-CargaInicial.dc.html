@@ -36,14 +36,13 @@ h4{font:600 16px/24px 'Poppins',sans-serif;margin:0}
 <div style="padding:32px 40px;display:flex;flex-direction:column;gap:20px;height:100%;box-sizing:border-box;overflow:auto;">
   <div style="display:flex;align-items:center;gap:12px;">
     <h1>Carga inicial de inventario</h1>
-    <span class="overline" style="color:#153e6c;">Paso 1 de 2</span>
+    <span class="overline" style="color:#153e6c;">Carga por ubicación</span>
   </div>
   <x-import component-from-global-scope="Vastio.Select" label="Ubicación" default-value="deposito-avril" options="{{ubicacionOptions}}" style="max-width:320px;"></x-import>
   <x-import component-from-global-scope="Vastio.Table" columns="{{cols}}" rows="{{rows}}"></x-import>
-  <div class="body-sm" style="color:#404b5a;">El avance se guarda por ubicación, así podés retomarlo después. Paso 2: datos maestros de proveedores (nombre, contacto, bebidas que provee).</div>
+  <div class="body-sm" style="color:#404b5a;">El avance se guarda por ubicación, así podés retomarlo después.</div>
   <div style="display:flex;gap:10px;">
-    <x-import component-from-global-scope="Vastio.Button" variant="outline" tone="brand">Guardar y continuar después</x-import>
-    <x-import component-from-global-scope="Vastio.Button" variant="solid" tone="brand">Siguiente: proveedores</x-import>
+    <x-import component-from-global-scope="Vastio.Button" variant="solid" tone="brand">Guardar carga inicial</x-import>
   </div>
 </div>
 

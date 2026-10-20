@@ -8,9 +8,9 @@ import { backendFalso, json, montar, pedidos, problema, sesionDe, type Pedido } 
 
 const CATALOGO: Bebida[] = [
   { id: 1, nombre: 'Fernet', presentacion: '750 ml', tipo: { id: 3, nombre: 'Destilado' }, unidad: { id: 1, nombre: 'Caja', esBotella: false },
-    unidadesPorBulto: 6, stockMinimo: null, codigos: [{ codigo: '7790000000001', unidades: 1 }], proveedorHabitual: null, activo: true, fechaBaja: null },
+    unidadesPorBulto: 6, stockMinimo: null, codigos: [{ codigo: '7790000000001', unidades: 1 }], activo: true, fechaBaja: null },
   { id: 2, nombre: 'Gin inactivo', presentacion: '750 ml', tipo: { id: 3, nombre: 'Destilado' }, unidad: { id: 1, nombre: 'Caja', esBotella: false },
-    unidadesPorBulto: 6, stockMinimo: null, codigos: [], proveedorHabitual: null, activo: false, fechaBaja: '2026-10-01' },
+    unidadesPorBulto: 6, stockMinimo: null, codigos: [], activo: false, fechaBaja: '2026-10-01' },
 ];
 
 function renglon(b: Bebida, cantidad: number): RenglonStock {

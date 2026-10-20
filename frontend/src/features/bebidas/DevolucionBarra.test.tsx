@@ -131,6 +131,34 @@ describe('UI-32 · devolución de bebida', () => {
     expect(screen.getByLabelText('Agregar bebida')).toBeInTheDocument();
   });
 
+  it('si el backend rechaza los ceros por saldo negativo conserva el formulario sin anunciar una devolución', async () => {
+    const pantalla = { ...ABIERTA, origen: TRANSICION, enTransicion: [FERNET] };
+    const mensaje = 'Fernet Branca 750 ml: lo que vuelve y lo que queda suman más de lo que hay en la barra. Revisá el conteo.';
+    const fetchMock = backendFalso(sesionDe(['BARRA']), (pedido) => {
+      if (pedido.metodo === 'POST' && pedido.ruta.endsWith('/devolucion')) {
+        return problema(422, 'SUPERA_LO_DE_LA_BARRA', mensaje);
+      }
+      return backend(pantalla)(pedido);
+    });
+    const persona = userEvent.setup();
+    montar('/barra');
+    await persona.click(await screen.findByRole('button', { name: 'Registrar devolución' }));
+    await cargar(persona, 'Fernet Branca 750 ml en la transición', 'Queda en la transición', 1);
+    await persona.click(screen.getByRole('button', { name: 'Revisar devolución' }));
+    await persona.click(within(screen.getByRole('dialog')).getByRole('button', { name: 'Registrar devolución' }));
+
+    expect(await screen.findByText(mensaje)).toBeVisible();
+    expect(screen.queryByText('Devolución registrada')).not.toBeInTheDocument();
+    expect(pedidos(fetchMock).filter((p) => p.metodo === 'POST').map((p) => p.cuerpo)).toEqual([{
+      renglones: [{ bebidaId: 1, devuelto: 0, remanente: 0 }, { bebidaId: 3, devuelto: 0, remanente: 0 }],
+      transicion: [{ bebidaId: 1, cantidad: 6 }],
+    }]);
+    await persona.click(screen.getByRole('button', { name: 'Volver a editar' }));
+    await persona.click(screen.getByRole('button', { name: 'Revisar devolución' }));
+    expect(within(screen.getByRole('dialog')).getByText('vuelve 1 caja')).toBeVisible();
+    expect(pedidos(fetchMock).filter((p) => p.metodo === 'POST')).toHaveLength(1);
+  }, LARGO);
+
   it('con el evento realizado va directo a la devolución', async () => {
     backendFalso(sesionDe(['BARRA']), backend({ ...ABIERTA, evento: { ...EVENTO, estado: 'REALIZADO' } }));
     montar('/barra');

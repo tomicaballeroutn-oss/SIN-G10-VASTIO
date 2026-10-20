@@ -253,7 +253,8 @@ public class EntregaService {
             BigDecimal remanente = enBotellas(r.remanente());
             BigDecimal entregado = saldos.getOrDefault(bebida.getId(), BigDecimal.ZERO).setScale(2, RoundingMode.UNNECESSARY);
             BigDecimal suma = devuelto.add(remanente);
-            if (suma.signum() > 0 && suma.compareTo(entregado) > 0) {
+            // Cero también supera un saldo negativo: omitir la bebida no puede producir consumo negativo.
+            if (suma.compareTo(entregado) > 0) {
                 throw ProblemaException.reglaDeNegocio("SUPERA_LO_DE_LA_BARRA",
                         "%s: lo que vuelve y lo que queda suman más de lo que hay en la barra. Revisá el conteo."
                                 .formatted(bebida.descripcion()));

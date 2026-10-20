@@ -1,0 +1,3 @@
+.preparacion { display: grid; gap: var(--space-4); min-width: 0; }
+.preparacion .ingreso-bebida__lista > li { gap: var(--space-3); flex-wrap: wrap; }
+.preparacion .ingreso-bebida__lista > li > span { overflow-wrap: anywhere; }

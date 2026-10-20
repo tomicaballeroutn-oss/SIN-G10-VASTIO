@@ -2,13 +2,21 @@ package ar.edu.utn.vastio.bebida.infraestructura;
 
 import java.math.BigDecimal;
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
 
 import ar.edu.utn.vastio.bebida.dominio.Bebida;
 
 public interface BebidaRepository extends JpaRepository<Bebida, Long> {
+
+    /** Bloquea el artículo y lee su actividad vigente sin refrescar el grafo cíclico de códigos. */
+    @Transactional(propagation = Propagation.MANDATORY)
+    @Query(nativeQuery = true, value = "SELECT activo FROM bebida WHERE bebida_id = :id FOR SHARE")
+    Optional<Boolean> activaBloqueada(long id);
 
     @Query("SELECT DISTINCT b FROM Bebida b LEFT JOIN FETCH b.codigos LEFT JOIN FETCH b.proveedorHabitual")
     List<Bebida> findAllConCodigos();

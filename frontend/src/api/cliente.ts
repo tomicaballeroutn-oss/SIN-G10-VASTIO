@@ -48,6 +48,7 @@ function avisar(evento: EventoSesion) {
 }
 
 export interface Opciones {
+  cabeceras?: Record<string, string>;
   metodo?: 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE';
   cuerpo?: unknown;
   /** false en el reintento, para no entrar en bucle. */
@@ -83,7 +84,7 @@ export function nombreDeArchivo(disposicion: string | null): string | null {
 async function pedir(ruta: string, opciones: Opciones, aceptar: string): Promise<Response> {
   const { metodo = 'GET', cuerpo, renovarSiVence = true } = opciones;
   const formulario = cuerpo instanceof FormData;
-  const headers: Record<string, string> = { Accept: aceptar };
+  const headers: Record<string, string> = { ...opciones.cabeceras, Accept: aceptar };
   if (cuerpo !== undefined && !formulario) headers['Content-Type'] = 'application/json';
   if (tokenAcceso) headers.Authorization = `Bearer ${tokenAcceso}`;
 

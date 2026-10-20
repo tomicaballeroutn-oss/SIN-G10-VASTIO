@@ -9,6 +9,9 @@ public final class Permisos {
     /** B4-05: consulta histórica, independiente de la operación de barra y del cierre. */
     public static final String CONSULTAR_CONSUMO = "hasAnyRole('DIRECCION', 'COORDINACION', 'ADMINISTRACION', 'COMPRAS')";
 
+    /** B5-04: preparación manual; no otorga operación de barra. */
+    public static final String REGISTRAR_PREPARACION = "hasAnyRole('DIRECCION', 'COORDINACION', 'ADMINISTRACION', 'COMPRAS')";
+
     /** Administrar usuarios. */
     public static final String ACCESO_TOTAL = "hasAnyRole('DIRECCION', 'COORDINACION')";
 

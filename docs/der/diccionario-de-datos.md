@@ -547,17 +547,22 @@ Entrega abierta de un evento hacia una barra. Agrupa la salida inicial y los ret
 
 #### MOVIMIENTO_STOCK
 
+V8 agrega `PREPARACION`: transferencia madre → transición, con `evento_id` y `preparacion_id` obligatorios,
+cantidad entera positiva, ambos extremos distintos y sin `entrega_id` ni `ingreso_id`. No es consumo.
+`preparacion_id` (bigint, FK nullable → preparacion_evento) solo se utiliza para ese tipo;
+un índice único por (`preparacion_id`, `bebida_id`) impide repetir una bebida en la operación.
+
 Asiento inalterable de mercadería (RNF-SEG-03). Solo inserción: las correcciones son nuevos asientos de ajuste.
 
 | Campo | Tipo | Clave | Nulo | Descripción / valores posibles |
 |---|---|---|---|---|
 | `movimiento_id` | bigint | PK | NO | Identificador. |
-| `tipo` | varchar(18) |  | NO | INGRESO · INVENTARIO_INICIAL · SALIDA_BARRA · RETIRO_ADICIONAL · DEVOLUCION · REMANENTE · CONSUMO · AJUSTE · MERMA. REMANENTE tiene origen y destino la barra (constancia, no cambia el saldo). CONSUMO (V7) sale de la barra sin destino con la devolución: asiento de cuentas que deja el saldo de la barra en el remanente. |
+| `tipo` | varchar(18) |  | NO | INGRESO · INVENTARIO_INICIAL · SALIDA_BARRA · RETIRO_ADICIONAL · DEVOLUCION · REMANENTE · CONSUMO · AJUSTE · MERMA · PREPARACION (V8). REMANENTE tiene origen y destino la barra (constancia, no cambia el saldo). CONSUMO (V7) sale de la barra sin destino con la devolución: asiento de cuentas que deja el saldo de la barra en el remanente. |
 | `bebida_id` | bigint | FK | NO | → bebida. |
 | `cantidad` | numeric(10,2) |  | NO | En botellas. > 0; el sentido lo dan origen y destino. |
 | `ubicacion_origen_id` | smallint | FK | SÍ | → ubicacion. Null en ingresos. |
 | `ubicacion_destino_id` | smallint | FK | SÍ | → ubicacion. Null en mermas. |
-| `evento_id` | bigint | FK | SÍ | → evento. Obligatorio en salidas, retiros, devoluciones, remanentes y consumos. |
+| `evento_id` | bigint | FK | SÍ | → evento. Obligatorio en salidas, retiros, devoluciones, remanentes, consumos y preparaciones. |
 | `entrega_id` | bigint | FK | SÍ | → entrega. |
 | `ingreso_id` | bigint | FK | SÍ | → ingreso. |
 | `movimiento_corregido_id` | bigint | FK | SÍ | → movimiento_stock. Asiento que corrige este ajuste. |
@@ -566,7 +571,27 @@ Asiento inalterable de mercadería (RNF-SEG-03). Solo inserción: las correccion
 | `usuario_id` | bigint | FK | NO | → usuario. Responsable del movimiento. |
 | `fecha_hora` | timestamptz |  | NO | Default now(). |
 
-*Restricciones:* CHECK (ubicacion_origen_id IS NOT NULL OR ubicacion_destino_id IS NOT NULL). Sin UPDATE ni DELETE: se revocan esos permisos al usuario de la aplicación sobre esta tabla.
+*Restricciones:* CHECK (ubicacion_origen_id IS NOT NULL OR ubicacion_destino_id IS NOT NULL). Sin UPDATE ni DELETE: el trigger `fn_solo_insercion` los rechaza, también para el usuario dueño de la tabla.
+
+#### PREPARACION_EVENTO (V8)
+
+Cabecera inmutable de un traspaso manual B5-04, independiente de `orden_preparacion` y de `entrega`.
+No hay unicidad por evento: admite varias operaciones.
+
+| Campo | Tipo | Clave | Nulo | Descripción |
+|---|---|---|---|---|
+| `preparacion_id` | bigint identity | PK | NO | Identificador de la operación. |
+| `evento_id` | bigint | FK | NO | → evento. |
+| `barra_id` | smallint | FK | NO | Barra cuyo abastecimiento se preparó. |
+| `origen_id` | smallint | FK | NO | Depósito madre utilizado. |
+| `destino_id` | smallint | FK | NO | Transición utilizada; distinta del origen. |
+| `usuario_id` | bigint | FK | NO | Responsable. |
+| `fecha_hora` | timestamptz | | NO | Mismo momento en todos sus movimientos. |
+| `clave` | varchar(100) | UQ con evento | NO | Idempotencia persistida. |
+| `huella` | varchar(64) | | NO | SHA-256 de barra, destino y renglones normalizados. |
+
+Trigger `fn_solo_insercion`: rechaza UPDATE/DELETE. Índice por evento e identificador para su historial.
+Las cantidades permanecen en `movimiento_stock`; no se duplican en una tabla de detalle.
 
 #### CONSUMO_EVENTO
 

@@ -14,6 +14,9 @@ import ar.edu.utn.vastio.bebida.dominio.MovimientoStock;
 
 public interface MovimientoStockRepository extends JpaRepository<MovimientoStock, Long> {
 
+    @Query("SELECT m FROM MovimientoStock m JOIN FETCH m.bebida b JOIN FETCH b.unidad WHERE m.preparacionId = :id ORDER BY m.id")
+    List<MovimientoStock> dePreparacion(long id);
+
     @Query("SELECT m FROM MovimientoStock m JOIN FETCH m.bebida b JOIN FETCH b.unidad WHERE m.ingresoId IN :ingresos ORDER BY m.id")
     List<MovimientoStock> deIngresos(Collection<Long> ingresos);
 

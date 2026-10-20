@@ -1,0 +1,73 @@
+# Archivos de la eliminación de proveedores
+
+Inventario del cambio contra `origin/main` (`02c3564`), base confirmada tras `git fetch origin` para la publicación autorizada. Incluye los anexos de Fases 1–2 y esta lista.
+
+| Estado | Archivo |
+| --- | --- |
+| Modificado | `.github/workflows/ci.yml` |
+| Modificado | `.gitignore` |
+| Modificado | `README.md` |
+| Modificado | `backend/src/main/java/ar/edu/utn/vastio/bebida/api/BebidaDto.java` |
+| Modificado | `backend/src/main/java/ar/edu/utn/vastio/bebida/api/EntregaDto.java` |
+| Modificado | `backend/src/main/java/ar/edu/utn/vastio/bebida/api/IngresoController.java` |
+| Modificado | `backend/src/main/java/ar/edu/utn/vastio/bebida/api/IngresoDto.java` |
+| Eliminado | `backend/src/main/java/ar/edu/utn/vastio/bebida/api/ProveedorController.java` |
+| Eliminado | `backend/src/main/java/ar/edu/utn/vastio/bebida/api/ProveedorDto.java` |
+| Modificado | `backend/src/main/java/ar/edu/utn/vastio/bebida/aplicacion/BebidaService.java` |
+| Modificado | `backend/src/main/java/ar/edu/utn/vastio/bebida/aplicacion/IngresoService.java` |
+| Eliminado | `backend/src/main/java/ar/edu/utn/vastio/bebida/aplicacion/ProveedorService.java` |
+| Modificado | `backend/src/main/java/ar/edu/utn/vastio/bebida/dominio/Bebida.java` |
+| Modificado | `backend/src/main/java/ar/edu/utn/vastio/bebida/dominio/Ingreso.java` |
+| Eliminado | `backend/src/main/java/ar/edu/utn/vastio/bebida/dominio/Proveedor.java` |
+| Modificado | `backend/src/main/java/ar/edu/utn/vastio/bebida/infraestructura/BebidaRepository.java` |
+| Modificado | `backend/src/main/java/ar/edu/utn/vastio/bebida/infraestructura/IngresoRepository.java` |
+| Eliminado | `backend/src/main/java/ar/edu/utn/vastio/bebida/infraestructura/ProveedorRepository.java` |
+| Modificado | `backend/src/main/java/ar/edu/utn/vastio/comun/seguridad/Permisos.java` |
+| Modificado | `backend/src/main/java/ar/edu/utn/vastio/demo/DatosDeDemostracion.java` |
+| Agregado | `backend/src/main/resources/db/migration/V9__eliminar_proveedores.sql` |
+| Agregado | `backend/src/test/java/ar/edu/utn/vastio/MigracionProveedoresIT.java` |
+| Modificado | `backend/src/test/java/ar/edu/utn/vastio/MigracionesIT.java` |
+| Modificado | `backend/src/test/java/ar/edu/utn/vastio/PerfilDevIT.java` |
+| Modificado | `backend/src/test/java/ar/edu/utn/vastio/bebida/api/BebidaSinTransaccionIT.java` |
+| Modificado | `backend/src/test/java/ar/edu/utn/vastio/bebida/api/IngresoDtoTest.java` |
+| Modificado | `backend/src/test/java/ar/edu/utn/vastio/bebida/api/IngresoIT.java` |
+| Modificado | `backend/src/test/java/ar/edu/utn/vastio/bebida/api/PreparacionIT.java` |
+| Eliminado | `backend/src/test/java/ar/edu/utn/vastio/bebida/api/ProveedorIT.java` |
+| Agregado | `backend/src/test/java/ar/edu/utn/vastio/bebida/api/ProveedoresEliminadosIT.java` |
+| Modificado | `backend/src/test/java/ar/edu/utn/vastio/bebida/aplicacion/IngresoConcurrenciaIT.java` |
+| Modificado | `backend/src/test/java/ar/edu/utn/vastio/bebida/aplicacion/IngresoServiceTest.java` |
+| Modificado | `backend/src/test/java/ar/edu/utn/vastio/bebida/aplicacion/PreparacionConcurrenciaIT.java` |
+| Modificado | `backend/src/test/java/ar/edu/utn/vastio/bebida/aplicacion/RecuentoConcurrenciaIT.java` |
+| Modificado | `backend/src/test/java/ar/edu/utn/vastio/bebida/aplicacion/SalidaBarraConcurrenciaIT.java` |
+| Modificado | `design/pantallas/UI28-CargaInicial.dc.html` |
+| Modificado | `docs/b5-04-implementacion.md` |
+| Modificado | `docs/der/diccionario-de-datos.md` |
+| Agregado | `docs/der/modelo-bebida-v9.md` |
+| Modificado | `docs/despliegue.md` |
+| Agregado | `docs/eliminacion-proveedores-archivos.md` |
+| Agregado | `docs/eliminacion-proveedores-auditoria.md` |
+| Agregado | `docs/eliminacion-proveedores-despliegue.md` |
+| Agregado | `docs/eliminacion-proveedores-migraciones-sha256.txt` |
+| Agregado | `docs/eliminacion-proveedores-referencias.txt` |
+| Agregado | `docs/eliminacion-proveedores-resultados.md` |
+| Modificado | `docs/perfiles-y-permisos.md` |
+| Modificado | `docs/sprint-3.md` |
+| Agregado | `frontend/e2e/proveedores-eliminados.spec.ts` |
+| Modificado | `frontend/src/api/bebidas.ts` |
+| Modificado | `frontend/src/api/ingresos.ts` |
+| Eliminado | `frontend/src/api/proveedores.ts` |
+| Agregado | `frontend/src/features/bebidas/CargaInicial.test.tsx` |
+| Eliminado | `frontend/src/features/bebidas/CargaInicialYProveedores.test.tsx` |
+| Modificado | `frontend/src/features/bebidas/PaginaCatalogo.test.tsx` |
+| Modificado | `frontend/src/features/bebidas/PaginaCatalogo.tsx` |
+| Modificado | `frontend/src/features/bebidas/PaginaIngresoBebida.test.tsx` |
+| Modificado | `frontend/src/features/bebidas/PaginaIngresoBebida.tsx` |
+| Modificado | `frontend/src/features/bebidas/RecuentoSinSaldo.test.tsx` |
+| Modificado | `frontend/src/features/bebidas/SeccionCargaInicial.tsx` |
+| Eliminado | `frontend/src/features/bebidas/SeccionProveedores.tsx` |
+| Modificado | `frontend/src/features/bebidas/catalogo.css` |
+| Modificado | `frontend/src/features/eventos/PestanaPreparacion.test.tsx` |
+| Agregado | `scripts/probar_resguardo_proveedores.py` |
+| Agregado | `scripts/resguardo_proveedores.py` |
+
+Total: 65 archivos; 9 eliminados, 42 modificados y 14 agregados. `CargaInicialYProveedores.test.tsx` se reemplaza por `CargaInicial.test.tsx`, que conserva inventario.

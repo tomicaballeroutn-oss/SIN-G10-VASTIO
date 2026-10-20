@@ -116,3 +116,7 @@ E2E_URL=https://localhost E2E_IGNORAR_CERTIFICADO=1 E2E_USUARIO=direccion E2E_CO
 ```
 
 No correrlo en la misma máquina donde ya hay algo escuchando en los puertos 80 o 443.
+
+## Actualización V9: operación previa obligatoria
+
+Antes de arrancar una versión que incluya V9 sobre una instalación existente, seguir el [resguardo, restauración verificada y aprobación manual](eliminacion-proveedores-despliegue.md). Flyway migra al iniciar: no arrancar el backend nuevo contra una base real antes de esa aprobación. V9 bloquea bases con datos de proveedores sin constancia válida para su estado actual.

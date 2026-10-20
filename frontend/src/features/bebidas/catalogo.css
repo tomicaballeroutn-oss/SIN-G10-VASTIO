@@ -21,10 +21,8 @@
 .bebidas__nuevo-codigo > :first-child { flex: 1 1 200px; }
 .bebidas__saldos { margin: var(--space-2) 0; padding-left: var(--space-5); }
 
-/* Pestañas del catálogo: bebidas, proveedores y carga inicial (UI-28). */
+/* Pestañas del catálogo: bebidas y carga inicial (UI-28). */
 .bebidas__pestana { display: flex; flex-direction: column; gap: var(--space-4); }
-.bebidas__barra { display: flex; justify-content: flex-end; }
-.bebidas__provee { display: grid; gap: var(--space-2); max-height: 280px; overflow: auto; padding-right: var(--space-2); }
 .bebidas__ubicacion { max-width: 420px; }
 .bebidas__carga { list-style: none; margin: 0; padding: var(--space-1) var(--space-4); }
 .bebidas__carga-fila { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: var(--space-3);

@@ -19,7 +19,7 @@ const DESTINO = { id: 7, nombre: 'Transición Avril', tipo: 'TRANSICION' as cons
 const BARRA = { id: 2, nombre: 'Barra Avril', tipo: 'BARRA' as const };
 const BEBIDA: Bebida = { id: 12, nombre: 'Fernet Branca', presentacion: '750 ml', tipo: { id: 3, nombre: 'Destilado' },
   unidad: { id: 1, nombre: 'Caja', esBotella: false }, unidadesPorBulto: 6, stockMinimo: null,
-  codigos: [{ codigo: '17790000000016', unidades: 6 }], proveedorHabitual: null, activo: true, fechaBaja: null };
+  codigos: [{ codigo: '17790000000016', unidades: 6 }], activo: true, fechaBaja: null };
 const PANTALLA: PantallaPreparacion = { evento: { id: 5, codigo: 'EV-5', nombre: 'Bruno y Martina', estado: 'CONFIRMADO' }, madre: MADRE,
   circuitos: [{ barra: BARRA, abastecimiento: DESTINO, requierePreparacion: true }], historial: [] };
 const PREPARACION: Preparacion = { id: 90, eventoId: 5, barra: BARRA, origen: MADRE, destino: DESTINO,

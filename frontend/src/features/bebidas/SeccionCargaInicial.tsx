@@ -13,18 +13,17 @@ const cargarBase = () => Promise.all([ubicaciones.listar(), bebidas.listar()]).t
 }));
 
 /**
- * UI-28, paso 1 · Carga inicial de inventario por ubicación (depósito madre, transiciones y barras), en cajas y
+ * UI-28 · Carga inicial de inventario por ubicación (depósito madre, transiciones y barras), en cajas y
  * botellas sueltas. Se guarda las veces que haga falta para retomarla; lo que cambia queda como corrección. Si la
  * ubicación ya tiene otros movimientos, se muestra en solo lectura y se corrige con un recuento.
  */
-export function SeccionCargaInicial({ alSeguir }: { alSeguir: () => void }) {
+export function SeccionCargaInicial() {
   const base = useDatos(cargarBase);
   const [ubicacionId, setUbicacionId] = useState('');
   return (
     <Cargando datos={base}>
       {({ ubicaciones: lista, catalogo }) => (
         <>
-          <p className="overline v-muted">Paso 1 de 2</p>
           <Select
             label="Ubicación"
             placeholder="Elegí una ubicación"
@@ -34,7 +33,7 @@ export function SeccionCargaInicial({ alSeguir }: { alSeguir: () => void }) {
             onChange={(e) => setUbicacionId(e.target.value)}
           />
           {ubicacionId ? (
-            <CargaDeUbicacion key={ubicacionId} ubicacionId={Number(ubicacionId)} catalogo={catalogo} alSeguir={alSeguir} />
+            <CargaDeUbicacion key={ubicacionId} ubicacionId={Number(ubicacionId)} catalogo={catalogo} />
           ) : (
             <p className="body-sm v-muted">
               Elegí una ubicación para cargar lo que tiene hoy. El avance se guarda por ubicación, así podés retomarlo después.
@@ -46,7 +45,7 @@ export function SeccionCargaInicial({ alSeguir }: { alSeguir: () => void }) {
   );
 }
 
-function CargaDeUbicacion({ ubicacionId, catalogo, alSeguir }: { ubicacionId: number; catalogo: Bebida[]; alSeguir: () => void }) {
+function CargaDeUbicacion({ ubicacionId, catalogo }: { ubicacionId: number; catalogo: Bebida[] }) {
   const cargar = useCallback(() => inventarioInicial.consultar(ubicacionId), [ubicacionId]);
   const datos = useDatos(cargar);
   return (
@@ -56,18 +55,16 @@ function CargaDeUbicacion({ ubicacionId, catalogo, alSeguir }: { ubicacionId: nu
           carga={carga}
           catalogo={catalogo}
           alGuardar={(nueva) => datos.fijar(() => nueva)}
-          alSeguir={alSeguir}
         />
       )}
     </Cargando>
   );
 }
 
-function Formulario({ carga, catalogo, alGuardar, alSeguir }: {
+function Formulario({ carga, catalogo, alGuardar }: {
   carga: CargaInicial;
   catalogo: Bebida[];
   alGuardar: (c: CargaInicial) => void;
-  alSeguir: () => void;
 }) {
   const cargado = new Map(carga.renglones.map((r) => [r.bebidaId, r.cantidad]));
   const [valores, setValores] = useState<Map<number, number>>(() => new Map(cargado));
@@ -87,10 +84,6 @@ function Formulario({ carga, catalogo, alGuardar, alSeguir }: {
     alGuardar(nueva);
     setAviso(`Carga inicial de ${nueva.ubicacion.nombre} guardada.`);
     return true;
-  }
-
-  async function seguir() {
-    if (await guardar()) alSeguir();
   }
 
   if (carga.cerrada) {
@@ -149,8 +142,7 @@ function Formulario({ carga, catalogo, alGuardar, alSeguir }: {
           : 'Lo que cambies después de guardar queda registrado como corrección de la carga inicial.'}
       </p>
       <div className="bebidas__acciones-carga">
-        <Button variant="outline" loading={guardando} disabled={cambios.length === 0} onClick={() => void guardar()}>Guardar y continuar después</Button>
-        <Button iconEnd="arrow-right" onClick={() => void seguir()}>Siguiente: proveedores</Button>
+        <Button icon="check" loading={guardando} disabled={cambios.length === 0} onClick={() => void guardar()}>Guardar carga inicial</Button>
       </div>
     </>
   );

@@ -42,18 +42,14 @@ class BebidaSinTransaccionIT {
 
     @Test
     void lasRespuestasDeBebidasYUbicacionesSeArmanFueraDeLaTransaccion() throws Exception {
-        String proveedor = pedir(post("/api/v1/proveedores"), """
-                {"razonSocial":"Proveedor sin transacción"}""").andExpect(status().isCreated()).andReturn().getResponse().getContentAsString();
-        long proveedorId = ((Number) JsonPath.read(proveedor, "$.id")).longValue();
         String bebida = pedir(post("/api/v1/bebidas"), """
                 {"nombre":"Bebida sin transacción","presentacion":"750 ml","tipoId":3,"unidadId":1,"unidadesPorBulto":6,
-                 "codigos":[{"codigo":"%s","unidades":6}],"proveedorId":%d}""".formatted(CODIGO, proveedorId))
+                 "codigos":[{"codigo":"%s","unidades":6}]}""".formatted(CODIGO))
                 .andExpect(status().isCreated()).andReturn().getResponse().getContentAsString();
         long id = ((Number) JsonPath.read(bebida, "$.id")).longValue();
 
         pedir(get("/api/v1/bebidas/" + id)).andExpect(status().isOk())
-                .andExpect(jsonPath("$.codigos[0].codigo").value(CODIGO))
-                .andExpect(jsonPath("$.proveedorHabitual.razonSocial").value("Proveedor sin transacción"));
+                .andExpect(jsonPath("$.codigos[0].codigo").value(CODIGO));
         pedir(get("/api/v1/bebidas/codigos/" + CODIGO)).andExpect(status().isOk()).andExpect(jsonPath("$.id").value(id));
         pedir(post("/api/v1/bebidas/" + id + "/baja")).andExpect(status().isOk()).andExpect(jsonPath("$.codigos[0].codigo").value(CODIGO));
         pedir(post("/api/v1/bebidas/" + id + "/reactivacion")).andExpect(status().isOk());
@@ -65,14 +61,12 @@ class BebidaSinTransaccionIT {
         pedir(put("/api/v1/ubicaciones/4"), """
                 {"nombre":"Barra Santa Bárbara","salonId":3}""").andExpect(status().isOk());
         pedir(get("/api/v1/ubicaciones")).andExpect(status().isOk());
-        pedir(get("/api/v1/proveedores")).andExpect(status().isOk());
     }
 
     @AfterEach
     void limpiar() {
         jdbc.update("DELETE FROM codigo_barra WHERE codigo = ?", CODIGO);
         jdbc.update("DELETE FROM bebida WHERE nombre = 'Bebida sin transacción'");
-        jdbc.update("DELETE FROM proveedor WHERE razon_social = 'Proveedor sin transacción'");
         jdbc.update("UPDATE ubicacion SET activo = true WHERE ubicacion_id = 4");
     }
 

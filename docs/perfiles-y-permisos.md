@@ -44,7 +44,7 @@ E = ejecuta · P = ejecuta solo sobre sus propios eventos (vendedora: los que ve
 | Consultar vista de cocina | — | — | C | C | — | C |
 | Notificaciones | E | E | E | E | E | E |
 | Reporte de ocupación | C | — | — | — | — | — |
-| Catálogo de bebidas y proveedores (ABM) | E | — | — | E | — | — |
+| Catálogo de bebidas (ABM) | E | — | — | E | — | — |
 | Configurar ubicaciones de stock | E | — | — | — | — | — |
 | Carga inicial / ingreso de bebida | E | — | — | E | — | — |
 | Consultar stock | C | — | — | C | Solo su barra | — |

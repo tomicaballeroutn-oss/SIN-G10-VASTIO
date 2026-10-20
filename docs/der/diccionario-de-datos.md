@@ -1,4 +1,6 @@
-# Vastio — Modelo de datos (DER v2) y diccionario de datos
+# Vastio — Modelo de datos y diccionario de datos
+
+Modelo operativo actualizado a V9. Los PNG `DER_1`, `DER_2` y `DER_3` son referencias históricas del DER v2; `DER_3_bebida.png` conserva proveedores y no representa el esquema vigente. Ver [relaciones vigentes del módulo B](modelo-bebida-v9.md) y [resguardo antes de V9](../eliminacion-proveedores-despliegue.md).
 
 Motor: PostgreSQL. Convenciones: nombres en `snake_case` y en español; claves primarias sustitutas (`bigint` generado para tablas transaccionales, `smallint` para catálogos); importes en `numeric(14,2)` expresados en pesos argentinos (el único es el de la seña: el sistema no maneja precios ni costos); fechas y horas en `timestamptz`; cantidades de bebida en `numeric(10,2)` expresadas siempre en **botellas** (unidad base). Los estados y tipos fijos se modelan como `varchar` con restricción `CHECK`, no como tablas, porque el comportamiento del sistema depende de ellos y no son configurables.
 
@@ -25,6 +27,7 @@ Motor: PostgreSQL. Convenciones: nombres en `snake_case` y en español; claves p
 | `turno`: horario | Sin horario el sistema no puede pasar el evento a En curso ni a Realizado. |
 | `orden_preparacion`: estado, origen y destino | Tiene su propia máquina de estados (§6.1). |
 | `salon.color_hex` → `salon.codigo`; `turno.codigo` | El color de cada salón ya está en los tokens del sistema de diseño, con variante clara y oscura; un solo hex en la base lo duplicaba y rompía el tema oscuro. El código estable (avril, club, santa-barbara; mediodia, noche) es el que usa el frontend. |
+| Eliminación completa de proveedores (V9, decisión 19/10/2026) | Se retiran el maestro y las relaciones habitual e ingreso después de resguardo externo validado. No se alteran ingresos ni movimientos. |
 | Sin precios ni costos (V5, Sprint 3) | El sistema maneja cantidades; cada área calcula los costos con sus remitos. Se quitaron `bebida.precio_referencia` y el precio y el costo de `consumo_evento`. La seña es la única excepción. |
 | Ubicaciones: sin sectores; abastecimiento de la barra y máximo de barras por salón (V6, Sprint 3) | Las divisiones internas del depósito no se modelan. Cada barra se abastece del depósito madre o de una transición, con retiro directo del depósito madre como contingencia. Una barra por salón; Avril, hasta dos. |
 | Tipo de movimiento CONSUMO (V7, Sprint 3) | Lo consumido sale de la barra con la devolución, así su saldo es siempre lo que de verdad hay (la barra sigue de un evento a otro). Ver docs/sprint-3-operacion.md, decisión 13. |
@@ -410,19 +413,6 @@ Forma en que se mueve la mercadería.
 | `unidad_manipulacion_id` | smallint | PK | NO | Identificador. |
 | `nombre` | varchar(20) | UQ | NO | Caja · Pack · Botella. Solo para mostrar y cargar: las cantidades se guardan en botellas. |
 
-#### PROVEEDOR
-
-Proveedor de bebida (carga inicial de datos maestros). Las bebidas que provee son las que lo tienen como `bebida.proveedor_habitual_id`. Razón social sin repetir entre los activos y CUIT con dígito verificador válido, validados en el backend.
-
-| Campo | Tipo | Clave | Nulo | Descripción / valores posibles |
-|---|---|---|---|---|
-| `proveedor_id` | bigint | PK | NO | Identificador. |
-| `razon_social` | varchar(120) |  | NO |  |
-| `cuit` | varchar(11) | UQ | SÍ | Sin guiones. |
-| `telefono` | varchar(30) |  | SÍ |  |
-| `email` | varchar(120) |  | SÍ |  |
-| `activo` | boolean |  | NO | Default true. |
-
 #### BEBIDA
 
 Artículo del catálogo. Toda cantidad del sistema se expresa en su unidad base (botella).
@@ -436,7 +426,6 @@ Artículo del catálogo. Toda cantidad del sistema se expresa en su unidad base 
 | `unidad_manipulacion_id` | smallint | FK | NO | → unidad_manipulacion. Unidad en que se mueve (caja). |
 | `unidades_por_bulto` | smallint |  | NO | Botellas por unidad de manipulación. > 0; 1 si la unidad es Botella. Reemplaza al factorConversion. |
 | `stock_minimo` | numeric(10,2) |  | SÍ | Umbral de stock bajo del depósito madre, en botellas (UI-27). |
-| `proveedor_habitual_id` | bigint | FK | SÍ | → proveedor. |
 | `activo` | boolean |  | NO | false = baja lógica. Default true (V5). |
 | `fecha_baja` | timestamptz |  | SÍ |  |
 
@@ -489,7 +478,6 @@ Cabecera de un ingreso de mercadería al depósito.
 |---|---|---|---|---|
 | `ingreso_id` | bigint | PK | NO | Identificador. |
 | `ubicacion_destino_id` | smallint | FK | NO | → ubicacion. |
-| `proveedor_id` | bigint | FK | SÍ | → proveedor. |
 | `numero_remito` | varchar(30) |  | SÍ | Remito contra el que se contó. |
 | `fecha_ingreso` | date |  | NO | Default hoy. |
 | `es_inventario_inicial` | boolean |  | NO | true para la carga de puesta en marcha. |

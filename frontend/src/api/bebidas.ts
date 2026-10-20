@@ -28,7 +28,6 @@ export interface Bebida {
   unidadesPorBulto: number;
   stockMinimo: number | null;
   codigos: CodigoBarra[];
-  proveedorHabitual: { id: number; razonSocial: string; activo: boolean } | null;
   activo: boolean;
   fechaBaja: string | null;
 }
@@ -42,7 +41,6 @@ export interface DatosBebida {
   unidadesPorBulto: number;
   stockMinimo: number | null;
   codigos: CodigoBarra[];
-  proveedorId: number | null;
 }
 
 /** Ubicación donde la bebida tiene saldo, en botellas. */

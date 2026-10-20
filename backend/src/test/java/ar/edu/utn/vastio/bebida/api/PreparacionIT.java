@@ -47,8 +47,8 @@ class PreparacionIT {
     @BeforeEach void datos() {
         evento = escenario.evento("avril", LocalDate.of(2035, 2, 6), "noche", "CONFIRMADO", personas.de(RolCodigo.VENDEDORA), personas.de(RolCodigo.PLANNER), "Preparación IT");
         bebida = bebidas.crear(new DatosBebida("Ron preparación", "750 ml", (short) 3, (short) 1, (short) 6, null,
-                List.of(new BebidaService.Codigo("9988776655441", (short) 6)), null)).getId();
-        otra = bebidas.crear(new DatosBebida("Gin preparación", "750 ml", (short) 3, (short) 1, (short) 6, null, List.of(), null)).getId();
+                List.of(new BebidaService.Codigo("9988776655441", (short) 6)))).getId();
+        otra = bebidas.crear(new DatosBebida("Gin preparación", "750 ml", (short) 3, (short) 1, (short) 6, null, List.of())).getId();
         em.flush();
         destino = jdbc.queryForObject("INSERT INTO ubicacion(nombre,tipo,activo) VALUES ('Transición IT','TRANSICION',true) RETURNING ubicacion_id", Short.class);
         jdbc.update("UPDATE ubicacion SET ubicacion_abastecimiento_id=? WHERE ubicacion_id=2", destino);

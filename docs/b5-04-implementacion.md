@@ -256,3 +256,5 @@ CONSUMO se registra al devolver; el cierre consolida sin descontar stock otra ve
 Esta etapa termina localmente: no publica ramas ni cambia la base o el contenido remoto de #31.
 Para usar esta reconstrucción en el head existente habrá que autorizar expresamente la actualización remota,
 comprobar que siga en `d03d510`, usar una protección de lease y cambiar el destino del PR a main.
+
+Actualización de alcance del 19/10/2026: la observación histórica sobre proveedores queda reemplazada por la eliminación completa documentada en [eliminacion-proveedores-despliegue.md](eliminacion-proveedores-despliegue.md). B5-04 mantiene sus reglas de preparación.

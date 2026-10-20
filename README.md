@@ -6,4 +6,5 @@ Proyecto Integrador · Seminario Integrador · UTN Facultad Regional Córdoba ·
 
 - Guía de desarrollo y convenciones: [`CLAUDE.md`](CLAUDE.md)
 - Documentación funcional: [`docs/`](docs/)
+- Actualización a V9: [resguardo y aprobación manual antes del despliegue](docs/eliminacion-proveedores-despliegue.md).
 - Sistema de diseño y prototipos: [`design/`](design/)

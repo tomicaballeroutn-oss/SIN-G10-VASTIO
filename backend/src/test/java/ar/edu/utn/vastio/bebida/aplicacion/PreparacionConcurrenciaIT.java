@@ -40,7 +40,7 @@ class PreparacionConcurrenciaIT {
         hilos=Executors.newFixedThreadPool(2); aplicada=new CountDownLatch(1); continuar=new CountDownLatch(1);
         usuario=personas.usuario("prep."+UUID.randomUUID(),"Preparador concurrente",RolCodigo.COMPRAS).getId();
         personas.de(RolCodigo.ADMINISTRACION);
-        bebida=bebidas.crear(new DatosBebida("Preparación concurrente "+UUID.randomUUID(),"750 ml",(short)3,(short)1,(short)6,null,List.of(),null)).getId();
+        bebida=bebidas.crear(new DatosBebida("Preparación concurrente "+UUID.randomUUID(),"750 ml",(short)3,(short)1,(short)6,null,List.of())).getId();
         evento=escenario.evento("avril",LocalDate.of(2036,3,2),"noche","CONFIRMADO",personas.de(RolCodigo.VENDEDORA),personas.de(RolCodigo.PLANNER),"Evento concurrente");
         destino=jdbc.queryForObject("INSERT INTO ubicacion(nombre,tipo,activo) VALUES (?,'TRANSICION',true) RETURNING ubicacion_id",Short.class,"Transición "+UUID.randomUUID());
         barra=jdbc.queryForObject("INSERT INTO ubicacion(nombre,tipo,activo,salon_id,ubicacion_abastecimiento_id) VALUES (?,'BARRA',true,1,?) RETURNING ubicacion_id",Short.class,"Barra "+UUID.randomUUID(),destino);

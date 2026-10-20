@@ -10,7 +10,7 @@ const UNIDADES = [{ id: 1, nombre: 'Caja', esBotella: false }, { id: 2, nombre: 
 
 const bebida = (id: number, nombre: string, extra: Partial<Bebida> = {}): Bebida => ({
   id, nombre, presentacion: '750 ml', tipo: TIPOS[1], unidad: UNIDADES[0], unidadesPorBulto: 6, stockMinimo: null,
-  codigos: [], proveedorHabitual: null, activo: true, fechaBaja: null, ...extra,
+  codigos: [], activo: true, fechaBaja: null, ...extra,
 });
 
 const BEBIDAS: Bebida[] = [
@@ -23,7 +23,6 @@ function backend({ metodo, ruta, cuerpo }: Pedido) {
   if (metodo === 'GET' && ruta === '/bebidas') return json(200, BEBIDAS);
   if (metodo === 'GET' && ruta === '/tipos-bebida') return json(200, TIPOS);
   if (metodo === 'GET' && ruta === '/unidades-manipulacion') return json(200, UNIDADES);
-  if (metodo === 'GET' && ruta === '/proveedores') return json(200, []);
   if (metodo === 'POST' && ruta === '/bebidas') {
     const datos = cuerpo as { nombre: string; codigos: { codigo: string }[] };
     if (datos.codigos.some((c) => c.codigo === '7790000000019')) {
@@ -47,6 +46,16 @@ afterEach(() => {
 });
 
 describe('UI-25 · catálogo de bebidas', () => {
+  it('un enlace antiguo abre bebidas sin pestaña, selector ni llamadas de proveedores', async () => {
+    const fetchMock = backendFalso(sesionDe(['COMPRAS']), backend);
+    montar('/catalogo?pestana=proveedores');
+    await screen.findByText('Fernet Branca');
+    expect(screen.queryByRole('tab', { name: 'Proveedores' })).not.toBeInTheDocument();
+    await userEvent.setup().click(screen.getByRole('button', { name: 'Nueva bebida' }));
+    expect(screen.queryByLabelText(/Proveedor/)).not.toBeInTheDocument();
+    expect(pedidos(fetchMock).some((p) => p.ruta.includes('proveedores'))).toBe(false);
+  });
+
   it('lista las activas sin precios y busca por nombre o código de barras', async () => {
     backendFalso(sesionDe(['COMPRAS']), backend);
     const persona = userEvent.setup();
@@ -105,7 +114,6 @@ describe('UI-25 · catálogo de bebidas', () => {
       unidadesPorBulto: 6,
       stockMinimo: 7,
       codigos: [{ codigo: '17791234567890', unidades: 6 }],
-      proveedorId: null,
     });
   });
 

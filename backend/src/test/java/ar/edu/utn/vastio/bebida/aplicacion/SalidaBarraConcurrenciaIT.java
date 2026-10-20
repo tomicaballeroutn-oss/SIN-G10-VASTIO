@@ -64,7 +64,7 @@ class SalidaBarraConcurrenciaIT {
     @BeforeEach
     void escenario() {
         bebida = bebidas.crear(new DatosBebida("Bebida de salida concurrente", "750 ml", (short) 3, (short) 1, (short) 6, null,
-                List.of(), null)).getId();
+                List.of())).getId();
         evento = escenario.evento("avril", FECHA, "noche", "EN_CURSO", personas.de(RolCodigo.VENDEDORA),
                 personas.de(RolCodigo.PLANNER), "Evento de concurrencia");
     }

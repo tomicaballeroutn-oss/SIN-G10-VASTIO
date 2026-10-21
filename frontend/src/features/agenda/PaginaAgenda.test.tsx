@@ -43,7 +43,7 @@ afterEach(() => {
 });
 
 describe('UI-07 · consultar agenda', () => {
-  it('muestra el mes con cada día descripto y, al tocarlo, sus seis unidades', async () => {
+  it('muestra el mes con cada día descripto y, al tocarlo, un salón a la vez con sus dos turnos', async () => {
     backend();
     const usuario = userEvent.setup();
     const router = montar('/agenda?mes=2030-03');
@@ -59,13 +59,44 @@ describe('UI-07 · consultar agenda', () => {
 
     expect(router.state.location.search).toContain('dia=2030-03-09');
     const detalle = screen.getByRole('heading', { name: 'sábado 9 de marzo' }).closest('section') as HTMLElement;
-    expect(within(detalle).getByText('Mediodía · 12:00 a 18:00')).toBeInTheDocument();
-    expect(within(detalle).getByText('La tiene Melina Ruiz.')).toBeInTheDocument();
-    expect(within(detalle).getByText('Quince de Delfina')).toBeInTheDocument();
-    expect(within(detalle).getByText('Quince · Delfina Ríos')).toBeInTheDocument();
-    expect(within(detalle).getByText('Mantenimiento · Pintura del salón')).toBeInTheDocument();
-    expect(within(detalle).getAllByText('Libre para ofrecer.')).toHaveLength(1);
-    expect(within(detalle).getAllByText('Salón dado de baja: no acepta pre-reservas.')).toHaveLength(2);
+    // Un botón por salón, con cuántos turnos le quedan libres; arranca en el primero.
+    expect(within(detalle).getByRole('tab', { name: 'Avril 1 libre' })).toHaveAttribute('aria-selected', 'true');
+    expect(within(detalle).getByRole('tab', { name: 'Club de Campo Sin lugar' })).toHaveAttribute('aria-selected', 'false');
+    expect(within(detalle).getByRole('tab', { name: 'Santa Bárbara Dado de baja' })).toBeInTheDocument();
+
+    let turnos = within(detalle).getByRole('tabpanel', { name: 'Avril' });
+    expect(within(turnos).getByText('12:00 a 18:00')).toBeInTheDocument();
+    expect(within(turnos).getByText('Libre para ofrecer.')).toBeInTheDocument();
+    expect(within(turnos).getByText('Quince de Delfina')).toBeInTheDocument();
+    expect(within(turnos).getByText('Quince · Delfina Ríos')).toBeInTheDocument();
+    expect(within(turnos).queryByText('La tiene Melina Ruiz.')).not.toBeInTheDocument();
+
+    await usuario.click(within(detalle).getByRole('tab', { name: /^Club de Campo/ }));
+    expect(router.state.location.search).toContain('ver=club');
+    turnos = within(detalle).getByRole('tabpanel', { name: 'Club de Campo' });
+    expect(within(turnos).getByText('La tiene Melina Ruiz.')).toBeInTheDocument();
+    expect(within(turnos).getByText('Mantenimiento · Pintura del salón')).toBeInTheDocument();
+
+    await usuario.click(within(detalle).getByRole('tab', { name: /^Santa Bárbara/ }));
+    turnos = within(detalle).getByRole('tabpanel', { name: 'Santa Bárbara' });
+    expect(within(turnos).getAllByText('Salón dado de baja: no acepta pre-reservas.')).toHaveLength(2);
+  });
+
+  it('el detalle del día arranca en el salón del filtro', async () => {
+    backend();
+    montar('/agenda?mes=2030-03&dia=2030-03-09&salon=club');
+
+    expect(await screen.findByRole('tab', { name: /^Club de Campo/ })).toHaveAttribute('aria-selected', 'true');
+    expect(screen.getByRole('tabpanel', { name: 'Club de Campo' })).toHaveTextContent('La tiene Melina Ruiz.');
+  });
+
+  it('en un día pasado no cuenta turnos libres ni ofrece pre-reservar', async () => {
+    backendFalso(sesionDe(['VENDEDORA']), ({ ruta }) => (ruta === '/agenda?mes=2020-03' ? json(200, { ...MARZO, mes: '2020-03', unidades: [] }) : undefined));
+    montar('/agenda?mes=2020-03&dia=2020-03-09');
+
+    expect(await screen.findByRole('tab', { name: 'Avril' })).toBeInTheDocument();
+    expect(screen.getAllByText('Sin evento.')).toHaveLength(2);
+    expect(screen.queryByRole('button', { name: 'Registrar pre-reserva' })).not.toBeInTheDocument();
   });
 
   it('pasa al mes siguiente y pide sus datos', async () => {

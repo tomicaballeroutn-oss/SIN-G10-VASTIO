@@ -313,6 +313,15 @@ export function PaginaDs() {
 
       <Seccion titulo="Tabs">
         <Tabs items={[{ id: 'datos', label: 'Datos' }, { id: 'servicios', label: 'Servicios', count: 4 }, { id: 'historial', label: 'Historial', icon: 'history' }]} />
+        <Tabs
+          variant="bloques"
+          label="Salón"
+          items={[
+            { id: 'avril', label: 'Avril', salon: 'avril', hint: '1 libre' },
+            { id: 'club', label: 'Club de Campo', salon: 'club', hint: 'Sin lugar' },
+            { id: 'santa-barbara', label: 'Santa Bárbara', salon: 'santa-barbara', hint: '2 libres' },
+          ]}
+        />
       </Seccion>
 
       <Seccion titulo="Timeline">

@@ -19,16 +19,16 @@ async function ingresar(browser: Browser, usuario: string, opciones: Parameters<
   return pagina;
 }
 
-/** Santa Bárbara al mediodía de ese día, en el detalle de la agenda. */
+/** Santa Bárbara al mediodía de ese día, en el detalle de la agenda (la dirección elige el salón con «ver»). */
 function unidad(pagina: Page) {
-  return pagina.locator('.agenda__turno').filter({ hasText: 'Mediodía' }).locator('li').filter({ hasText: 'Santa Bárbara' });
+  return pagina.getByRole('tabpanel', { name: 'Santa Bárbara' }).locator('.agenda__caja').filter({ hasText: 'Mediodía' });
 }
 
 /** Un día libre lejos de los datos de demostración; cada corrida prueba otros hasta encontrar uno. */
 async function diaLibre(pagina: Page): Promise<string> {
   for (let intento = 0; intento < 10; intento++) {
     const fecha = new Date(Date.now() + (90 + Math.floor(Math.random() * 600)) * 86_400_000).toISOString().slice(0, 10);
-    await pagina.goto(`/agenda?mes=${fecha.slice(0, 7)}&dia=${fecha}`);
+    await pagina.goto(`/agenda?mes=${fecha.slice(0, 7)}&dia=${fecha}&ver=santa-barbara`);
     await expect(pagina.getByText('Día elegido')).toBeVisible();
     if (await unidad(pagina).getByRole('button', { name: 'Registrar pre-reserva' }).isVisible()) return fecha;
   }
@@ -44,7 +44,7 @@ test('dos vendedoras van por la misma fecha: entra una sola y la seña la deja f
 
   // Las dos abren la misma unidad libre.
   const fecha = await diaLibre(lucia);
-  await sofia.goto(`/agenda?mes=${fecha.slice(0, 7)}&dia=${fecha}`);
+  await sofia.goto(`/agenda?mes=${fecha.slice(0, 7)}&dia=${fecha}&ver=santa-barbara`);
   for (const pagina of [lucia, sofia]) {
     await unidad(pagina).getByRole('button', { name: 'Registrar pre-reserva' }).click();
     const dialogo = pagina.getByRole('dialog', { name: 'Registrar pre-reserva' });
@@ -75,7 +75,7 @@ test('dos vendedoras van por la misma fecha: entra una sola y la seña la deja f
   await expect(lucia.getByText('Seña registrada. El evento pasó a Señado.')).toBeVisible();
 
   // La agenda muestra la unidad señada.
-  await lucia.goto(`/agenda?mes=${fecha.slice(0, 7)}&dia=${fecha}`);
+  await lucia.goto(`/agenda?mes=${fecha.slice(0, 7)}&dia=${fecha}&ver=santa-barbara`);
   await expect(unidad(lucia).getByText('Señado')).toBeVisible();
   await expect(unidad(lucia)).toContainText(`Quince de ${cliente}`);
 });

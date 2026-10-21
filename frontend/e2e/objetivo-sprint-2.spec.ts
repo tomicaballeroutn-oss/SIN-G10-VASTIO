@@ -23,16 +23,16 @@ async function ingresar(browser: Browser, usuario: string, opciones: Parameters<
   return pagina;
 }
 
-/** Avril a la noche de ese día, en el detalle de la agenda. */
+/** Avril a la noche de ese día, en el detalle de la agenda (la dirección elige el salón con «ver»). */
 function unidad(pagina: Page) {
-  return pagina.locator('.agenda__turno').filter({ hasText: 'Noche' }).locator('li').filter({ hasText: 'Avril' });
+  return pagina.getByRole('tabpanel', { name: 'Avril' }).locator('.agenda__caja').filter({ hasText: 'Noche' });
 }
 
 /** Un día libre lejos de los datos de demostración; cada corrida prueba otros hasta encontrar uno. */
 async function diaLibre(pagina: Page): Promise<string> {
   for (let intento = 0; intento < 10; intento++) {
     const fecha = new Date(Date.now() + (60 + Math.floor(Math.random() * 600)) * 86_400_000).toISOString().slice(0, 10);
-    await pagina.goto(`/agenda?mes=${fecha.slice(0, 7)}&dia=${fecha}`);
+    await pagina.goto(`/agenda?mes=${fecha.slice(0, 7)}&dia=${fecha}&ver=avril`);
     await expect(pagina.getByText('Día elegido')).toBeVisible();
     if (await unidad(pagina).getByRole('button', { name: 'Registrar pre-reserva' }).isVisible()) return fecha;
   }

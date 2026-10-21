@@ -270,9 +270,10 @@ h2.h2, h3.h3, h3.h4 { margin: 0; color: var(--ink); }
 .v-day.is-selected { border: 2px solid var(--brand); background: var(--surface-raised); box-shadow: var(--shadow-sm); }
 .v-day__num { display: inline-grid; place-items: center; min-width: 26px; height: 26px; padding: 0 4px; border-radius: var(--radius-pill); }
 .v-day.is-today .v-day__num { background: var(--accent); color: var(--on-accent); font-weight: 600; }
-.v-day__pips { display: grid; grid-template-columns: repeat(3, 1fr); gap: 3px; width: 100%; max-width: 78px; }
-@media (min-width: 960px) { .v-day { min-height: 96px; padding: var(--space-3) var(--space-2); } .v-day__pips { gap: 4px; } }
-.v-pip { --s: var(--line-strong); --st: var(--surface-sunken); display: block; height: 12px; min-width: 10px; border-radius: var(--radius-xs); border: 1.5px solid var(--line); background: transparent; }
+/* Seis puntos por día: columna = salón, fila de arriba = mediodía, de abajo = noche. El relleno dice el estado. */
+.v-day__pips { --pip: 9px; display: grid; grid-template-columns: repeat(3, var(--pip)); gap: 4px; justify-content: center; }
+@media (min-width: 960px) { .v-day { min-height: 96px; padding: var(--space-3) var(--space-2); } .v-day__pips { --pip: 11px; gap: 5px; } }
+.v-pip { --s: var(--line-strong); --st: var(--surface-sunken); display: block; width: var(--pip, 11px); height: var(--pip, 11px); border-radius: 50%; border: 1.5px solid var(--line); background: transparent; }
 .v-pip--avril { --s: var(--salon-avril); --st: var(--salon-avril-tint); }
 .v-pip--club { --s: var(--salon-club); --st: var(--salon-club-tint); }
 .v-pip--santa-barbara { --s: var(--salon-santa-barbara); --st: var(--salon-santa-barbara-tint); }
@@ -283,10 +284,23 @@ h2.h2, h3.h3, h3.h4 { margin: 0; color: var(--ink); }
 .v-pip--bloqueado { border: 1.5px solid var(--line-strong); background: repeating-linear-gradient(135deg, var(--line-strong) 0 1.5px, transparent 1.5px 4px); }
 .v-pip--disponible { border: 1.5px solid var(--line); background: transparent; }
 .v-pip.is-dim { opacity: 0.18; }
-.v-agenda__legend { display: flex; flex-wrap: wrap; gap: var(--space-2) var(--space-5); align-items: center; }
 .v-legend__item { display: inline-flex; align-items: center; gap: var(--space-2); }
-.v-legend__item .v-pip { width: 20px; }
-.v-agenda__salons { display: flex; flex-wrap: wrap; gap: var(--space-2); }
+.v-legend__item .v-pip { --pip: 14px; flex: none; }
+/* Qué salón es cada columna de puntos: arriba de la grilla, en el orden de las columnas. */
+.v-agenda__salons { display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-2) var(--space-3); }
+.v-agenda__salons-lista { display: flex; flex-wrap: wrap; gap: var(--space-2); margin: 0; padding: 0; list-style: none; }
+/* Machete de estados (AgendaLeyenda): se abre y se cierra; abierto, dos columnas. */
+.v-agenda-leyenda { display: block; }
+.v-agenda-leyenda__resumen { display: flex; align-items: center; justify-content: space-between; gap: var(--space-3); min-height: var(--control-md);
+  margin: calc(-1 * var(--space-2)) 0; cursor: pointer; list-style: none; border-radius: var(--radius-sm); }
+.v-agenda-leyenda__resumen::-webkit-details-marker { display: none; }
+.v-agenda-leyenda__resumen:focus-visible { outline: 2px solid var(--focus-ring); outline-offset: 2px; }
+.v-agenda-leyenda__chevron { color: var(--ink-muted); transition: transform var(--motion-fast) var(--ease); }
+.v-agenda-leyenda[open] .v-agenda-leyenda__chevron { transform: rotate(180deg); }
+.v-agenda-leyenda__lista { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--space-2) var(--space-4); margin: 0; padding: 0; list-style: none; color: var(--ink); }
+.v-agenda-leyenda[open] > .v-agenda-leyenda__lista { margin-top: var(--space-4); }
+.v-agenda-leyenda > p { margin-top: var(--space-3); }
+@media (prefers-reduced-motion: reduce) { .v-agenda-leyenda__chevron { transition: none; } }
 
 .v-event { gap: var(--space-4); }
 .v-event__top { display: flex; align-items: center; justify-content: space-between; gap: var(--space-2); flex-wrap: wrap; }
@@ -384,3 +398,148 @@ h2.h2, h3.h3, h3.h4 { margin: 0; color: var(--ink); }
 .v-stock--negativo { border-color: var(--warning); }
 .v-meter--negativo .v-meter__fill { background: var(--warning); }
 .v-stock__acciones { display: flex; flex-wrap: wrap; gap: var(--space-2); padding-top: var(--space-2); border-top: 1px solid var(--line); }
+
+/* =====================================================================
+   v2 · Fichero (del sistema de diseño «Vastio v2»)
+   Fichas con muesca y solapa, solapas folder, riel flotante con índice de grupos,
+   barra inferior flotante, MiniCalendar y pastillas segmentadas sólidas.
+   ===================================================================== */
+
+/* ---------- Forma suave (v2) ----------
+   Todo redondeado con los mismos radios: la muesca, las solapas y la pestaña activa del riel
+   usan curvas circulares (esquinas invertidas) iguales a las esquinas de las fichas. */
+:root { --round-notch: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 76 76'%3E%3Cpath d='M0 0A16 16 0 0 1 16 16V38A22 22 0 0 0 38 60H60A16 16 0 0 1 76 76H0Z'/%3E%3C/svg%3E"); }
+
+/* ---------- Card: tonos, solapa y muesca ---------- */
+.v-card { position: relative; --card-bg: var(--surface); background: var(--card-bg); }
+.v-card--deep { --card-bg: var(--deep); color: var(--on-deep); border-color: transparent; }
+.v-card--deep h1, .v-card--deep h2, .v-card--deep h3, .v-card--deep h4, .v-card--deep .h3, .v-card--deep .label { color: var(--on-deep); }
+.v-card--deep .v-muted, .v-card--deep .v-card__titles .v-muted { color: var(--on-deep-muted); }
+.v-card--deep .v-card__foot { border-top-color: var(--deep-raised); }
+.v-card--brand-tint { --card-bg: var(--brand-tint); border-color: transparent; }
+.v-card--accent-tint { --card-bg: var(--accent-tint); border-color: transparent; }
+.v-card--success-tint { --card-bg: var(--success-tint); border-color: transparent; }
+.v-card--sunken { --card-bg: var(--surface-sunken); }
+
+/* Muesca: la esquina superior derecha recortada con una esquina invertida redonda; el botón va en el hueco.
+   El fondo se dibuja en ::before con máscara, así el botón no se recorta y sirve sobre cualquier fondo. */
+.v-card--notched { isolation: isolate; background: none; border-color: transparent; }
+.v-card--notched::before { content: ""; position: absolute; z-index: -1; inset: 0; border-radius: inherit; background: var(--card-bg);
+  -webkit-mask: var(--round-notch) top right / var(--notch-size) var(--notch-size) no-repeat,
+    linear-gradient(#000 0 0) left top / calc(100% - var(--notch-size)) 100% no-repeat,
+    linear-gradient(#000 0 0) left bottom / 100% calc(100% - var(--notch-size)) no-repeat;
+          mask: var(--round-notch) top right / var(--notch-size) var(--notch-size) no-repeat,
+    linear-gradient(#000 0 0) left top / calc(100% - var(--notch-size)) 100% no-repeat,
+    linear-gradient(#000 0 0) left bottom / 100% calc(100% - var(--notch-size)) no-repeat; }
+.v-card--notched > .v-card__head { padding-right: calc(var(--notch-size) - var(--space-4)); }
+.v-card__notch { position: absolute; z-index: 1; top: 8px; right: 8px; }
+.v-card__notch .v-iconbtn { border-radius: var(--radius-pill); }
+
+/* Solapa: asoma arriba con las esquinas redondeadas y baja a la ficha con una esquina invertida. */
+.v-card--tabbed { margin-top: var(--tab-h); border-color: transparent; border-top-left-radius: 0; }
+.v-card__tab { position: absolute; bottom: 100%; left: 0; height: var(--tab-h); display: inline-flex; align-items: center;
+  padding: 2px var(--space-4) 0; background: var(--card-bg); color: inherit; white-space: nowrap; border-radius: var(--radius-md) var(--radius-md) 0 0; }
+.v-card__tab::after { content: ""; position: absolute; left: 100%; bottom: 0; width: var(--tab-fillet); height: var(--tab-fillet); pointer-events: none;
+  background: radial-gradient(circle at 100% 0, transparent calc(var(--tab-fillet) - 0.5px), var(--card-bg) var(--tab-fillet)); }
+
+/* ---------- Tabs · variante folder: solapas de agenda que se apilan sobre su ficha ---------- */
+.v-tabs--folder { gap: 4px; overflow: visible; padding-top: 4px; }
+.v-tabs--folder .v-tab { position: relative; height: var(--tab-h); padding: 2px var(--space-4) 0; background: var(--surface-sunken); color: var(--ink-muted);
+  border-radius: var(--radius-md) var(--radius-md) 0 0; }
+.v-tabs--folder .v-tab:hover { color: var(--ink); }
+.v-tabs--folder .v-tab.is-on { z-index: 1; background: var(--surface); color: var(--brand-ink); font-weight: 600; }
+.v-tabs--folder .v-tab.is-on::before, .v-tabs--folder .v-tab.is-on::after { content: ""; position: absolute; bottom: 0; width: var(--tab-fillet); height: var(--tab-fillet); pointer-events: none; }
+.v-tabs--folder .v-tab.is-on::after { left: 100%; background: radial-gradient(circle at 100% 0, transparent calc(var(--tab-fillet) - 0.5px), var(--surface) var(--tab-fillet)); }
+.v-tabs--folder .v-tab.is-on::before { right: 100%; background: radial-gradient(circle at 0 0, transparent calc(var(--tab-fillet) - 0.5px), var(--surface) var(--tab-fillet)); }
+.v-tabs--folder .v-tab.is-on:first-child::before { display: none; }
+.v-tabs--folder + .v-card { border-top-left-radius: 0; border-color: transparent; }
+
+/* ---------- Nav · riel flotante (escritorio) ---------- */
+.v-rail { position: relative; width: var(--rail-w); height: 100%; min-height: 0; }
+.v-nav--rail { position: absolute; z-index: var(--z-nav); top: 0; left: 0; bottom: 0; width: var(--rail-w); display: flex; flex-direction: column;
+  padding: var(--space-4) 0; background: var(--deep); color: var(--on-deep); border-radius: var(--rail-radius); box-shadow: var(--shadow-sm);
+  transition: width var(--motion-base) var(--ease), box-shadow var(--motion-base) var(--ease); }
+/* Abierto flota sobre el contenido: sombra corta, para que no deje una franja gris al costado. */
+.v-rail:hover .v-nav--rail, .v-rail:focus-within .v-nav--rail, .v-rail.is-open .v-nav--rail { width: var(--rail-w-open); box-shadow: var(--shadow-md); }
+.v-nav--rail .v-nav__logo { display: flex; align-items: center; height: 48px; padding: 0 0 0 20px; margin-bottom: var(--space-3); overflow: hidden; }
+/* El Logo fija el ancho y la imagen conserva su proporción. */
+.v-nav--rail .v-nav__logo .v-brand--marca { width: 40px; }
+.v-nav--rail .v-nav__scroll { flex: 1; min-height: 0; display: flex; flex-direction: column; gap: var(--space-3);
+  /* El área de scroll se extiende por fuera del riel para no recortar las pestañas que sobresalen. */
+  margin-right: calc(-1 * var(--tab-protrude)); padding: 0 var(--tab-protrude) 0 0; overflow-x: hidden; overflow-y: auto; scrollbar-width: none; }
+.v-nav--rail .v-nav__scroll::-webkit-scrollbar { display: none; }
+.v-nav--rail .v-nav__group { position: relative; display: flex; flex-direction: column; gap: 2px; }
+.v-nav--rail .v-nav__title { height: 0; margin: 0 !important; padding: 0 0 0 26px; overflow: hidden; opacity: 0; color: var(--on-deep-muted);
+  transition: opacity var(--motion-base) var(--ease), height var(--motion-base) var(--ease); }
+.v-rail:hover .v-nav__title, .v-rail:focus-within .v-nav__title, .v-rail.is-open .v-nav__title { height: 20px; opacity: 1; }
+.v-nav--rail .v-nav__item { position: relative; display: flex; align-items: center; gap: var(--space-4); width: calc(100% - 24px); height: var(--control-md); flex: none; margin-left: 12px;
+  padding: 0 0 0 11px; border: 0; border-radius: var(--radius-lg); background: none; color: var(--on-deep-muted); text-align: left; cursor: pointer; white-space: nowrap;
+  transition: background-color var(--motion-fast) var(--ease), color var(--motion-fast) var(--ease); }
+.v-nav--rail .v-nav__item:hover { background: var(--deep-raised); color: var(--on-deep); }
+.v-nav--rail .v-nav__item:focus-visible { outline: 2px solid var(--on-deep); outline-offset: -2px; }
+.v-nav--rail .v-nav__ico { position: relative; display: grid; place-items: center; flex: none; width: 34px; height: 34px; }
+.v-nav__dot { position: absolute; top: 3px; right: 3px; width: 9px; height: 9px; border-radius: 50%; background: var(--accent); box-shadow: 0 0 0 2px var(--deep); }
+.v-nav--rail .v-nav__text { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; opacity: 0; transition: opacity var(--motion-fast) var(--ease); }
+.v-nav--rail .v-nav__count { opacity: 0; margin-right: var(--space-3); }
+.v-rail:hover .v-nav__text, .v-rail:focus-within .v-nav__text, .v-rail.is-open .v-nav__text,
+.v-rail:hover .v-nav__count, .v-rail:focus-within .v-nav__count, .v-rail.is-open .v-nav__count { opacity: 1; }
+/* Ítem activo: el fondo de la pantalla entra en el riel, como en un fichero.
+   Arriba y abajo, esquinas invertidas redondas para que el riel "abrace" la pestaña. */
+.v-nav--rail .v-nav__item.is-on { z-index: 1; width: calc(100% - 12px + var(--tab-protrude)); background: var(--tab); color: var(--on-tab); font-weight: 600;
+  border-radius: var(--radius-lg) 0 0 var(--radius-lg); }
+.v-nav--rail .v-nav__item.is-on::before, .v-nav--rail .v-nav__item.is-on::after { content: ""; position: absolute; right: var(--tab-protrude);
+  width: var(--fillet); height: var(--fillet); background: var(--tab); pointer-events: none; }
+.v-nav--rail .v-nav__item.is-on::before { bottom: 100%; -webkit-mask: radial-gradient(circle at 0 0, transparent calc(var(--fillet) - 0.5px), #000 var(--fillet)); mask: radial-gradient(circle at 0 0, transparent calc(var(--fillet) - 0.5px), #000 var(--fillet)); }
+.v-nav--rail .v-nav__item.is-on::after { top: 100%; -webkit-mask: radial-gradient(circle at 0 100%, transparent calc(var(--fillet) - 0.5px), #000 var(--fillet)); mask: radial-gradient(circle at 0 100%, transparent calc(var(--fillet) - 0.5px), #000 var(--fillet)); }
+.v-nav--rail .v-nav__item.is-on:hover { background: var(--tab); }
+.v-nav--rail .v-nav__item.is-on .v-nav__dot { box-shadow: 0 0 0 2px var(--tab); }
+/* Con el riel abierto (encima del contenido) el activo deja de ser pestaña: es un recuadro simple con los mismos
+   márgenes que los demás ítems, sin unirse al borde. Al cerrarse vuelve a ser la pestaña. */
+.v-rail:hover .v-nav__item.is-on, .v-rail:focus-within .v-nav__item.is-on, .v-rail.is-open .v-nav__item.is-on {
+  width: calc(100% - 24px); border-radius: var(--radius-lg); }
+.v-rail:hover .v-nav__item.is-on::before, .v-rail:hover .v-nav__item.is-on::after,
+.v-rail:focus-within .v-nav__item.is-on::before, .v-rail:focus-within .v-nav__item.is-on::after,
+.v-rail.is-open .v-nav__item.is-on::before, .v-rail.is-open .v-nav__item.is-on::after { display: none; }
+.v-nav--rail .v-nav__foot { display: flex; align-items: center; min-height: 64px; padding: var(--space-3) 0 0 20px; margin-top: var(--space-3); border-top: 1px solid var(--deep-raised); overflow: hidden; white-space: nowrap; }
+.v-nav--rail .v-nav__foot .v-actor { gap: var(--space-3); color: var(--on-deep); }
+.v-nav--rail .v-nav__foot .label { color: var(--on-deep); }
+.v-nav--rail .v-nav__foot .v-actor .v-avatar { width: 40px; height: 40px; font-size: 14px; line-height: 20px; background: var(--deep-raised); color: var(--on-deep); }
+.v-nav--rail .v-nav__foot .v-muted { color: var(--on-deep-muted); }
+.v-nav--rail .v-nav__foot .v-actor__text { opacity: 0; transition: opacity var(--motion-fast) var(--ease); }
+.v-rail:hover .v-nav__foot .v-actor__text, .v-rail:focus-within .v-nav__foot .v-actor__text, .v-rail.is-open .v-nav__foot .v-actor__text { opacity: 1; }
+@media (prefers-reduced-motion: reduce) { .v-nav--rail, .v-nav--rail * { transition: none !important; } }
+
+/* ---------- Nav · barra inferior flotante (teléfono y tableta) ---------- */
+.v-nav--bottom { margin: 0 var(--rail-inset) calc(var(--rail-inset) + env(safe-area-inset-bottom, 0px)); padding: var(--space-2);
+  background: var(--deep); border: 0; border-radius: var(--rail-radius); box-shadow: var(--shadow-lg); }
+.v-nav--bottom .v-nav__item { color: var(--on-deep-muted); }
+.v-nav--bottom .v-nav__item.is-on { color: var(--on-deep); }
+.v-nav--bottom .v-nav__ico { transition: transform var(--motion-base) var(--ease), background-color var(--motion-fast) var(--ease); }
+.v-nav--bottom .v-nav__item.is-on .v-nav__ico { background: var(--tab); color: var(--on-tab); transform: translateY(-14px); height: 44px; width: 56px; border-radius: var(--radius-pill); box-shadow: 0 0 0 6px var(--deep);
+  /* El círculo es 12 px más alto que el ícono: lo descuenta para que la etiqueta quede alineada con las demás. */
+  margin-bottom: -12px; }
+
+/* ---------- MiniCalendar (v2): días ocupados de un vistazo ---------- */
+.v-minical { display: flex; flex-direction: column; gap: var(--space-3); }
+.v-minical__head { display: flex; align-items: center; justify-content: space-between; gap: var(--space-2); }
+.v-minical__head .label { margin: 0; }
+.v-minical__nav { display: flex; gap: 2px; margin-right: -8px; }
+.v-minical__grid { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 4px 2px; justify-items: center; }
+.v-minical__wd { padding-bottom: 2px; }
+.v-minical__day { display: grid; place-items: center; width: 36px; height: 36px; padding: 0; border: 0; border-radius: var(--radius-pill); background: none; color: var(--ink); cursor: pointer; }
+.v-minical__day:hover { background: var(--surface-sunken); }
+.v-minical__day.is-reservado { background: var(--brand); color: var(--on-brand); }
+.v-minical__day.is-prereserva { background: var(--brand-tint); color: var(--brand-ink); }
+.v-minical__day.is-today { box-shadow: inset 0 0 0 2px var(--accent); }
+.v-minical__day.is-selected { outline: 2px solid var(--ink); outline-offset: 2px; }
+.v-minical__legend { display: flex; gap: var(--space-4); }
+.v-minical__legend span { display: inline-flex; align-items: center; gap: 6px; }
+.v-minical__key { display: inline-block; width: 10px; height: 10px; border-radius: 50%; }
+.v-minical__key.is-reservado { background: var(--brand); }
+.v-minical__key.is-prereserva { background: var(--brand-tint); box-shadow: inset 0 0 0 1px var(--brand); }
+
+/* ---------- Tabs segmentadas (v2): pastilla activa azul sólida, sin reborde ni aire alrededor ---------- */
+.v-tabs--segmented { padding: 0; gap: 2px; background: var(--surface-sunken); border: 0; }
+.v-tabs--segmented .v-tab { height: 40px; padding: 0 var(--space-5); color: var(--ink); }
+.v-tabs--segmented .v-tab.is-on { background: var(--brand); color: var(--on-brand); box-shadow: none; font-weight: 600; }
+.v-tabs--segmented .v-tab.is-on .v-tab__count { background: var(--on-brand); color: var(--brand); }

@@ -21,12 +21,14 @@ export function PaginaIngreso() {
   return (
     <main className="pagina-ingreso">
       <div className="pagina-ingreso__columna">
-        <Logo className="pagina-ingreso__logo" />
-        <div className="pagina-ingreso__titulos">
-          <h1 className="display-sm">Ingresá a tu cuenta</h1>
-          <p className="body-lg v-muted">El sistema del complejo Avril · Club de Campo · Santa Bárbara</p>
+        <Logo reverse className="pagina-ingreso__logo" />
+        <div className="pagina-ingreso__ficha">
+          <div className="pagina-ingreso__titulos">
+            <h1 className="h1">Ingresá a tu cuenta</h1>
+            <p className="body v-muted">El sistema del complejo Avril · Club de Campo · Santa Bárbara</p>
+          </div>
+          {estado !== 'cargando' && <FormularioIngreso alIngresar={() => destino && navegar(destino, { replace: true })} />}
         </div>
-        {estado !== 'cargando' && <FormularioIngreso alIngresar={() => destino && navegar(destino, { replace: true })} />}
       </div>
     </main>
   );

@@ -9,6 +9,7 @@ import {
   type AgendaEvent, type EventStatus, type SalonId,
 } from '../../ds';
 import { disponibilidad } from '../agenda/disponibilidad';
+import { MacheteAgenda } from '../agenda/MacheteAgenda';
 import { NombreTurno } from '../agenda/NombreTurno';
 import { Cargando } from '../comun/Cargando';
 import { fechaCorta } from '../comun/formato';
@@ -123,16 +124,20 @@ function Reprogramar({ ficha }: { ficha: Ficha }) {
                 onSelectDay={(iso) => setDia(iso)}
                 onPrev={() => { setMes(sumarMeses(mes, -1)); setDia(null); }}
                 onNext={() => { setMes(sumarMeses(mes, 1)); setDia(null); }}
+                salones={ag.salones}
               />
             </Card>
-            <UnidadesDelDia
-              agenda={ag}
-              fecha={dia}
-              hoy={hoy}
-              ficha={ficha}
-              elegida={elegida}
-              alElegir={(u) => { limpiarError(); setElegida(u); }}
-            />
+            <div className="agenda__lateral">
+              <UnidadesDelDia
+                agenda={ag}
+                fecha={dia}
+                hoy={hoy}
+                ficha={ficha}
+                elegida={elegida}
+                alElegir={(u) => { limpiarError(); setElegida(u); }}
+              />
+              <MacheteAgenda />
+            </div>
           </div>
         )}
       </Cargando>

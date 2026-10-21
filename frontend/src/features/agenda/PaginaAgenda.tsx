@@ -11,6 +11,7 @@ import { Cargando } from '../comun/Cargando';
 import { Encabezado } from '../layout/paginas';
 import { useSesion } from '../sesion/contexto';
 import { disponibilidad } from './disponibilidad';
+import { MacheteAgenda } from './MacheteAgenda';
 import { NombreTurno } from './NombreTurno';
 import { DialogoPreReserva, type UnidadElegida } from './DialogoPreReserva';
 import './agenda.css';
@@ -102,17 +103,21 @@ export function PaginaAgenda() {
                 onSelectDay={(iso) => cambiar({ dia: iso })}
                 onPrev={() => cambiar({ mes: sumarMeses(mes, -1), dia: null })}
                 onNext={() => cambiar({ mes: sumarMeses(mes, 1), dia: null })}
+                salones={ag.salones}
                 resaltar={salon || estado ? (u) => (!salon || u.salon === salon) && (!estado || u.status === estado) : undefined}
               />
             </Card>
-            <DetalleDelDia
-              agenda={ag}
-              fecha={dia}
-              hoy={hoy}
-              ver={ver}
-              alVer={(codigo) => cambiar({ ver: codigo })}
-              alPreReservar={preReserva ? (u) => { setRegistrada(null); setElegida(u); } : undefined}
-            />
+            <div className="agenda__lateral">
+              <DetalleDelDia
+                agenda={ag}
+                fecha={dia}
+                hoy={hoy}
+                ver={ver}
+                alVer={(codigo) => cambiar({ ver: codigo })}
+                alPreReservar={preReserva ? (u) => { setRegistrada(null); setElegida(u); } : undefined}
+              />
+              <MacheteAgenda />
+            </div>
             {elegida && (
               <DialogoPreReserva
                 agenda={ag}

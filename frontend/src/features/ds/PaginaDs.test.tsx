@@ -10,7 +10,7 @@ describe('página /_ds', () => {
     for (const titulo of [
       'Icon', 'Button e IconButton', 'Input, Select, Combobox, SelectorArchivos, Checkbox, Switch y Stepper', 'Alert', 'Dialog y EmptyState', 'Badge',
       'StatusChip: estados del evento', 'SalonTag', 'Card, Actor y Stat', 'Table', 'Tabs', 'Timeline', 'Nav', 'AgendaGrid',
-      'EventCard', 'StockLevel y MovementCard',
+      'EventCard', 'StockLevel y MovementCard', 'Card v2: tonos, solapa y muesca', 'MiniCalendar',
     ]) {
       expect(screen.getByRole('heading', { name: titulo })).toBeInTheDocument();
     }

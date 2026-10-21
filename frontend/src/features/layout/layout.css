@@ -1,19 +1,28 @@
-/* Marco de la app: Nav lateral (≥ 960 px) o inferior (< 960 px). Márgenes: space-4 en teléfono, space-6 desde tableta. */
+/* Marco de la app: riel flotante (≥ 960 px) o barra inferior flotante (< 960 px). Márgenes: space-4 en teléfono, space-6 desde tableta. */
 .app { min-height: 100vh; min-height: 100dvh; }
 .app__lateral { display: none; }
-.app__contenido { max-width: var(--content-max); margin: 0 auto; padding: var(--space-6) var(--space-4) calc(96px + env(safe-area-inset-bottom, 0px)); }
+/* Abajo queda lugar para la barra flotante y para el ítem activo, que sube sobre ella. */
+.app__contenido { max-width: var(--content-max); margin: 0 auto; padding: var(--space-6) var(--space-4) calc(112px + env(safe-area-inset-bottom, 0px)); }
 @media (min-width: 640px) { .app__contenido { padding-inline: var(--space-6); } }
 .app__inferior { position: fixed; z-index: var(--z-nav); left: 0; right: 0; bottom: 0; }
 
 @media (min-width: 960px) {
-  .app { display: grid; grid-template-columns: var(--sidebar-w) minmax(0, 1fr); }
-  .app__lateral { display: block; position: sticky; top: 0; height: 100vh; height: 100dvh; }
+  /* La columna reserva siempre el riel cerrado: abierto, se dibuja por encima del contenido y no lo empuja. */
+  .app { display: grid; grid-template-columns: calc(var(--rail-w) + 2 * var(--rail-inset)) minmax(0, 1fr); }
+  .app__lateral { display: block; position: sticky; z-index: var(--z-nav); top: 0; height: 100vh; height: 100dvh; padding: var(--rail-inset); }
   .app__contenido { width: 100%; padding: var(--space-8) var(--space-6); }
   .app__inferior { display: none; }
 }
 
 .app__cuenta { display: flex; flex-direction: column; gap: var(--space-2); }
 .app__cuenta-acciones { display: flex; flex-wrap: wrap; gap: var(--space-1); margin-left: calc(-1 * var(--space-3)); }
+/* En el riel la cuenta va sobre el azul profundo: cerrado se ve solo el avatar; abierto, el nombre y las acciones. */
+.v-nav--rail .app__cuenta-acciones { opacity: 0; transition: opacity var(--motion-fast) var(--ease); }
+.v-rail:hover .app__cuenta-acciones, .v-rail:focus-within .app__cuenta-acciones, .v-rail.is-open .app__cuenta-acciones { opacity: 1; }
+.v-nav--rail .app__cuenta-acciones .v-btn--text { color: var(--on-deep); }
+.v-nav--rail .app__cuenta-acciones .v-btn--text:hover { background: var(--deep-raised); }
+.v-nav--rail .app__cuenta-acciones .v-btn:focus-visible { outline-color: var(--on-deep); }
+@media (prefers-reduced-motion: reduce) { .v-nav--rail .app__cuenta-acciones { transition: none; } }
 
 /* Encabezado común de las pantallas */
 .pantalla { display: flex; flex-direction: column; gap: var(--space-6); }

@@ -15,5 +15,8 @@
 .ds-agenda { width: 100%; max-width: 760px; }
 .ds-rellenos { border-collapse: collapse; color: var(--ink); }
 .ds-rellenos th, .ds-rellenos td { padding: var(--space-2) var(--space-4); text-align: left; border-bottom: 1px solid var(--line); }
-.ds-rellenos td .v-pip { width: 28px; height: 16px; }
+.ds-rellenos td .v-pip { --pip: 18px; }
 .ds-nota { width: 100%; }
+.ds-nav-riel { display: flex; align-items: flex-start; gap: var(--space-8); height: 420px; }
+.ds-folder { width: 100%; max-width: 560px; }
+.ds-minical { width: 100%; max-width: 340px; }

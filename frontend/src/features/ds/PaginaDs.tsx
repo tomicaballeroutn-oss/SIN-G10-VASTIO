@@ -1,7 +1,7 @@
 import { useState, type ReactNode } from 'react';
 import {
-  Actor, AgendaGrid, Alert, Badge, Button, CantidadEnCajas, Card, Checkbox, Combobox, Dialog, EmptyState, EventCard, Icon, IconButton, Input,
-  LectorCodigo, MovementCard, Nav, SalonTag, Select, SelectorArchivos, Stat, StatusChip, Stepper, StockLevel, Switch, Table, Tabs, Timeline,
+  Actor, AgendaGrid, AgendaLeyenda, Alert, Badge, Button, CantidadEnCajas, Card, Checkbox, Combobox, Dialog, EmptyState, EventCard, Icon, IconButton, Input,
+  LectorCodigo, Logo, MiniCalendar, MovementCard, Nav, SalonTag, Select, SelectorArchivos, Stat, StatusChip, Stepper, StockLevel, Switch, Table, Tabs, Timeline,
   ESTADOS_DEL_EVENTO, ORDEN_SALONES, SALONES, aplicarTema, cantidadLegible, temaGuardado, type AgendaEvent, type EventStatus,
   type IniciarLector, type Tema,
 } from '../../ds';
@@ -118,6 +118,7 @@ export function PaginaDs() {
   const [invitados, setInvitados] = useState(180);
   const [nav, setNav] = useState('agenda');
   const [dia, setDia] = useState('2026-09-26');
+  const [solapa, setSolapa] = useState('hoy');
 
   function cambiarTema(t: Tema) {
     setTema(t);
@@ -296,6 +297,21 @@ export function PaginaDs() {
         <Stat label="Consumo real" value="36" unit="cajones" />
       </Seccion>
 
+      <Seccion titulo="Card v2: tonos, solapa y muesca">
+        <Card tab="Sáb 26 sep" title="Bruno y Martina" eyebrow="Casamiento">
+          <p className="body">Solapa: un rótulo corto (día, grupo, período) que no repite el título.</p>
+        </Card>
+        <Card eyebrow="Confirmado" title="Gala anual" notch={<IconButton icon="arrow-right" label="Abrir evento" variant="solid" />}>
+          <p className="body">Muesca: un solo botón redondo con la acción que sigue.</p>
+        </Card>
+        <Card tone="deep" eyebrow="Esta semana" title="6 eventos">
+          <p className="body v-muted">Confirmado · 4 · Pre-reserva · 2</p>
+        </Card>
+        <Card tone="brand-tint" title="Registrar pre-reserva"><p className="body-sm">Tono de acceso.</p></Card>
+        <Card tone="accent-tint" title="Novedades"><p className="body-sm">Tono de acceso.</p></Card>
+        <Card tone="sunken" title="Bebidas"><p className="body-sm">Tono de acceso.</p></Card>
+      </Seccion>
+
       <Seccion titulo="Table">
         <Table
           caption="Ingresos al depósito"
@@ -322,6 +338,23 @@ export function PaginaDs() {
             { id: 'santa-barbara', label: 'Santa Bárbara', salon: 'santa-barbara', hint: '2 libres' },
           ]}
         />
+        <Tabs
+          variant="segmented"
+          label="Filtro de eventos"
+          items={[{ id: 'todos', label: 'Todos' }, { id: 'prereservas', label: 'Pre-reservas', count: 3 }, { id: 'senados', label: 'Señados' }]}
+        />
+        <div className="ds-folder">
+          <Tabs
+            variant="folder"
+            label="Próximos días"
+            value={solapa}
+            onChange={setSolapa}
+            items={[{ id: 'hoy', label: 'Hoy' }, { id: 'manana', label: 'Mañana' }, { id: 'sab', label: 'Sáb 26' }]}
+          />
+          <Card>
+            <p className="body">Solapas folder: la activa baja a la ficha de abajo con esquinas invertidas.</p>
+          </Card>
+        </div>
       </Seccion>
 
       <Seccion titulo="Timeline">
@@ -335,6 +368,23 @@ export function PaginaDs() {
       </Seccion>
 
       <Seccion titulo="Nav">
+        <div className="ds-nav-riel">
+          <Nav
+            layout="rail"
+            label="Riel de ejemplo"
+            value={nav}
+            onSelect={setNav}
+            logo={<Logo variant="marca" reverse />}
+            items={[
+              { id: 'inicio', label: 'Inicio', icon: 'house' },
+              { id: 'agenda', label: 'Agenda', icon: 'calendar', group: 'Agenda' },
+              { id: 'eventos', label: 'Eventos', icon: 'clipboard-list', group: 'Agenda', badge: 2 },
+              { id: 'existencias', label: 'Existencias', icon: 'package', group: 'Bebidas' },
+              { id: 'usuarios', label: 'Usuarios y perfiles', icon: 'users', group: 'Gestión' },
+            ]}
+          />
+          <p className="body-sm v-muted">Riel: pasá el mouse o llegá con el teclado para abrirlo.</p>
+        </div>
         <div className="ds-nav-lateral">
           <Nav
             value={nav}
@@ -368,6 +418,24 @@ export function PaginaDs() {
         <div className="ds-agenda">
           <AgendaGrid year={2026} month={8} events={EVENTOS_DEMO} today="2026-09-28" selected={dia} onSelectDay={setDia} onPrev={() => {}} onNext={() => {}} />
         </div>
+        <div className="ds-minical">
+          <AgendaLeyenda defaultOpen />
+        </div>
+      </Seccion>
+
+      <Seccion titulo="MiniCalendar">
+        <Card className="ds-minical">
+          <MiniCalendar
+            year={2026}
+            month={8}
+            today="2026-09-28"
+            selected={dia}
+            onSelectDay={setDia}
+            onPrev={() => {}}
+            onNext={() => {}}
+            days={{ '2026-09-05': 'reservado', '2026-09-12': 'reservado', '2026-09-19': 'prereserva', '2026-09-26': 'reservado', '2026-09-27': 'prereserva' }}
+          />
+        </Card>
       </Seccion>
 
       <Seccion titulo="EventCard">

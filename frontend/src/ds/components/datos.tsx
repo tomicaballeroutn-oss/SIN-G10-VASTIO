@@ -1,5 +1,5 @@
 import { useState, type KeyboardEvent, type ReactNode, type SyntheticEvent, type JSX } from 'react';
-import type { BadgeTone, EventStatus, IconName, TimelineTone } from '../tipos';
+import type { BadgeTone, EventStatus, IconName, SalonId, TimelineTone } from '../tipos';
 import { cx, iniciales } from '../util';
 import { Badge } from './feedback';
 import { StatusChip } from './estado';
@@ -108,6 +108,10 @@ export interface TabItem {
   label: string;
   icon?: IconName;
   count?: number;
+  /** Punto con el color del salón, siempre junto a su nombre. */
+  salon?: SalonId;
+  /** Ayuda corta debajo del nombre, p. ej. «1 libre». Pensada para la variante `bloques`. */
+  hint?: string;
 }
 
 export interface TabsProps {
@@ -115,7 +119,8 @@ export interface TabsProps {
   value?: string;
   defaultValue?: string;
   onChange?: (id: string) => void;
-  variant?: 'underline' | 'segmented';
+  /** `bloques`: opciones de igual ancho y de dos renglones (nombre y ayuda), como el selector de salón de la agenda. */
+  variant?: 'underline' | 'segmented' | 'bloques';
   label?: string;
   className?: string;
 }
@@ -154,7 +159,13 @@ export function Tabs({ items, value, defaultValue, onChange, variant = 'underlin
             onKeyDown={(e) => alTeclear(e, i)}
           >
             {it.icon && <Icon name={it.icon} size={18} />}
-            {it.label}
+            {it.salon && <span className={cx('v-salon__dot', `v-salon--${it.salon}`)} aria-hidden />}
+            {it.hint ? (
+              <span className="v-tab__texto">
+                <span>{it.label}</span>{' '}
+                <span className="v-tab__hint caption">{it.hint}</span>
+              </span>
+            ) : it.label}
             {it.count != null && <span className="v-tab__count caption">{it.count}</span>}
           </button>
         );

@@ -5,7 +5,7 @@ import { hora } from '../../api/catalogos';
 import type { PreReservaRegistrada } from '../../api/eventos';
 import { useDatos } from '../../api/useDatos';
 import {
-  AgendaGrid, Alert, Button, Card, ESTADOS, ESTADOS_DEL_EVENTO, SalonTag, Select, StatusChip,
+  AgendaGrid, Alert, Button, Card, ESTADOS, ESTADOS_DEL_EVENTO, Icon, Select, StatusChip, Tabs,
   type AgendaEvent, type EventStatus, type SalonId,
 } from '../../ds';
 import { Cargando } from '../comun/Cargando';
@@ -25,7 +25,8 @@ const MES_VALIDO = /^\d{4}-(0[1-9]|1[0-2])$/;
 
 /**
  * UI-07 · Consultar agenda: un mes con las seis unidades de cada día (3 salones × 2 turnos).
- * Mes, día elegido y filtros quedan en la dirección, así se comparte o se recarga sin perder el lugar.
+ * Mes, día elegido, salón que se mira en el detalle y filtros quedan en la dirección,
+ * así se comparte o se recarga sin perder el lugar.
  */
 export function PaginaAgenda() {
   const [busqueda, setBusqueda] = useSearchParams();
@@ -35,6 +36,8 @@ export function PaginaAgenda() {
   const dia = busqueda.get('dia')?.startsWith(mes) ? busqueda.get('dia') : null;
   const salon = (busqueda.get('salon') ?? '') as SalonId | '';
   const estado = (busqueda.get('estado') ?? '') as EventStatus | '';
+  // Sin elegir, el detalle arranca en el salón del filtro.
+  const ver = busqueda.get('ver') || salon || null;
 
   const cargar = useCallback(() => agenda.mes(mes), [mes]);
   const datos = useDatos(cargar);
@@ -105,6 +108,8 @@ export function PaginaAgenda() {
               agenda={ag}
               fecha={dia}
               hoy={hoy}
+              ver={ver}
+              alVer={(codigo) => cambiar({ ver: codigo })}
               alPreReservar={preReserva ? (u) => { setRegistrada(null); setElegida(u); } : undefined}
             />
             {elegida && (
@@ -134,11 +139,17 @@ function eventosDelMes(ag: Agenda): AgendaEvent[] {
   }));
 }
 
-/** Las seis unidades del día elegido, por turno y salón, con quién la tiene o por qué está bloqueada. */
-function DetalleDelDia({ agenda: ag, fecha, hoy, alPreReservar }: {
+/**
+ * El día elegido, un salón a la vez: un botón por salón con cuántos turnos le quedan libres y, debajo,
+ * los dos turnos del salón elegido con quién los tiene o por qué están bloqueados.
+ */
+function DetalleDelDia({ agenda: ag, fecha, hoy, ver, alVer, alPreReservar }: {
   agenda: Agenda;
   fecha: string | null;
   hoy: string;
+  /** Código del salón que se mira; sin él, el primero. */
+  ver: string | null;
+  alVer: (codigo: SalonId) => void;
   /** Sin él, el perfil no pre-reserva y no se ofrece el botón. */
   alPreReservar?: (unidad: UnidadElegida) => void;
 }) {
@@ -152,51 +163,74 @@ function DetalleDelDia({ agenda: ag, fecha, hoy, alPreReservar }: {
   if (!fecha) {
     return (
       <Card className="agenda__dia agenda__dia--vacio">
-        <p className="body-sm v-muted">Tocá un día para ver sus seis unidades y quién tiene cada una.</p>
+        <p className="body-sm v-muted">Tocá un día para ver qué turnos le quedan libres a cada salón y quién tiene los demás.</p>
       </Card>
     );
   }
 
+  const salon = ag.salones.find((s) => s.codigo === ver) ?? ag.salones[0];
+  const ocupadaEn = (salonId: number, turnoId: number) =>
+    ag.unidades.find((u) => u.fecha === fecha && u.salonId === salonId && u.turnoId === turnoId);
+
   return (
     <div ref={ref} className="agenda__dia">
       <Card title={fechaLarga(fecha)} eyebrow="Día elegido">
-        {ag.turnos.map((turno) => (
-          <div key={turno.id} className="agenda__turno">
-            <p className="overline v-muted">
-              {turno.nombre} · {hora(turno.horaInicio)} a {hora(turno.horaFin)}
-            </p>
-            <ul className="agenda__unidades">
-              {ag.salones.map((salon) => {
-                const ocupada = ag.unidades.find((u) => u.fecha === fecha && u.salonId === salon.id && u.turnoId === turno.id);
-                const estado: EventStatus = ocupada ? estadoDs(ocupada.estado) : 'disponible';
-                return (
-                  <li key={salon.id} className="agenda__unidad">
-                    <div className="agenda__unidad-cabeza">
-                      <SalonTag salon={salon.codigo} label={salon.nombre} />
-                      <StatusChip status={estado} size="sm" />
+        <div className="agenda__panel">
+          <Tabs
+            variant="bloques"
+            label="Salón"
+            value={salon.codigo}
+            onChange={(codigo) => alVer(codigo as SalonId)}
+            items={ag.salones.map((s) => ({
+              id: s.codigo,
+              label: s.nombre,
+              salon: s.codigo,
+              hint: disponibilidad(s.activo, ag.turnos.filter((t) => !ocupadaEn(s.id, t.id)).length, fecha < hoy),
+            }))}
+          />
+          <div role="tabpanel" aria-label={salon.nombre} className="agenda__turnos">
+            {ag.turnos.map((turno) => {
+              const ocupada = ocupadaEn(salon.id, turno.id);
+              const estado: EventStatus = ocupada ? estadoDs(ocupada.estado) : 'disponible';
+              return (
+                <div key={turno.id} className="agenda__caja">
+                  <div className="agenda__unidad-cabeza">
+                    <p className="agenda__turno-nombre">
+                      <Icon name={turno.codigo === 'noche' ? 'moon' : 'sun'} size={18} />
+                      <span className="label">{turno.nombre}</span>
+                      <span className="body-sm v-muted">{hora(turno.horaInicio)} a {hora(turno.horaFin)}</span>
+                    </p>
+                    <StatusChip status={estado} size="sm" />
+                  </div>
+                  <Descripcion ocupada={ocupada} salonActivo={salon.activo} pasada={fecha < hoy} alAbrir={(id) => navegar(`/eventos/${id}`)} />
+                  {!ocupada && salon.activo && fecha >= hoy && alPreReservar && (
+                    <div className="agenda__accion">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        icon="plus"
+                        onClick={() => alPreReservar({ fecha, salonId: salon.id, turnoId: turno.id })}
+                      >
+                        Registrar pre-reserva
+                      </Button>
                     </div>
-                    <Descripcion ocupada={ocupada} salonActivo={salon.activo} pasada={fecha < hoy} alAbrir={(id) => navegar(`/eventos/${id}`)} />
-                    {!ocupada && salon.activo && fecha >= hoy && alPreReservar && (
-                      <div>
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          icon="plus"
-                          onClick={() => alPreReservar({ fecha, salonId: salon.id, turnoId: turno.id })}
-                        >
-                          Registrar pre-reserva
-                        </Button>
-                      </div>
-                    )}
-                  </li>
-                );
-              })}
-            </ul>
+                  )}
+                </div>
+              );
+            })}
           </div>
-        ))}
+        </div>
       </Card>
     </div>
   );
+}
+
+/** Ayuda del botón de cada salón. En un día pasado no hay nada que ofrecer: no se cuenta. */
+function disponibilidad(activo: boolean, libres: number, pasado: boolean): string | undefined {
+  if (!activo) return 'Dado de baja';
+  if (pasado) return undefined;
+  if (libres === 0) return 'Sin lugar';
+  return libres === 1 ? '1 libre' : `${libres} libres`;
 }
 
 function Descripcion({ ocupada, salonActivo, pasada, alAbrir }: {

@@ -203,6 +203,12 @@ h2.h2, h3.h3, h3.h4 { margin: 0; color: var(--ink); }
 .v-tabs--segmented { display: inline-flex; padding: 4px; background: var(--surface-sunken); border: 1px solid var(--line); border-radius: var(--radius-pill); }
 .v-tabs--segmented .v-tab { height: 36px; border-radius: var(--radius-pill); }
 .v-tabs--segmented .v-tab.is-on { background: var(--surface-raised); color: var(--ink); box-shadow: var(--shadow-xs); }
+/* Bloques: opciones de igual ancho que ocupan toda la fila; el nombre puede partirse y lleva una ayuda debajo. */
+.v-tabs--bloques { display: grid; grid-auto-flow: column; grid-auto-columns: minmax(0, 1fr); padding: 4px; background: var(--surface-sunken); border: 1px solid var(--line); border-radius: var(--radius-lg); overflow: visible; }
+.v-tabs--bloques .v-tab { height: auto; min-height: 60px; padding: var(--space-2); border-radius: var(--radius-md); white-space: normal; line-height: 1.25; justify-content: center; }
+.v-tabs--bloques .v-tab.is-on { background: var(--surface-raised); color: var(--ink); box-shadow: var(--shadow-sm); }
+.v-tab__texto { display: flex; flex-direction: column; min-width: 0; text-align: left; }
+.v-tab__hint { color: var(--ink-muted); font-weight: 400; }
 
 /* ---------- Actor ---------- */
 .v-actor { display: flex; align-items: center; gap: var(--space-3); min-width: 0; }

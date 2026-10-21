@@ -8,6 +8,14 @@
 .agenda__dia { scroll-margin-top: var(--space-4); }
 @media (max-width: 1199.98px) { .agenda__dia--vacio { display: none; } }
 
+/* Detalle del día: botones por salón y, debajo, los dos turnos del salón elegido. */
+.agenda__panel { display: flex; flex-direction: column; gap: var(--space-4); }
+.agenda__turnos { display: flex; flex-direction: column; gap: var(--space-3); }
+.agenda__caja { display: flex; flex-direction: column; gap: var(--space-1); padding: var(--space-3); border: 1px solid var(--line); border-radius: var(--radius-md); }
+.agenda__turno-nombre { display: inline-flex; flex-wrap: wrap; align-items: center; gap: var(--space-1) var(--space-2); margin: 0; }
+.agenda__accion { margin-top: var(--space-1); }
+
+/* Lista de unidades por turno: la usa también UI-18 · Reprogramar. */
 .agenda__turno { display: flex; flex-direction: column; gap: var(--space-2); }
 .agenda__turno + .agenda__turno { margin-top: var(--space-2); }
 .agenda__unidades { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; }

@@ -75,4 +75,4 @@
 .reprogramar__fechas p { margin: 0; }
 .reprogramar__motivo { display: grid; gap: var(--space-4); }
 .reprogramar__acciones { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: var(--space-2); }
-.agenda__unidad.is-elegida { outline: 3px solid var(--brand); outline-offset: 4px; border-radius: var(--radius-sm); }
+.agenda__caja.is-elegida { border: 2px solid var(--brand); padding: calc(var(--space-3) - 1px); background: var(--surface-raised); }

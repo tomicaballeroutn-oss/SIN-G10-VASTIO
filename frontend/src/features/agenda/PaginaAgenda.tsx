@@ -1,16 +1,17 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router';
 import { agenda, estadoDs, fechaLarga, hoyEnCordoba, sumarMeses, type Agenda } from '../../api/agenda';
-import { hora } from '../../api/catalogos';
 import type { PreReservaRegistrada } from '../../api/eventos';
 import { useDatos } from '../../api/useDatos';
 import {
-  AgendaGrid, Alert, Button, Card, ESTADOS, ESTADOS_DEL_EVENTO, Icon, Select, StatusChip, Tabs,
+  AgendaGrid, Alert, Button, Card, ESTADOS, ESTADOS_DEL_EVENTO, Select, StatusChip, Tabs,
   type AgendaEvent, type EventStatus, type SalonId,
 } from '../../ds';
 import { Cargando } from '../comun/Cargando';
 import { Encabezado } from '../layout/paginas';
 import { useSesion } from '../sesion/contexto';
+import { disponibilidad } from './disponibilidad';
+import { NombreTurno } from './NombreTurno';
 import { DialogoPreReserva, type UnidadElegida } from './DialogoPreReserva';
 import './agenda.css';
 
@@ -195,11 +196,7 @@ function DetalleDelDia({ agenda: ag, fecha, hoy, ver, alVer, alPreReservar }: {
               return (
                 <div key={turno.id} className="agenda__caja">
                   <div className="agenda__unidad-cabeza">
-                    <p className="agenda__turno-nombre">
-                      <Icon name={turno.codigo === 'noche' ? 'moon' : 'sun'} size={18} />
-                      <span className="label">{turno.nombre}</span>
-                      <span className="body-sm v-muted">{hora(turno.horaInicio)} a {hora(turno.horaFin)}</span>
-                    </p>
+                    <NombreTurno turno={turno} />
                     <StatusChip status={estado} size="sm" />
                   </div>
                   <Descripcion ocupada={ocupada} salonActivo={salon.activo} pasada={fecha < hoy} alAbrir={(id) => navegar(`/eventos/${id}`)} />
@@ -223,14 +220,6 @@ function DetalleDelDia({ agenda: ag, fecha, hoy, ver, alVer, alPreReservar }: {
       </Card>
     </div>
   );
-}
-
-/** Ayuda del botón de cada salón. En un día pasado no hay nada que ofrecer: no se cuenta. */
-function disponibilidad(activo: boolean, libres: number, pasado: boolean): string | undefined {
-  if (!activo) return 'Dado de baja';
-  if (pasado) return undefined;
-  if (libres === 0) return 'Sin lugar';
-  return libres === 1 ? '1 libre' : `${libres} libres`;
 }
 
 function Descripcion({ ocupada, salonActivo, pasada, alAbrir }: {

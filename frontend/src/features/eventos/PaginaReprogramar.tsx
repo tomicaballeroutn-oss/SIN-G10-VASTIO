@@ -1,13 +1,15 @@
 import { useCallback, useState } from 'react';
 import { useNavigate, useParams } from 'react-router';
 import { agenda, estadoDs, fechaLarga, hoyEnCordoba, sumarMeses, type Agenda } from '../../api/agenda';
-import { catalogos, hora } from '../../api/catalogos';
+import { catalogos } from '../../api/catalogos';
 import { fichas, type Ficha } from '../../api/eventos';
 import { useDatos, useEnvio } from '../../api/useDatos';
 import {
-  AgendaGrid, Alert, Button, Card, Icon, Input, SalonTag, Select, StatusChip, ESTADOS,
+  AgendaGrid, Alert, Button, Card, Icon, Input, Select, StatusChip, Tabs, ESTADOS,
   type AgendaEvent, type EventStatus, type SalonId,
 } from '../../ds';
+import { disponibilidad } from '../agenda/disponibilidad';
+import { NombreTurno } from '../agenda/NombreTurno';
 import { Cargando } from '../comun/Cargando';
 import { fechaCorta } from '../comun/formato';
 import { Encabezado } from '../layout/paginas';
@@ -176,7 +178,11 @@ function eventos(ag: Agenda): AgendaEvent[] {
   }));
 }
 
-/** Las seis unidades del día: las libres se eligen; las ocupadas, la actual y las pasadas dicen por qué no. */
+/**
+ * El día elegido, un salón a la vez, igual que en la agenda: un botón por salón con cuántos turnos le quedan libres
+ * y, debajo, sus dos turnos. Los libres se eligen; los ocupados, la fecha actual y los pasados dicen por qué no.
+ * Arranca en el salón actual del evento.
+ */
 function UnidadesDelDia({ agenda: ag, fecha, hoy, ficha, elegida, alElegir }: {
   agenda: Agenda;
   fecha: string | null;
@@ -185,55 +191,71 @@ function UnidadesDelDia({ agenda: ag, fecha, hoy, ficha, elegida, alElegir }: {
   elegida: UnidadNueva | null;
   alElegir: (u: UnidadNueva) => void;
 }) {
+  const [ver, setVer] = useState(ficha.salon.id);
+
   if (!fecha) {
     return (
       <Card className="agenda__dia agenda__dia--vacio">
-        <p className="body-sm v-muted">Tocá un día para ver qué unidades están libres.</p>
+        <p className="body-sm v-muted">Tocá un día para ver qué turnos le quedan libres a cada salón.</p>
       </Card>
     );
   }
+
+  const salon = ag.salones.find((s) => s.id === ver) ?? ag.salones[0];
+  const ocupadaEn = (salonId: number, turnoId: number) =>
+    ag.unidades.find((u) => u.fecha === fecha && u.salonId === salonId && u.turnoId === turnoId);
+
   return (
     <div className="agenda__dia">
       <Card title={fechaLarga(fecha)} eyebrow="Día elegido">
-        {ag.turnos.map((turno) => (
-          <div key={turno.id} className="agenda__turno">
-            <p className="overline v-muted">{turno.nombre} · {hora(turno.horaInicio)} a {hora(turno.horaFin)}</p>
-            <ul className="agenda__unidades">
-              {ag.salones.map((salon) => {
-                const ocupada = ag.unidades.find((u) => u.fecha === fecha && u.salonId === salon.id && u.turnoId === turno.id);
-                const actual = fecha === ficha.fecha && salon.id === ficha.salon.id && turno.id === ficha.turno.id;
-                const estado: EventStatus = ocupada ? estadoDs(ocupada.estado) : 'disponible';
-                const motivo = actual ? 'Es la fecha actual del evento.'
-                  : ocupada ? `${ESTADOS[estado].label}: no se puede elegir.`
-                    : !salon.activo ? 'Salón dado de baja.'
-                      : fecha < hoy ? 'La fecha ya pasó.' : null;
-                const esLaElegida = elegida?.fecha === fecha && elegida.salonId === salon.id && elegida.turnoId === turno.id;
-                return (
-                  <li key={salon.id} className={esLaElegida ? 'agenda__unidad is-elegida' : 'agenda__unidad'}>
-                    <div className="agenda__unidad-cabeza">
-                      <SalonTag salon={salon.codigo} label={salon.nombre} />
-                      <StatusChip status={estado} size="sm" />
+        <div className="agenda__panel">
+          <Tabs
+            variant="bloques"
+            label="Salón"
+            value={String(salon.id)}
+            onChange={(id) => setVer(Number(id))}
+            items={ag.salones.map((s) => ({
+              id: String(s.id),
+              label: s.nombre,
+              salon: s.codigo,
+              hint: disponibilidad(s.activo, ag.turnos.filter((t) => !ocupadaEn(s.id, t.id)).length, fecha < hoy),
+            }))}
+          />
+          <div role="tabpanel" aria-label={salon.nombre} className="agenda__turnos">
+            {ag.turnos.map((turno) => {
+              const ocupada = ocupadaEn(salon.id, turno.id);
+              const actual = fecha === ficha.fecha && salon.id === ficha.salon.id && turno.id === ficha.turno.id;
+              const estado: EventStatus = ocupada ? estadoDs(ocupada.estado) : 'disponible';
+              const motivo = actual ? 'Es la fecha actual del evento.'
+                : ocupada ? `${ESTADOS[estado].label}: no se puede elegir.`
+                  : !salon.activo ? 'Salón dado de baja.'
+                    : fecha < hoy ? 'La fecha ya pasó.' : null;
+              const esLaElegida = elegida?.fecha === fecha && elegida.salonId === salon.id && elegida.turnoId === turno.id;
+              return (
+                <div key={turno.id} className={esLaElegida ? 'agenda__caja is-elegida' : 'agenda__caja'}>
+                  <div className="agenda__unidad-cabeza">
+                    <NombreTurno turno={turno} />
+                    <StatusChip status={estado} size="sm" />
+                  </div>
+                  {motivo ? (
+                    <p className="body-sm v-muted">{motivo}</p>
+                  ) : (
+                    <div className="agenda__accion">
+                      <Button
+                        variant={esLaElegida ? 'solid' : 'outline'}
+                        size="sm"
+                        icon={esLaElegida ? 'check' : undefined}
+                        onClick={() => alElegir({ fecha, salonId: salon.id, turnoId: turno.id })}
+                      >
+                        {esLaElegida ? 'Elegida' : `Elegir ${turno.nombre.toLowerCase()}`}
+                      </Button>
                     </div>
-                    {motivo ? (
-                      <p className="body-sm v-muted">{motivo}</p>
-                    ) : (
-                      <div>
-                        <Button
-                          variant={esLaElegida ? 'solid' : 'outline'}
-                          size="sm"
-                          icon={esLaElegida ? 'check' : undefined}
-                          onClick={() => alElegir({ fecha, salonId: salon.id, turnoId: turno.id })}
-                        >
-                          {esLaElegida ? `Elegida: ${salon.nombre} · ${turno.nombre}` : `Elegir ${salon.nombre} · ${turno.nombre}`}
-                        </Button>
-                      </div>
-                    )}
-                  </li>
-                );
-              })}
-            </ul>
+                  )}
+                </div>
+              );
+            })}
           </div>
-        ))}
+        </div>
       </Card>
     </div>
   );

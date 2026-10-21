@@ -78,6 +78,11 @@ async function abrirElDia16() {
   return { usuario, dia };
 }
 
+/** El detalle del día muestra un salón a la vez: toca su botón. */
+async function verSalon(usuario: ReturnType<typeof userEvent.setup>, dia: HTMLElement, nombre: string) {
+  await usuario.click(within(dia).getByRole('tab', { name: (accesible) => accesible.startsWith(nombre) }));
+}
+
 beforeEach(() => {
   _reiniciarCliente();
   vi.useFakeTimers({ toFake: ['Date'], now: new Date('2030-03-01T12:00:00Z') });
@@ -93,9 +98,14 @@ describe('UI-18 · reprogramar evento', () => {
     const fetchMock = backend();
     const { usuario, dia } = await abrirElDia16();
 
+    // Arranca en el salón actual del evento; cada salón dice cuántos turnos le quedan libres.
+    expect(within(dia).getByRole('tab', { name: 'Avril 2 libres' })).toHaveAttribute('aria-selected', 'true');
+    expect(within(dia).getByRole('tab', { name: 'Club de Campo 1 libre' })).toBeInTheDocument();
+    await verSalon(usuario, dia, 'Club de Campo');
     expect(within(dia).getByText('Señado: no se puede elegir.')).toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'Confirmar reprogramación' })).toBeDisabled();
-    await usuario.click(within(dia).getByRole('button', { name: 'Elegir Santa Bárbara · Noche' }));
+    await verSalon(usuario, dia, 'Santa Bárbara');
+    await usuario.click(within(dia).getByRole('button', { name: 'Elegir noche' }));
     expect(screen.getByText('Santa Bárbara · sáb 16 mar 2030 · Noche')).toBeInTheDocument();
     await usuario.selectOptions(screen.getByLabelText('Motivo de la reprogramación'), 'Pedido del cliente');
     await usuario.click(screen.getByRole('button', { name: 'Confirmar reprogramación' }));
@@ -115,14 +125,14 @@ describe('UI-18 · reprogramar evento', () => {
     await usuario.click(await screen.findByRole('button', { name: /^sábado 9 de marzo/ }));
     const dia = screen.getByRole('heading', { name: 'sábado 9 de marzo' }).closest('section') as HTMLElement;
     expect(within(dia).getByText('Es la fecha actual del evento.')).toBeInTheDocument();
-    expect(within(dia).queryByRole('button', { name: 'Elegir Avril · Noche' })).not.toBeInTheDocument();
+    expect(within(dia).queryByRole('button', { name: 'Elegir noche' })).not.toBeInTheDocument();
   });
 
   it('pide el motivo antes de confirmar', async () => {
     const fetchMock = backend();
     const { usuario, dia } = await abrirElDia16();
 
-    await usuario.click(within(dia).getByRole('button', { name: 'Elegir Avril · Mediodía' }));
+    await usuario.click(within(dia).getByRole('button', { name: 'Elegir mediodía' }));
     await usuario.click(screen.getByRole('button', { name: 'Confirmar reprogramación' }));
 
     expect(screen.getByLabelText('Motivo de la reprogramación')).toHaveAccessibleDescription('Elegí el motivo de la reprogramación.');
@@ -134,7 +144,8 @@ describe('UI-18 · reprogramar evento', () => {
     const { usuario, dia } = await abrirElDia16();
 
     expect(screen.queryByLabelText('Motivo de la reprogramación')).not.toBeInTheDocument();
-    await usuario.click(within(dia).getByRole('button', { name: 'Elegir Club de Campo · Mediodía' }));
+    await verSalon(usuario, dia, 'Club de Campo');
+    await usuario.click(within(dia).getByRole('button', { name: 'Elegir mediodía' }));
     await usuario.click(screen.getByRole('button', { name: 'Confirmar reprogramación' }));
 
     await screen.findByText(/Evento reprogramado/);
@@ -145,7 +156,8 @@ describe('UI-18 · reprogramar evento', () => {
     const fetchMock = backend(CONTRATADO, () => problema(409, 'FECHA_TOMADA', 'Esa fecha ya está tomada. Elegí otro salón, otra fecha u otro turno.'));
     const { usuario, dia } = await abrirElDia16();
 
-    await usuario.click(within(dia).getByRole('button', { name: 'Elegir Santa Bárbara · Noche' }));
+    await verSalon(usuario, dia, 'Santa Bárbara');
+    await usuario.click(within(dia).getByRole('button', { name: 'Elegir noche' }));
     await usuario.selectOptions(screen.getByLabelText('Motivo de la reprogramación'), 'Pedido del cliente');
     await usuario.click(screen.getByRole('button', { name: 'Confirmar reprogramación' }));
 

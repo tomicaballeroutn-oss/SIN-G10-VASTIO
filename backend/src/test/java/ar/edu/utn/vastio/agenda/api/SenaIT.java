@@ -97,7 +97,7 @@ class SenaIT {
         Map<String, Object> aviso = jdbc.queryForMap(
                 "SELECT notificacion_id, mensaje, usuario_origen_id FROM notificacion WHERE evento_id = ? AND tipo = 'SENA'", preReserva);
         assertThat(aviso).containsEntry("usuario_origen_id", lucia.getId());
-        assertThat((String) aviso.get("mensaje")).startsWith("Seña registrada: Casamiento de Camila Ruiz · Santa Bárbara").doesNotContain("150");
+        assertThat((String) aviso.get("mensaje")).startsWith(lucia.getNombreCompleto() + " registró la seña: Casamiento de Camila Ruiz · Santa Bárbara").doesNotContain("150");
         List<Long> destinatarios = jdbc.queryForList(
                 "SELECT usuario_id FROM notificacion_destinatario WHERE notificacion_id = ?", Long.class, aviso.get("notificacion_id"));
         assertThat(destinatarios).contains(administracion.getId(), coordinacion.getId()).doesNotContain(lucia.getId());

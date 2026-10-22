@@ -28,7 +28,7 @@ import ar.edu.utn.vastio.usuarios.dominio.RolCodigo;
 import ar.edu.utn.vastio.usuarios.dominio.Usuario;
 
 /**
- * Notificar cambios de evento: quién recibe cada aviso (docs/sprint-2.md, decisión 10).
+ * Notificar cambios de evento: quién recibe cada aviso (docs/sprint-2.md, decisión 10) y qué dice.
  */
 @PruebaDeIntegracion
 @Transactional
@@ -63,6 +63,9 @@ class AvisosEventoIT {
     Usuario cocina;
     Usuario barra;
 
+    /** Los avisos con id hasta acá son de acciones anteriores (ver {@link #marcar()}). */
+    long marca;
+
     @BeforeEach
     void personas() {
         lucia = personas.usuario("lucia.avisos", "Lucía Ferreyra", RolCodigo.VENDEDORA);
@@ -84,6 +87,10 @@ class AvisosEventoIT {
         assertThat(destinatarios(evento, "CONTRATO"))
                 .contains(administracion.getId(), coordinacion.getId(), lucia.getId())
                 .doesNotContain(direccion.getId(), ana.getId(), compras.getId(), cocina.getId(), barra.getId());
+        assertThat(mensaje(evento, "CONTRATO", administracion))
+                .startsWith(direccion.getNombreCompleto() + " registró la firma del contrato: Bruno y Martina · Avril");
+        assertThat(mensaje(evento, "CONTRATO", lucia))
+                .startsWith(direccion.getNombreCompleto() + " registró la firma del contrato de tu evento: Bruno y Martina");
     }
 
     @Test
@@ -95,6 +102,8 @@ class AvisosEventoIT {
         assertThat(destinatarios(evento, "CONFIRMACION"))
                 .contains(compras.getId(), cocina.getId(), administracion.getId(), lucia.getId())
                 .doesNotContain(ana.getId(), coordinacion.getId(), barra.getId());
+        assertThat(mensaje(evento, "CONFIRMACION", cocina)).startsWith("Ana Sosa confirmó el evento: Bruno y Martina");
+        assertThat(mensaje(evento, "CONFIRMACION", lucia)).startsWith("Ana Sosa confirmó tu evento: Bruno y Martina");
     }
 
     @Test
@@ -106,6 +115,10 @@ class AvisosEventoIT {
         assertThat(destinatarios(evento, "CANCELACION"))
                 .contains(direccion.getId(), administracion.getId(), compras.getId(), cocina.getId(), lucia.getId(), ana.getId())
                 .doesNotContain(coordinacion.getId(), barra.getId());
+        String tuEvento = coordinacion.getNombreCompleto() + " canceló tu evento: Bruno y Martina";
+        assertThat(mensaje(evento, "CANCELACION", lucia)).startsWith(tuEvento);
+        assertThat(mensaje(evento, "CANCELACION", ana)).startsWith(tuEvento);
+        assertThat(mensaje(evento, "CANCELACION", compras)).startsWith(coordinacion.getNombreCompleto() + " canceló el evento:");
     }
 
     @Test
@@ -127,6 +140,28 @@ class AvisosEventoIT {
         assertThat(destinatarios(evento, "MODIFICACION"))
                 .contains(lucia.getId(), ana.getId(), coordinacion.getId(), administracion.getId())
                 .doesNotContain(direccion.getId(), compras.getId(), cocina.getId());
+        assertThat(mensaje(evento, "MODIFICACION", administracion))
+                .startsWith(direccion.getNombreCompleto() + " cambió la cantidad de invitados: Bruno y Martina · Avril");
+        assertThat(mensaje(evento, "MODIFICACION", ana))
+                .startsWith(direccion.getNombreCompleto() + " cambió la cantidad de invitados de tu evento: Bruno y Martina");
+    }
+
+    @Test
+    void elAvisoDeModificacionNombraLosDatosQueCambiaron() {
+        Evento evento = evento("CONTRATADO", ana);
+
+        avisos.modificacion(evento, List.of("hora_inicio", "servicio.Postre", "contacto", "contacto"), direccion.getId());
+
+        assertThat(mensaje(evento, "MODIFICACION", lucia)).startsWith(direccion.getNombreCompleto()
+                + " cambió la hora de inicio, el servicio de Postre y los contactos de tu evento: Bruno y Martina");
+    }
+
+    @Test
+    void conMuchosDatosNombraTresYCuentaElResto() {
+        assertThat(AvisosEvento.datos(List.of("nombre", "hora_inicio", "cliente.email", "contacto")))
+                .isEqualTo("el nombre, la hora de inicio, el correo del cliente y los contactos");
+        assertThat(AvisosEvento.datos(List.of("nombre", "hora_inicio", "cliente.email", "contacto", "tipo_evento")))
+                .isEqualTo("el nombre, la hora de inicio, el correo del cliente y 2 datos más");
     }
 
     @Test
@@ -163,6 +198,7 @@ class AvisosEventoIT {
         avisos.modificacion(evento, Set.of("servicio.Postre"), true, false, ana.getId());
         assertThat(destinatarios(evento, "MODIFICACION")).contains(cocina.getId()).doesNotContain(compras.getId());
 
+        marcar();
         avisos.modificacion(evento, Set.of("servicio.Bodega"), false, true, ana.getId());
         assertThat(destinatarios(evento, "MODIFICACION")).contains(compras.getId()).doesNotContain(cocina.getId());
     }
@@ -192,9 +228,11 @@ class AvisosEventoIT {
 
         avisos.reprogramacion(evento, "sáb 5/3 · Noche", coordinacion.getId());
 
-        assertThat(jdbc.queryForObject("SELECT mensaje FROM notificacion WHERE evento_id = ? AND tipo = 'REPROGRAMACION'",
-                String.class, evento.getId()))
-                .startsWith("Evento reprogramado: Bruno y Martina · Avril")
+        assertThat(mensaje(evento, "REPROGRAMACION", cocina))
+                .startsWith(coordinacion.getNombreCompleto() + " reprogramó el evento: Bruno y Martina · Avril")
+                .endsWith("(antes sáb 5/3 · Noche)");
+        assertThat(mensaje(evento, "REPROGRAMACION", lucia))
+                .startsWith(coordinacion.getNombreCompleto() + " reprogramó tu evento: Bruno y Martina · Avril")
                 .endsWith("(antes sáb 5/3 · Noche)");
         assertThat(destinatarios(evento, "REPROGRAMACION"))
                 .contains(direccion.getId(), administracion.getId(), compras.getId(), cocina.getId(), lucia.getId(), ana.getId())
@@ -208,11 +246,41 @@ class AvisosEventoIT {
 
         avisos.planner(evento, ana.getId(), "Carla Núñez", coordinacion.getId());
 
-        assertThat(jdbc.queryForObject("SELECT mensaje FROM notificacion WHERE evento_id = ? AND tipo = 'PLANNER_ASIGNADA'",
-                String.class, evento.getId())).startsWith("Planner asignada (Carla Núñez): Bruno y Martina");
         assertThat(destinatarios(evento, "PLANNER_ASIGNADA"))
                 .contains(carla.getId(), ana.getId(), administracion.getId())
                 .doesNotContain(coordinacion.getId(), lucia.getId());
+        String quien = coordinacion.getNombreCompleto();
+        assertThat(mensaje(evento, "PLANNER_ASIGNADA", carla)).startsWith(quien + " te asignó como planner: Bruno y Martina");
+        assertThat(mensaje(evento, "PLANNER_ASIGNADA", ana)).startsWith(quien + " te quitó como planner: Bruno y Martina");
+        assertThat(mensaje(evento, "PLANNER_ASIGNADA", administracion))
+                .startsWith(quien + " asignó a Carla Núñez como planner: Bruno y Martina")
+                .endsWith("(antes Ana Sosa)");
+    }
+
+    @Test
+    void quitarLaPlannerLeAvisaAElla() {
+        Evento evento = evento("CONTRATADO", null);
+
+        avisos.planner(evento, ana.getId(), null, coordinacion.getId());
+
+        String quien = coordinacion.getNombreCompleto();
+        assertThat(mensaje(evento, "PLANNER_ASIGNADA", ana)).startsWith(quien + " te quitó como planner: Bruno y Martina");
+        assertThat(mensaje(evento, "PLANNER_ASIGNADA", administracion))
+                .startsWith(quien + " quitó a Ana Sosa como planner: Bruno y Martina")
+                .doesNotContain("(antes");
+    }
+
+    @Test
+    void laTitularQueTambienEsDeUnPerfilRecibeSoloSuTexto() {
+        Usuario vendedoraYAdministracion = personas.usuario("sofia.avisos", "Sofía Paz", RolCodigo.VENDEDORA,
+                RolCodigo.ADMINISTRACION);
+        long id = escenario.evento("avril", FECHA, "noche", "CONTRATADO", vendedoraYAdministracion, ana, "Bruno y Martina");
+        Evento evento = entityManager.find(Evento.class, id);
+
+        avisos.modificacion(evento, Set.of("nombre"), coordinacion.getId());
+
+        assertThat(destinatarios(evento, "MODIFICACION")).containsOnlyOnce(vendedoraYAdministracion.getId());
+        assertThat(mensaje(evento, "MODIFICACION", vendedoraYAdministracion)).contains("de tu evento");
     }
 
     @Test
@@ -235,6 +303,7 @@ class AvisosEventoIT {
         entityManager.flush();
         assertThat(destinatarios(id, "MODIFICACION")).contains(lucia.getId(), administracion.getId()).doesNotContain(coordinacion.getId());
 
+        marcar();
         guardar(id, lucia, "Quince de Delfi").andExpect(status().isOk());
         entityManager.flush();
         assertThat(destinatarios(id, "MODIFICACION")).contains(coordinacion.getId()).doesNotContain(lucia.getId());
@@ -253,7 +322,13 @@ class AvisosEventoIT {
         return entityManager.find(Evento.class, id);
     }
 
-    /** Destinatarios del último aviso de ese tipo. */
+    /** Lo que se avise de acá en adelante es de la próxima acción. */
+    private void marcar() {
+        entityManager.flush();
+        marca = jdbc.queryForObject("SELECT coalesce(max(notificacion_id), 0) FROM notificacion", Long.class);
+    }
+
+    /** Destinatarios de los avisos de ese tipo desde {@link #marcar()}: el general y los personales. */
     private List<Long> destinatarios(Evento evento, String tipo) {
         entityManager.flush();
         return destinatarios(evento.getId(), tipo);
@@ -261,8 +336,17 @@ class AvisosEventoIT {
 
     private List<Long> destinatarios(long eventoId, String tipo) {
         return jdbc.queryForList("""
-                SELECT d.usuario_id FROM notificacion_destinatario d
-                WHERE d.notificacion_id = (SELECT max(notificacion_id) FROM notificacion WHERE evento_id = ? AND tipo = ?)""",
-                Long.class, eventoId, tipo);
+                SELECT d.usuario_id FROM notificacion_destinatario d JOIN notificacion n USING (notificacion_id)
+                WHERE n.evento_id = ? AND n.tipo = ? AND n.notificacion_id > ?""",
+                Long.class, eventoId, tipo, marca);
+    }
+
+    /** Lo que leyó esa persona en el último aviso de ese tipo. */
+    private String mensaje(Evento evento, String tipo, Usuario quien) {
+        entityManager.flush();
+        return jdbc.queryForObject("""
+                SELECT n.mensaje FROM notificacion n JOIN notificacion_destinatario d USING (notificacion_id)
+                WHERE n.evento_id = ? AND n.tipo = ? AND d.usuario_id = ? ORDER BY n.notificacion_id DESC LIMIT 1""",
+                String.class, evento.getId(), tipo, quien.getId());
     }
 }

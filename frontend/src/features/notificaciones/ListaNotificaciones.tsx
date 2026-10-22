@@ -29,7 +29,8 @@ type Filtro = 'sin-leer' | 'todas';
 
 /**
  * UI-22 · Lista de notificaciones (en el panel de la campana y en la página): más recientes primero, filtro
- * «Sin leer» / «Todas», de a 20. Abrir un aviso lo marca como leído y lleva a la ficha del evento; «Marcar todas como
+ * «Sin leer» / «Todas», de a 20. Abrir un aviso lo marca como leído y lleva a la ficha del evento (el de una
+ * modificación, a su historial con ese cambio resaltado); «Marcar todas como
  * leídas» deja el contador en 0. Cada cambio del contador se avisa a la campana.
  *
  * @param alIrAlEvento antes de navegar a la ficha (p. ej. cerrar el panel).
@@ -107,7 +108,10 @@ export function ListaNotificaciones({ alIrAlEvento, limite }: { alIrAlEvento?: (
       navegar('/existencias');
     } else if (abreFicha && n.eventoId) {
       alIrAlEvento?.();
-      navegar(`/eventos/${n.eventoId}`);
+      // Una modificación se entiende mejor en el historial, con ese guardado resaltado (qué cambió, de qué a qué).
+      navegar(n.tipo === 'MODIFICACION'
+        ? `/eventos/${n.eventoId}?pestana=historial&cambio=${encodeURIComponent(n.fechaHora)}`
+        : `/eventos/${n.eventoId}`);
     }
   }
 

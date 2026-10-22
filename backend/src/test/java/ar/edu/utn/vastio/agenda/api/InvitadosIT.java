@@ -103,7 +103,10 @@ class InvitadosIT {
         entityManager.flush();
 
         assertThat(jdbc.queryForObject("SELECT count(*) FROM modificacion_evento WHERE evento_id = ?", Integer.class, evento)).isEqualTo(2);
-        assertThat(jdbc.queryForObject("SELECT count(*) FROM notificacion WHERE evento_id = ?", Integer.class, evento)).isEqualTo(1);
+        // Un aviso por guardado: a la planner le llega una sola vez (el suyo, «… de tu evento»).
+        assertThat(jdbc.queryForObject("""
+                SELECT count(*) FROM notificacion_destinatario d JOIN notificacion n USING (notificacion_id)
+                WHERE n.evento_id = ? AND d.usuario_id = ?""", Integer.class, evento, ana.getId())).isEqualTo(1);
     }
 
     @Test

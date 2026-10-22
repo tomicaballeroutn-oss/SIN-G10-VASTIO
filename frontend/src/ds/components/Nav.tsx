@@ -16,7 +16,7 @@ export interface NavProps {
   value?: string;
   onSelect?: (id: string) => void;
   /**
-   * rail (v2): riel flotante de escritorio, cerrado con íconos y abierto con texto al pasar el mouse o con el foco.
+   * rail (v2): riel flotante de escritorio, cerrado con íconos y abierto con texto al pasar el mouse o con el foco del teclado (un clic no lo deja abierto).
    * bottom: teléfono y tableta (cinco ítems como máximo). sidebar: la lateral clásica (la usa «Más»).
    */
   layout?: 'rail' | 'sidebar' | 'bottom';

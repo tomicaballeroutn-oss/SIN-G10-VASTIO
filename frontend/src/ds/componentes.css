@@ -459,8 +459,9 @@ h2.h2, h3.h3, h3.h4 { margin: 0; color: var(--ink); }
 .v-nav--rail { position: absolute; z-index: var(--z-nav); top: 0; left: 0; bottom: 0; width: var(--rail-w); display: flex; flex-direction: column;
   padding: var(--space-4) 0; background: var(--deep); color: var(--on-deep); border-radius: var(--rail-radius); box-shadow: var(--shadow-sm);
   transition: width var(--motion-base) var(--ease), box-shadow var(--motion-base) var(--ease); }
-/* Abierto flota sobre el contenido: sombra corta, para que no deje una franja gris al costado. */
-.v-rail:hover .v-nav--rail, .v-rail:focus-within .v-nav--rail, .v-rail.is-open .v-nav--rail { width: var(--rail-w-open); box-shadow: var(--shadow-md); }
+/* Abierto flota sobre el contenido: sombra corta, para que no deje una franja gris al costado.
+   Se abre con el mouse encima o con foco de teclado (:focus-visible), no con :focus-within: un clic deja el foco en el ítem y lo dejaría fijo. */
+.v-rail:hover .v-nav--rail, .v-rail:has(:focus-visible) .v-nav--rail, .v-rail.is-open .v-nav--rail { width: var(--rail-w-open); box-shadow: var(--shadow-md); }
 .v-nav--rail .v-nav__logo { display: flex; align-items: center; height: 48px; padding: 0 0 0 20px; margin-bottom: var(--space-3); overflow: hidden; }
 /* El Logo fija el ancho y la imagen conserva su proporción. */
 .v-nav--rail .v-nav__logo .v-brand--marca { width: 40px; }
@@ -471,7 +472,7 @@ h2.h2, h3.h3, h3.h4 { margin: 0; color: var(--ink); }
 .v-nav--rail .v-nav__group { position: relative; display: flex; flex-direction: column; gap: 2px; }
 .v-nav--rail .v-nav__title { height: 0; margin: 0 !important; padding: 0 0 0 26px; overflow: hidden; opacity: 0; color: var(--on-deep-muted);
   transition: opacity var(--motion-base) var(--ease), height var(--motion-base) var(--ease); }
-.v-rail:hover .v-nav__title, .v-rail:focus-within .v-nav__title, .v-rail.is-open .v-nav__title { height: 20px; opacity: 1; }
+.v-rail:hover .v-nav__title, .v-rail:has(:focus-visible) .v-nav__title, .v-rail.is-open .v-nav__title { height: 20px; opacity: 1; }
 .v-nav--rail .v-nav__item { position: relative; display: flex; align-items: center; gap: var(--space-4); width: calc(100% - 24px); height: var(--control-md); flex: none; margin-left: 12px;
   padding: 0 0 0 11px; border: 0; border-radius: var(--radius-lg); background: none; color: var(--on-deep-muted); text-align: left; cursor: pointer; white-space: nowrap;
   transition: background-color var(--motion-fast) var(--ease), color var(--motion-fast) var(--ease); }
@@ -481,8 +482,8 @@ h2.h2, h3.h3, h3.h4 { margin: 0; color: var(--ink); }
 .v-nav__dot { position: absolute; top: 3px; right: 3px; width: 9px; height: 9px; border-radius: 50%; background: var(--accent); box-shadow: 0 0 0 2px var(--deep); }
 .v-nav--rail .v-nav__text { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; opacity: 0; transition: opacity var(--motion-fast) var(--ease); }
 .v-nav--rail .v-nav__count { opacity: 0; margin-right: var(--space-3); }
-.v-rail:hover .v-nav__text, .v-rail:focus-within .v-nav__text, .v-rail.is-open .v-nav__text,
-.v-rail:hover .v-nav__count, .v-rail:focus-within .v-nav__count, .v-rail.is-open .v-nav__count { opacity: 1; }
+.v-rail:hover .v-nav__text, .v-rail:has(:focus-visible) .v-nav__text, .v-rail.is-open .v-nav__text,
+.v-rail:hover .v-nav__count, .v-rail:has(:focus-visible) .v-nav__count, .v-rail.is-open .v-nav__count { opacity: 1; }
 /* Ítem activo: el fondo de la pantalla entra en el riel, como en un fichero.
    Arriba y abajo, esquinas invertidas redondas para que el riel "abrace" la pestaña. */
 .v-nav--rail .v-nav__item.is-on { z-index: 1; width: calc(100% - 12px + var(--tab-protrude)); background: var(--tab); color: var(--on-tab); font-weight: 600;
@@ -495,10 +496,10 @@ h2.h2, h3.h3, h3.h4 { margin: 0; color: var(--ink); }
 .v-nav--rail .v-nav__item.is-on .v-nav__dot { box-shadow: 0 0 0 2px var(--tab); }
 /* Con el riel abierto (encima del contenido) el activo deja de ser pestaña: es un recuadro simple con los mismos
    márgenes que los demás ítems, sin unirse al borde. Al cerrarse vuelve a ser la pestaña. */
-.v-rail:hover .v-nav__item.is-on, .v-rail:focus-within .v-nav__item.is-on, .v-rail.is-open .v-nav__item.is-on {
+.v-rail:hover .v-nav__item.is-on, .v-rail:has(:focus-visible) .v-nav__item.is-on, .v-rail.is-open .v-nav__item.is-on {
   width: calc(100% - 24px); border-radius: var(--radius-lg); }
 .v-rail:hover .v-nav__item.is-on::before, .v-rail:hover .v-nav__item.is-on::after,
-.v-rail:focus-within .v-nav__item.is-on::before, .v-rail:focus-within .v-nav__item.is-on::after,
+.v-rail:has(:focus-visible) .v-nav__item.is-on::before, .v-rail:has(:focus-visible) .v-nav__item.is-on::after,
 .v-rail.is-open .v-nav__item.is-on::before, .v-rail.is-open .v-nav__item.is-on::after { display: none; }
 .v-nav--rail .v-nav__foot { display: flex; align-items: center; min-height: 64px; padding: var(--space-3) 0 0 20px; margin-top: var(--space-3); border-top: 1px solid var(--deep-raised); overflow: hidden; white-space: nowrap; }
 .v-nav--rail .v-nav__foot .v-actor { gap: var(--space-3); color: var(--on-deep); }
@@ -506,7 +507,7 @@ h2.h2, h3.h3, h3.h4 { margin: 0; color: var(--ink); }
 .v-nav--rail .v-nav__foot .v-actor .v-avatar { width: 40px; height: 40px; font-size: 14px; line-height: 20px; background: var(--deep-raised); color: var(--on-deep); }
 .v-nav--rail .v-nav__foot .v-muted { color: var(--on-deep-muted); }
 .v-nav--rail .v-nav__foot .v-actor__text { opacity: 0; transition: opacity var(--motion-fast) var(--ease); }
-.v-rail:hover .v-nav__foot .v-actor__text, .v-rail:focus-within .v-nav__foot .v-actor__text, .v-rail.is-open .v-nav__foot .v-actor__text { opacity: 1; }
+.v-rail:hover .v-nav__foot .v-actor__text, .v-rail:has(:focus-visible) .v-nav__foot .v-actor__text, .v-rail.is-open .v-nav__foot .v-actor__text { opacity: 1; }
 @media (prefers-reduced-motion: reduce) { .v-nav--rail, .v-nav--rail * { transition: none !important; } }
 
 /* ---------- Nav · barra inferior flotante (teléfono y tableta) ---------- */

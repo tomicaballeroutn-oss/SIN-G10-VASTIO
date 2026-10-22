@@ -18,7 +18,7 @@
 .app__cuenta-acciones { display: flex; flex-wrap: wrap; gap: var(--space-1); margin-left: calc(-1 * var(--space-3)); }
 /* En el riel la cuenta va sobre el azul profundo: cerrado se ve solo el avatar; abierto, el nombre y las acciones. */
 .v-nav--rail .app__cuenta-acciones { opacity: 0; transition: opacity var(--motion-fast) var(--ease); }
-.v-rail:hover .app__cuenta-acciones, .v-rail:focus-within .app__cuenta-acciones, .v-rail.is-open .app__cuenta-acciones { opacity: 1; }
+.v-rail:hover .app__cuenta-acciones, .v-rail:has(:focus-visible) .app__cuenta-acciones, .v-rail.is-open .app__cuenta-acciones { opacity: 1; }
 .v-nav--rail .app__cuenta-acciones .v-btn--text { color: var(--on-deep); }
 .v-nav--rail .app__cuenta-acciones .v-btn--text:hover { background: var(--deep-raised); }
 .v-nav--rail .app__cuenta-acciones .v-btn:focus-visible { outline-color: var(--on-deep); }

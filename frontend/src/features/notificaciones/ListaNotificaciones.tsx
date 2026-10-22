@@ -22,7 +22,7 @@ const ICONO: Record<TipoNotificacion, IconName> = {
   ALERTA_STOCK: 'triangle-alert',
 };
 
-/** Perfiles que abren la ficha del evento. Cocina y Barra leen el aviso pero no tienen ficha (Sprint 3: vista de cocina). */
+/** Perfiles que abren la ficha del evento. Cocina no tiene ficha: su aviso abre la tarjeta en la vista de cocina (A7-02). */
 const ABREN_FICHA: Rol[] = ['DIRECCION', 'COORDINACION', 'ADMINISTRACION', 'VENDEDORA', 'PLANNER', 'COMPRAS'];
 
 type Filtro = 'sin-leer' | 'todas';
@@ -39,6 +39,7 @@ export function ListaNotificaciones({ alIrAlEvento, limite }: { alIrAlEvento?: (
   const navegar = useNavigate();
   const { usuario } = useSesion();
   const abreFicha = !!usuario?.roles.some((r) => ABREN_FICHA.includes(r));
+  const esCocina = !!usuario?.roles.includes('COCINA');
   const [filtro, setFiltro] = useState<Filtro>('sin-leer');
   const [lista, setLista] = useState<Notificacion[]>([]);
   const [pagina, setPagina] = useState(0);
@@ -108,6 +109,9 @@ export function ListaNotificaciones({ alIrAlEvento, limite }: { alIrAlEvento?: (
     } else if (abreFicha && n.eventoId) {
       alIrAlEvento?.();
       navegar(`/eventos/${n.eventoId}`);
+    } else if (esCocina && n.eventoId) {
+      alIrAlEvento?.();
+      navegar(`/cocina?evento=${n.eventoId}`);
     }
   }
 

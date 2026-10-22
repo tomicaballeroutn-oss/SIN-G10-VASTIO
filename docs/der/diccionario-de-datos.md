@@ -385,6 +385,27 @@ Destinatarios de cada aviso. El ruteo por perfil y dato modificado se resuelve a
 | `leida` | boolean |  | NO | Default false. |
 | `fecha_lectura` | timestamptz |  | SÍ |  |
 
+#### COMPROBANTE_SENA
+
+Comprobante interno de la seña en PDF (V12, M-07; opcional). Uno por evento: se crea en la primera descarga y las siguientes repiten número y fecha de emisión. No es una factura. Lo descargan solo quienes ven el importe.
+
+| Campo | Tipo | Clave | Nulo | Descripción / valores posibles |
+|---|---|---|---|---|
+| `comprobante_id` | bigint | PK | NO | Identificador. |
+| `evento_id` | bigint | FK, UQ | NO | → evento. Un comprobante por evento. |
+| `numero` | varchar(14) | UQ | NO | CS-AAAA-NNNNN, correlativo por año (`numerador_comprobante`). |
+| `fecha_emision` | timestamptz |  | NO | Primera emisión. Default now(). |
+| `usuario_id` | bigint | FK | NO | → usuario. Quién lo emitió por primera vez. |
+
+#### NUMERADOR_COMPROBANTE
+
+Último número de comprobante de seña de cada año (V12). Funciona como `numerador_evento`.
+
+| Campo | Tipo | Clave | Nulo | Descripción / valores posibles |
+|---|---|---|---|---|
+| `anio` | smallint | PK | NO | Año de emisión. |
+| `ultimo` | integer |  | NO | Último número entregado. Entre 1 y 99999. |
+
 #### NUMERADOR_EVENTO
 
 Último número de evento de cada año, para el código EV-AAAA-NNNNN (V3). Se incrementa con `INSERT … ON CONFLICT … RETURNING`: la fila del año queda bloqueada hasta el final de la transacción, así dos pre-reservas simultáneas no comparten número y, si una se deshace, su número no se pierde.

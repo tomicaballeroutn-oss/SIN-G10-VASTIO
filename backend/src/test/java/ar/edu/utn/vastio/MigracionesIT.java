@@ -36,7 +36,7 @@ class MigracionesIT {
                   AND table_name <> 'flyway_schema_history'
                 """, Integer.class);
 
-        assertThat(tablas).isEqualTo(39); // V1 + V3 + V8 - proveedor (V9)
+        assertThat(tablas).isEqualTo(40); // V1 + V3 + V8 - proveedor (V9) + servicio_renglon (V10)
     }
 
     @ParameterizedTest(name = "{0} tiene {1} filas")
@@ -46,7 +46,7 @@ class MigracionesIT {
             "turno, 2",
             "tipo_evento, 5",
             "tipo_segmento_asistencia, 3",
-            "categoria_servicio, 10",
+            "categoria_servicio, 11",
             "motivo, 13",
             "parametro, 3",
             "tipo_bebida, 5",

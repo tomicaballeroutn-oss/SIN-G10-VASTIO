@@ -45,6 +45,11 @@ export interface AgendaGridProps {
    * para que una unidad ocupada nunca parezca disponible.
    */
   resaltar?: (unidad: { salon: SalonId; turno: TurnoId; status: EventStatus }) => boolean;
+  /**
+   * Solo dice qué unidades tienen evento, sin su estado (vista de cocina): todos los puntos van llenos y se anuncian
+   * «con evento».
+   */
+  soloOcupacion?: boolean;
   className?: string;
 }
 
@@ -52,7 +57,9 @@ export interface AgendaGridProps {
  * Mes de la agenda: cada día muestra las seis unidades como puntos (columna = salón, fila = mediodía / noche).
  * Arriba, qué salón es cada columna. Qué significa cada relleno va aparte, en AgendaLeyenda.
  */
-export function AgendaGrid({ year, month, events = [], today, selected, onSelectDay, onPrev, onNext, salones, resaltar, className }: AgendaGridProps) {
+export function AgendaGrid({
+  year, month, events = [], today, selected, onSelectDay, onPrev, onNext, salones, resaltar, soloOcupacion, className,
+}: AgendaGridProps) {
   const primero = new Date(year, month, 1);
   const blancos = (primero.getDay() + 6) % 7;
   const total = new Date(year, month + 1, 0).getDate();
@@ -69,11 +76,11 @@ export function AgendaGrid({ year, month, events = [], today, selected, onSelect
     for (const turno of TURNOS) {
       for (const salon of ORDEN_SALONES) {
         const ev = delDia.find((e) => e.salon === salon && e.turno === turno);
-        const estado: EventStatus = ev ? ev.status : 'disponible';
+        const estado: EventStatus = ev ? (soloOcupacion ? 'confirmado' : ev.status) : 'disponible';
         const atenuada = resaltar ? !resaltar({ salon, turno, status: estado }) : false;
         pips.push(<span key={turno + salon} className={cx('v-pip', `v-pip--${salon}`, `v-pip--${estado}`, atenuada && 'is-dim')} />);
         if (ev && estado !== 'disponible') {
-          descripcion.push(`${SALONES[salon]} ${turno === 'noche' ? 'noche' : 'mediodía'}: ${ESTADOS[estado]?.label ?? estado}`);
+          descripcion.push(`${SALONES[salon]} ${turno === 'noche' ? 'noche' : 'mediodía'}: ${soloOcupacion ? 'con evento' : ESTADOS[estado]?.label ?? estado}`);
         }
       }
     }

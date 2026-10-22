@@ -105,18 +105,18 @@ describe('UI-22 · notificaciones', () => {
     expect(await screen.findByTitle('Notificaciones')).not.toHaveTextContent(/\d/);
   });
 
-  it('Cocina lee el aviso pero no abre la ficha', async () => {
+  it('a Cocina el aviso la lleva a la tarjeta del evento en la vista de cocina', async () => {
     const fetchMock = backend(['COCINA']);
     const usuario = userEvent.setup();
     const router = montar('/mi-cuenta');
-    const antes = router.state.location.pathname;
 
     await usuario.click(await screen.findByRole('button', { name: 'Notificaciones, 2 sin leer' }));
     const panel = screen.getByRole('dialog', { name: 'Notificaciones' });
     await usuario.click(await within(panel).findByRole('button', { name: /Evento confirmado/ }));
 
-    expect(router.state.location.pathname).toBe(antes);
-    expect(screen.getByRole('dialog', { name: 'Notificaciones' })).toBeInTheDocument();
+    expect(router.state.location.pathname).toBe('/cocina');
+    expect(router.state.location.search).toBe('?evento=5');
+    expect(screen.queryByRole('dialog', { name: 'Notificaciones' })).not.toBeInTheDocument();
     expect(pedidos(fetchMock).some((p) => p.ruta === '/notificaciones/30/lectura')).toBe(true);
   });
 

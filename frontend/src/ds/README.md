@@ -61,3 +61,4 @@ Lavado de cara con el sistema de diseño «Vastio v2 · propuesta». Solo cambia
 ## Cambios del Sprint 4
 
 - `Input` acepta `labelHidden`: la etiqueta queda para los lectores de pantalla pero no se ve. Lo usan los renglones de servicios (UI-13, M-09), que tienen un encabezado «Qué / Cantidad» propio.
+- `AgendaGrid` acepta `soloOcupacion`: todos los puntos con evento van llenos y se anuncian «con evento», sin el estado. Lo usa la vista de cocina (A7-02), que no muestra estados.

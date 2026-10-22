@@ -83,6 +83,11 @@ public class Evento {
     @Column(name = "importe_sena", precision = 14, scale = 2)
     private BigDecimal importeSena;
 
+    /** Moneda del importe de la seña (M-02), sin conversión. Va junto con el importe y se filtra igual. */
+    @Enumerated(EnumType.STRING)
+    @Column(name = "moneda_sena", length = 3)
+    private Moneda monedaSena;
+
     @Column(name = "fecha_sena")
     private LocalDate fechaSena;
 
@@ -178,9 +183,10 @@ public class Evento {
     /**
      * Datos de la seña. Se cargan antes de pasar a Señado: el CHECK de la base los exige desde ese estado.
      */
-    public void registrarSena(BigDecimal importe, LocalDate fecha, String firmanteNombre, String firmanteDni,
-            String firmanteContacto) {
+    public void registrarSena(BigDecimal importe, Moneda moneda, LocalDate fecha, String firmanteNombre,
+            String firmanteDni, String firmanteContacto) {
         this.importeSena = importe;
+        this.monedaSena = moneda;
         this.fechaSena = fecha;
         this.firmanteNombre = firmanteNombre;
         this.firmanteDni = firmanteDni;
@@ -262,6 +268,10 @@ public class Evento {
 
     public BigDecimal getImporteSena() {
         return importeSena;
+    }
+
+    public Moneda getMonedaSena() {
+        return monedaSena;
     }
 
     public LocalDate getFechaSena() {

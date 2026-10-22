@@ -246,7 +246,8 @@ public class EventoController {
     @PreAuthorize(Permisos.CONSULTAR_EVENTOS)
     @Operation(summary = "Ficha del evento", description = """
             Datos, estado, acciones disponibles para quien consulta e historial de cambios. La vendedora solo abre
-            sus eventos. El importe de la seña solo llega a Dirección, Coordinación, Administración y la vendedora titular.""")
+            sus eventos. El importe de la seña y su moneda solo llegan a Dirección, Coordinación, Administración y la
+            vendedora titular.""")
     @ApiResponse(responseCode = "403", description = "Evento de otra vendedora")
     public FichaResponse ficha(@PathVariable long id, @AuthenticationPrincipal Jwt jwt) {
         return dto.ficha(consultas.ficha(id, UsuarioActual.de(jwt)));
@@ -255,8 +256,9 @@ public class EventoController {
     @PostMapping("/{id}/sena")
     @PreAuthorize(Permisos.PRERESERVA)
     @Operation(summary = "Registrar seña", description = """
-            La pre-reserva pasa a Señado con el importe, la fecha del pago y los datos del firmante. La registran la
-            vendedora titular, Coordinación y Dirección. Avisa a Administración y Coordinación. Devuelve la ficha.""")
+            La pre-reserva pasa a Señado con el importe, su moneda (ARS o USD, sin conversión; sin moneda, ARS), la
+            fecha del pago y los datos del firmante. La registran la vendedora titular, Coordinación y Dirección. Avisa a
+            Administración y Coordinación. Devuelve la ficha.""")
     @ApiResponse(responseCode = "422", description = "El evento no está en Pre-reserva, o la fecha del pago es futura")
     public FichaResponse registrarSena(@PathVariable long id, @Valid @RequestBody SenaRequest pedido,
             @AuthenticationPrincipal Jwt jwt) {

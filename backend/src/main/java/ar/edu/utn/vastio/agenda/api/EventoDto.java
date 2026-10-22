@@ -25,6 +25,7 @@ import ar.edu.utn.vastio.agenda.dominio.DocumentoEvento;
 import ar.edu.utn.vastio.agenda.dominio.EstadoEvento;
 import ar.edu.utn.vastio.agenda.dominio.Evento;
 import ar.edu.utn.vastio.agenda.dominio.ModificacionEvento;
+import ar.edu.utn.vastio.agenda.dominio.Moneda;
 import ar.edu.utn.vastio.agenda.dominio.Reprogramacion;
 import ar.edu.utn.vastio.agenda.dominio.ServicioContratado;
 import ar.edu.utn.vastio.configuracion.aplicacion.CatalogoService;
@@ -63,9 +64,12 @@ public class EventoDto {
         }
     }
 
-    /** {@code importe} solo viaja a quien ve datos económicos (RNF-SEG-04): no alcanza con ocultarlo en pantalla. */
+    /**
+     * {@code importe} y su {@code moneda} (ARS o USD, M-02) solo viajan a quien ve datos económicos (RNF-SEG-04): no
+     * alcanza con ocultarlos en pantalla.
+     */
     @JsonInclude(JsonInclude.Include.NON_NULL)
-    public record SenaDto(BigDecimal importe, LocalDate fecha, String firmanteNombre, String firmanteDni,
+    public record SenaDto(BigDecimal importe, Moneda moneda, LocalDate fecha, String firmanteNombre, String firmanteDni,
             String firmanteContacto) {
     }
 
@@ -123,8 +127,8 @@ public class EventoDto {
         Evento e = f.evento();
         Map<Long, String> nombres = f.nombres();
         SenaDto sena = e.getFechaSena() == null ? null
-                : new SenaDto(f.veImportes() ? e.getImporteSena() : null, e.getFechaSena(), e.getFirmanteNombre(),
-                        e.getFirmanteDni(), e.getFirmanteContacto());
+                : new SenaDto(f.veImportes() ? e.getImporteSena() : null, f.veImportes() ? e.getMonedaSena() : null,
+                        e.getFechaSena(), e.getFirmanteNombre(), e.getFirmanteDni(), e.getFirmanteContacto());
         List<HistorialDto> historial = Stream.of(
                         f.cambios().stream().map(c -> historial(c, nombres)),
                         f.modificaciones().stream().map(m -> historial(m, nombres)),

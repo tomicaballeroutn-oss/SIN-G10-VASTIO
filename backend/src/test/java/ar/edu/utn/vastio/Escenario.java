@@ -63,13 +63,13 @@ public class Escenario {
         boolean confirmado = List.of("CONFIRMADO", "EN_CURSO", "REALIZADO", "CERRADO").contains(estado);
         return jdbc.queryForObject("""
                 INSERT INTO evento (codigo, unidad_id, cliente_id, tipo_evento_id, vendedora_id, planner_id, estado, nombre,
-                    cantidad_invitados, invitados_definitivos, importe_sena, fecha_sena, firmante_dni, fecha_firma_contrato,
-                    motivo_cancelacion_id, version)
-                VALUES (?, ?, ?, 2, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 0)
+                    cantidad_invitados, invitados_definitivos, importe_sena, moneda_sena, fecha_sena, firmante_dni,
+                    fecha_firma_contrato, motivo_cancelacion_id, version)
+                VALUES (?, ?, ?, 2, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 0)
                 RETURNING evento_id""", Long.class,
                 "EV-9999-%05d".formatted(NUMERO.incrementAndGet()), unidad, cliente, vendedora.getId(),
                 planner == null ? null : planner.getId(), estado, nombre, confirmado ? 150 : null, confirmado,
-                senado ? 100000 : null, senado ? fecha.minusMonths(1) : null, senado ? "30111222" : null,
+                senado ? 100000 : null, senado ? "ARS" : null, senado ? fecha.minusMonths(1) : null, senado ? "30111222" : null,
                 contratado ? fecha.minusWeeks(3) : null, estado.equals("CANCELADO") ? 1 : null);
     }
 

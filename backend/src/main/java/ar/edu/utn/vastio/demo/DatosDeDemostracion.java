@@ -35,6 +35,7 @@ import ar.edu.utn.vastio.agenda.aplicacion.SenaService.Sena;
 import ar.edu.utn.vastio.agenda.aplicacion.ServiciosService;
 import ar.edu.utn.vastio.agenda.aplicacion.ServiciosService.Servicio;
 import ar.edu.utn.vastio.agenda.dominio.Evento;
+import ar.edu.utn.vastio.agenda.dominio.Moneda;
 import ar.edu.utn.vastio.bebida.aplicacion.BebidaService;
 import ar.edu.utn.vastio.bebida.aplicacion.BebidaService.Codigo;
 import ar.edu.utn.vastio.bebida.aplicacion.BebidaService.DatosBebida;
@@ -182,7 +183,7 @@ public class DatosDeDemostracion implements ApplicationRunner {
                             new DatosCliente(null, r.cliente(), null, null, null)),
                     quien);
             if (r.sena() != null) {
-                senas.registrar(evento.getId(), new Sena(BigDecimal.valueOf(r.sena()), hoy, null, "30111222", null), quien);
+                senas.registrar(evento.getId(), new Sena(BigDecimal.valueOf(r.sena()), Moneda.ARS, hoy, null, "30111222", null), quien);
             }
             if (r.etapa() == Etapa.CONTRATADO || r.etapa() == Etapa.CONFIRMADO) {
                 evento = contratos.registrar(evento.getId(), hoy,

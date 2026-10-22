@@ -33,8 +33,9 @@ type Filtro = 'sin-leer' | 'todas';
  * leídas» deja el contador en 0. Cada cambio del contador se avisa a la campana.
  *
  * @param alIrAlEvento antes de navegar a la ficha (p. ej. cerrar el panel).
+ * @param limite muestra solo los primeros, sin «Ver más» ni «Marcar todas» (el resumen del Inicio).
  */
-export function ListaNotificaciones({ alIrAlEvento }: { alIrAlEvento?: () => void }) {
+export function ListaNotificaciones({ alIrAlEvento, limite }: { alIrAlEvento?: () => void; limite?: number }) {
   const navegar = useNavigate();
   const { usuario } = useSesion();
   const abreFicha = !!usuario?.roles.some((r) => ABREN_FICHA.includes(r));
@@ -139,7 +140,7 @@ export function ListaNotificaciones({ alIrAlEvento }: { alIrAlEvento?: () => voi
       )}
       {lista.length > 0 && (
         <ul className="avisos__lista">
-          {lista.map((n) => (
+          {(limite ? lista.slice(0, limite) : lista).map((n) => (
             <li key={n.id}>
               <button type="button" className={n.leida ? 'avisos__aviso' : 'avisos__aviso is-nuevo'} onClick={() => void abrir(n)}>
                 <Icon name={ICONO[n.tipo]} size={18} />
@@ -157,14 +158,14 @@ export function ListaNotificaciones({ alIrAlEvento }: { alIrAlEvento?: () => voi
         </ul>
       )}
       {cargando && <p className="body-sm v-muted" role="status">Cargando…</p>}
-      <div className="avisos__pie">
+      {!limite && <div className="avisos__pie">
         {hayMas && !cargando && (
           <Button variant="outline" size="sm" onClick={verMas}>Ver más</Button>
         )}
         <Button variant="text" icon="check-check" disabled={sinLeer === 0} onClick={() => void marcarTodas()}>
           Marcar todas como leídas
         </Button>
-      </div>
+      </div>}
     </div>
   );
 }

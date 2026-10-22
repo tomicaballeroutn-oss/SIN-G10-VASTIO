@@ -1,7 +1,7 @@
 import { useState, type ReactNode } from 'react';
 import {
-  Actor, AgendaGrid, AgendaLeyenda, Alert, Badge, Button, CantidadEnCajas, Card, Checkbox, Combobox, Dialog, EmptyState, EventCard, Icon, IconButton, Input,
-  LectorCodigo, Logo, MiniCalendar, MovementCard, Nav, SalonTag, Select, SelectorArchivos, Stat, StatusChip, Stepper, StockLevel, Switch, Table, Tabs, Timeline,
+  Actor, AgendaGrid, AgendaLeyenda, Alert, Atajo, Badge, Button, CantidadEnCajas, Card, Checkbox, Combobox, Dialog, EmptyState, EventCard, Icon, IconButton, Input,
+  LectorCodigo, Logo, MiniBarras, MiniCalendar, MovementCard, Nav, SalonTag, Select, SelectorArchivos, Stat, StatusChip, Stepper, StockLevel, Switch, Table, Tabs, Timeline,
   ESTADOS_DEL_EVENTO, ORDEN_SALONES, SALONES, aplicarTema, cantidadLegible, temaGuardado, type AgendaEvent, type EventStatus,
   type IniciarLector, type Tema,
 } from '../../ds';
@@ -310,6 +310,19 @@ export function PaginaDs() {
         <Card tone="brand-tint" title="Registrar pre-reserva"><p className="body-sm">Tono de acceso.</p></Card>
         <Card tone="accent-tint" title="Novedades"><p className="body-sm">Tono de acceso.</p></Card>
         <Card tone="sunken" title="Bebidas"><p className="body-sm">Tono de acceso.</p></Card>
+      </Seccion>
+
+      <Seccion titulo="Atajo y MiniBarras (Inicio)">
+        <Card eyebrow="Para hacer" title="Te toca a vos">
+          <div>
+            <Atajo icon="file-check" title="Registrar firma de contrato" subtitle="Cumpleaños 50 de Marta G. · sáb 24 oct" onClick={() => {}} />
+            <Atajo icon="users" tone="warning" title="Asignar planner" subtitle="Casamiento Paz–Ledesma · sáb 24 oct" onClick={() => {}} />
+            <Atajo icon="banknote" tone="accent" title="Registrar seña" subtitle="Bautismo Ledesma · dom 25 oct" onClick={() => {}} />
+          </div>
+        </Card>
+        <Card tone="deep" eyebrow="Esta semana">
+          <MiniBarras values={[0, 0, 0, 1, 2, 3, 1]} label="Eventos por día: lunes 0, martes 0, miércoles 0, jueves 1, viernes 2, sábado 3, domingo 1" />
+        </Card>
       </Seccion>
 
       <Seccion titulo="Table">

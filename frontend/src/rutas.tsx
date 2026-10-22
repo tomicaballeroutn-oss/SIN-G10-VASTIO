@@ -11,6 +11,7 @@ import { PaginaDatosEvento } from './features/eventos/PaginaDatosEvento';
 import { PaginaEvento } from './features/eventos/PaginaEvento';
 import { PaginaEventos } from './features/eventos/PaginaEventos';
 import { PaginaReprogramar } from './features/eventos/PaginaReprogramar';
+import { PaginaInicio } from './features/inicio/PaginaInicio';
 import { Layout } from './features/layout/Layout';
 import { MENU } from './features/layout/menu';
 import { ConPermiso, IrAlInicio, PaginaMas, PaginaMiCuenta, PaginaPendiente } from './features/layout/paginas';
@@ -26,6 +27,7 @@ const PANTALLAS: Partial<Record<string, ReactNode>> = {
   catalogo: <PaginaCatalogo />,
   existencias: <PaginaExistencias />,
   ingreso: <PaginaIngresoBebida />,
+  inicio: <PaginaInicio />,
   eventos: <PaginaEventos />,
   notificaciones: <PaginaNotificaciones />,
   parametros: <PaginaParametros />,

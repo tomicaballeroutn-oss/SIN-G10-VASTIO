@@ -17,12 +17,12 @@ describe('menú por perfil', () => {
 
   it('la vendedora ve la agenda y sus eventos', () => {
     const items = itemsPara(['VENDEDORA']);
-    expect(items.map((it) => it.id)).toEqual(['notificaciones', 'agenda', 'eventos']);
+    expect(items.map((it) => it.id)).toEqual(['inicio', 'notificaciones', 'agenda', 'eventos']);
     expect(items.find((it) => it.id === 'eventos')?.label).toBe('Mis eventos');
   });
 
   it('la planner ve agenda, todos los eventos y la vista de cocina', () => {
-    expect(ids(['PLANNER'])).toEqual(['notificaciones', 'agenda', 'eventos', 'cocina']);
+    expect(ids(['PLANNER'])).toEqual(['inicio', 'notificaciones', 'agenda', 'eventos', 'cocina']);
     expect(itemsPara(['PLANNER']).find((it) => it.id === 'eventos')?.label).toBe('Eventos');
   });
 
@@ -44,13 +44,13 @@ describe('menú por perfil', () => {
   });
 
   it('con dos perfiles se ve la unión', () => {
-    expect(ids(['VENDEDORA', 'PLANNER'])).toEqual(['notificaciones', 'agenda', 'eventos', 'cocina']);
+    expect(ids(['VENDEDORA', 'PLANNER'])).toEqual(['inicio', 'notificaciones', 'agenda', 'eventos', 'cocina']);
   });
 });
 
 describe('navegación inferior', () => {
   it('si entran, muestra todos los ítems', () => {
-    expect(itemsInferiores(itemsPara(['PLANNER'])).map((it) => it.id)).toEqual(['notificaciones', 'agenda', 'eventos', 'cocina']);
+    expect(itemsInferiores(itemsPara(['PLANNER'])).map((it) => it.id)).toEqual(['inicio', 'notificaciones', 'agenda', 'eventos', 'cocina']);
   });
 
   it('si no entran, muestra cuatro por prioridad y «Más»', () => {
@@ -64,11 +64,11 @@ describe('pantalla de inicio', () => {
     [['DIRECCION'], '/inicio'],
     [['ADMINISTRACION'], '/inicio'],
     [['COMPRAS'], '/inicio'],
-    [['VENDEDORA'], '/agenda'],
-    [['PLANNER'], '/eventos'],
+    [['VENDEDORA'], '/inicio'],
+    [['PLANNER'], '/inicio'],
     [['BARRA'], '/barra'],
     [['COCINA'], '/cocina'],
-    [['VENDEDORA', 'PLANNER'], '/agenda'],
+    [['VENDEDORA', 'PLANNER'], '/inicio'],
   ])('%j empieza en %s', (roles, ruta) => {
     expect(rutaDeInicio(roles)).toBe(ruta);
   });

@@ -241,6 +241,57 @@ export function Stat({ label, value, unit, delta, deltaTone = 'neutral', deltaIc
   );
 }
 
+export type AtajoTone = 'brand' | 'accent' | 'warning';
+
+export interface AtajoProps {
+  icon: IconName;
+  /** Qué hay que hacer, con verbo: «Registrar firma de contrato». */
+  title: string;
+  /** Sobre qué: el evento o la cantidad. */
+  subtitle?: string;
+  tone?: AtajoTone;
+  onClick: () => void;
+  className?: string;
+}
+
+/** v2: fila de una lista de atajos (Inicio): ícono en círculo, qué hacer y sobre qué, y flecha. Lleva a la pantalla donde se hace. */
+export function Atajo({ icon, title, subtitle, tone = 'brand', onClick, className }: AtajoProps) {
+  return (
+    <button type="button" className={cx('v-atajo', className)} onClick={onClick}>
+      <span className={cx('v-atajo__ico', `v-atajo__ico--${tone}`)}><Icon name={icon} /></span>
+      <span className="v-atajo__texto">
+        <span className="label">{title}</span>
+        {subtitle && <span className="body-sm v-muted">{subtitle}</span>}
+      </span>
+      <Icon name="chevron-right" />
+    </button>
+  );
+}
+
+export interface MiniBarrasProps {
+  /** Un valor por barra, p. ej. los siete días de la semana. */
+  values: number[];
+  /** Tope de la escala; por defecto, el mayor valor. */
+  max?: number;
+  /** Qué muestran las barras, para lectores de pantalla: «Eventos por día: lunes 0, martes 1…». */
+  label: string;
+  className?: string;
+}
+
+/** v2: barritas verticales para la ficha `deep` (eventos por día de la semana). Un cero deja el riel vacío. */
+export function MiniBarras({ values, max, label, className }: MiniBarrasProps) {
+  const tope = Math.max(max ?? 0, ...values, 1);
+  return (
+    <span className={cx('v-minibarras', className)} role="img" aria-label={label}>
+      {values.map((v, i) => (
+        <span key={i} className="v-minibarras__riel">
+          <span className="v-minibarras__relleno" style={{ height: `${v > 0 ? Math.max(Math.round((v / tope) * 100), 12) : 0}%` }} />
+        </span>
+      ))}
+    </span>
+  );
+}
+
 export interface TimelineItem {
   title: string;
   from?: EventStatus;

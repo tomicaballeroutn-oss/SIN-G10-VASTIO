@@ -50,7 +50,9 @@ Lavado de cara con el sistema de diseño «Vastio v2 · propuesta». Solo cambia
 - **Barra inferior flotante:** mismo componente, estilo nuevo; el activo sube en un círculo del color del lienzo.
 - **`Card`:** `tone` (`surface`, `deep`, `brand-tint`, `accent-tint`, `success-tint`, `sunken`), `tab` (solapa) y `notch` (muesca con un `IconButton`). Solapa o muesca, no las dos; como mucho una ficha `deep` por pantalla.
 - **`Tabs variant="folder"`:** solapas que bajan a la `Card` que va justo debajo. `segmented` ahora tiene la pastilla activa en azul sólido.
-- **`MiniCalendar`:** el mes de un vistazo (`reservado` / `prereserva`). Para el Inicio (UI-04), que sigue pendiente.
+- **`MiniCalendar`:** el mes de un vistazo (`reservado` / `prereserva`). Lo usa el Inicio (UI-04).
+- **`Atajo`** (rama `mateo/inicio-tablero`): fila de una lista de atajos, con ícono en círculo (`tone` `brand`, `accent` o `warning`), qué hacer con verbo y sobre qué, y flecha. Lleva a la pantalla donde se hace; no ejecuta la acción. Es «Te toca a vos» en el Inicio.
+- **`MiniBarras`** (rama `mateo/inicio-tablero`): barritas verticales para la ficha `deep` (eventos por día de la semana), con `label` para lectores de pantalla. Un cero deja el riel vacío.
 - **`Logo reverse`:** siempre la versión clara, para fondos azules (riel y login) en los dos temas.
 - **Login (UI-01):** fondo azul de marca (`deep`) con el logo claro y la ficha del formulario. Se probó el relieve de la V del sistema de diseño y se descartó: se veía como una foto de baja calidad.
 - **Agenda:** cada día muestra sus seis unidades como puntos (9 px en teléfono, 11 px desde 960 px) con el mismo relleno por estado. Arriba de la grilla, qué salón es cada columna (`AgendaGrid salones`, con los nombres de Parámetros). Qué significa cada relleno va aparte en `AgendaLeyenda`, un machete desplegable: en Agenda y Reprogramar está debajo del detalle del día, abierto desde 1200 px y cerrado en el teléfono. Se sacó «fila superior: mediodía / inferior: noche». `AgendaGrid` ya no tiene `legend`.

@@ -35,7 +35,12 @@ export function fechaHora(isoConHora: string): string {
 
 /** 150000 → «$ 150.000,00». */
 export function pesos(importe: number): string {
-  return new Intl.NumberFormat('es-AR', { style: 'currency', currency: 'ARS' }).format(importe).replace(/\s+/gu, ' ');
+  return dinero(importe, 'ARS');
+}
+
+/** Importe con su moneda, sin conversión: 1500, 'USD' → «US$ 1.500,00»; 150000, 'ARS' → «$ 150.000,00». */
+export function dinero(importe: number, moneda: 'ARS' | 'USD'): string {
+  return new Intl.NumberFormat('es-AR', { style: 'currency', currency: moneda }).format(importe).replace(/\s+/gu, ' ');
 }
 
 /**

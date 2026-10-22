@@ -17,7 +17,7 @@ import {
 } from '../../ds';
 import { Cargando } from '../comun/Cargando';
 import { guardarArchivo } from '../comun/archivos';
-import { fechaCorta, fechaHora, pesos } from '../comun/formato';
+import { dinero, fechaCorta, fechaHora } from '../comun/formato';
 import { DialogoCancelar } from './DialogoCancelar';
 import { DialogoConfirmar } from './DialogoConfirmar';
 import { DialogoFirma } from './DialogoFirma';
@@ -262,7 +262,7 @@ function Datos({ ficha }: { ficha: Ficha }) {
       {sena && (
         <Card title="Seña">
           <dl className="ficha__lista">
-            {sena.importe != null && <Dato etiqueta="Importe"><span className="numeral">{pesos(sena.importe)}</span></Dato>}
+            {sena.importe != null && <Dato etiqueta="Importe"><span className="numeral">{dinero(sena.importe, sena.moneda ?? 'ARS')}</span></Dato>}
             <Dato etiqueta="Fecha del pago">{fechaCorta(sena.fecha, true)}</Dato>
             <Dato etiqueta="Firmante">{[sena.firmanteNombre, sena.firmanteDni && `DNI ${sena.firmanteDni}`].filter(Boolean).join(' · ') || SIN_DATO}</Dato>
             <Dato etiqueta="Contacto del firmante">{sena.firmanteContacto ?? SIN_DATO}</Dato>

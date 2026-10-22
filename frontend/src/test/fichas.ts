@@ -15,17 +15,17 @@ export const SIN_ACCIONES: Acciones = {
   reprogramar: false,
 };
 
-/** Las categorías de servicio de V2, sin nada cargado. */
-export const SERVICIOS_VACIOS: ServicioFicha[] = [
-  ['Recepción', false, true], ['Plato principal', true, true], ['Postre', false, true], ['After', false, true],
-  ['Menús especiales', false, true], ['Bodega', false, false], ['Tipo de barra', true, false], ['Técnica', false, false],
-  ['Mobiliario', false, false], ['Extras', false, false],
-].map(([categoria, requerida, cocina], i) => ({
-  categoriaId: i + 1,
-  categoria: categoria as string,
+/** Las categorías de servicio activas desde V10 (con su id de la base), sin nada cargado. */
+export const SERVICIOS_VACIOS: ServicioFicha[] = ([
+  [2, 'Menú', true, true], [5, 'Menús especiales', false, true], [6, 'Bodega', false, false], [7, 'Tipo de barra', true, false],
+  [11, 'Otros', false, false],
+] as const).map(([categoriaId, categoria, requerida, cocina]) => ({
+  categoriaId,
+  categoria,
   activa: true,
-  requeridaParaConfirmar: requerida as boolean,
-  visibleEnCocina: cocina as boolean,
+  requeridaParaConfirmar: requerida,
+  visibleEnCocina: cocina,
+  renglones: [],
   descripcion: null,
   usuario: null,
   fechaModificacion: null,
@@ -67,7 +67,7 @@ export function fichaDePrueba(cambios: Partial<Ficha> = {}): Ficha {
   };
 }
 
-/** Las categorías de V2 con esos textos cargados (por nombre de categoría). */
+/** Las categorías de V10 con esos detalles cargados (por nombre de categoría). */
 export function servicios(textos: Record<string, string>, cambios: Partial<ServicioFicha> = {}): ServicioFicha[] {
   return SERVICIOS_VACIOS.map((s) => (textos[s.categoria] === undefined ? s : {
     ...s,

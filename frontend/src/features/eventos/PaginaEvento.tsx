@@ -8,7 +8,7 @@ import { PestanaConsumo } from './PestanaConsumo';
 import { PestanaPreparacion } from './PestanaPreparacion';
 import { hora } from '../../api/catalogos';
 import {
-  fichas, type CambioDeEstado, type CambioDeUnidad, type DocumentoLegajo, type EntradaHistorial, type Ficha, type Modificacion,
+  fichas, tieneServicio, type CambioDeEstado, type CambioDeUnidad, type DocumentoLegajo, type EntradaHistorial, type Ficha, type Modificacion,
 } from '../../api/eventos';
 import { useDatos, useEnvio } from '../../api/useDatos';
 import {
@@ -187,7 +187,7 @@ function ContenidoFicha({ ficha, alCambiar }: { ficha: Ficha; alCambiar: (ficha:
         label="Secciones de la ficha"
         items={[
           { id: 'datos', label: 'Datos' },
-          { id: 'servicios', label: 'Servicios', count: ficha.servicios.filter((x) => x.descripcion).length },
+          { id: 'servicios', label: 'Servicios', count: ficha.servicios.filter(tieneServicio).length },
           ...(ficha.documentos ? [{ id: 'documentos', label: 'Documentos', count: ficha.documentos.length }] : []),
           { id: 'historial', label: 'Historial', count: ficha.historial.length },
           ...(veConsumo ? [{ id: 'consumo', label: 'Consumo de bebida' }] : []),

@@ -544,3 +544,20 @@ h2.h2, h3.h3, h3.h4 { margin: 0; color: var(--ink); }
 .v-tabs--segmented .v-tab { height: 40px; padding: 0 var(--space-5); color: var(--ink); }
 .v-tabs--segmented .v-tab.is-on { background: var(--brand); color: var(--on-brand); box-shadow: none; font-weight: 600; }
 .v-tabs--segmented .v-tab.is-on .v-tab__count { background: var(--on-brand); color: var(--brand); }
+
+/* ---------- Atajo (v2): fila de «Te toca a vos» en el Inicio ---------- */
+.v-atajo { display: flex; align-items: center; gap: var(--space-3); width: 100%; min-height: 60px; padding: var(--space-2) 0; border: 0; border-bottom: 1px solid var(--line);
+  background: none; color: var(--ink); text-align: left; cursor: pointer; font: inherit; }
+.v-atajo:last-child { border-bottom: 0; }
+.v-atajo:hover { color: var(--brand-ink); }
+.v-atajo:focus-visible { outline: 3px solid var(--focus-ring); outline-offset: 2px; border-radius: var(--radius-sm); }
+.v-atajo__ico { display: grid; place-items: center; flex: none; width: 40px; height: 40px; border-radius: var(--radius-pill); }
+.v-atajo__ico--brand { background: var(--brand-tint); color: var(--brand-ink); }
+.v-atajo__ico--accent { background: var(--accent-tint); color: var(--accent-ink); }
+.v-atajo__ico--warning { background: var(--warning-tint); color: var(--warning-ink); }
+.v-atajo__texto { display: flex; flex: 1; flex-direction: column; min-width: 0; }
+
+/* ---------- MiniBarras (v2): eventos por día dentro de la ficha deep ---------- */
+.v-minibarras { display: inline-flex; align-items: flex-end; gap: 4px; height: 32px; }
+.v-minibarras__riel { position: relative; display: block; width: 8px; height: 100%; border-radius: var(--radius-pill); background: var(--deep-raised); overflow: hidden; }
+.v-minibarras__relleno { position: absolute; left: 0; right: 0; bottom: 0; border-radius: var(--radius-pill); background: var(--on-deep); }

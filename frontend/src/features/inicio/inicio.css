@@ -1,0 +1,53 @@
+/*
+ * UI-04 · Inicio. Teléfono y tableta: una columna (semana con el resumen en una línea, calendario, próximos días,
+ * tareas, notificaciones y bebidas). Desde 960 px, la grilla de 12 del prototipo: semana y tres números arriba,
+ * próximos días y calendario en el medio, y abajo tareas, notificaciones y bebidas.
+ */
+.inicio__cabeza { display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between; gap: var(--space-4); }
+.inicio__numero { display: flex; align-items: baseline; gap: var(--space-2); margin: 0; }
+
+.inicio__semana .v-card__body, .inicio__kpi .v-card__body { display: flex; flex-direction: column; gap: var(--space-2); }
+.inicio__semana .stat { color: var(--on-deep); }
+.inicio__semana-fila { display: flex; align-items: flex-end; gap: var(--space-5); }
+/* En teléfono los tres números van en una línea dentro de la semana. .v-card.inicio__kpi le gana al display de .v-card. */
+.v-card.inicio__kpi { display: none; }
+.inicio__kpi-fila { display: flex; align-items: baseline; justify-content: space-between; gap: var(--space-3); }
+
+.inicio__calendario { order: 1; }
+.inicio__dias, .inicio__fila { order: 2; }
+
+.inicio__dias { display: flex; flex-direction: column; min-width: 0; }
+.inicio__dia-cabeza { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: var(--space-1) var(--space-3); }
+.inicio__dia-cabeza .h4 { margin: 0; }
+.inicio__eventos { list-style: none; margin: 0; padding: 0; }
+.inicio__evento { display: grid; grid-template-columns: minmax(0, 1fr) auto; grid-template-areas: "lugar estado" "nombre nombre" "detalle detalle";
+  align-items: center; gap: 4px var(--space-3); width: 100%; padding: var(--space-3) 0; border: 0; border-bottom: 1px solid var(--line);
+  background: none; color: var(--ink); text-align: left; cursor: pointer; font: inherit; }
+.inicio__eventos li:last-child .inicio__evento { border-bottom: 0; }
+.inicio__evento:hover .label { color: var(--brand-ink); }
+.inicio__evento:focus-visible { outline: 3px solid var(--focus-ring); outline-offset: 2px; border-radius: var(--radius-sm); }
+.inicio__evento-lugar { grid-area: lugar; display: flex; align-items: center; gap: var(--space-2); }
+.inicio__evento > .label { grid-area: nombre; }
+.inicio__evento > .body-sm { grid-area: detalle; }
+.inicio__evento > :last-child { grid-area: estado; justify-self: end; }
+
+.inicio__tareas, .inicio__bebidas { display: flex; flex-direction: column; }
+.inicio__bebidas { gap: var(--space-4); }
+.inicio__tareas > .v-btn { align-self: flex-start; margin-top: var(--space-2); }
+
+.inicio__fila { display: grid; grid-template-columns: minmax(0, 1fr); gap: var(--space-6); }
+
+@media (min-width: 960px) {
+  /* .pantalla.inicio: le gana al display flex de .pantalla, que se carga después. */
+  .pantalla.inicio { display: grid; grid-template-columns: repeat(12, minmax(0, 1fr)); align-items: start; gap: var(--space-6); }
+  .inicio > * { grid-column: 1 / -1; order: 0; }
+  .inicio > .inicio__semana, .inicio > .v-card.inicio__kpi { display: flex; grid-column: span 3; align-self: stretch; }
+  .inicio__semana-resumen { display: none; }
+  .inicio > .inicio__dias { grid-column: span 8; }
+  /* Baja lo que ocupan las solapas, para alinearse con la ficha de los días. */
+  .inicio > .inicio__calendario { grid-column: span 4; margin-top: var(--tab-h); }
+  /* Una columna igual por bloque: dos o tres según el perfil. */
+  .inicio__fila { grid-template-columns: none; grid-auto-flow: column; grid-auto-columns: minmax(0, 1fr); align-items: start; }
+  .inicio__evento { grid-template-columns: 150px minmax(0, 1fr) minmax(0, 1fr) auto; grid-template-areas: "lugar nombre detalle estado"; gap: var(--space-4); }
+  .inicio__evento-lugar { flex-direction: column; align-items: flex-start; gap: 2px; }
+}

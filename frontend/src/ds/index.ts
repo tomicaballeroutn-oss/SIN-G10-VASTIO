@@ -17,8 +17,9 @@ export { cantidadLegible, enBultos, plural } from './cantidad';
 export { Alert, Dialog, EmptyState, Badge, type AlertProps, type DialogProps, type EmptyStateProps, type BadgeProps } from './components/feedback';
 export { StatusChip, SalonTag, type StatusChipProps, type SalonTagProps } from './components/estado';
 export {
-  Card, Table, Tabs, Actor, Stat, Timeline,
+  Card, Table, Tabs, Actor, Stat, Timeline, Atajo, MiniBarras,
   type CardProps, type CardTone, type TableColumn, type TableProps, type TabItem, type TabsProps, type ActorProps, type StatProps, type TimelineItem,
+  type AtajoProps, type AtajoTone, type MiniBarrasProps,
 } from './components/datos';
 export { Nav, type NavItem, type NavProps } from './components/Nav';
 export { Logo, type LogoProps } from './components/Logo';

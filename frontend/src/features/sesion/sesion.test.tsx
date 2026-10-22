@@ -121,12 +121,12 @@ describe('UI-01 · inicio de sesión', () => {
 });
 
 describe('layout · menú según perfil', () => {
-  it('la vendedora empieza en la agenda y ve solo sus ítems', async () => {
+  it('la vendedora empieza en el Inicio y ve solo sus ítems', async () => {
     backend(sesionDe(['VENDEDORA']));
     const router = montar('/');
 
-    expect(await screen.findByRole('heading', { level: 1, name: 'Agenda' })).toBeInTheDocument();
-    expect(router.state.location.pathname).toBe('/agenda');
+    expect(await screen.findByRole('heading', { level: 1, name: 'Hola, Lucía' })).toBeInTheDocument();
+    expect(router.state.location.pathname).toBe('/inicio');
     const menu = menuLateral();
     expect(within(menu).getByRole('button', { name: 'Mis eventos' })).toBeInTheDocument();
     expect(within(menu).queryByRole('button', { name: 'Usuarios y perfiles' })).not.toBeInTheDocument();
@@ -137,7 +137,7 @@ describe('layout · menú según perfil', () => {
     backend(sesionDe(['DIRECCION']));
     montar('/');
 
-    await screen.findByRole('heading', { level: 1, name: 'Inicio' });
+    await screen.findByRole('heading', { level: 1, name: 'Hola, Lucía' });
     const menu = menuLateral();
     for (const grupo of ['Agenda', 'Bebidas', 'Gestión']) expect(within(menu).getByText(grupo, { selector: '.v-nav__title' })).toBeInTheDocument();
     expect(within(menu).getByRole('button', { name: 'Usuarios y perfiles' })).toBeInTheDocument();
@@ -188,7 +188,7 @@ describe('UI-02 · sesión vencida', () => {
     vi.useFakeTimers({ toFake: ['setInterval', 'clearInterval', 'Date'] });
     const fetchMock = backend(sesionDe(['COMPRAS']));
     montar('/');
-    await screen.findByRole('heading', { level: 1, name: 'Inicio' });
+    await screen.findByRole('heading', { level: 1, name: 'Hola, Lucía' });
 
     act(() => vi.advanceTimersByTime(55 * 60_000));
     expect(await screen.findByText('Tu sesión va a expirar pronto')).toBeInTheDocument();
@@ -203,7 +203,7 @@ describe('UI-02 · sesión vencida', () => {
     vi.useFakeTimers({ toFake: ['setInterval', 'clearInterval', 'Date'] });
     const fetchMock = backend(sesionDe(['COMPRAS']));
     montar('/');
-    await screen.findByRole('heading', { level: 1, name: 'Inicio' });
+    await screen.findByRole('heading', { level: 1, name: 'Hola, Lucía' });
     act(() => vi.advanceTimersByTime(56 * 60_000));
     const renovacionesAntes = fetchMock.mock.calls.filter(([url]) => String(url).endsWith('/auth/refresh')).length;
 

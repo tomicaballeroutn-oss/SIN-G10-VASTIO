@@ -15,7 +15,7 @@ const TOTAL: readonly Rol[] = ['DIRECCION', 'COORDINACION'];
 const TODOS: readonly Rol[] = ['DIRECCION', 'COORDINACION', 'ADMINISTRACION', 'VENDEDORA', 'PLANNER', 'COMPRAS', 'BARRA', 'COCINA'];
 
 export const MENU: readonly ItemDeMenu[] = [
-  { id: 'inicio', label: 'Inicio', icon: 'house', ruta: '/inicio', roles: [...TOTAL, 'ADMINISTRACION', 'COMPRAS'] },
+  { id: 'inicio', label: 'Inicio', icon: 'house', ruta: '/inicio', roles: [...TOTAL, 'ADMINISTRACION', 'VENDEDORA', 'PLANNER', 'COMPRAS'] },
   { id: 'notificaciones', label: 'Notificaciones', icon: 'bell', ruta: '/notificaciones', roles: TODOS },
 
   { id: 'agenda', label: 'Agenda', icon: 'calendar', group: 'Agenda', ruta: '/agenda', roles: [...TOTAL, 'ADMINISTRACION', 'VENDEDORA', 'PLANNER', 'COMPRAS'] },
@@ -64,13 +64,11 @@ export function itemsInferiores(items: ItemDeMenu[]): ItemDeMenu[] {
 }
 
 /**
- * Pantalla de inicio según el perfil: la agenda es el inicio de comercial, Barra el de la encargada de barra.
- * Dirección, Coordinación, Administración y Compras tienen su propio inicio (UI-04).
+ * Pantalla de inicio según el perfil: el Inicio (UI-04) para todos los que lo tienen; Barra para la encargada de barra
+ * y la vista de cocina para Cocina.
  */
 export function rutaDeInicio(roles: readonly Rol[]): string {
-  if (roles.some((r) => (['DIRECCION', 'COORDINACION', 'ADMINISTRACION', 'COMPRAS'] as Rol[]).includes(r))) return '/inicio';
-  if (roles.includes('VENDEDORA')) return '/agenda';
-  if (roles.includes('PLANNER')) return '/eventos';
+  if (roles.some((r) => (['DIRECCION', 'COORDINACION', 'ADMINISTRACION', 'VENDEDORA', 'PLANNER', 'COMPRAS'] as Rol[]).includes(r))) return '/inicio';
   if (roles.includes('BARRA')) return '/barra';
   if (roles.includes('COCINA')) return '/cocina';
   return '/mi-cuenta';

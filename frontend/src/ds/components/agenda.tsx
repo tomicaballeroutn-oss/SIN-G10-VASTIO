@@ -11,8 +11,8 @@ const MESES = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', '
 const DIAS = ['Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb', 'Dom'];
 const DIAS_LARGOS = ['lunes', 'martes', 'miércoles', 'jueves', 'viernes', 'sábado', 'domingo'];
 const TURNOS: TurnoId[] = ['mediodia', 'noche'];
-/** Estados que se muestran en la leyenda de la agenda. */
-const LEYENDA: EventStatus[] = ['prereserva', 'senado', 'contratado', 'confirmado', 'bloqueado'];
+/** Lo que puede verse en un punto de la agenda, de libre a cerrado. Liberada y cancelado se ven como disponible. */
+const LEYENDA: EventStatus[] = ['disponible', 'prereserva', 'senado', 'contratado', 'confirmado', 'en-curso', 'realizado', 'cerrado', 'bloqueado'];
 
 const dosDigitos = (n: number) => (n < 10 ? '0' : '') + n;
 
@@ -35,7 +35,11 @@ export interface AgendaGridProps {
   onSelectDay?: (isoDate: string) => void;
   onPrev?: () => void;
   onNext?: () => void;
-  legend?: boolean;
+  /**
+   * Nombres de los salones (se editan en Parámetros). El color y el orden de las columnas salen del código.
+   * Sin ellos, los nombres por defecto.
+   */
+  salones?: { codigo: SalonId; nombre: string }[];
   /**
    * Filtro de la pantalla: las unidades para las que devuelve false se ven atenuadas, no ocultas,
    * para que una unidad ocupada nunca parezca disponible.
@@ -44,8 +48,11 @@ export interface AgendaGridProps {
   className?: string;
 }
 
-/** Mes de la agenda: cada día muestra las seis unidades (columna = salón, fila = mediodía / noche). */
-export function AgendaGrid({ year, month, events = [], today, selected, onSelectDay, onPrev, onNext, legend = true, resaltar, className }: AgendaGridProps) {
+/**
+ * Mes de la agenda: cada día muestra las seis unidades como puntos (columna = salón, fila = mediodía / noche).
+ * Arriba, qué salón es cada columna. Qué significa cada relleno va aparte, en AgendaLeyenda.
+ */
+export function AgendaGrid({ year, month, events = [], today, selected, onSelectDay, onPrev, onNext, salones, resaltar, className }: AgendaGridProps) {
   const primero = new Date(year, month, 1);
   const blancos = (primero.getDay() + 6) % 7;
   const total = new Date(year, month + 1, 0).getDate();
@@ -86,6 +93,8 @@ export function AgendaGrid({ year, month, events = [], today, selected, onSelect
     );
   }
 
+  const nombre = (s: SalonId) => salones?.find((x) => x.codigo === s)?.nombre ?? SALONES[s];
+
   return (
     <div className={cx('v-agenda', className)}>
       <div className="v-agenda__head">
@@ -93,25 +102,119 @@ export function AgendaGrid({ year, month, events = [], today, selected, onSelect
         <h2 className="h2 v-agenda__title">{MESES[month]} {year}</h2>
         {onNext && <IconButton icon="chevron-right" label="Mes siguiente" onClick={onNext} />}
       </div>
+      {/* Qué salón es cada columna de puntos, en el mismo orden en que aparecen en cada día. */}
+      <div className="v-agenda__salons">
+        <span className="caption v-muted">Cada día, de izquierda a derecha</span>
+        <ol className="v-agenda__salons-lista">
+          {ORDEN_SALONES.map((s) => <li key={s}><SalonTag salon={s} label={nombre(s)} /></li>)}
+        </ol>
+      </div>
       <div className="v-agenda__weekdays label" aria-hidden>
         {DIAS.map((n) => <span key={n}>{n}</span>)}
       </div>
       <div className="v-agenda__grid">{celdas}</div>
+    </div>
+  );
+}
+
+export interface AgendaLeyendaProps {
+  /** Abierta al cargar. Conviene abierta en escritorio y cerrada en el teléfono. */
+  defaultOpen?: boolean;
+  className?: string;
+}
+
+/** Machete de la agenda: qué estado significa cada relleno de punto. Se abre y se cierra. */
+export function AgendaLeyenda({ defaultOpen = false, className }: AgendaLeyendaProps) {
+  return (
+    <details className={cx('v-agenda-leyenda', className)} open={defaultOpen}>
+      <summary className="v-agenda-leyenda__resumen">
+        <span className="h4">Qué significa cada punto</span>
+        <Icon name="chevron-down" size={20} className="v-agenda-leyenda__chevron" />
+      </summary>
+      <ul className="v-agenda-leyenda__lista body-sm">
+        {LEYENDA.map((s) => (
+          <li key={s} className="v-legend__item">
+            <span className={`v-pip v-pip--club v-pip--${s}`} aria-hidden />
+            {ESTADOS[s].label}
+          </li>
+        ))}
+      </ul>
+      <p className="caption v-muted">Una fecha cancelada o liberada vuelve a verse disponible.</p>
+    </details>
+  );
+}
+
+/** Ocupación de un día en el MiniCalendar. Los libres no llevan marca. */
+export type DiaOcupado = 'reservado' | 'prereserva';
+
+export interface MiniCalendarProps {
+  year: number;
+  /** 0 = enero. */
+  month: number;
+  /**
+   * yyyy-mm-dd → `reservado` (al menos una unidad señada, contratada, confirmada o posterior) o
+   * `prereserva` (solo pre-reservas). Bloqueos y cancelados no marcan.
+   */
+  days?: Record<string, DiaOcupado>;
+  today?: string;
+  selected?: string;
+  onSelectDay?: (isoDate: string) => void;
+  onPrev?: () => void;
+  onNext?: () => void;
+  legend?: boolean;
+  className?: string;
+}
+
+const INICIALES_DIAS = ['L', 'M', 'M', 'J', 'V', 'S', 'D'];
+
+/** v2: el mes de un vistazo para el inicio y como selector rápido de fecha. El detalle por salón y turno está en AgendaGrid. */
+export function MiniCalendar({ year, month, days = {}, today, selected, onSelectDay, onPrev, onNext, legend = true, className }: MiniCalendarProps) {
+  const blancos = (new Date(year, month, 1).getDay() + 6) % 7;
+  const total = new Date(year, month + 1, 0).getDate();
+  const titulo = `${MESES[month]} ${year}`;
+
+  const celdas = [];
+  for (let i = 0; i < blancos; i++) celdas.push(<span key={`b${i}`} aria-hidden />);
+  for (let d = 1; d <= total; d++) {
+    const iso = `${year}-${dosDigitos(month + 1)}-${dosDigitos(d)}`;
+    const ocupado = days[iso];
+    const estado = ocupado === 'reservado' ? 'con reserva' : ocupado === 'prereserva' ? 'con pre-reserva' : 'libre';
+    celdas.push(
+      <button
+        key={iso}
+        type="button"
+        className={cx('v-minical__day', 'numeral-sm', ocupado && `is-${ocupado}`, today === iso && 'is-today', selected === iso && 'is-selected')}
+        aria-label={`${d} de ${MESES[month].toLowerCase()}: ${estado}`}
+        aria-current={today === iso ? 'date' : undefined}
+        aria-pressed={onSelectDay ? selected === iso : undefined}
+        onClick={onSelectDay ? () => onSelectDay(iso) : undefined}
+      >
+        {d}
+      </button>,
+    );
+  }
+
+  return (
+    <div className={cx('v-minical', className)}>
+      <div className="v-minical__head">
+        <p className="label">{titulo}</p>
+        {(onPrev || onNext) && (
+          <div className="v-minical__nav">
+            <IconButton icon="chevron-left" label="Mes anterior" variant="text" size="sm" onClick={onPrev} />
+            <IconButton icon="chevron-right" label="Mes siguiente" variant="text" size="sm" onClick={onNext} />
+          </div>
+        )}
+      </div>
+      <div className="v-minical__grid" role="group" aria-label={titulo}>
+        {INICIALES_DIAS.map((n, i) => <span key={`d${i}`} className="caption v-muted v-minical__wd" aria-hidden>{n}</span>)}
+        {celdas}
+      </div>
       {legend && (
-        <div className="v-agenda__legend body-sm v-muted">
-          <span className="v-legend__item"><Icon name="sun" size={16} />Fila superior: mediodía</span>
-          <span className="v-legend__item"><Icon name="moon" size={16} />Fila inferior: noche</span>
-          {LEYENDA.map((s) => (
-            <span key={s} className="v-legend__item">
-              <span className={`v-pip v-pip--club v-pip--${s}`} />
-              {ESTADOS[s].label}
-            </span>
-          ))}
+        <div className="v-minical__legend caption v-muted">
+          <span><i className="v-minical__key is-reservado" />Con reserva</span>
+          <span><i className="v-minical__key is-prereserva" />Pre-reserva</span>
         </div>
       )}
-      <div className="v-agenda__salons">
-        {ORDEN_SALONES.map((s) => <SalonTag key={s} salon={s} />)}
-      </div>
     </div>
   );
 }

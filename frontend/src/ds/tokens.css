@@ -1,10 +1,10 @@
 /* Vastio design tokens — generated from tokens.json. Load before components/bundle.css. */
 :root {
   --canvas: #e6e2dd;
-  --surface: #fcfaf7;
-  --surface-raised: #ffffff;
-  --surface-sunken: #f5f2ee;
-  --line: #d6d1cb;
+  --surface: #f2eee8;
+  --surface-raised: #f8f5f0;
+  --surface-sunken: #ebe7e1;
+  --line: #a09a93;
   --line-strong: #59544f;
   --ink: #021226;
   --ink-muted: #404b5a;
@@ -45,6 +45,13 @@
   --salon-santa-barbara-tint: #e3f5fe;
   --salon-santa-barbara-ink: #104765;
   --scrim: rgba(2,18,38,0.60);
+  /* v2 · Fichero: fondo profundo del riel, la barra inferior y la ficha destacada; pestaña activa. */
+  --deep: #153e6c;
+  --deep-raised: #0d2e54;
+  --on-deep: #ffffff;
+  --on-deep-muted: #c6dffe;
+  --tab: #e6e2dd;
+  --on-tab: #153e6c;
   --space-1: 4px;
   --space-2: 8px;
   --space-3: 12px;
@@ -61,6 +68,16 @@
   --control-lg: 52px;
   --sidebar-w: 264px;
   --content-max: 1200px;
+  /* v2 · Fichero: medidas del riel, la solapa y la muesca. */
+  --rail-w: 80px;
+  --rail-w-open: 264px;
+  --rail-inset: 12px;
+  --rail-radius: 28px;
+  --tab-protrude: 20px;
+  --tab-h: 32px;
+  --tab-fillet: 14px;
+  --notch-size: 76px;
+  --fillet: 24px;
   --radius-xs: 4px;
   --radius-sm: 8px;
   --radius-md: 12px;
@@ -77,14 +94,66 @@
   --shadow-sm: 0 2px 6px rgba(6,31,59,0.08), 0 1px 2px rgba(6,31,59,0.06);
   --shadow-md: 0 8px 20px rgba(6,31,59,0.10), 0 2px 6px rgba(6,31,59,0.06);
   --shadow-lg: 0 20px 48px rgba(6,31,59,0.18), 0 4px 12px rgba(6,31,59,0.08);
+  /* Paleta base: los tokens de arriba salen de acá. Las pantallas usan los semánticos, no estos. */
+  --blue-50: #f1f7ff;
+  --blue-100: #e1eefe;
+  --blue-200: #c6dffe;
+  --blue-300: #9dc6f9;
+  --blue-400: #6ca3e6;
+  --blue-500: #417fc8;
+  --blue-600: #245d9e;
+  --blue-700: #153e6c;
+  --blue-800: #0d2e54;
+  --blue-900: #061f3b;
+  --blue-950: #021226;
+  --sand-50: #fcfaf7;
+  --sand-100: #f5f2ee;
+  --sand-200: #e6e2dd;
+  --sand-300: #d6d1cb;
+  --sand-400: #bfbab2;
+  --sand-500: #a09a93;
+  --sand-600: #7c7670;
+  --sand-700: #59544f;
+  --sand-800: #3e3a35;
+  --sand-900: #282521;
+  --sand-950: #161310;
+  --brass-50: #fef6e8;
+  --brass-100: #feeccd;
+  --brass-200: #fcdb9f;
+  --brass-300: #f3c672;
+  --brass-400: #e2b254;
+  --brass-500: #c89937;
+  --brass-600: #a47c25;
+  --brass-700: #816018;
+  --brass-800: #604713;
+  --brass-900: #41300d;
+  --brass-950: #251a04;
+  --teal-50: #e7faf7;
+  --teal-100: #cdf3ed;
+  --teal-300: #84dace;
+  --teal-500: #33a397;
+  --teal-700: #036961;
+  --teal-900: #013c37;
+  --amber-50: #fff5ea;
+  --amber-100: #ffe9d1;
+  --amber-300: #fec076;
+  --amber-500: #e29936;
+  --amber-700: #85581b;
+  --amber-900: #4d310b;
+  --red-50: #fef2f0;
+  --red-100: #fee2de;
+  --red-300: #f6aba1;
+  --red-500: #e15a4e;
+  --red-700: #a12721;
+  --red-900: #5f1a15;
 }
 
 [data-theme="dark"] {
   --canvas: #021226;
-  --surface: #061f3b;
-  --surface-raised: #0d2e54;
-  --surface-sunken: #0a1526;
-  --line: #0d2e54;
+  --surface: #0a2440;
+  --surface-raised: #0f2d4f;
+  --surface-sunken: #06192f;
+  --line: #245d9e;
   --line-strong: #a09a93;
   --ink: #f5f2ee;
   --ink-muted: #afb8c4;
@@ -123,6 +192,12 @@
   --salon-santa-barbara-tint: #022a3d;
   --salon-santa-barbara-ink: #aaddf2;
   --scrim: rgba(0,0,0,0.65);
+  --deep: #0d2e54;
+  --deep-raised: #153e6c;
+  --on-deep: #f5f2ee;
+  --on-deep-muted: #afb8c4;
+  --tab: #021226;
+  --on-tab: #9dc6f9;
   --shadow-xs: 0 1px 2px rgba(0,0,0,0.50);
   --shadow-sm: 0 2px 6px rgba(0,0,0,0.45), 0 1px 2px rgba(0,0,0,0.35);
   --shadow-md: 0 8px 20px rgba(0,0,0,0.50), 0 2px 6px rgba(0,0,0,0.35);

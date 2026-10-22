@@ -17,18 +17,31 @@ export interface CardProps {
   onClick?: (e: SyntheticEvent) => void;
   as?: keyof JSX.IntrinsicElements;
   className?: string;
+  /** v2: tono de la ficha. `deep` solo para el único resumen destacado de la pantalla. */
+  tone?: CardTone;
+  /** v2: rótulo corto de la solapa que asoma arriba (día, grupo, período). Solapa o muesca, no las dos. */
+  tab?: string;
+  /** v2: un solo IconButton redondo en el recorte de la esquina: la acción que sigue de esa ficha. */
+  notch?: ReactNode;
 }
 
-export function Card({ children, eyebrow, title, subtitle, actions, footer, interactive, flush, onClick, as, className }: CardProps) {
+export type CardTone = 'surface' | 'deep' | 'brand-tint' | 'accent-tint' | 'success-tint' | 'sunken';
+
+export function Card({ children, eyebrow, title, subtitle, actions, footer, interactive, flush, onClick, as, className, tone = 'surface', tab, notch }: CardProps) {
   const Tag = (as ?? 'section') as 'section';
   const conCabecera = title || eyebrow || actions;
   return (
     <Tag
-      className={cx('v-card', interactive && 'v-card--interactive', flush && 'v-card--flush', className)}
+      className={cx(
+        'v-card', tone !== 'surface' && `v-card--${tone}`, interactive && 'v-card--interactive', flush && 'v-card--flush',
+        tab ? 'v-card--tabbed' : null, notch ? 'v-card--notched' : null, className,
+      )}
       onClick={onClick}
       tabIndex={interactive ? 0 : undefined}
       onKeyDown={interactive && onClick ? (e: KeyboardEvent) => { if (e.key === 'Enter') onClick(e); } : undefined}
     >
+      {tab && <span className="v-card__tab overline">{tab}</span>}
+      {notch ? <div className="v-card__notch">{notch}</div> : null}
       {conCabecera && (
         <header className="v-card__head">
           <div className="v-card__titles">
@@ -119,8 +132,11 @@ export interface TabsProps {
   value?: string;
   defaultValue?: string;
   onChange?: (id: string) => void;
-  /** `bloques`: opciones de igual ancho y de dos renglones (nombre y ayuda), como el selector de salón de la agenda. */
-  variant?: 'underline' | 'segmented' | 'bloques';
+  /**
+   * `bloques`: opciones de igual ancho y de dos renglones (nombre y ayuda), como el selector de salón de la agenda.
+   * `folder` (v2): solapas de agenda que se unen a la Card que va justo debajo, para recorrer días o semanas sobre una misma ficha.
+   */
+  variant?: 'underline' | 'segmented' | 'bloques' | 'folder';
   label?: string;
   className?: string;
 }

@@ -280,6 +280,8 @@ export const fichas = {
   registrarServicios: (id: number, version: number, servicios: { categoriaId: number; descripcion: string }[]) =>
     api<Ficha>(`/eventos/${id}/servicios`, { metodo: 'PUT', cuerpo: { version, servicios } }),
   descargarDocumento: (id: number, documentoId: number) => descargarArchivo(`/eventos/${id}/documentos/${documentoId}`),
+  /** Comprobante interno de la seña en PDF (M-07): solo para quien ve el importe. */
+  descargarComprobante: (id: number) => descargarArchivo(`/eventos/${id}/sena/comprobante`),
 };
 
 /** Lo que acepta «Registrar firma de contrato». */

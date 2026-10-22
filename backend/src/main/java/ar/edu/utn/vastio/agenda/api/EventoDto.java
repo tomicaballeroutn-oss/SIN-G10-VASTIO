@@ -92,10 +92,20 @@ public class EventoDto {
 
     /**
      * Una categoría de servicio de la ficha, en el orden configurado: todas las activas y, de las dadas de baja, las que
-     * tienen algo cargado ({@code activa = false}: se ven pero no se editan). Sin servicio, {@code descripcion} es null.
+     * tienen algo cargado ({@code activa = false}: se ven pero no se editan). {@code descripcion} es el detalle libre
+     * (null si no hay); {@code renglones}, lo cargado renglón por renglón (vacío si no hay).
      */
     public record ServicioDto(short categoriaId, String categoria, boolean activa, boolean requeridaParaConfirmar,
-            boolean visibleEnCocina, String descripcion, Nombre usuario, OffsetDateTime fechaModificacion) {
+            boolean visibleEnCocina, List<RenglonDto> renglones, String descripcion, Nombre usuario,
+            OffsetDateTime fechaModificacion) {
+    }
+
+    /** Un renglón de servicio: texto libre y cantidad (null si no lleva). */
+    public record RenglonDto(String texto, Integer cantidad) {
+
+        static List<RenglonDto> de(ServicioContratado s) {
+            return s == null ? List.of() : s.getRenglones().stream().map(r -> new RenglonDto(r.getTexto(), r.getCantidad())).toList();
+        }
     }
 
     /** Motivo y detalle de un evento cancelado. */
@@ -163,7 +173,7 @@ public class EventoDto {
 
     private static ServicioDto servicio(CategoriaServicio c, ServicioContratado s, Map<Long, String> nombres) {
         return new ServicioDto(c.getId(), c.getNombre(), c.isActivo(), c.isRequeridaParaConfirmar(), c.isVisibleEnCocina(),
-                s == null ? null : s.getDescripcion(), s == null ? null : persona(s.getUsuarioId(), nombres),
+                RenglonDto.de(s), s == null ? null : s.getDescripcion(), s == null ? null : persona(s.getUsuarioId(), nombres),
                 s == null ? null : s.getFechaModificacion());
     }
 

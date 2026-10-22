@@ -12,6 +12,12 @@ public final class Permisos {
     /** B5-04: preparación manual; no otorga operación de barra. */
     public static final String REGISTRAR_PREPARACION = "hasAnyRole('DIRECCION', 'COORDINACION', 'ADMINISTRACION', 'COMPRAS')";
 
+    /**
+     * M-07: comprobante interno de la seña. Los perfiles que pueden ver el importe; que la vendedora sea la titular se
+     * verifica en el servicio.
+     */
+    public static final String COMPROBANTE_SENA = "hasAnyRole('DIRECCION', 'COORDINACION', 'ADMINISTRACION', 'VENDEDORA')";
+
     /** Administrar usuarios. */
     public static final String ACCESO_TOTAL = "hasAnyRole('DIRECCION', 'COORDINACION')";
 

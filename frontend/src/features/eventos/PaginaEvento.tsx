@@ -260,7 +260,7 @@ function Datos({ ficha }: { ficha: Ficha }) {
         )}
       </Card>
       {sena && (
-        <Card title="Seña">
+        <Card title="Seña" actions={sena.importe != null ? <DescargarComprobante ficha={ficha} /> : undefined}>
           <dl className="ficha__lista">
             {sena.importe != null && <Dato etiqueta="Importe"><span className="numeral">{dinero(sena.importe, sena.moneda ?? 'ARS')}</span></Dato>}
             <Dato etiqueta="Fecha del pago">{fechaCorta(sena.fecha, true)}</Dato>
@@ -292,6 +292,28 @@ function Datos({ ficha }: { ficha: Ficha }) {
 }
 
 /** Legajo del evento: el contrato digitalizado. Solo llega a quien ve datos económicos. */
+/**
+ * M-07 · Comprobante interno de la seña en PDF. Solo se ofrece a quien recibió el importe; el backend lo verifica igual.
+ * El número se asigna en la primera descarga y se repite en las siguientes.
+ */
+function DescargarComprobante({ ficha }: { ficha: Ficha }) {
+  const { guardando, error, enviar } = useEnvio();
+
+  async function descargar() {
+    const archivo = await enviar(() => fichas.descargarComprobante(ficha.id));
+    if (archivo) guardarArchivo(archivo.contenido, archivo.nombre ?? `comprobante-sena-${ficha.codigo}.pdf`);
+  }
+
+  return (
+    <div className="ficha__comprobante">
+      <Button variant="outline" size="sm" icon="file-text" loading={guardando} onClick={() => void descargar()}>
+        Descargar comprobante
+      </Button>
+      {error && <p className="body-sm v-field__error" role="alert">{error.message}</p>}
+    </div>
+  );
+}
+
 function Documentos({ ficha, documentos }: { ficha: Ficha; documentos: DocumentoLegajo[] }) {
   const { error, enviar } = useEnvio();
 

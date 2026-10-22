@@ -235,6 +235,7 @@ h2.h2, h3.h3, h3.h4 { margin: 0; color: var(--ink); }
 .v-tl__dot--info { background: var(--info-tint); color: var(--info-ink); box-shadow: inset 0 0 0 1.5px var(--info); }
 .v-tl__body { display: flex; flex-direction: column; gap: var(--space-2); min-width: 0; padding-top: 4px; }
 .v-tl__flow { display: flex; align-items: center; gap: var(--space-2); flex-wrap: wrap; }
+.v-tl__item.is-destacado .v-tl__body { flex: 1; padding: var(--space-2) var(--space-3); border-radius: var(--radius-md); background: var(--accent-tint); box-shadow: inset 3px 0 0 var(--accent); }
 
 /* ---------- Navigation ---------- */
 .v-nav { color: var(--ink); }

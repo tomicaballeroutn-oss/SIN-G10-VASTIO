@@ -152,12 +152,13 @@ class ServiciosIT {
         guardar(ana, confirmado, """
                 [{"categoriaId":2,"descripcion":"Bondiola braseada"}]""").andExpect(status().isOk());
         entityManager.flush();
-        assertThat(destinatariosDelUltimoAviso(confirmado)).contains(cocina.getId(), lucia.getId()).doesNotContain(compras.getId());
+        assertThat(destinatariosDesde(confirmado, 0)).contains(cocina.getId(), lucia.getId()).doesNotContain(compras.getId());
 
+        long anteriores = jdbc.queryForObject("SELECT max(notificacion_id) FROM notificacion", Long.class);
         guardar(ana, confirmado, """
                 [{"categoriaId":6,"descripcion":"Malbec y Chardonnay"}]""").andExpect(status().isOk());
         entityManager.flush();
-        assertThat(destinatariosDelUltimoAviso(confirmado)).contains(compras.getId()).doesNotContain(cocina.getId());
+        assertThat(destinatariosDesde(confirmado, anteriores)).contains(compras.getId()).doesNotContain(cocina.getId());
     }
 
     @Test
@@ -245,10 +246,11 @@ class ServiciosIT {
         return jdbc.queryForObject(sql, Integer.class, evento);
     }
 
-    private List<Long> destinatariosDelUltimoAviso(long id) {
+    /** Destinatarios de los avisos de modificación con id mayor a {@code anteriores}: el general y los personales. */
+    private List<Long> destinatariosDesde(long id, long anteriores) {
         return jdbc.queryForList("""
-                SELECT usuario_id FROM notificacion_destinatario
-                WHERE notificacion_id = (SELECT max(notificacion_id) FROM notificacion WHERE evento_id = ? AND tipo = 'MODIFICACION')""",
-                Long.class, id);
+                SELECT d.usuario_id FROM notificacion_destinatario d JOIN notificacion n USING (notificacion_id)
+                WHERE n.evento_id = ? AND n.tipo = 'MODIFICACION' AND n.notificacion_id > ?""",
+                Long.class, id, anteriores);
     }
 }

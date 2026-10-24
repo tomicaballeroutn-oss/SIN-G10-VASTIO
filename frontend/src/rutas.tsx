@@ -5,6 +5,7 @@ import { PaginaBarra } from './features/bebidas/PaginaBarra';
 import { PaginaCierre } from './features/bebidas/PaginaCierre';
 import { PaginaCatalogo } from './features/bebidas/PaginaCatalogo';
 import { PaginaExistencias } from './features/bebidas/PaginaExistencias';
+import { PaginaEstadisticas } from './features/bebidas/PaginaEstadisticas';
 import { PaginaIngresoBebida } from './features/bebidas/PaginaIngresoBebida';
 import { PaginaDs } from './features/ds/PaginaDs';
 import { PaginaDatosEvento } from './features/eventos/PaginaDatosEvento';
@@ -26,6 +27,7 @@ const PANTALLAS: Partial<Record<string, ReactNode>> = {
   barra: <PaginaBarra />,
   catalogo: <PaginaCatalogo />,
   existencias: <PaginaExistencias />,
+  estadisticas: <PaginaEstadisticas />,
   ingreso: <PaginaIngresoBebida />,
   inicio: <PaginaInicio />,
   eventos: <PaginaEventos />,

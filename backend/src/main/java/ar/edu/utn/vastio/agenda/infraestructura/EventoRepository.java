@@ -13,6 +13,24 @@ import ar.edu.utn.vastio.agenda.dominio.Evento;
 
 public interface EventoRepository extends JpaRepository<Evento, Long> {
 
+    interface Historico {
+        Long getId();
+        Short getTipoEventoId();
+        Integer getCantidadInvitados();
+    }
+
+    /** La fecha operativa pertenece a la unidad, nunca a la fecha de cierre. */
+    @Query("""
+            select e.id as id, e.tipoEventoId as tipoEventoId, e.cantidadInvitados as cantidadInvitados
+            from Evento e join e.unidad u
+            where e.estado = ar.edu.utn.vastio.agenda.dominio.EstadoEvento.CERRADO
+              and u.fecha between :desde and :hasta
+              and (:tipoEventoId is null or e.tipoEventoId = :tipoEventoId)
+              and (:salonId is null or u.salonId = :salonId)
+            order by e.id
+            """)
+    List<Historico> historicos(LocalDate desde, LocalDate hasta, Short tipoEventoId, Short salonId);
+
     /** Eventos que ocupan una unidad entre esas fechas, con su unidad y cliente. */
     @Query("""
             select e from Evento e join fetch e.unidad u join fetch e.cliente

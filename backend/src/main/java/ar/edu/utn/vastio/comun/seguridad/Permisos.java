@@ -6,6 +6,9 @@ package ar.edu.utn.vastio.comun.seguridad;
  */
 public final class Permisos {
 
+    /** B5-01 A: estadísticas históricas de solo lectura. */
+    public static final String CONSULTAR_ESTADISTICAS_CONSUMO = "hasAnyRole('DIRECCION', 'COORDINACION', 'ADMINISTRACION', 'COMPRAS')";
+
     /** B4-05: consulta histórica, independiente de la operación de barra y del cierre. */
     public static final String CONSULTAR_CONSUMO = "hasAnyRole('DIRECCION', 'COORDINACION', 'ADMINISTRACION', 'COMPRAS')";
 

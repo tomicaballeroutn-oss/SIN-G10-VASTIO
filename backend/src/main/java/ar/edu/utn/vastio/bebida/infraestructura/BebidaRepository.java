@@ -13,6 +13,17 @@ import ar.edu.utn.vastio.bebida.dominio.Bebida;
 
 public interface BebidaRepository extends JpaRepository<Bebida, Long> {
 
+    interface ReferenciaHistorica {
+        Long getId();
+        String getNombre();
+        String getPresentacion();
+        boolean getActivo();
+    }
+
+    /** Proyección del catálogo sin cargar códigos, unidades ni stock. */
+    @Query("select b.id as id, b.nombre as nombre, b.presentacion as presentacion, b.activo as activo from Bebida b order by b.nombre, b.presentacion, b.id")
+    List<ReferenciaHistorica> referenciasHistoricas();
+
     /** Bloquea el artículo y lee su actividad vigente sin refrescar el grafo cíclico de códigos. */
     @Transactional(propagation = Propagation.MANDATORY)
     @Query(nativeQuery = true, value = "SELECT activo FROM bebida WHERE bebida_id = :id FOR SHARE")

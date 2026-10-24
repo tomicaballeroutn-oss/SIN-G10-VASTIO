@@ -1,0 +1,4 @@
+# El build de respaldo solo necesita su Dockerfile; nunca enviar configuracion/datos.
+**
+!deploy/
+!deploy/respaldo.Dockerfile

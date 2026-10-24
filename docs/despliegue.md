@@ -79,21 +79,15 @@ Flyway aplica las migraciones nuevas al arrancar el backend.
 
 ## 5. Respaldos
 
-El servicio `respaldo` hace un `pg_dump` por día en `./respaldos/` y conserva los últimos 14. También copia a `./respaldos/legajo/` los archivos nuevos del legajo (contratos digitalizados), que viven en el volumen `legajo`: la base guarda solo la ruta, así que **un respaldo de la base sin esa carpeta no alcanza para recuperar los contratos**. **Esos archivos están en el mismo servidor: si el servidor se pierde, se pierden con él.** Falta decidir a dónde se copian. Una opción sin costo es Google Drive con `rclone`: se configura una vez con `rclone config` y después un cron del servidor copia la carpeta todos los días:
+El servicio `respaldo` ejecuta `scripts/respaldo_local.sh` con PostgreSQL 17: un `pg_dump` al iniciar y luego una espera de 86400 segundos entre ciclos. Requiere `RESPALDO_ENTORNO`, identificador exclusivo de la instalación (ver `.env.prod.example`). Guarda en `./respaldos/<entorno>/<base>/`; solo publica `.dump` después de completar el dump, inspeccionar su índice y copiar el legajo. Los fallos del respaldo local terminan el proceso con código no cero. Los fallos posteriores de preparación o transferencia se registran, conservan las copias locales y omiten la retención del ciclo: en modo diario se mantiene la espera de 86400 segundos; con `--once` o `--transfer-only` se devuelve error. Docker conserva `restart: unless-stopped` para los procesos que terminan.
 
-```bash
-# crontab -e
-30 4 * * * rclone copy /home/ubuntu/vastio/respaldos drive:vastio-respaldos
-```
+La retención elimina únicamente archivos regulares `vastio-*.dump` de esa carpeta con `-mtime +14` (días completos, no exactamente las últimas 14 copias), después de publicar una copia nueva. No recorre subdirectorios ni elimina respaldos históricos de la raíz, otras bases o entornos. Los `.partial` se conservan para diagnóstico y no son respaldos terminados.
 
-Restaurar un respaldo (reemplaza los datos actuales):
+El legajo se copia a `./respaldos/<entorno>/<base>/legajo/`: la base guarda rutas, por lo que **el dump solo no recupera los contratos**. La copia incremental sigue sin ser una instantánea atómica con la base. La [transferencia M-10](m-10-transferencia.md) agrega paquetes verificables y rclone opcional mediante `docker-compose.respaldo-externo.yml`; sin ese override todo sigue local. La integración real con Google Drive fue validada exclusivamente con datos sintéticos y configuración de pruebas; ver [resultados](m-10-drive-resultados.md). Esa cuenta y carpeta no son un destino productivo aprobado. No se acredita un despliegue productivo.
 
-```bash
-docker compose -f docker-compose.prod.yml --env-file .env.prod stop backend
-docker compose -f docker-compose.prod.yml --env-file .env.prod exec -T respaldo \
-  pg_restore --clean --if-exists -d vastio /respaldos/vastio-AAAAMMDD-HHMM.dump
-docker compose -f docker-compose.prod.yml --env-file .env.prod start backend
-```
+Para identificar pendientes, revisar `transferencias/*.listo` sin confirmación `.enviado` para el destino actual y los registros `ERROR transferencia paquete=<id> etapa=<etapa> codigo=<n>`. Un paquete fallido no bloquea los siguientes; el ciclo conserva un resultado de error. Los `.partial` no se envían. El procedimiento de inspección y reintento está en [operación de transferencia](m-10-transferencia.md).
+
+Ver [M-10: cambios locales, pruebas y limitaciones](m-10-respaldo-local.md). La antigua receta de restauración sobre la base activa se retira: la recuperación debe diseñarse y verificarse primero en un destino vacío y aislado, con una versión de aplicación compatible con su historia Flyway.
 
 ## 6. GitHub: proteger `main`
 

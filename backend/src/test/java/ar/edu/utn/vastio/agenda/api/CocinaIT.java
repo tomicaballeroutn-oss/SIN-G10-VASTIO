@@ -17,6 +17,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -98,7 +99,8 @@ class CocinaIT {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.hoy").value("2032-05-10"))
                 .andExpect(jsonPath("$.hasta").value("2032-05-25"))
-                .andExpect(jsonPath("$.eventos[*].id", containsInAnyOrder((int) hoy, (int) dentro, (int) enCurso)))
+                .andExpect(jsonPath("$.eventos[*].id", containsInAnyOrder((int) hoy, (int) dentro)))
+                .andExpect(jsonPath("$.jornadasAnteriores[*].id", containsInAnyOrder((int) enCurso)))
                 .andExpect(jsonPath("$.eventos[*].id", not(hasItem((int) fuera))))
                 .andExpect(jsonPath("$.eventos[*].id", not(hasItem((int) senado))))
                 .andExpect(jsonPath("$.eventos[*].id", not(hasItem((int) cancelado))));
@@ -109,7 +111,8 @@ class CocinaIT {
         consultar(ana, "2032-05")
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.hasta").doesNotExist())
-                .andExpect(jsonPath("$.eventos[*].id", containsInAnyOrder((int) hoy, (int) dentro, (int) fuera, (int) enCurso)));
+                .andExpect(jsonPath("$.eventos[*].id", containsInAnyOrder((int) hoy, (int) dentro, (int) fuera)))
+                .andExpect(jsonPath("$.jornadasAnteriores[*].id", containsInAnyOrder((int) enCurso)));
     }
 
     @Test
@@ -180,6 +183,72 @@ class CocinaIT {
     @Test
     void sinSesionNoHayVistaDeCocina() throws Exception {
         mvc.perform(get("/api/v1/cocina").param("mes", "2032-05")).andExpect(status().isUnauthorized());
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {"2032-06-01", "2033-01-01", "2032-05-10"})
+    void jornadasAnterioresSeVenSinCambiarSuFechaNiDuplicarse(String fecha) throws Exception {
+        LocalDate actual = LocalDate.parse(fecha);
+        when(reloj.instant()).thenReturn(actual.atTime(1, 0).atZone(ZONA).toInstant());
+        jdbc.update("UPDATE evento SET estado = 'CERRADO' WHERE evento_id = ?", enCurso);
+        long anterior = escenario.evento("avril", actual.minusDays(1), "mediodia", "EN_CURSO", lucia, ana, "Sigue la preparación");
+        escenario.evento("club", actual.minusDays(1), "mediodia", "CANCELADO", lucia, ana, "Cancelado anterior");
+        escenario.evento("santa-barbara", actual.minusDays(1), "mediodia", "CERRADO", lucia, ana, "Cerrado anterior");
+        consultar(personas.de(RolCodigo.COCINA), actual.toString().substring(0, 7))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.jornadasAnteriores.length()").value(1))
+                .andExpect(jsonPath("$.jornadasAnteriores[0].id").value(anterior))
+                .andExpect(jsonPath("$.jornadasAnteriores[0].fecha").value(actual.minusDays(1).toString()))
+                .andExpect(jsonPath("$.eventos[*].id", not(hasItem((int) anterior))))
+                .andExpect(jsonPath("$.jornadasAnteriores[0].estado").doesNotExist())
+                .andExpect(jsonPath("$.jornadasAnteriores[0].cliente").doesNotExist())
+                .andExpect(jsonPath("$.jornadasAnteriores[0].observacionesInternas").doesNotExist());
+        tarjeta(personas.de(RolCodigo.COCINA), anterior).andExpect(status().isOk());
+    }
+
+    @Test
+    void horizonteConfigurableIncluyeAmbosExtremosYExcluyeAyerYElDiaSiguiente() throws Exception {
+        jdbc.update("UPDATE parametro SET valor = '3' WHERE clave = 'HORIZONTE_COCINA_DIAS'");
+        long limite = escenario.evento("avril", HOY.plusDays(3), "mediodia", "CONFIRMADO", lucia, ana, "Límite");
+        long siguiente = escenario.evento("avril", HOY.plusDays(4), "mediodia", "CONFIRMADO", lucia, ana, "Siguiente");
+        long ayer = escenario.evento("avril", HOY.minusDays(1), "mediodia", "CONFIRMADO", lucia, ana, "Ayer confirmado");
+        Usuario cocina = personas.de(RolCodigo.COCINA);
+        consultar(cocina, "2032-05")
+                .andExpect(jsonPath("$.hasta").value("2032-05-13"))
+                .andExpect(jsonPath("$.eventos[*].id", containsInAnyOrder((int) hoy, (int) limite)));
+        tarjeta(cocina, hoy).andExpect(status().isOk());
+        tarjeta(cocina, limite).andExpect(status().isOk());
+        tarjeta(cocina, siguiente).andExpect(status().isNotFound());
+        tarjeta(cocina, ayer).andExpect(status().isNotFound());
+    }
+
+    @ParameterizedTest
+    @EnumSource(value = RolCodigo.class, names = {"VENDEDORA", "ADMINISTRACION", "BARRA", "COMPRAS", "PLANNER", "DIRECCION", "COORDINACION"})
+    void cocinaConOtrosPerfilesConservaElHorizonteQueCorresponde(RolCodigo otro) throws Exception {
+        Usuario ambos = personas.usuario("combinado." + otro.name(), "Cocina combinada", RolCodigo.COCINA, otro);
+        boolean general = java.util.Set.of(RolCodigo.COMPRAS, RolCodigo.PLANNER, RolCodigo.DIRECCION, RolCodigo.COORDINACION).contains(otro);
+        tarjeta(ambos, fuera).andExpect(general ? status().isOk() : status().isNotFound());
+        consultar(ambos, "2032-05").andExpect(status().isOk());
+    }
+
+    @Test
+    void listadoMensualNoFiltraDatosSensibles() throws Exception {
+        String cuerpo = consultar(personas.de(RolCodigo.COCINA), "2032-05")
+                .andExpect(status().isOk()).andReturn().getResponse().getContentAsString();
+        assertThat(cuerpo).doesNotContain("estado", "importe", "observaciones", "cliente", "contactos", "vendedora", "Cliente complicado", "Malbec", "30111222");
+    }
+
+    @Test
+    void cocinaVendedoraConsultaCocinaPeroNoLaFichaAjena() throws Exception {
+        Usuario ambos = personas.usuario("cocina.vendedora", "Cocina vendedora", RolCodigo.COCINA, RolCodigo.VENDEDORA);
+        long propio = escenario.evento("avril", HOY.plusDays(1), "mediodia", "CONFIRMADO", ambos, ana, "Propio");
+        tarjeta(ambos, propio).andExpect(status().isOk());
+        tarjeta(ambos, hoy).andExpect(status().isOk());
+        mvc.perform(get("/api/v1/eventos/{id}", propio).header(HttpHeaders.AUTHORIZATION, personas.bearer(ambos)))
+                .andExpect(status().isOk());
+        mvc.perform(get("/api/v1/eventos/{id}", hoy).header(HttpHeaders.AUTHORIZATION, personas.bearer(ambos)))
+                .andExpect(status().isForbidden())
+                .andExpect(jsonPath("$.codigo").value("EVENTO_DE_OTRA_VENDEDORA"));
     }
 
     private ResultActions consultar(Usuario quien, String mes) throws Exception {

@@ -200,7 +200,7 @@ function ContenidoFicha({ ficha, alCambiar }: { ficha: Ficha; alCambiar: (ficha:
       {pestana === 'datos' && <Datos ficha={ficha} />}
       {pestana === 'servicios' && <PestanaServicios key={ficha.id} ficha={ficha} alGuardar={alCambiar} />}
       {pestana === 'documentos' && <Documentos ficha={ficha} documentos={ficha.documentos ?? []} />}
-      {pestana === 'historial' && <Historial historial={ficha.historial} />}
+      {pestana === 'historial' && <Historial historial={ficha.historial} cambio={busqueda.get('cambio')} />}
       {pestana === 'consumo' && <PestanaConsumo key={ficha.id} eventoId={ficha.id} />}
       {pestana === 'preparacion' && <PestanaPreparacion key={ficha.id} eventoId={ficha.id} />}
     </>
@@ -400,8 +400,28 @@ function agrupar(historial: EntradaHistorial[]): (CambioDeEstado | CambioDeUnida
   return grupos;
 }
 
-function Historial({ historial }: { historial: EntradaHistorial[] }) {
-  const items: TimelineItem[] = agrupar(historial).map((g) => {
+/**
+ * El guardado del que avisa una notificación de «cambió …»: el último anterior al aviso (el aviso se genera
+ * después de registrar los cambios, en el mismo guardado).
+ */
+function guardadoAvisado(grupos: ReturnType<typeof agrupar>, momento: string | null): Modificacion[] | undefined {
+  const hasta = momento ? Date.parse(momento) : NaN;
+  if (Number.isNaN(hasta)) return undefined;
+  let elegido: Modificacion[] | undefined;
+  for (const g of grupos) {
+    if (Array.isArray(g) && Date.parse(g[0].fechaHora) <= hasta
+        && (!elegido || Date.parse(g[0].fechaHora) >= Date.parse(elegido[0].fechaHora))) {
+      elegido = g;
+    }
+  }
+  return elegido;
+}
+
+/** @param cambio fecha y hora de un aviso de modificación: se resalta el guardado del que avisó. */
+function Historial({ historial, cambio }: { historial: EntradaHistorial[]; cambio: string | null }) {
+  const grupos = agrupar(historial);
+  const avisado = guardadoAvisado(grupos, cambio);
+  const items: TimelineItem[] = grupos.map((g) => {
     if (Array.isArray(g)) {
       return {
         title: 'Datos modificados',
@@ -411,6 +431,7 @@ function Historial({ historial }: { historial: EntradaHistorial[] }) {
         at: fechaHora(g[0].fechaHora),
         icon: 'pencil',
         tone: 'neutral',
+        highlighted: g === avisado,
       };
     }
     if (g.tipo === 'REPROGRAMACION') {

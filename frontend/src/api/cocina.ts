@@ -36,6 +36,8 @@ export interface Cocina {
   hasta: string | null;
   salones: { codigo: SalonId; nombre: string }[];
   eventos: TarjetaCocina[];
+  /** Preparaciones de jornadas previas a hoy, con su fecha operativa original. */
+  jornadasAnteriores: TarjetaCocina[];
 }
 
 export const cocina = {

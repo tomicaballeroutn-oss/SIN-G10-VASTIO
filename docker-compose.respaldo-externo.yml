@@ -1,0 +1,14 @@
+# Opt-in: combinar con docker-compose.prod.yml. No conecta Drive por si mismo.
+services:
+  respaldo:
+    environment:
+      RESPALDO_TRANSFERIR: "1"
+      RCLONE_CONFIG: /config/rclone/rclone.conf
+      RCLONE_DESTINO: ${RCLONE_DESTINO:?Falta RCLONE_DESTINO remoto:ruta}
+    volumes:
+      # Directorio externo existente. RW para que rclone pueda renovar tokens en el futuro.
+      - type: bind
+        source: ${RCLONE_CONFIG_DIR:?Falta directorio externo RCLONE_CONFIG_DIR}
+        target: /config/rclone
+        bind:
+          create_host_path: false

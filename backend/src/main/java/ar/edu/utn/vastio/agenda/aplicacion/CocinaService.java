@@ -66,16 +66,21 @@ public class CocinaService {
     public record EventoCocina(Evento evento, List<ServicioContratado> servicios) {
     }
 
-    public record Cocina(YearMonth mes, Horizonte horizonte, List<EventoCocina> eventos) {
+    public record Cocina(YearMonth mes, Horizonte horizonte, List<EventoCocina> eventos, List<EventoCocina> jornadasAnteriores) {
     }
 
     @Transactional(readOnly = true)
     public Cocina mes(YearMonth mes, UsuarioActual quien) {
         Horizonte horizonte = horizonte(quien);
+        List<Evento> anteriores = eventos.enEstado(EstadoEvento.EN_CURSO).stream()
+                .filter(e -> e.getUnidad().getFecha().isBefore(horizonte.hoy()))
+                .toList();
+        Set<Long> anterioresIds = anteriores.stream().map(Evento::getId).collect(Collectors.toSet());
         List<Evento> delMes = eventos.enEstadosEntre(mes.atDay(1), mes.atEndOfMonth(), ESTADOS).stream()
+                .filter(e -> !anterioresIds.contains(e.getId()))
                 .filter(horizonte::incluye)
                 .toList();
-        return new Cocina(mes, horizonte, conServicios(delMes));
+        return new Cocina(mes, horizonte, conServicios(delMes), conServicios(anteriores));
     }
 
     /** La tarjeta de un evento, para el aviso que lleva a ella. Si ya no está en la vista, lo dice. */

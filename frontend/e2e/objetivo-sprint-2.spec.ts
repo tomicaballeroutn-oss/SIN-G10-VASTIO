@@ -105,7 +105,7 @@ test('un evento señado llega a Confirmado con su legajo y Compras se entera', a
   const nicolas = await ingresar(browser, 'nicolas.herrera', contexto);
   await nicolas.getByTitle(/^Notificaciones/).click();
   const panel = nicolas.getByRole('dialog', { name: 'Notificaciones' });
-  await panel.getByRole('button', { name: new RegExp(`Evento confirmado: ${nombre}`) }).click();
+  await panel.getByRole('button', { name: new RegExp(`confirmó el evento: ${nombre}`) }).click();
   await expect(nicolas.getByRole('heading', { level: 1, name: nombre })).toBeVisible();
   await expect(nicolas.getByText('Confirmado', { exact: true }).first()).toBeVisible();
 });

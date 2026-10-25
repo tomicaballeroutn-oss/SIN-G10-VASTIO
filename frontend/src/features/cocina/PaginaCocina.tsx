@@ -5,7 +5,7 @@ import { hora } from '../../api/catalogos';
 import { cocina, type Cocina, type TarjetaCocina } from '../../api/cocina';
 import { ProblemaApi } from '../../api/problema';
 import { useDatos } from '../../api/useDatos';
-import { AgendaGrid, Alert, Card, SalonTag, type AgendaEvent } from '../../ds';
+import { AgendaGrid, Alert, Button, Card, SalonTag, type AgendaEvent } from '../../ds';
 import { Cargando } from '../comun/Cargando';
 import { Encabezado } from '../layout/paginas';
 import '../agenda/agenda.css';
@@ -24,7 +24,8 @@ export function PaginaCocina() {
   const mes = MES_VALIDO.test(pedido) ? pedido : hoyEnCordoba().slice(0, 7);
   const diaPedido = busqueda.get('dia');
   const eventoPedido = Number(busqueda.get('evento')) || null;
-  const [aviso, setAviso] = useState<string | null>(null);
+  const [aviso, setAviso] = useState<{ evento: number; mensaje: string } | null>(null);
+  const [intento, setIntento] = useState(0);
 
   const cargar = useCallback(() => cocina.mes(mes), [mes]);
   const datos = useDatos(cargar);
@@ -41,26 +42,39 @@ export function PaginaCocina() {
   // Desde un aviso: se busca el evento para abrir su mes y su día. Si ya no está en la vista, se dice por qué.
   const resuelto = useRef<number | null>(null);
   useEffect(() => {
-    if (!eventoPedido || resuelto.current === eventoPedido) return;
-    resuelto.current = eventoPedido;
+    if (!eventoPedido) {
+      resuelto.current = null;
+      return;
+    }
+    if (resuelto.current === eventoPedido) return;
+    resuelto.current = null;
+    let vigente = true;
     cocina.evento(eventoPedido).then(
       (t) => {
+        if (!vigente) return;
+        resuelto.current = eventoPedido;
         setAviso(null);
         const siguiente = new URLSearchParams(busqueda);
         siguiente.set('mes', t.fecha.slice(0, 7));
         siguiente.set('dia', t.fecha);
         setBusqueda(siguiente, { replace: true });
       },
-      (error: unknown) => setAviso(error instanceof ProblemaApi ? error.message : 'No pudimos abrir ese evento. Volvé a intentarlo.'),
+      (error: unknown) => {
+        if (vigente) setAviso({ evento: eventoPedido, mensaje: error instanceof ProblemaApi ? error.message : 'No pudimos abrir ese evento. Volvé a intentarlo.' });
+      },
     );
-  }, [eventoPedido, busqueda, setBusqueda]);
+    return () => { vigente = false; };
+  }, [eventoPedido, busqueda, setBusqueda, intento]);
 
   const [anio, numeroMes] = mes.split('-').map(Number);
 
   return (
     <section className="pantalla">
       <Encabezado titulo="Vista de cocina" antetitulo="Agenda" />
-      {aviso && <Alert tone="warning" title="Ese evento ya no está en la vista">{aviso}</Alert>}
+      {aviso?.evento === eventoPedido && <Alert tone="warning" title="No pudimos abrir ese evento"
+        action={<Button variant="outline" size="sm" onClick={() => setIntento((n) => n + 1)}>Reintentar</Button>}>
+        {aviso.mensaje}
+      </Alert>}
       <Cargando datos={datos}>
         {(c) => {
           const dia = diaPedido?.startsWith(mes) ? diaPedido : c.hoy.startsWith(mes) ? c.hoy : null;
@@ -72,7 +86,7 @@ export function PaginaCocina() {
                   <AgendaGrid
                     year={anio}
                     month={numeroMes - 1}
-                    events={c.eventos.map((e): AgendaEvent => ({ date: e.fecha, salon: e.salon.codigo, turno: e.turno, status: 'confirmado' }))}
+                    events={[...c.eventos, ...c.jornadasAnteriores].map((e): AgendaEvent => ({ date: e.fecha, salon: e.salon.codigo, turno: e.turno, status: 'confirmado' }))}
                     soloOcupacion
                     today={c.hoy}
                     selected={dia ?? undefined}
@@ -84,6 +98,13 @@ export function PaginaCocina() {
                   <p className="caption v-muted">Cada punto lleno es un evento para cocinar.</p>
                 </Card>
                 <div className="agenda__lateral">
+                  {c.jornadasAnteriores.length > 0 && <div className="cocina__dia">
+                    <h2 className="h3">Jornadas anteriores</h2>
+                    {c.jornadasAnteriores.map((e) => <div key={e.id}>
+                      <p className="overline">{fechaLarga(e.fecha)}</p>
+                      <TarjetaEvento evento={e} destacada={e.id === eventoPedido} />
+                    </div>)}
+                  </div>}
                   <DiaDeCocina cocina={c} dia={dia} destacado={eventoPedido} />
                 </div>
               </div>
@@ -111,7 +132,7 @@ function DiaDeCocina({ cocina: c, dia, destacado }: { cocina: Cocina; dia: strin
     );
   }
 
-  const delDia = c.eventos.filter((e) => e.fecha === dia).sort((a, b) => a.hora.localeCompare(b.hora));
+  const delDia = c.eventos.filter((e) => e.fecha === dia && !c.jornadasAnteriores.some((anterior) => anterior.id === e.id)).sort((a, b) => a.hora.localeCompare(b.hora));
   return (
     <div ref={ref} className="cocina__dia">
       <div className="pantalla__titulos">
@@ -120,7 +141,7 @@ function DiaDeCocina({ cocina: c, dia, destacado }: { cocina: Cocina; dia: strin
       </div>
       {delDia.length ? (
         delDia.map((e) => <TarjetaEvento key={e.id} evento={e} destacada={e.id === destacado} />)
-      ) : (
+      ) : c.jornadasAnteriores.some((e) => e.fecha === dia) ? null : (
         <Card>
           <p className="body-sm v-muted">{sinEventos(c, dia)}</p>
         </Card>

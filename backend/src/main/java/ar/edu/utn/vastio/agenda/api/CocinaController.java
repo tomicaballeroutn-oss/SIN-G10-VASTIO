@@ -55,7 +55,8 @@ public class CocinaController {
     @PreAuthorize(Permisos.VISTA_COCINA)
     @Operation(summary = "Eventos de cocina de un mes", description = """
             Eventos Confirmados y En curso del mes, con hora, salón, invitados y los servicios de las categorías visibles
-            en cocina. Para el perfil Cocina, solo desde hoy hasta HORIZONTE_COCINA_DIAS adelante (`hasta`); para el resto,
+            en cocina. jornadasAnteriores incluye preparaciones de fechas previas a hoy, sin límite de mes,
+            con su fecha operativa original y sin duplicarlas en eventos. Para el perfil Cocina, solo desde hoy hasta HORIZONTE_COCINA_DIAS adelante (`hasta`); para el resto,
             `hasta` es null.""")
     public CocinaResponse mes(@Parameter(example = "2026-11") @RequestParam(required = false) YearMonth mes,
             @AuthenticationPrincipal Jwt jwt) {
@@ -64,7 +65,8 @@ public class CocinaController {
         Armado armado = new Armado();
         return new CocinaResponse(resultado.mes(), resultado.horizonte().hoy(), resultado.horizonte().hasta(),
                 catalogos.salones().stream().map(SalonCocina::de).toList(),
-                resultado.eventos().stream().map(armado::tarjeta).toList());
+                resultado.eventos().stream().map(armado::tarjeta).toList(),
+                resultado.jornadasAnteriores().stream().map(armado::tarjeta).toList());
     }
 
     @GetMapping("/eventos/{id}")
@@ -78,7 +80,7 @@ public class CocinaController {
 
     /** {@code hasta}: último día que puede ver quien consulta; null si no tiene límite. */
     public record CocinaResponse(YearMonth mes, LocalDate hoy, LocalDate hasta, List<SalonCocina> salones,
-            List<TarjetaCocina> eventos) {
+            List<TarjetaCocina> eventos, List<TarjetaCocina> jornadasAnteriores) {
     }
 
     public record SalonCocina(String codigo, String nombre) {

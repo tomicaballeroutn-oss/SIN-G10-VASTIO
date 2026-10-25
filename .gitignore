@@ -20,6 +20,9 @@ frontend/dev-dist/
 !.env.prod.example
 # Respaldos del ambiente de prueba
 respaldos/
+# Defensa adicional: rclone se configura fuera del repositorio.
+rclone.conf
+rclone.conf.*
 # Bytecode de las herramientas de resguardo
 scripts/__pycache__/
 # IDE y sistema

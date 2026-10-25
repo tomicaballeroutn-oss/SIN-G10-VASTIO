@@ -1,13 +1,14 @@
 import { useState } from 'react';
 import { hoyEnCordoba } from '../../api/agenda';
-import { fichas, type Ficha } from '../../api/eventos';
+import { fichas, type Ficha, type Moneda } from '../../api/eventos';
 import { useEnvio } from '../../api/useDatos';
-import { Alert, Button, Dialog, Input } from '../../ds';
+import { Alert, Button, Dialog, Input, Select } from '../../ds';
 import { fechaCorta, leerImporte } from '../comun/formato';
 
 /**
  * UI-11 · Registrar seña: la pre-reserva pasa a Señado y se vuelve una reserva firme.
- * Importe mayor a 0, fecha del pago no posterior a hoy y DNI del firmante; nombre y contacto opcionales.
+ * Importe mayor a 0 en pesos o dólares (M-02, sin conversión; pesos de entrada), fecha del pago no posterior a hoy y
+ * DNI del firmante; nombre y contacto opcionales.
  */
 export function DialogoSena({ ficha, alCerrar, alRegistrar }: {
   ficha: Ficha;
@@ -16,6 +17,7 @@ export function DialogoSena({ ficha, alCerrar, alRegistrar }: {
 }) {
   const hoy = hoyEnCordoba();
   const [importe, setImporte] = useState('');
+  const [moneda, setMoneda] = useState<Moneda>('ARS');
   const [fechaPago, setFechaPago] = useState(hoy);
   const [firmanteNombre, setFirmanteNombre] = useState('');
   const [firmanteDni, setFirmanteDni] = useState('');
@@ -28,7 +30,7 @@ export function DialogoSena({ ficha, alCerrar, alRegistrar }: {
     setImporteIlegible(importe.trim() !== '' && valor === null);
     if (importe.trim() !== '' && valor === null) return;
     const nueva = await enviar(() =>
-      fichas.registrarSena(ficha.id, { importe: valor, fechaPago, firmanteNombre, firmanteDni, firmanteContacto }),
+      fichas.registrarSena(ficha.id, { importe: valor, moneda, fechaPago, firmanteNombre, firmanteDni, firmanteContacto }),
     );
     if (nueva) alRegistrar(nueva);
   }
@@ -51,17 +53,26 @@ export function DialogoSena({ ficha, alCerrar, alRegistrar }: {
         </p>
         {error && !error.errores.length && error.codigo !== 'FECHA_PAGO_FUTURA' && <Alert tone="danger">{error.message}</Alert>}
         <div className="sena__par">
+          <Select
+            label="Moneda"
+            options={[{ value: 'ARS', label: 'Pesos (ARS)' }, { value: 'USD', label: 'Dólares (USD)' }]}
+            value={moneda}
+            onChange={(e) => setMoneda(e.target.value as Moneda)}
+            error={error?.errorDe('moneda')}
+          />
           <Input
             label="Importe de la seña"
             icon="banknote"
             inputMode="decimal"
             placeholder="0"
-            suffix="pesos"
+            suffix={moneda === 'USD' ? 'dólares' : 'pesos'}
             value={importe}
             onChange={(e) => setImporte(e.target.value)}
             error={importeIlegible ? 'Escribí el importe con números, p. ej. 150.000.' : error?.errorDe('importe')}
             required
           />
+        </div>
+        <div className="sena__par">
           <Input
             label="Fecha del pago"
             type="date"

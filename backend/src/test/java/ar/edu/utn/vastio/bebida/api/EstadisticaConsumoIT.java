@@ -280,10 +280,10 @@ class EstadisticaConsumoIT {
                     SELECT 1,fecha,2 FROM serie RETURNING unidad_id,fecha
                 )
                 INSERT INTO evento(codigo,unidad_id,cliente_id,tipo_evento_id,vendedora_id,planner_id,estado,nombre,
-                    cantidad_invitados,invitados_definitivos,importe_sena,fecha_sena,firmante_dni,fecha_firma_contrato,version)
+                    cantidad_invitados,invitados_definitivos,importe_sena,moneda_sena,fecha_sena,firmante_dni,fecha_firma_contrato,version)
                 SELECT 'EV-2070-'||lpad(s.n::text,5,'0'),u.unidad_id,?,((s.n-1)%5)+1,?,?,'CERRADO','Historial B501 '||s.n,
                     CASE s.n%4 WHEN 0 THEN NULL WHEN 1 THEN 0 WHEN 2 THEN 100 ELSE 200 END,
-                    true,100,date '2069-01-01','30111222',date '2069-01-02',0
+                    true,100,'ARS',date '2069-01-01','30111222',date '2069-01-02',0
                 FROM serie s JOIN unidades u USING(fecha)""", cliente, vendedora, planner);
         jdbc.update("""
                 INSERT INTO bebida(nombre,presentacion,tipo_bebida_id,unidad_manipulacion_id,unidades_por_bulto,activo)

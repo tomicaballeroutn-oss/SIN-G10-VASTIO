@@ -91,11 +91,42 @@ describe('UI-11 · registrar seña', () => {
     expect(screen.queryByRole('button', { name: 'Registrar seña' })).not.toBeInTheDocument();
     expect(pedidos(fetchMock).find((p) => p.metodo === 'POST')?.cuerpo).toEqual({
       importe: 150000.5,
+      moneda: 'ARS',
       fechaPago: hoyEnCordoba(),
       firmanteNombre: 'Mariela Ruiz',
       firmanteDni: '30111222',
       firmanteContacto: '',
     });
+  });
+
+  it('la seña puede ser en dólares, sin conversión, y la ficha la muestra con su moneda', async () => {
+    const fetchMock = backend(() => json(200, { ...SENADO, sena: { ...SENADO.sena!, importe: 1500, moneda: 'USD' } }));
+    const { usuario, dialogo } = await abrir();
+
+    expect(within(dialogo).getByLabelText('Moneda')).toHaveValue('ARS');
+    await usuario.selectOptions(within(dialogo).getByLabelText('Moneda'), 'USD');
+    expect(within(dialogo).getByText('dólares')).toBeInTheDocument();
+    await usuario.type(within(dialogo).getByLabelText('Importe de la seña'), '1.500');
+    await usuario.type(within(dialogo).getByLabelText('DNI'), '30111222');
+    await usuario.click(within(dialogo).getByRole('button', { name: 'Confirmar seña' }));
+
+    expect(await screen.findByText('US$ 1.500,00')).toBeInTheDocument();
+    expect(pedidos(fetchMock).find((p) => p.metodo === 'POST')?.cuerpo).toMatchObject({ importe: 1500, moneda: 'USD' });
+  });
+
+  it('conserva centavos en USD desde la carga hasta la ficha', async () => {
+    const fetchMock = backend(() => json(200, { ...SENADO, sena: { ...SENADO.sena!, importe: 1500.75, moneda: 'USD' } }));
+    const { usuario, dialogo } = await abrir();
+
+    expect(within(dialogo).getByLabelText('Moneda')).toHaveValue('ARS');
+    await usuario.selectOptions(within(dialogo).getByLabelText('Moneda'), 'USD');
+    expect(within(dialogo).getByText('dólares')).toBeInTheDocument();
+    await usuario.type(within(dialogo).getByLabelText('Importe de la seña'), '1.500,75');
+    await usuario.type(within(dialogo).getByLabelText('DNI'), '30111222');
+    await usuario.click(within(dialogo).getByRole('button', { name: 'Confirmar seña' }));
+
+    expect(await screen.findByText('US$ 1.500,75')).toBeInTheDocument();
+    expect(pedidos(fetchMock).find((p) => p.metodo === 'POST')?.cuerpo).toMatchObject({ importe: 1500.75, moneda: 'USD' });
   });
 
   it('un importe ilegible se marca sin llamar al sistema', async () => {

@@ -1,6 +1,7 @@
 package ar.edu.utn.vastio.agenda.api;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.hamcrest.Matchers.hasItem;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -79,6 +80,7 @@ class SenaIT {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.estado").value("SENADO"))
                 .andExpect(jsonPath("$.sena.importe").value(150000.50))
+                .andExpect(jsonPath("$.sena.moneda").value("ARS"))
                 .andExpect(jsonPath("$.sena.fecha").value(HOY.toString()))
                 .andExpect(jsonPath("$.sena.firmanteNombre").value("Mariela Ruiz"))
                 .andExpect(jsonPath("$.sena.firmanteDni").value("30111222"))
@@ -101,6 +103,53 @@ class SenaIT {
         List<Long> destinatarios = jdbc.queryForList(
                 "SELECT usuario_id FROM notificacion_destinatario WHERE notificacion_id = ?", Long.class, aviso.get("notificacion_id"));
         assertThat(destinatarios).contains(administracion.getId(), coordinacion.getId()).doesNotContain(lucia.getId());
+    }
+
+    @Test
+    void laSenaPuedeSerEnDolaresSinConversion() throws Exception {
+        registrar(lucia, preReserva, """
+                {"importe":1500,"moneda":"USD","fechaPago":"%s","firmanteDni":"30111222"}""".formatted(HOY))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.sena.importe").value(1500))
+                .andExpect(jsonPath("$.sena.moneda").value("USD"));
+        entityManager.flush();
+
+        assertThat(jdbc.queryForMap("SELECT importe_sena, moneda_sena FROM evento WHERE evento_id = ?", preReserva))
+                .containsEntry("moneda_sena", "USD")
+                .hasEntrySatisfying("importe_sena", importe -> assertThat(importe.toString()).isEqualTo("1500.00"));
+    }
+
+    @Test
+    void conservaLosCentavosDeUnaSenaEnDolaresEnRespuestaBaseYFicha() throws Exception {
+        registrar(lucia, preReserva, """
+                {"importe":1500.75,"moneda":"USD","fechaPago":"%s","firmanteDni":"30111222"}""".formatted(HOY))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.sena.importe").value(1500.75))
+                .andExpect(jsonPath("$.sena.moneda").value("USD"));
+        entityManager.flush();
+        entityManager.clear();
+        assertThat(jdbc.queryForObject("SELECT importe_sena FROM evento WHERE evento_id = ?", java.math.BigDecimal.class, preReserva))
+                .isEqualByComparingTo("1500.75");
+        mvc.perform(org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get("/api/v1/eventos/{id}", preReserva)
+                        .header(HttpHeaders.AUTHORIZATION, personas.bearer(lucia)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.sena.importe").value(1500.75))
+                .andExpect(jsonPath("$.sena.moneda").value("USD"));
+    }
+
+    @Test
+    void unaMonedaQueNoEsPesosNiDolaresNoSeAcepta() throws Exception {
+        registrar(lucia, preReserva, """
+                {"importe":1500,"moneda":"EUR","fechaPago":"%s","firmanteDni":"30111222"}""".formatted(HOY))
+                .andExpect(status().isBadRequest());
+        assertThat(jdbc.queryForObject("SELECT estado FROM evento WHERE evento_id = ?", String.class, preReserva)).isEqualTo("PRE_RESERVA");
+    }
+
+    @Test
+    void laBaseNoAceptaImporteSinMoneda() {
+        long senado = escenario.evento("avril", LocalDate.of(2032, 6, 26), "noche", "SENADO", lucia, "Con seña");
+        assertThatThrownBy(() -> jdbc.update("UPDATE evento SET moneda_sena = NULL WHERE evento_id = ?", senado))
+                .hasMessageContaining("ck_evento_sena_con_moneda");
     }
 
     @Test

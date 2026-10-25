@@ -71,9 +71,13 @@ export interface TurnoEvento {
   horaFin: string;
 }
 
-/** `importe` solo llega a quien ve datos económicos. */
+/** Moneda de la seña (M-02): pesos o dólares, sin conversión. */
+export type Moneda = 'ARS' | 'USD';
+
+/** `importe` y su `moneda` solo llegan a quien ve datos económicos. */
 export interface Sena {
   importe?: number;
+  moneda?: Moneda;
   fecha: string;
   firmanteNombre: string | null;
   firmanteDni: string | null;
@@ -258,9 +262,10 @@ export interface EventoResumen {
   cantidadInvitados: number | null;
 }
 
-/** Registrar seña: importe en pesos, fecha del pago (yyyy-mm-dd) y firmante. */
+/** Registrar seña: importe en ARS o USD, sin conversión, fecha del pago (yyyy-mm-dd) y firmante. */
 export interface PedidoSena {
   importe: number | null;
+  moneda: Moneda;
   fechaPago: string;
   firmanteNombre: string;
   firmanteDni: string;

@@ -1,8 +1,8 @@
 # Vastio — Modelo de datos y diccionario de datos
 
-Modelo operativo actualizado a V10. Los PNG `DER_1` y `DER_2` son referencias históricas del DER v2. [DER_3_bebida.png](DER_3_bebida.png) fue regenerado desde PostgreSQL posterior a V9, con [fuente editable DOT](DER_3_bebida.dot). Ver [alcance y reproducción del módulo B](modelo-bebida-v9.md) y [resguardo antes de V9](../eliminacion-proveedores-despliegue.md).
+Modelo operativo actualizado a V11. Los PNG `DER_1` y `DER_2` son referencias históricas del DER v2. [DER_3_bebida.png](DER_3_bebida.png) fue regenerado desde PostgreSQL posterior a V9, con [fuente editable DOT](DER_3_bebida.dot). Ver [alcance y reproducción del módulo B](modelo-bebida-v9.md) y [resguardo antes de V9](../eliminacion-proveedores-despliegue.md).
 
-Motor: PostgreSQL. Convenciones: nombres en `snake_case` y en español; claves primarias sustitutas (`bigint` generado para tablas transaccionales, `smallint` para catálogos); importes en `numeric(14,2)` expresados en pesos argentinos (el único es el de la seña: el sistema no maneja precios ni costos); fechas y horas en `timestamptz`; cantidades de bebida en `numeric(10,2)` expresadas siempre en **botellas** (unidad base). Los estados y tipos fijos se modelan como `varchar` con restricción `CHECK`, no como tablas, porque el comportamiento del sistema depende de ellos y no son configurables.
+Motor: PostgreSQL. Convenciones: nombres en `snake_case` y en español; claves primarias sustitutas (`bigint` generado para tablas transaccionales, `smallint` para catálogos); importes en `numeric(14,2)`, en la moneda que indica su columna de moneda (el único es el de la seña, en ARS o USD sin conversión desde V11: el sistema no maneja precios ni costos); fechas y horas en `timestamptz`; cantidades de bebida en `numeric(10,2)` expresadas siempre en **botellas** (unidad base). Los estados y tipos fijos se modelan como `varchar` con restricción `CHECK`, no como tablas, porque el comportamiento del sistema depende de ellos y no son configurables.
 
 ## 1. Cambios respecto del DER v1
 
@@ -45,7 +45,7 @@ Motor: PostgreSQL. Convenciones: nombres en `snake_case` y en español; claves p
 - **Consumo congelado.** Al cerrar el evento se escribe `consumo_evento`; no se recalcula después.
 - **Consumo por asistente.** Se divide lo consumido por la suma de `asistencia_segmento.cantidad_real` si el tipo de evento usa segmentos; si no, por `evento.cantidad_invitados`.
 - **Obligatoriedad por estado** (validada en backend y con `CHECK`): desde SENADO, `importe_sena`, `fecha_sena` y `firmante_dni`; desde CONTRATADO, `fecha_firma_contrato` y un `documento_evento` de tipo CONTRATO; para CONFIRMADO, `planner_id`, `invitados_definitivos = true` y servicios cargados en las categorías con `requerida_para_confirmar`; en CANCELADO, `motivo_cancelacion_id`.
-- **Importe de la seña** (`importe_sena`, el único dato económico): se filtra por perfil en el backend según RNF-SEG-04; el modelo no lo separa en otra tabla.
+- **Importe de la seña** (`importe_sena` y su `moneda_sena`, el único dato económico): se filtran por perfil en el backend según RNF-SEG-04; el modelo no los separa en otra tabla.
 
 ## 3. Diccionario de datos
 
@@ -246,7 +246,8 @@ Entidad central que vincula ambos módulos.
 | `invitados_definitivos` | boolean |  | NO | true cuando la cantidad quedó cerrada (condición de Confirmar). |
 | `hora_inicio` | time |  | SÍ | Hora de inicio (vista de cocina). Default: hora del turno. |
 | `observaciones_internas` | text |  | SÍ | Notas no visibles para cocina (p. ej. «cliente complicado»). |
-| `importe_sena` | numeric(14,2) |  | SÍ | Importe de la seña en ARS. Obligatorio desde SENADO. Dato económico (RNF-SEG-04). |
+| `importe_sena` | numeric(14,2) |  | SÍ | Importe de la seña, en la moneda de `moneda_sena`. Obligatorio desde SENADO. Dato económico (RNF-SEG-04). |
+| `moneda_sena` | varchar(3) |  | SÍ | ARS · USD (V11, M-02). Sin conversión. Va siempre junto con el importe (`ck_evento_sena_con_moneda`); las señas anteriores a V11 quedaron en ARS. Se filtra por perfil igual que el importe. |
 | `fecha_sena` | date |  | SÍ | Fecha de pago de la seña. |
 | `firmante_nombre` | varchar(120) |  | SÍ | Quien firma el contrato. |
 | `firmante_dni` | varchar(10) |  | SÍ | DNI del firmante. Obligatorio desde SENADO. |

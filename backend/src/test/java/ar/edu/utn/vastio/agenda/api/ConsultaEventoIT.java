@@ -101,9 +101,12 @@ class ConsultaEventoIT {
                     .andExpect(status().isOk())
                     .andExpect(jsonPath("$.sena.fecha").exists())
                     .andExpect(jsonPath("$.sena.importe").doesNotExist())
+                    .andExpect(jsonPath("$.sena.moneda").doesNotExist())
                     .andExpect(jsonPath("$.acciones.modificar").value(false));
         }
-        ficha(senado, personas.bearer(RolCodigo.ADMINISTRACION)).andExpect(jsonPath("$.sena.importe").value(100000));
+        ficha(senado, personas.bearer(RolCodigo.ADMINISTRACION))
+                .andExpect(jsonPath("$.sena.importe").value(100000))
+                .andExpect(jsonPath("$.sena.moneda").value("ARS"));
     }
 
     @Test

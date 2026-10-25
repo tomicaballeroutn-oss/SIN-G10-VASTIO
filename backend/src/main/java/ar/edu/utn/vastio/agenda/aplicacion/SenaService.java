@@ -13,6 +13,7 @@ import org.springframework.transaction.annotation.Transactional;
 import ar.edu.utn.vastio.VastioApplication;
 import ar.edu.utn.vastio.agenda.dominio.EstadoEvento;
 import ar.edu.utn.vastio.agenda.dominio.Evento;
+import ar.edu.utn.vastio.agenda.dominio.Moneda;
 import ar.edu.utn.vastio.comun.errores.ProblemaException;
 import ar.edu.utn.vastio.comun.seguridad.UsuarioActual;
 
@@ -35,7 +36,8 @@ public class SenaService {
         this.entityManager = entityManager;
     }
 
-    public record Sena(BigDecimal importe, LocalDate fechaPago, String firmanteNombre, String firmanteDni,
+    /** {@code moneda}: ARS o USD, sin conversión (M-02). */
+    public record Sena(BigDecimal importe, Moneda moneda, LocalDate fechaPago, String firmanteNombre, String firmanteDni,
             String firmanteContacto) {
     }
 
@@ -56,7 +58,7 @@ public class SenaService {
         }
         // Una versión nueva: si justo otra persona liberaba la pre-reserva, una de las dos recibe 409.
         entityManager.lock(evento, LockModeType.PESSIMISTIC_FORCE_INCREMENT);
-        evento.registrarSena(sena.importe(), sena.fechaPago(), sena.firmanteNombre(), sena.firmanteDni(),
+        evento.registrarSena(sena.importe(), sena.moneda(), sena.fechaPago(), sena.firmanteNombre(), sena.firmanteDni(),
                 sena.firmanteContacto());
         maquina.transicionar(evento, EstadoEvento.SENADO, quien.id(), null);
         return evento;

@@ -120,6 +120,24 @@ class SenaIT {
     }
 
     @Test
+    void conservaLosCentavosDeUnaSenaEnDolaresEnRespuestaBaseYFicha() throws Exception {
+        registrar(lucia, preReserva, """
+                {"importe":1500.75,"moneda":"USD","fechaPago":"%s","firmanteDni":"30111222"}""".formatted(HOY))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.sena.importe").value(1500.75))
+                .andExpect(jsonPath("$.sena.moneda").value("USD"));
+        entityManager.flush();
+        entityManager.clear();
+        assertThat(jdbc.queryForObject("SELECT importe_sena FROM evento WHERE evento_id = ?", java.math.BigDecimal.class, preReserva))
+                .isEqualByComparingTo("1500.75");
+        mvc.perform(org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get("/api/v1/eventos/{id}", preReserva)
+                        .header(HttpHeaders.AUTHORIZATION, personas.bearer(lucia)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.sena.importe").value(1500.75))
+                .andExpect(jsonPath("$.sena.moneda").value("USD"));
+    }
+
+    @Test
     void unaMonedaQueNoEsPesosNiDolaresNoSeAcepta() throws Exception {
         registrar(lucia, preReserva, """
                 {"importe":1500,"moneda":"EUR","fechaPago":"%s","firmanteDni":"30111222"}""".formatted(HOY))

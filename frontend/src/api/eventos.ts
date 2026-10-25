@@ -262,7 +262,7 @@ export interface EventoResumen {
   cantidadInvitados: number | null;
 }
 
-/** Registrar seña: importe en pesos, fecha del pago (yyyy-mm-dd) y firmante. */
+/** Registrar seña: importe en ARS o USD, sin conversión, fecha del pago (yyyy-mm-dd) y firmante. */
 export interface PedidoSena {
   importe: number | null;
   moneda: Moneda;

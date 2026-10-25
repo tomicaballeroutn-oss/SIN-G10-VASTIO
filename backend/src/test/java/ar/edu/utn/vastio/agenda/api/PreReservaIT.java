@@ -112,7 +112,7 @@ class PreReservaIT {
         Map<String, Object> aviso = jdbc.queryForMap(
                 "SELECT notificacion_id, tipo, mensaje, usuario_origen_id FROM notificacion WHERE evento_id = ?", id);
         assertThat(aviso).containsEntry("tipo", "EVENTO_NUEVO").containsEntry("usuario_origen_id", coordinacion.getId());
-        assertThat((String) aviso.get("mensaje")).startsWith("Nueva pre-reserva: Quince de Grupo Arcor · Club de Campo ·");
+        assertThat((String) aviso.get("mensaje")).startsWith(coordinacion.getNombreCompleto() + " cargó una pre-reserva: Quince de Grupo Arcor · Club de Campo ·");
         List<Long> destinatarios = jdbc.queryForList(
                 "SELECT usuario_id FROM notificacion_destinatario WHERE notificacion_id = ?", Long.class, aviso.get("notificacion_id"));
         assertThat(destinatarios).contains(administracion.getId()).doesNotContain(coordinacion.getId(), lucia.getId());

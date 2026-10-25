@@ -1,0 +1,18 @@
+.estadisticas__filtros,
+.estadisticas__indicadores {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 1rem;
+  align-items: end;
+}
+@media (min-width: 768px) {
+  .estadisticas__filtros,
+  .estadisticas__indicadores { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+@media (min-width: 1200px) {
+  .estadisticas__filtros { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  .estadisticas__indicadores { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+}
+.estadisticas__tabla .v-table { min-width: 64rem; }
+.estadisticas__tabla .v-table th { white-space: normal; vertical-align: bottom; }
+.estadisticas__tabla .v-table th:first-child { min-width: 10rem; }

@@ -6,7 +6,6 @@ import java.util.HashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -20,6 +19,7 @@ import org.springframework.transaction.annotation.Transactional;
 import ar.edu.utn.vastio.agenda.dominio.EstadoEvento;
 import ar.edu.utn.vastio.agenda.dominio.Evento;
 import ar.edu.utn.vastio.agenda.dominio.ModificacionEvento;
+import ar.edu.utn.vastio.agenda.dominio.RenglonServicio;
 import ar.edu.utn.vastio.agenda.dominio.ServicioContratado;
 import ar.edu.utn.vastio.agenda.infraestructura.ModificacionEventoRepository;
 import ar.edu.utn.vastio.agenda.infraestructura.ServicioContratadoRepository;
@@ -29,9 +29,10 @@ import ar.edu.utn.vastio.configuracion.aplicacion.CatalogoService;
 import ar.edu.utn.vastio.configuracion.dominio.CategoriaServicio;
 
 /**
- * Registrar servicios contratados (UI-13): un texto libre por categoría configurable. Lo hacen la vendedora titular,
- * la planner asignada, Coordinación y Dirección, entre Pre-reserva y Confirmado. Cada categoría que cambia queda en
- * {@code modificacion_evento} como {@code servicio.<categoría>} y el guardado genera un aviso de modificación.
+ * Registrar servicios contratados (UI-13): por categoría configurable, renglones libres con cantidad opcional y un
+ * detalle libre (M-09). Lo hacen la vendedora titular, la planner asignada, Coordinación y Dirección, entre
+ * Pre-reserva y Confirmado. Cada categoría que cambia queda en {@code modificacion_evento} como
+ * {@code servicio.<categoría>} y el guardado genera un aviso de modificación.
  */
 @Service
 public class ServiciosService {
@@ -54,8 +55,64 @@ public class ServiciosService {
         this.entityManager = entityManager;
     }
 
-    /** Texto de una categoría; vacío o null la deja sin servicio. Las categorías que no vienen no cambian. */
-    public record Servicio(short categoriaId, String descripcion) {
+    /**
+     * Lo cargado en una categoría. Sin renglones y sin detalle, la categoría queda sin servicio. Las categorías que no
+     * vienen no cambian.
+     */
+    public record Servicio(short categoriaId, String descripcion, List<Renglon> renglones) {
+
+        public Servicio {
+            renglones = renglones == null ? List.of() : renglones;
+        }
+
+        public Servicio(short categoriaId, String descripcion) {
+            this(categoriaId, descripcion, List.of());
+        }
+    }
+
+    /** Un renglón: texto libre y cantidad opcional («Celíaco», 2). */
+    public record Renglon(String texto, Integer cantidad) {
+    }
+
+    /** Lo que queda guardado de una categoría, para comparar antes y después. */
+    private record Contenido(String descripcion, List<Renglon> renglones) {
+
+        static final Contenido NADA = new Contenido(null, List.of());
+
+        static Contenido de(ServicioContratado s) {
+            return s == null ? NADA
+                    : new Contenido(s.getDescripcion(), s.getRenglones().stream().map(r -> new Renglon(r.getTexto(), r.getCantidad())).toList());
+        }
+
+        /** Recorta los textos y descarta los renglones del todo vacíos. Un renglón con cantidad y sin texto es un error. */
+        static Contenido pedido(Servicio pedido, String categoria) {
+            List<Renglon> renglones = new ArrayList<>();
+            for (Renglon r : pedido.renglones()) {
+                String texto = r.texto() == null ? "" : r.texto().strip();
+                if (texto.isEmpty() && r.cantidad() == null) {
+                    continue;
+                }
+                if (texto.isEmpty()) {
+                    throw ProblemaException.reglaDeNegocio("RENGLON_SIN_TEXTO",
+                            "En %s hay una cantidad sin texto: escribí a qué corresponde.".formatted(categoria));
+                }
+                renglones.add(new Renglon(texto, r.cantidad()));
+            }
+            String descripcion = pedido.descripcion() == null || pedido.descripcion().isBlank() ? null : pedido.descripcion().strip();
+            return new Contenido(descripcion, List.copyOf(renglones));
+        }
+
+        boolean vacio() {
+            return descripcion == null && renglones.isEmpty();
+        }
+
+        List<RenglonServicio> entidades() {
+            return renglones.stream().map(r -> new RenglonServicio(r.texto(), r.cantidad())).toList();
+        }
+
+        String legible() {
+            return ServicioContratado.legible(entidades(), descripcion);
+        }
     }
 
     /**
@@ -87,41 +144,44 @@ public class ServiciosService {
         OffsetDateTime momento = OffsetDateTime.now();
         List<ModificacionEvento> filas = new ArrayList<>();
         Set<CategoriaServicio> cambiadas = new LinkedHashSet<>();
+        Map<Short, Boolean> vacias = new HashMap<>();
         for (Servicio pedido : pedidos) {
             CategoriaServicio categoria = categorias.get(pedido.categoriaId());
             if (categoria == null) {
                 throw ProblemaException.reglaDeNegocio("CATEGORIA_INEXISTENTE", "Una de las categorías ya no existe. Volvé a abrir la ficha.");
             }
             ServicioContratado actual = actuales.get(categoria.getId());
-            String antes = actual == null ? null : actual.getDescripcion();
-            String despues = pedido.descripcion() == null || pedido.descripcion().isBlank() ? null : pedido.descripcion().strip();
-            if (Objects.equals(antes, despues)) {
+            Contenido antes = Contenido.de(actual);
+            Contenido despues = Contenido.pedido(pedido, categoria.getNombre());
+            if (antes.equals(despues)) {
                 continue;
             }
             if (!categoria.isActivo()) {
                 throw ProblemaException.reglaDeNegocio("CATEGORIA_DADA_DE_BAJA",
                         "La categoría " + categoria.getNombre() + " está dada de baja: lo cargado se conserva pero no se modifica.");
             }
-            if (despues == null) {
+            if (despues.vacio()) {
                 servicios.delete(actual);
             } else if (actual == null) {
-                servicios.save(new ServicioContratado(id, categoria.getId(), despues, quien.id(), momento));
+                servicios.save(new ServicioContratado(id, categoria.getId(), despues.descripcion(), despues.entidades(), quien.id(), momento));
             } else {
-                actual.cambiar(despues, quien.id(), momento);
+                actual.cambiar(despues.descripcion(), despues.entidades(), quien.id(), momento);
             }
-            filas.add(new ModificacionEvento(id, "servicio." + categoria.getNombre(), antes, despues, quien.id(), momento));
+            filas.add(new ModificacionEvento(id, "servicio." + categoria.getNombre(), antes.legible(), despues.legible(),
+                    quien.id(), momento));
             cambiadas.add(categoria);
+            vacias.put(categoria.getId(), despues.vacio());
         }
 
         if (evento.getEstado() == EstadoEvento.CONFIRMADO) {
             Set<Short> conServicio = new LinkedHashSet<>(actuales.keySet());
-            for (Servicio pedido : pedidos) {
-                if (pedido.descripcion() == null || pedido.descripcion().isBlank()) {
-                    conServicio.remove(pedido.categoriaId());
+            vacias.forEach((categoriaId, vacia) -> {
+                if (vacia) {
+                    conServicio.remove(categoriaId);
                 } else {
-                    conServicio.add(pedido.categoriaId());
+                    conServicio.add(categoriaId);
                 }
-            }
+            });
             categorias.values().stream()
                     .filter(c -> c.isActivo() && c.isRequeridaParaConfirmar() && !conServicio.contains(c.getId()))
                     .findFirst()

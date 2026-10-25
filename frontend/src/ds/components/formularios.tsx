@@ -6,6 +6,8 @@ import { Icon } from './Icon';
 
 interface FieldBase {
   label?: string;
+  /** La etiqueta queda para los lectores de pantalla pero no se ve (p. ej. renglones con encabezado propio). */
+  labelHidden?: boolean;
   hint?: string;
   error?: string;
   optional?: boolean;
@@ -15,11 +17,11 @@ interface FieldBase {
 }
 
 /** Etiqueta arriba, control, y abajo el error (con role="alert") o la ayuda. */
-function Field({ label, hint, error, optional, id, className, children }: FieldBase & { id: string; children: ReactNode }) {
+function Field({ label, labelHidden, hint, error, optional, id, className, children }: FieldBase & { id: string; children: ReactNode }) {
   return (
     <div className={cx('v-field', className)}>
       {label && (
-        <label className="label v-field__label" htmlFor={id}>
+        <label className={cx('label v-field__label', labelHidden && 'v-sr')} htmlFor={id}>
           {label}
           {optional && <span className="v-muted"> (opcional)</span>}
         </label>
@@ -74,7 +76,7 @@ export function Input(p: InputProps) {
     'aria-describedby': p.error || p.hint ? `${id}-msg` : undefined,
   };
   return (
-    <Field label={p.label} hint={p.hint} error={p.error} optional={p.optional} id={id} className={p.className}>
+    <Field label={p.label} labelHidden={p.labelHidden} hint={p.hint} error={p.error} optional={p.optional} id={id} className={p.className}>
       <div className="v-control-wrap">
         {p.icon && <Icon name={p.icon} size={20} className="v-control__icon" />}
         {p.multiline ? <textarea {...comunes} rows={p.rows ?? 3} /> : <input {...comunes} type={p.type ?? 'text'} />}

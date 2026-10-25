@@ -57,3 +57,8 @@ Lavado de cara con el sistema de diseño «Vastio v2 · propuesta». Solo cambia
 - **Login (UI-01):** fondo azul de marca (`deep`) con el logo claro y la ficha del formulario. Se probó el relieve de la V del sistema de diseño y se descartó: se veía como una foto de baja calidad.
 - **Agenda:** cada día muestra sus seis unidades como puntos (9 px en teléfono, 11 px desde 960 px) con el mismo relleno por estado. Arriba de la grilla, qué salón es cada columna (`AgendaGrid salones`, con los nombres de Parámetros). Qué significa cada relleno va aparte en `AgendaLeyenda`, un machete desplegable: en Agenda y Reprogramar está debajo del detalle del día, abierto desde 1200 px y cerrado en el teléfono. Se sacó «fila superior: mediodía / inferior: noche». `AgendaGrid` ya no tiene `legend`.
 - **Riel y contenido:** el riel abierto se superpone al contenido, no lo corre. Abrirse con solo pasar el mouse y empujar la pantalla haría saltar la grilla y el texto en cada roce. Correr el contenido tiene sentido solo con un «fijar abierto» por clic.
+
+## Cambios del Sprint 4
+
+- `Input` acepta `labelHidden`: la etiqueta queda para los lectores de pantalla pero no se ve. Lo usan los renglones de servicios (UI-13, M-09), que tienen un encabezado «Qué / Cantidad» propio.
+- `AgendaGrid` acepta `soloOcupacion`: todos los puntos con evento van llenos y se anuncian «con evento», sin el estado. Lo usa la vista de cocina (A7-02), que no muestra estados.

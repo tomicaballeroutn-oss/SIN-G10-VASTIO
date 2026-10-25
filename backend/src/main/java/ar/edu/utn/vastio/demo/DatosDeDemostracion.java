@@ -197,6 +197,8 @@ public class DatosDeDemostracion implements ApplicationRunner {
                 entityManager.flush();
                 evento = servicios.registrar(evento.getId(), evento.getVersion(), List.of(
                         new Servicio((short) 2, "Lomo braseado con papas rústicas"),
+                        new Servicio((short) 5, null, List.of(new ServiciosService.Renglon("Vegetariano", 6),
+                                new ServiciosService.Renglon("Celíaco", 2))),
                         new Servicio((short) 7, "Barra libre premium hasta las 5")), coordinacion);
                 confirmaciones.confirmar(evento.getId(), new UsuarioActual(ana.getId(), Set.of(RolCodigo.PLANNER.name())));
             }

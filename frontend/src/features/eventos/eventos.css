@@ -43,9 +43,14 @@
 
 /* UI-13 · Servicios contratados */
 .servicios { display: flex; flex-direction: column; gap: var(--space-5); }
-.servicios__categoria { display: flex; flex-direction: column; gap: var(--space-2); }
+.servicios__categoria { display: flex; flex-direction: column; gap: var(--space-3); min-width: 0; margin: 0; padding: 0; border: 0; }
 .servicios__titulo { display: flex; align-items: center; flex-wrap: wrap; gap: var(--space-2); }
+.servicios__leyenda { padding: 0; }
 .servicios__texto { margin: 0; white-space: pre-line; }
+/* M-09: renglones libres. El texto ocupa lo que sobra; la cantidad, un ancho fijo; al final, quitar. */
+.servicios__renglones { display: flex; flex-direction: column; gap: var(--space-2); }
+.servicios__encabezado, .servicios__renglon { display: grid; grid-template-columns: minmax(0, 1fr) 88px var(--control-md); gap: var(--space-2); align-items: start; }
+.servicios__lista { margin: 0; padding-left: var(--space-5); }
 .servicios__acciones { display: flex; justify-content: flex-end; padding-top: var(--space-4); border-top: 1px solid var(--line); }
 
 /* UI-14 · Cantidad de invitados */

@@ -9,7 +9,7 @@ import { fichaDePrueba, SIN_ACCIONES } from '../../test/fichas';
 const CUMPLIDOS: RequisitoConfirmacion[] = [
   { codigo: 'PLANNER', titulo: 'Planner asignada', cumplido: true, detalle: 'Ana Sosa' },
   { codigo: 'INVITADOS', titulo: 'Cantidad definitiva de invitados', cumplido: true, detalle: '180' },
-  { codigo: 'SERVICIOS', titulo: 'Plato principal y Tipo de barra', cumplido: true, detalle: 'Cargado' },
+  { codigo: 'SERVICIOS', titulo: 'Menú y Tipo de barra', cumplido: true, detalle: 'Cargado' },
   { codigo: 'FECHA', titulo: 'Fecha del evento', cumplido: true, detalle: 'Todavía no pasó.' },
 ];
 

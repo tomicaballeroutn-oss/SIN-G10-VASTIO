@@ -11,11 +11,14 @@ const EDITABLE = fichaDePrueba({ acciones: { ...SIN_ACCIONES, modificar: true } 
 const GUARDADA: Ficha = {
   ...EDITABLE,
   version: 2,
-  servicios: servicios({ 'Plato principal': 'Lomo con papas rústicas', Bodega: 'Malbec Luigi Bosca' }),
+  servicios: servicios({ Bodega: 'Malbec Luigi Bosca' }).map((s) => (s.categoria === 'Menús especiales' ? {
+    ...s, renglones: [{ texto: 'Celíaco', cantidad: 2 }, { texto: 'Sin lactosa', cantidad: 3 }],
+    usuario: { id: 1, nombre: 'Lucía Ferreyra' }, fechaModificacion: '2026-10-01T09:40:00-03:00',
+  } : s)),
   historial: [
     ...EDITABLE.historial,
     {
-      tipo: 'MODIFICACION', campo: 'servicio.Plato principal', valorNuevo: 'Lomo con papas rústicas',
+      tipo: 'MODIFICACION', campo: 'servicio.Menús especiales', valorNuevo: 'Celíaco (2), Sin lactosa (3)',
       usuario: { id: 1, nombre: 'Lucía Ferreyra' }, fechaHora: '2026-10-01T09:40:00-03:00',
     },
     {
@@ -41,51 +44,82 @@ afterEach(() => {
   vi.unstubAllGlobals();
 });
 
-describe('UI-13 · servicios contratados', () => {
-  it('carga un texto por categoría y manda solo las que cambiaron', async () => {
+describe('UI-13 · servicios contratados (M-09)', () => {
+  it('carga renglones con cantidad y un detalle, y manda solo las categorías que cambiaron', async () => {
     const fetchMock = backend();
     const usuario = userEvent.setup();
     montar('/eventos/5?pestana=servicios');
 
-    expect(await screen.findByLabelText('Plato principal')).toHaveAccessibleDescription('Hace falta para confirmar el evento.');
+    const especiales = (await screen.findByRole('group', { name: 'Menús especiales' }));
     const guardar = screen.getByRole('button', { name: 'Guardar servicios' });
     expect(guardar).toBeDisabled();
 
-    await usuario.type(screen.getByLabelText('Plato principal'), 'Lomo con papas rústicas');
-    await usuario.type(screen.getByLabelText('Bodega'), 'Malbec Luigi Bosca');
+    await usuario.type(within(especiales).getByLabelText('Menús especiales: renglón 1'), 'Celíaco');
+    await usuario.type(within(especiales).getByLabelText('Menús especiales: cantidad del renglón 1'), '2a');
+    await usuario.click(within(especiales).getByRole('button', { name: 'Agregar renglón' }));
+    await usuario.type(within(especiales).getByLabelText('Menús especiales: renglón 2'), 'Sin lactosa');
+    await usuario.type(within(especiales).getByLabelText('Menús especiales: cantidad del renglón 2'), '3');
+    await usuario.click(within(especiales).getByRole('button', { name: 'Agregar renglón' }));
+    await usuario.type(screen.getByLabelText(/Detalle de Bodega/), 'Malbec Luigi Bosca');
     await usuario.click(guardar);
 
     expect(await screen.findByText('Servicios guardados.')).toBeInTheDocument();
     expect(pedidos(fetchMock).find((p) => p.metodo === 'PUT')?.cuerpo).toEqual({
       version: 1,
       servicios: [
-        { categoriaId: 2, descripcion: 'Lomo con papas rústicas' },
-        { categoriaId: 6, descripcion: 'Malbec Luigi Bosca' },
+        { categoriaId: 5, descripcion: '', renglones: [{ texto: 'Celíaco', cantidad: 2 }, { texto: 'Sin lactosa', cantidad: 3 }] },
+        { categoriaId: 6, descripcion: 'Malbec Luigi Bosca', renglones: [] },
       ],
     });
     expect(screen.getByRole('tab', { name: /Servicios/ })).toHaveTextContent('2');
-    expect(screen.getAllByText('Ana Sosa').length).toBeGreaterThan(0);
   });
 
-  it('sin permiso para modificar los ve en solo lectura', async () => {
-    backend(fichaDePrueba({ servicios: servicios({ 'Tipo de barra': 'Barra libre premium' }) }), undefined, ['COMPRAS']);
+  it('quitar el único renglón lo deja vacío para volver a escribir', async () => {
+    const lista = servicios({}).map((s) => (s.categoria === 'Menú' ? { ...s, renglones: [{ texto: 'Lomo', cantidad: null }] } : s));
+    const fetchMock = backend({ ...EDITABLE, servicios: lista });
+    const usuario = userEvent.setup();
     montar('/eventos/5?pestana=servicios');
 
-    expect(await screen.findByText('Barra libre premium')).toBeInTheDocument();
-    expect(screen.getByRole('heading', { name: 'Tipo de barra' })).toBeInTheDocument();
+    expect(await screen.findByLabelText('Menú: renglón 1')).toHaveValue('Lomo');
+    await usuario.click(screen.getByRole('button', { name: 'Quitar el renglón 1 de Menú' }));
+    expect(screen.getByLabelText('Menú: renglón 1')).toHaveValue('');
+    await usuario.click(screen.getByRole('button', { name: 'Guardar servicios' }));
+
+    await screen.findByText('Servicios guardados.');
+    expect(pedidos(fetchMock).find((p) => p.metodo === 'PUT')?.cuerpo).toEqual({
+      version: 1, servicios: [{ categoriaId: 2, descripcion: '', renglones: [] }],
+    });
+  });
+
+  it('sin permiso para modificar los ve en solo lectura, con las cantidades', async () => {
+    backend({ ...GUARDADA, acciones: SIN_ACCIONES }, undefined, ['COMPRAS']);
+    montar('/eventos/5?pestana=servicios');
+
+    expect(await screen.findByText('Malbec Luigi Bosca')).toBeInTheDocument();
+    expect(screen.getAllByRole('listitem').map((li) => li.textContent)).toEqual(['Celíaco · 2', 'Sin lactosa · 3']);
+    expect(screen.getByRole('heading', { name: 'Menús especiales' })).toBeInTheDocument();
     expect(screen.queryByRole('textbox')).not.toBeInTheDocument();
     expect(screen.queryByRole('button', { name: 'Guardar servicios' })).not.toBeInTheDocument();
   });
 
   it('una categoría dada de baja se ve pero no se edita', async () => {
-    const lista = servicios({ After: 'DJ hasta las 5' }).map((s) => (s.categoria === 'After' ? { ...s, activa: false } : s));
-    backend({ ...EDITABLE, servicios: lista });
+    const baja = { ...servicios({})[0], categoriaId: 4, categoria: 'After', activa: false, requeridaParaConfirmar: false, descripcion: 'DJ hasta las 5' };
+    backend({ ...EDITABLE, servicios: [...servicios({}), baja] });
     montar('/eventos/5?pestana=servicios');
 
     expect(await screen.findByText('DJ hasta las 5')).toBeInTheDocument();
     expect(screen.getByText('Categoría dada de baja')).toBeInTheDocument();
-    expect(screen.queryByLabelText('After')).not.toBeInTheDocument();
-    expect(screen.getByLabelText('Recepción')).toBeInTheDocument();
+    expect(screen.queryByLabelText('After: renglón 1')).not.toBeInTheDocument();
+    expect(screen.getByLabelText('Menú: renglón 1')).toBeInTheDocument();
+  });
+
+  it('las requeridas para confirmar lo avisan', async () => {
+    backend();
+    montar('/eventos/5?pestana=servicios');
+
+    const menu = await screen.findByRole('group', { name: 'Menú' });
+    expect(within(menu).getByText('Hace falta para confirmar')).toBeInTheDocument();
+    expect(within(screen.getByRole('group', { name: 'Bodega' })).queryByText('Hace falta para confirmar')).not.toBeInTheDocument();
   });
 
   it('muestra lo que rechaza el sistema', async () => {
@@ -93,32 +127,35 @@ describe('UI-13 · servicios contratados', () => {
     const usuario = userEvent.setup();
     montar('/eventos/5?pestana=servicios');
 
-    await usuario.type(await screen.findByLabelText('Postre'), 'Mesa dulce');
+    await usuario.type(await screen.findByLabelText('Otros: renglón 1'), 'Cabina de fotos');
     await usuario.click(screen.getByRole('button', { name: 'Guardar servicios' }));
 
     expect(await screen.findByText('El evento está confirmado: Tipo de barra no puede quedar vacío.')).toBeInTheDocument();
   });
 
-  it('el error de un campo se muestra en esa categoría', async () => {
+  it('el error de un renglón se muestra en ese renglón, aunque haya renglones vacíos antes', async () => {
     backend(EDITABLE, () => problema(400, 'DATOS_INVALIDOS', 'Revisá los datos marcados.', [
-      { campo: 'servicios[1].descripcion', mensaje: 'Usá hasta 2000 caracteres.' },
+      { campo: 'servicios[1].renglones[0].texto', mensaje: 'Usá hasta 120 caracteres.' },
     ]));
     const usuario = userEvent.setup();
     montar('/eventos/5?pestana=servicios');
 
-    await usuario.type(await screen.findByLabelText('Recepción'), 'Finger food');
-    await usuario.type(screen.getByLabelText('Extras'), 'Mucho texto');
+    await usuario.type(await screen.findByLabelText('Menú: renglón 1'), 'Lomo');
+    const otros = screen.getByRole('group', { name: 'Otros' });
+    await usuario.click(within(otros).getByRole('button', { name: 'Agregar renglón' }));
+    await usuario.type(within(otros).getByLabelText('Otros: renglón 2'), 'Mucho texto');
     await usuario.click(screen.getByRole('button', { name: 'Guardar servicios' }));
 
-    expect(await screen.findByText('Usá hasta 2000 caracteres.')).toBeInTheDocument();
-    expect(screen.getByLabelText('Extras')).toHaveAccessibleDescription('Usá hasta 2000 caracteres.');
+    expect(await screen.findByText('Usá hasta 120 caracteres.')).toBeInTheDocument();
+    expect(screen.getByLabelText('Otros: renglón 2')).toHaveAccessibleDescription('Usá hasta 120 caracteres.');
+    expect(screen.getByLabelText('Otros: renglón 1')).not.toHaveAccessibleDescription('Usá hasta 120 caracteres.');
   });
 
   it('el historial cuenta qué servicio cambió', async () => {
     backend(GUARDADA);
     montar('/eventos/5?pestana=historial');
 
-    const historial = await screen.findByText(/Cargó Plato principal: Lomo con papas rústicas/);
+    const historial = await screen.findByText(/Cargó Menús especiales: Celíaco \(2\), Sin lactosa \(3\)/);
     expect(within(historial.closest('li') ?? document.body).getByText(/Bodega: Malbec → Malbec Luigi Bosca/)).toBeInTheDocument();
   });
 });

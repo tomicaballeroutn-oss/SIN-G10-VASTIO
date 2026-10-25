@@ -102,7 +102,7 @@ class ConfirmacionIT {
                 .andExpect(jsonPath("$.requisitosConfirmacion[*].cumplido", everyItem(is(true))))
                 .andExpect(jsonPath("$.requisitosConfirmacion[0].detalle").value("Ana Sosa"))
                 .andExpect(jsonPath("$.requisitosConfirmacion[1].detalle").value("180"))
-                .andExpect(jsonPath("$.requisitosConfirmacion[2].titulo").value("Plato principal y Tipo de barra"));
+                .andExpect(jsonPath("$.requisitosConfirmacion[2].titulo").value("Menú y Tipo de barra"));
     }
 
     @Test

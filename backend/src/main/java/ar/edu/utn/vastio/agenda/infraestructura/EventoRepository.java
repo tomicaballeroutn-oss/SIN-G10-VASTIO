@@ -38,6 +38,14 @@ public interface EventoRepository extends JpaRepository<Evento, Long> {
             """)
     List<Evento> activosEntre(LocalDate desde, LocalDate hasta, Collection<EstadoEvento> inactivos);
 
+    /** Vista de cocina: los eventos en esos estados entre dos fechas, por fecha, turno y salón. */
+    @Query("""
+            select e from Evento e join fetch e.unidad u
+            where u.fecha between :desde and :hasta and e.estado in :estados
+            order by u.fecha, u.turnoId, u.salonId
+            """)
+    List<Evento> enEstadosEntre(LocalDate desde, LocalDate hasta, Collection<EstadoEvento> estados);
+
     @Query("select count(e) > 0 from Evento e where e.unidad.id = :unidadId and e.estado not in :inactivos")
     boolean hayActivoEn(long unidadId, Collection<EstadoEvento> inactivos);
 

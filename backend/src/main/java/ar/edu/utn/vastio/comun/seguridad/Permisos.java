@@ -15,6 +15,9 @@ public final class Permisos {
     /** B5-04: preparación manual; no otorga operación de barra. */
     public static final String REGISTRAR_PREPARACION = "hasAnyRole('DIRECCION', 'COORDINACION', 'ADMINISTRACION', 'COMPRAS')";
 
+    /** A7-02: vista de cocina, como en la matriz (Planner, Compras y Cocina consultan; Administración y Vendedora no). */
+    public static final String VISTA_COCINA = "hasAnyRole('DIRECCION', 'COORDINACION', 'PLANNER', 'COMPRAS', 'COCINA')";
+
     /** Administrar usuarios. */
     public static final String ACCESO_TOTAL = "hasAnyRole('DIRECCION', 'COORDINACION')";
 

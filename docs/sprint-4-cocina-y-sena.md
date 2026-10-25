@@ -25,3 +25,18 @@ Cuatro tareas, cada una en su rama y su PR. El comprobante de la seña queda apa
 **Modelo.** V10: `servicio_renglon` (texto y cantidad por renglón), `servicio_contratado.descripcion` nullable y el ajuste de categorías. Ver el diccionario de datos.
 
 **Historial.** Cada categoría que cambia queda en `modificacion_evento` como `servicio.<categoría>`, con lo cargado en una línea: «Celíaco (2), Sin lactosa (3) · Avisar en la mesa 4».
+
+## 2 · A7-02 + mejora 5 · Consultar vista de cocina
+
+**Qué hace.** `/cocina` muestra el calendario de la agenda en solo lectura y, al elegir un día, una tarjeta por evento con lo que hay que preparar: tipo, nombre, hora (la de inicio o la del turno), salón, turno, invitados y los servicios de las categorías visibles en cocina, con sus renglones, cantidades y detalle. Base: UI-23.
+
+**Decisiones.**
+
+1. **Qué eventos.** Solo Confirmados y En curso. Uno En curso se ve siempre, aunque su jornada haya empezado ayer: es lo que se cocina ahora. Los eventos de jornadas anteriores que siguen En curso aparecen al ingresar, en «Jornadas anteriores», con su fecha operativa real, incluso al cambiar de mes o año. No se duplican entre ese bloque y las tarjetas del día. Cancelados y Cerrados quedan excluidos. Una reprogramación se refleja con su nueva fecha al volver a consultar; su visibilidad depende del estado y del horizonte.
+2. **Sin estado.** La tarjeta no lo muestra y la API no lo manda. La grilla de la agenda pinta todos los puntos llenos y los anuncia «con evento» (`AgendaGrid soloOcupacion`).
+3. **Sin datos sensibles.** La respuesta tiene DTO propios: no lleva importes, observaciones internas, cliente, contactos ni vendedora.
+4. **Permisos.** Exactamente los de la matriz: Dirección, Coordinación, Planner, Compras y Cocina. Administración, Vendedora y Barra, no. `perfiles-y-permisos.md` no cambia.
+5. **Horizonte.** `HORIZONTE_COCINA_DIAS` (hoy, 15) limita solo al perfil Cocina, como dice `perfiles-y-permisos.md`: ve desde hoy hasta ese día. Los demás perfiles ven el mes entero. Un usuario con Cocina y otro perfil con acceso suma permisos y ve sin límite.
+6. **Inicio y avisos.** `/cocina` ya era el inicio del perfil Cocina. Sus avisos (confirmación, modificación de algo de cocina, reprogramación, cancelación) ahora llevan a `/cocina?evento=ID`, que abre el día del evento y resalta su tarjeta. Si el evento ya no está en la vista, la pantalla lo dice y permite reintentar. Las respuestas de avisos anteriores no cambian la selección del más reciente. Con Cocina + Vendedora los avisos abren cocina, tanto para eventos propios como ajenos; con un perfil de acceso general a fichas se conserva la ficha y, en modificaciones, su historial (#39).
+
+**API.** `GET /api/v1/cocina?mes=AAAA-MM` y `GET /api/v1/cocina/eventos/{id}` (404 `FUERA_DE_COCINA`). La respuesta mensual separa `eventos` del mes y `jornadasAnteriores` (En curso anteriores a hoy, sin límite de mes); ambas listas llevan el mismo DTO sin estado ni datos comerciales. El calendario conserva los puntos de las jornadas anteriores en su fecha real. Sin migración.

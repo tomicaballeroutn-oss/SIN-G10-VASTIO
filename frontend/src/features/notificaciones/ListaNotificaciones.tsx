@@ -22,7 +22,7 @@ const ICONO: Record<TipoNotificacion, IconName> = {
   ALERTA_STOCK: 'triangle-alert',
 };
 
-/** Perfiles que abren la ficha del evento. Cocina y Barra leen el aviso pero no tienen ficha (Sprint 3: vista de cocina). */
+/** Perfiles que abren la ficha del evento. Cocina no tiene ficha: su aviso abre la tarjeta en la vista de cocina (A7-02). */
 const ABREN_FICHA: Rol[] = ['DIRECCION', 'COORDINACION', 'ADMINISTRACION', 'VENDEDORA', 'PLANNER', 'COMPRAS'];
 
 type Filtro = 'sin-leer' | 'todas';
@@ -39,7 +39,9 @@ type Filtro = 'sin-leer' | 'todas';
 export function ListaNotificaciones({ alIrAlEvento, limite }: { alIrAlEvento?: () => void; limite?: number }) {
   const navegar = useNavigate();
   const { usuario } = useSesion();
-  const abreFicha = !!usuario?.roles.some((r) => ABREN_FICHA.includes(r));
+  const esCocina = !!usuario?.roles.includes('COCINA');
+  // Vendedora no garantiza acceso a la ficha de un aviso recibido por Cocina.
+  const abreFicha = !!usuario?.roles.some((r) => ABREN_FICHA.includes(r) && (!esCocina || r !== 'VENDEDORA'));
   const [filtro, setFiltro] = useState<Filtro>('sin-leer');
   const [lista, setLista] = useState<Notificacion[]>([]);
   const [pagina, setPagina] = useState(0);
@@ -108,10 +110,13 @@ export function ListaNotificaciones({ alIrAlEvento, limite }: { alIrAlEvento?: (
       navegar('/existencias');
     } else if (abreFicha && n.eventoId) {
       alIrAlEvento?.();
-      // Una modificación se entiende mejor en el historial, con ese guardado resaltado (qué cambió, de qué a qué).
+      // Conservar el historial de #39 para quienes pueden consultar la ficha.
       navegar(n.tipo === 'MODIFICACION'
         ? `/eventos/${n.eventoId}?pestana=historial&cambio=${encodeURIComponent(n.fechaHora)}`
         : `/eventos/${n.eventoId}`);
+    } else if (esCocina && n.eventoId) {
+      alIrAlEvento?.();
+      navegar(`/cocina?evento=${n.eventoId}`);
     }
   }
 

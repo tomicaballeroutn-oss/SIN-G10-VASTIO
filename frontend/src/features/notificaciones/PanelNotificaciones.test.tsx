@@ -145,18 +145,19 @@ describe('UI-22 · notificaciones', () => {
     expect(screen.getByText('Nombre del evento: B y M → Bruno y Martina.').closest('li')).not.toHaveAttribute('aria-current');
   });
 
-  it('Cocina lee el aviso pero no abre la ficha', async () => {
+  it('a Cocina el aviso la lleva a la tarjeta del evento en la vista de cocina', async () => {
+
     const fetchMock = backend(['COCINA']);
     const usuario = userEvent.setup();
     const router = montar('/mi-cuenta');
-    const antes = router.state.location.pathname;
 
     await usuario.click(await screen.findByRole('button', { name: 'Notificaciones, 2 sin leer' }));
     const panel = screen.getByRole('dialog', { name: 'Notificaciones' });
     await usuario.click(await within(panel).findByRole('button', { name: /Evento confirmado/ }));
 
-    expect(router.state.location.pathname).toBe(antes);
-    expect(screen.getByRole('dialog', { name: 'Notificaciones' })).toBeInTheDocument();
+    expect(router.state.location.pathname).toBe('/cocina');
+    expect(router.state.location.search).toBe('?evento=5');
+    expect(screen.queryByRole('dialog', { name: 'Notificaciones' })).not.toBeInTheDocument();
     expect(pedidos(fetchMock).some((p) => p.ruta === '/notificaciones/30/lectura')).toBe(true);
   });
 
@@ -181,5 +182,43 @@ describe('UI-22 · notificaciones', () => {
 
     expect(await screen.findByRole('heading', { level: 1, name: 'Notificaciones' })).toBeInTheDocument();
     expect(await screen.findByText(/Evento confirmado: Bruno y Martina/)).toBeInTheDocument();
+  });
+});
+
+
+describe('notificaciones con Cocina y otros perfiles', () => {
+  it.each([
+    ['COCINA'], ['COCINA', 'VENDEDORA'], ['COCINA', 'BARRA'],
+  ] satisfies Rol[][])('con %j abre cocina', async (...roles: Rol[]) => {
+    backend(roles);
+    const router = montar('/mi-cuenta');
+    await userEvent.click(await screen.findByRole('button', { name: 'Notificaciones, 2 sin leer' }));
+    await userEvent.click(await within(screen.getByRole('dialog', { name: 'Notificaciones' })).findByRole('button', { name: /Evento confirmado/ }));
+    expect(router.state.location.pathname).toBe('/cocina');
+    expect(router.state.location.search).toBe('?evento=5');
+  });
+
+  it.each(['COMPRAS', 'PLANNER', 'ADMINISTRACION', 'DIRECCION', 'COORDINACION'] satisfies Rol[])('Cocina + %s conserva la ficha', async (rol) => {
+    backend(['COCINA', rol]);
+    const router = montar('/mi-cuenta');
+    await userEvent.click(await screen.findByRole('button', { name: 'Notificaciones, 2 sin leer' }));
+    await userEvent.click(await within(screen.getByRole('dialog', { name: 'Notificaciones' })).findByRole('button', { name: /Evento confirmado/ }));
+    expect(router.state.location.pathname).toBe('/eventos/5');
+  });
+});
+
+
+describe('Cocina + Vendedora en avisos propios y ajenos', () => {
+  it.each([true, false])('evento propio=%s abre cocina sin intentar la ficha', async (propio) => {
+    const fetchMock = backendFalso(sesionDe(['COCINA', 'VENDEDORA'], 'Cocina vendedora', propio ? 1 : 2), ({ ruta }) => {
+      if (ruta === '/notificaciones/sin-leer') return json(200, { cantidad: 1 });
+      if (ruta.startsWith('/notificaciones?')) return json(200, { notificaciones: [AVISOS[0]], pagina: 0, hayMas: false, sinLeer: 1 });
+      if (ruta === '/notificaciones/30/lectura') return new Response(null, { status: 204 });
+    });
+    const router = montar('/mi-cuenta');
+    await userEvent.click(await screen.findByRole('button', { name: 'Notificaciones, 1 sin leer' }));
+    await userEvent.click(await within(screen.getByRole('dialog', { name: 'Notificaciones' })).findByRole('button', { name: /Evento confirmado/ }));
+    expect(router.state.location.pathname).toBe('/cocina');
+    expect(pedidos(fetchMock).some((p) => p.ruta === '/eventos/5')).toBe(false);
   });
 });

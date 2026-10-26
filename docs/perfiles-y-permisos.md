@@ -43,7 +43,7 @@ E = ejecuta · P = ejecuta solo sobre sus propios eventos (vendedora: los que ve
 | Asistencia por segmento (prevista y real) | — | — | P | — | — | — |
 | Consultar vista de cocina | — | — | C | C | — | C |
 | Notificaciones | E | E | E | E | E | E |
-| Reporte de ocupación | C | — | — | — | — | — |
+| Reporte de ocupación | — | — | — | — | — | — |
 | Catálogo de bebidas (ABM) | E | — | — | E | — | — |
 | Configurar ubicaciones de stock | E | — | — | — | — | — |
 | Carga inicial / ingreso de bebida | E | — | — | E | — | — |
@@ -64,6 +64,7 @@ E = ejecuta · P = ejecuta solo sobre sus propios eventos (vendedora: los que ve
 - **Planner:** ve toda la agenda, incluidos los eventos de la otra planner.
 - **Operación a ciegas (barra):** ve solo el saldo de su barra (las barras de los salones con evento en la jornada; las encargadas son fijas y no se asignan en el sistema); registra retiros del depósito sin ver su saldo; si retira más que el saldo teórico, el sistema lo **acepta**, lo registra y alerta a Compras y Administración; al cerrar declara lo que devuelve sin ver lo esperado.
 - **Cocina:** solo la vista de cocina, dentro del horizonte del parámetro `HORIZONTE_COCINA_DIAS`, sin importes ni observaciones internas.
+- **Reporte de ocupación (A7-01):** solo Dirección y Coordinación, por su acceso total. La consulta se autoriza también en el backend; Administración, Compras y el resto de perfiles no pueden abrir el endpoint.
 
 ## Supuestos a validar
 

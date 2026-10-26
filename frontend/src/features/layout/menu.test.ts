@@ -11,8 +11,10 @@ describe('menú por perfil', () => {
     expect(ids(['COORDINACION'])).toEqual(todo);
   });
 
-  it('Administración no administra usuarios ni opera la barra', () => {
-    expect(ids(['ADMINISTRACION'])).toEqual(['inicio', 'notificaciones', 'agenda', 'eventos', 'bloqueos', 'existencias', 'ingreso', 'movimientos', 'ordenes', 'catalogo', 'estadisticas', 'reportes', 'parametros']);
+  it('Administración no administra usuarios, no ve reportes ni opera la barra', () => {
+    expect(ids(['ADMINISTRACION'])).toEqual(['inicio', 'notificaciones', 'agenda', 'eventos', 'bloqueos', 'existencias', 'ingreso', 'movimientos', 'ordenes', 'catalogo', 'estadisticas', 'parametros']);
+    expect(ids(['ADMINISTRACION'])).not.toContain('reportes');
+    expect(ids(['ADMINISTRACION'])).toContain('estadisticas');
   });
 
   it('la vendedora ve la agenda y sus eventos', () => {
@@ -30,8 +32,10 @@ describe('menú por perfil', () => {
     expect(itemsPara(['VENDEDORA', 'PLANNER']).find((it) => it.id === 'eventos')?.label).toBe('Eventos');
   });
 
-  it('Compras ve bebidas, reportes y la agenda en consulta', () => {
-    expect(ids(['COMPRAS'])).toEqual(['inicio', 'notificaciones', 'agenda', 'eventos', 'cocina', 'barra', 'existencias', 'ingreso', 'movimientos', 'ordenes', 'catalogo', 'estadisticas', 'reportes']);
+  it('Compras ve bebidas y la agenda en consulta, pero no reportes', () => {
+    expect(ids(['COMPRAS'])).toEqual(['inicio', 'notificaciones', 'agenda', 'eventos', 'cocina', 'barra', 'existencias', 'ingreso', 'movimientos', 'ordenes', 'catalogo', 'estadisticas']);
+    expect(ids(['COMPRAS'])).not.toContain('reportes');
+    expect(ids(['COMPRAS'])).toContain('estadisticas');
     expect(itemsPara(['COMPRAS']).find((it) => it.id === 'eventos')?.label).toBe('Eventos');
   });
 

@@ -54,7 +54,8 @@ public class OcupacionRepository {
                 rs.getLong("vendedora_id"), EstadoEvento.valueOf(rs.getString("estado"))));
     }
 
-    /** Unidades bloqueadas durante la fecha consultada, también si luego fueron desbloqueadas. */
+    /** Unidades bloqueadas en su fecha, sin restar también las ocupadas por un evento del reporte.
+     * Como en la agenda, el evento tiene prioridad; los filtros comerciales no cambian esta disponibilidad. */
     public Map<Short, Long> bloqueadasPorSalon(LocalDate desde, LocalDate hasta, Short salonId, String regimen) {
         StringBuilder sql = new StringBuilder("""
                 select u.salon_id, count(distinct u.unidad_id) as unidades
@@ -65,6 +66,10 @@ public class OcupacionRepository {
                   and (b.fecha_registro at time zone 'America/Argentina/Cordoba')::date <= u.fecha
                   and (b.fecha_desbloqueo is null
                     or (b.fecha_desbloqueo at time zone 'America/Argentina/Cordoba')::date >= u.fecha)
+                  and not exists (
+                    select 1 from evento e where e.unidad_id = u.unidad_id
+                      and e.estado in ('SENADO', 'CONTRATADO', 'CONFIRMADO', 'EN_CURSO', 'REALIZADO', 'CERRADO')
+                  )
                 """);
         MapSqlParameterSource parametros = new MapSqlParameterSource().addValue("desde", desde).addValue("hasta", hasta);
         if (salonId != null) {

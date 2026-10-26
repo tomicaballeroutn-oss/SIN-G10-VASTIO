@@ -140,6 +140,93 @@ class ReporteOcupacionIT {
                 .andExpect(jsonPath("$.codigo").value("REGIMEN_INVALIDO"));
     }
 
+    @Test
+    void bloqueoHistoricoNoRestaUnaUnidadQueLuegoFueOcupadaInclusoAlFiltrarOtraVendedora() throws Exception {
+        LocalDate fecha = DESDE.plusDays(20);
+        long bloqueo = escenario.bloqueo("club", fecha, "mediodia", direccion, "Levantado antes del evento");
+        jdbc.update("UPDATE bloqueo SET activo=false, fecha_registro=?, fecha_desbloqueo=?, usuario_desbloqueo_id=? WHERE bloqueo_id=?",
+                fecha.atTime(8, 0).atOffset(java.time.ZoneOffset.ofHours(-3)),
+                fecha.atTime(9, 0).atOffset(java.time.ZoneOffset.ofHours(-3)), direccion.getId(), bloqueo);
+        escenario.evento("club", fecha, "mediodia", "SENADO", lucia, "Después del desbloqueo");
+        escenario.evento("club", fecha, "noche", "SENADO", sofia, "Otra vendedora");
+        String salon = "&salonId=" + salonId("club");
+        consultar(RolCodigo.DIRECCION, fecha, fecha, salon)
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.porSalon[0].unidadesDisponibles").value(2))
+                .andExpect(jsonPath("$.porSalon[0].ocupacion").value(100.0));
+        consultar(RolCodigo.DIRECCION, fecha, fecha, salon + "&vendedoraId=" + sofia.getId())
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.porSalon[0].unidadesDisponibles").value(2))
+                .andExpect(jsonPath("$.porSalon[0].ocupacion").value(50.0));
+        consultar(RolCodigo.DIRECCION, fecha, fecha, salon + "&tipoEventoId=1")
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.porSalon[0].unidadesDisponibles").value(2))
+                .andExpect(jsonPath("$.porSalon[0].ocupacion").value(0.0));
+    }
+
+    @Test
+    void bloqueosRepetidosSeCuentanUnaVezYDisponibilidadCeroNoDividePorCero() throws Exception {
+        LocalDate fecha = DESDE.plusDays(21);
+        escenario.bloqueo("club", fecha, "mediodia", direccion, "Primero");
+        escenario.bloqueo("club", fecha, "mediodia", direccion, "Segundo histórico");
+        escenario.bloqueo("club", fecha, "noche", direccion, "Tercero");
+        consultar(RolCodigo.DIRECCION, fecha, fecha, "&salonId=" + salonId("club"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.porSalon[0].unidadesOcupadas").value(0))
+                .andExpect(jsonPath("$.porSalon[0].unidadesDisponibles").value(0))
+                .andExpect(jsonPath("$.porSalon[0].ocupacion").value(0.0))
+                .andExpect(jsonPath("$.resumen.ocupacionPromedio").value(0.0));
+    }
+
+    @Test
+    void bloqueosFueraDeVigenciaNoRestanYLaTemporadaUsaLaFechaDeLaUnidad() throws Exception {
+        LocalDate septiembre = LocalDate.of(2042, 9, 30);
+        LocalDate octubre = septiembre.plusDays(1);
+        long pasado = escenario.bloqueo("club", septiembre, "mediodia", direccion, "Terminado el día anterior");
+        jdbc.update("UPDATE bloqueo SET activo=false, fecha_desbloqueo=?, usuario_desbloqueo_id=? WHERE bloqueo_id=?",
+                septiembre.minusDays(1).atStartOfDay().atOffset(java.time.ZoneOffset.ofHours(-3)), direccion.getId(), pasado);
+        long posterior = escenario.bloqueo("club", septiembre, "noche", direccion, "Registrado después");
+        jdbc.update("UPDATE bloqueo SET fecha_registro=? WHERE bloqueo_id=?",
+                octubre.atStartOfDay().atOffset(java.time.ZoneOffset.ofHours(-3)), posterior);
+        escenario.bloqueo("club", octubre, "noche", direccion, "Vigente en alta");
+        String salon = "&salonId=" + salonId("club");
+        consultar(RolCodigo.DIRECCION, septiembre, octubre, salon + "&regimen=BAJA")
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.porSalon[0].unidadesDisponibles").value(2));
+        consultar(RolCodigo.DIRECCION, septiembre, octubre, salon + "&regimen=ALTA")
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.porSalon[0].unidadesDisponibles").value(1));
+    }
+
+    @Test
+    void reprogramadoSeCuentaSoloEnSuUnidadActualYCanceladoNoImpideReutilizarla() throws Exception {
+        LocalDate origen = DESDE.plusDays(23);
+        LocalDate destino = origen.plusDays(1);
+        long evento = escenario.evento("club", origen, "mediodia", "SENADO", lucia, "Reprogramado");
+        long nuevaUnidad = escenario.unidad("avril", destino, "noche");
+        jdbc.update("UPDATE evento SET unidad_id=? WHERE evento_id=?", nuevaUnidad, evento);
+        escenario.evento("club", origen, "mediodia", "CANCELADO", sofia, "Cancelado");
+        escenario.evento("club", origen, "mediodia", "SENADO", lucia, "Reemplazo");
+        consultar(RolCodigo.DIRECCION, origen, origen, "&salonId=" + salonId("club"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.resumen.unidadesOcupadas").value(1))
+                .andExpect(jsonPath("$.porSalon[0].ocupacion").value(50.0));
+        consultar(RolCodigo.DIRECCION, destino, destino, "&salonId=" + salonId("avril"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.resumen.unidadesOcupadas").value(1));
+    }
+
+    @Test
+    void catalogoFijoDosTurnosYRespuestaSinDatosEconomicosNiDelCliente() throws Exception {
+        org.assertj.core.api.Assertions.assertThat(jdbc.queryForList("SELECT codigo FROM turno ORDER BY codigo", String.class))
+                .containsExactly("mediodia", "noche");
+        escenario.evento("club", DESDE, "noche", "SENADO", lucia, "Nombre privado");
+        var contenido = consultar(RolCodigo.DIRECCION, DESDE, DESDE, "")
+                .andExpect(status().isOk()).andReturn().getResponse().getContentAsString();
+        org.assertj.core.api.Assertions.assertThat(contenido)
+                .doesNotContain("importe", "moneda", "cliente", "30111222", "Nombre privado", "contrasena");
+    }
+
     private ResultActions consultar(RolCodigo rol, LocalDate desde, LocalDate hasta, String filtros)
             throws Exception {
         return mvc.perform(get(url(desde, hasta) + filtros)

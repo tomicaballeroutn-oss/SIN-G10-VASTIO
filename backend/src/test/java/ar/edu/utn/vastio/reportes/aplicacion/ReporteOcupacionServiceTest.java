@@ -120,6 +120,39 @@ class ReporteOcupacionServiceTest {
                 });
     }
 
+    @Test
+    void incluyeEl29DeFebreroYTodosLosAniosDelPeriodo() {
+        LocalDate desde = LocalDate.of(2040, 1, 1);
+        LocalDate hasta = LocalDate.of(2041, 12, 31);
+        for (String regimen : List.of("BAJA", "ALTA")) {
+            when(ocupacion.consultar(desde, hasta, null, null, null, regimen)).thenReturn(List.of());
+            when(ocupacion.bloqueadasPorSalon(desde, hasta, null, regimen)).thenReturn(Map.of());
+            var resultado = servicio.consultar(desde, hasta, null, null, null, regimen);
+            long dias = regimen.equals("BAJA") ? 547 : 184;
+            assertThat(resultado.porSalon()).allSatisfy(salon -> {
+                assertThat(salon.unidadesDisponibles()).isEqualTo(dias * 2);
+                assertThat(salon.ocupacion()).isZero();
+            });
+            assertThat(resultado.resumen().ocupacionPromedio()).isZero();
+        }
+    }
+
+    @Test
+    void periodoSinDiasDeTemporadaOSalonDevuelveCeroSinNaN() {
+        LocalDate fecha = LocalDate.of(2040, 2, 29);
+        when(ocupacion.consultar(fecha, fecha, null, null, null, "ALTA")).thenReturn(List.of());
+        when(ocupacion.bloqueadasPorSalon(fecha, fecha, null, "ALTA")).thenReturn(Map.of());
+        var sinDias = servicio.consultar(fecha, fecha, null, null, null, "ALTA");
+        assertThat(sinDias.porSalon()).allSatisfy(salon -> {
+            assertThat(salon.unidadesDisponibles()).isZero();
+            assertThat(salon.ocupacion()).isZero();
+        });
+        when(catalogos.salones()).thenReturn(List.of());
+        var sinSalones = servicio.consultar(fecha, fecha, null, null, null, "ALTA");
+        assertThat(sinSalones.porSalon()).isEmpty();
+        assertThat(sinSalones.resumen().ocupacionPromedio()).isZero();
+    }
+
     private static Salon salon(short id, String codigo, String nombre) {
         Salon salon = mock(Salon.class);
         when(salon.getId()).thenReturn(id);

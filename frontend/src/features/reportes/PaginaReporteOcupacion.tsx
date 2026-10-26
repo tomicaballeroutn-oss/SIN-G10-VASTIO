@@ -15,7 +15,7 @@ const numero = new Intl.NumberFormat('es-AR', { maximumFractionDigits: 1 });
 export function PaginaReporteOcupacion() {
   const [filtros, setFiltros] = useState(filtrosIniciales);
   const periodoAmbasTemporadas = useRef<{ desde: string; hasta: string } | null>(null);
-  const cargar = useCallback(() => consultarReporteOcupacion(filtros), [filtros]);
+  const cargar = useCallback(async () => ({ ...await consultarReporteOcupacion(filtros), consulta: filtros }), [filtros]);
   const datos = useDatos(cargar);
   const cambiar = (campo: keyof FiltroReporteOcupacion, valor: string) => {
     if (campo !== 'regimen') {
@@ -32,11 +32,14 @@ export function PaginaReporteOcupacion() {
     const periodo = ajustarPeriodoTemporada(filtros.desde, filtros.hasta, valor);
     setFiltros((actual) => ({ ...actual, regimen: valor, ...periodo }));
   };
-  const salonElegido = datos.datos?.filtros.salones.find((s) => String(s.id) === filtros.salonId)?.nombre ?? 'Todos';
-  const tipoElegido = datos.datos?.filtros.tiposEvento.find((t) => String(t.id) === filtros.tipoEventoId)?.nombre ?? 'Todos';
-  const vendedoraElegida = datos.datos?.filtros.vendedoras.find((v) => String(v.id) === filtros.vendedoraId)?.nombre ?? 'Todas';
-  const temporadaElegida = filtros.regimen === 'ALTA' ? 'Alta' : filtros.regimen === 'BAJA' ? 'Baja' : 'Ambas';
-  const etiquetaPeriodo = filtros.regimen
+  // Los resultados y su encabezado de impresión pertenecen a la misma consulta.
+  const filtrosDelResultado = datos.datos?.consulta ?? filtros;
+  const resultadoVigente = !!datos.datos && JSON.stringify(datos.datos.consulta) === JSON.stringify(filtros);
+  const salonElegido = datos.datos?.filtros.salones.find((s) => String(s.id) === filtrosDelResultado.salonId)?.nombre ?? 'Todos';
+  const tipoElegido = datos.datos?.filtros.tiposEvento.find((t) => String(t.id) === filtrosDelResultado.tipoEventoId)?.nombre ?? 'Todos';
+  const vendedoraElegida = datos.datos?.filtros.vendedoras.find((v) => String(v.id) === filtrosDelResultado.vendedoraId)?.nombre ?? 'Todas';
+  const temporadaElegida = filtrosDelResultado.regimen === 'ALTA' ? 'Alta' : filtrosDelResultado.regimen === 'BAJA' ? 'Baja' : 'Ambas';
+  const etiquetaPeriodo = filtrosDelResultado.regimen
     ? `Período de temporada ${temporadaElegida.toLowerCase()} ${fecha(datos.datos?.desde ?? filtros.desde)} al ${fecha(datos.datos?.hasta ?? filtros.hasta)} · dos turnos por día`
     : `Período ${fecha(datos.datos?.desde ?? filtros.desde)} al ${fecha(datos.datos?.hasta ?? filtros.hasta)} · dos turnos por día`;
 
@@ -44,7 +47,7 @@ export function PaginaReporteOcupacion() {
     <section className="pantalla reporte-ocupacion">
       <Encabezado titulo="Reporte de ocupación" antetitulo="Gestión comercial" />
       <div className="reporte-ocupacion__impresion">
-        <p><strong>Período:</strong> {fecha(filtros.desde)} al {fecha(filtros.hasta)}</p>
+        <p><strong>Período:</strong> {fecha(filtrosDelResultado.desde)} al {fecha(filtrosDelResultado.hasta)}</p>
         <p><strong>Salón:</strong> {salonElegido} <strong>· Tipo:</strong> {tipoElegido} <strong>· Vendedora:</strong> {vendedoraElegida} <strong>· Temporada:</strong> {temporadaElegida}</p>
         <p className="reporte-ocupacion__impresion-nota">Incluye eventos señados, contratados, confirmados, en curso, realizados y cerrados. Excluye pre-reservas, cancelados y liberados.</p>
         <p className="reporte-ocupacion__impresion-fecha">Generado el {new Intl.DateTimeFormat('es-AR', { timeZone: 'America/Argentina/Cordoba', dateStyle: 'long', timeStyle: 'short' }).format(new Date())}</p>
@@ -62,7 +65,7 @@ export function PaginaReporteOcupacion() {
           ]} onChange={(e) => cambiar('regimen', e.target.value)} />
         </div>
         <div className="reporte-ocupacion__acciones">
-          <Button type="button" variant="solid" icon="printer" onClick={() => window.print()}>Imprimir</Button>
+          <Button type="button" variant="solid" icon="printer" disabled={!resultadoVigente} onClick={() => window.print()}>Imprimir</Button>
         </div>
       </form>
 
@@ -110,10 +113,12 @@ function opciones(lista: { id: number; nombre: string }[] | undefined): SelectOp
 }
 
 function fecha(iso: string): string {
+  if (!iso || Number.isNaN(Date.parse(iso + 'T12:00:00Z'))) return '—';
   return new Intl.DateTimeFormat('es-AR', { timeZone: 'UTC', day: 'numeric', month: 'short', year: 'numeric' }).format(new Date(`${iso}T12:00:00Z`));
 }
 
 function ajustarPeriodoTemporada(desde: string, hasta: string, regimen: string): { desde: string; hasta: string } {
+  if (!desde || !hasta || desde > hasta) return { desde, hasta };
   const temporada = regimen === 'ALTA' ? { inicio: 10, fin: 12 } : { inicio: 1, fin: 9 };
   const anioDesde = Number(desde.slice(0, 4));
   const anioHasta = Number(hasta.slice(0, 4));

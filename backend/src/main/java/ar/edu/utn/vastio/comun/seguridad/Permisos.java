@@ -18,6 +18,11 @@ public final class Permisos {
     /** B5-04: preparación manual; no otorga operación de barra. */
     public static final String REGISTRAR_PREPARACION = "hasAnyRole('DIRECCION', 'COORDINACION', 'ADMINISTRACION', 'COMPRAS')";
 
+    /**
+     * M-07: comprobante interno de la seña. Los perfiles que pueden ver el importe; que la vendedora sea la titular se
+     * verifica en el servicio.
+     */
+    public static final String COMPROBANTE_SENA = "hasAnyRole('DIRECCION', 'COORDINACION', 'ADMINISTRACION', 'VENDEDORA')";
     /** A7-02: vista de cocina, como en la matriz (Planner, Compras y Cocina consultan; Administración y Vendedora no). */
     public static final String VISTA_COCINA = "hasAnyRole('DIRECCION', 'COORDINACION', 'PLANNER', 'COMPRAS', 'COCINA')";
 

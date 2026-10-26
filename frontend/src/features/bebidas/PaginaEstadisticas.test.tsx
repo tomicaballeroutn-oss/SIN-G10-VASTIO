@@ -8,10 +8,10 @@ import { backendFalso, json, montar, pedidos, problema, sesionDe } from '../../t
 const medidas: MedidasConsumo = {
   eventos: 3, eventosConConsumoRegistrado: 2, consumoTotal: 19, promedioPorEvento: 6.3333,
   eventosConInvitadosValidos: 2, invitadosRegistrados: 300, consumoConInvitadosValidos: 10,
-  porInvitadoRegistrado: 0.0333,
+  porInvitadoRegistrado: 0.0333, eventosConAsistenciaReal: 0,
 };
 const resultado: EstadisticasConsumo = {
-  unidad: 'BOTELLAS', denominador: 'INVITADOS_REGISTRADOS', filtros: {}, resumen: medidas,
+  unidad: 'BOTELLAS', denominador: 'ASISTENTES', filtros: {}, resumen: medidas,
   porBebida: [{ bebidaId: 1, nombre: 'Fernet', presentacion: '750 ml', activo: false, medidas }],
   porTipoEvento: [{ tipoEventoId: 2, nombre: 'Quince', activo: true, medidas }],
   detalle: [{ tipoEventoId: 2, bebidaId: 1, medidas }],
@@ -44,7 +44,8 @@ it.each<Rol>(['DIRECCION', 'COORDINACION', 'ADMINISTRACION', 'COMPRAS'])('permit
   expect(within(tabla).getByText('Fernet 750 ml · Dado de baja')).toBeInTheDocument();
   expect(screen.getByRole('table', { name: 'Consumo por tipo de evento' })).toBeInTheDocument();
   expect(screen.getByRole('table', { name: 'Detalle por tipo de evento y bebida' })).toBeInTheDocument();
-  expect(screen.getByText(/El cálculo por invitado usa 2 de 3 eventos/)).toHaveTextContent('300 invitados registrados y 10 botellas');
+  expect(screen.getByText(/El cálculo por asistente usa 2 de 3 eventos/)).toHaveTextContent('300 asistentes y 10 botellas');
+  expect(screen.queryByText(/usan la asistencia real por segmento/)).not.toBeInTheDocument();
   expect(consultas(mock)).toEqual([{ metodo: 'GET', ruta: '/estadisticas/consumo', cuerpo: undefined }]);
   expect(pedidos(mock).every((p) => p.metodo === 'GET')).toBe(true);
 });

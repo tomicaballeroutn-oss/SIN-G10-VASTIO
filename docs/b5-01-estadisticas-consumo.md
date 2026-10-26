@@ -20,6 +20,8 @@ La población se selecciona por `evento.estado = CERRADO`, fecha inclusiva de `e
 
 El consumo proviene exclusivamente de `consumo_evento.cantidad_consumida`. La clave `(evento_id, bebida_id)` ya consolida todas las barras. Una fila ausente aporta consumo cero; no elimina al evento.
 
+> **Actualización Sprint 4 (docs/sprint-4.md, decisión 8).** El denominador pasó a **`ASISTENTES`**: en los eventos de tipos con segmentos y la asistencia real completa (todos los segmentos activos), su suma; en el resto, `evento.cantidad_invitados`. Una asistencia parcial no se usa. `Medidas.eventosConAsistenciaReal` dice cuántos eventos válidos usan la real. Lo que sigue describe la versión original.
+
 La tabla `asistencia_segmento` existe desde V1, pero no está implementado el registro operativo de asistencia real. Esta historia no la consulta, aunque contenga datos parciales. El denominador es siempre **`INVITADOS_REGISTRADOS`**, tomado de `evento.cantidad_invitados`.
 
 Para cada conjunto o grupo:

@@ -12,7 +12,7 @@ const fila = (bebidaId: number, nombre: string, entregado: number, devuelto: num
   entregado, devuelto, remanente, consumo: entregado - devuelto - remanente, porAsistente,
 });
 const PARA_CERRAR: Cierre = {
-  evento: EVENTO, salon: SALON, invitados: 180, usaSegmentos: false, pendientes: [],
+  evento: EVENTO, salon: SALON, invitados: 180, usaSegmentos: false, asistenciaReal: null, pendientes: [],
   // Cuenta de control: salieron 12, volvieron 6, quedaron 2 → se consumieron 4.
   renglones: [fila(1, 'Fernet Branca', 12, 6, 2, 0.0222), fila(2, 'Gin Bombay', 6, 0, 0, 0.0333)],
   consumoTotal: 10, porAsistenteTotal: 0.0556, cerrado: false,
@@ -78,11 +78,19 @@ describe('UI-33 · cierre de evento', () => {
     expect(screen.getByRole('button', { name: 'Cerrar evento' })).toBeDisabled();
   });
 
-  it('con un tipo de evento con segmentos aclara que divide por los invitados', async () => {
+  it('con un tipo de evento con segmentos y sin la real aclara que divide por los invitados', async () => {
     backendFalso(sesionDe(['BARRA']), backend({ ...PARA_CERRAR, usaSegmentos: true }));
     montar('/barra/cierre/10');
 
-    expect(await screen.findByText(/usa asistencia por segmento, que todavía no se registra/)).toBeInTheDocument();
+    expect(await screen.findByText(/Mientras la planner no cargue la real, se divide por la cantidad de/)).toBeInTheDocument();
+  });
+
+  it('con la asistencia real cargada divide por ella', async () => {
+    backendFalso(sesionDe(['BARRA']), backend({ ...PARA_CERRAR, usaSegmentos: true, asistenciaReal: 204 }));
+    montar('/barra/cierre/10');
+
+    expect(await screen.findByText(/sobre 204 asistentes reales/)).toBeInTheDocument();
+    expect(screen.queryByText(/Mientras la planner no cargue la real/)).not.toBeInTheDocument();
   });
 
   it('un evento cerrado es solo lectura', async () => {

@@ -225,6 +225,22 @@ public class EventoController {
         return dto.ficha(consultas.ficha(id, quien));
     }
 
+    @PutMapping("/{id}/asistencia/real")
+    @PreAuthorize(Permisos.EDITAR_EVENTOS)
+    @Operation(summary = "Registrar asistencia real de cierre", description = """
+            La asistencia real de todos los segmentos activos a la vez (0 si no vino nadie), cargada a mano desde el
+            control de acceso y la venta en puerta. Con el evento Realizado o Cerrado; no bloquea el cierre. La
+            registran la planner asignada, Coordinación y Dirección. Con todos los segmentos cargados, el consumo por
+            asistente se divide por su total. Cada cambio queda en el historial. Devuelve la ficha.""")
+    @ApiResponse(responseCode = "409", description = "EVENTO_MODIFICADO: otra persona guardó cambios en el medio")
+    @ApiResponse(responseCode = "422", description = "SIN_SEGMENTOS, SEGMENTO_INVALIDO, ASISTENCIA_INCOMPLETA o estado que no lo permite")
+    public FichaResponse registrarAsistenciaReal(@PathVariable long id, @Valid @RequestBody AsistenciaRequest pedido,
+            @AuthenticationPrincipal Jwt jwt) {
+        UsuarioActual quien = UsuarioActual.de(jwt);
+        asistencias.registrarReal(id, pedido.version(), pedido.cantidades(), quien);
+        return dto.ficha(consultas.ficha(id, quien));
+    }
+
     @PutMapping("/{id}/servicios")
     @PreAuthorize(Permisos.EDITAR_EVENTOS)
     @Operation(summary = "Registrar servicios contratados", description = """

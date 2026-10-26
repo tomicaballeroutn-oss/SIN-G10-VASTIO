@@ -33,7 +33,11 @@ public class ConsultaConsumoService {
     public record Renglon(ConsumoEvento consumo, BigDecimal porInvitado) {
     }
 
-    public record Consulta(Integer invitados, boolean usaSegmentos, List<Renglon> renglones,
+    /**
+     * {@code asistenciaReal}: el total real por segmento, si ya se cargó; entonces es el divisor (docs/sprint-4.md,
+     * decisión 8). Si no, se divide por los invitados.
+     */
+    public record Consulta(Integer invitados, boolean usaSegmentos, Integer asistenciaReal, List<Renglon> renglones,
             BigDecimal consumoTotal, BigDecimal porInvitadoTotal) {
     }
 
@@ -48,12 +52,12 @@ public class ConsultaConsumoService {
                 .sorted(Comparator.comparing((ConsumoEvento c) -> c.getBebida().getNombre(), String.CASE_INSENSITIVE_ORDER)
                         .thenComparing(c -> c.getBebida().getPresentacion(), String.CASE_INSENSITIVE_ORDER)
                         .thenComparing(c -> c.getBebida().getId()))
-                .map(c -> new Renglon(c, porInvitado(c.getCantidadConsumida(), datos.cantidadInvitados())))
+                .map(c -> new Renglon(c, porInvitado(c.getCantidadConsumida(), datos.asistentes())))
                 .toList();
         BigDecimal total = renglones.stream().map(r -> r.consumo().getCantidadConsumida())
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
-        return new Consulta(datos.cantidadInvitados(), datos.usaSegmentos(), renglones, total,
-                porInvitado(total, datos.cantidadInvitados()));
+        return new Consulta(datos.cantidadInvitados(), datos.usaSegmentos(), datos.asistenciaReal(), renglones, total,
+                porInvitado(total, datos.asistentes()));
     }
 
     private static BigDecimal porInvitado(BigDecimal cantidad, Integer invitados) {

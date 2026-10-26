@@ -28,10 +28,12 @@ public class CierreEventoService {
     private final MaquinaDeEstados maquina;
     private final CatalogoService catalogos;
     private final ConsultaEventoService consultas;
+    private final AsistenciaPorSegmento asistencias;
     private final EntityManager entityManager;
 
     public CierreEventoService(EventoRepository eventos, MaquinaDeEstados maquina, CatalogoService catalogos,
-            ConsultaEventoService consultas, EntityManager entityManager) {
+            ConsultaEventoService consultas, AsistenciaPorSegmento asistencias, EntityManager entityManager) {
+        this.asistencias = asistencias;
         this.eventos = eventos;
         this.maquina = maquina;
         this.catalogos = catalogos;
@@ -40,15 +42,22 @@ public class CierreEventoService {
     }
 
     /**
-     * Para el consumo por asistente (decisión 14). {@code usaSegmentos}: el tipo de evento pide asistencia real por
-     * segmento, que todavía no se registra (Sprint 4); mientras tanto se divide por la cantidad de invitados.
+     * Para el consumo por asistente (docs/sprint-3-operacion.md, decisión 14, y docs/sprint-4.md, decisión 8).
+     * {@code usaSegmentos}: el tipo de evento cuenta la asistencia por segmento. {@code asistenciaReal}: su total, si ya
+     * se cargó la de todos los segmentos; si no, null y se divide por la cantidad de invitados.
      */
-    public record DatosDeCierre(Integer cantidadInvitados, boolean usaSegmentos) {
+    public record DatosDeCierre(Integer cantidadInvitados, boolean usaSegmentos, Integer asistenciaReal) {
+
+        /** El divisor del consumo por asistente: la asistencia real si está; si no, los invitados. */
+        public Integer asistentes() {
+            return asistenciaReal != null ? asistenciaReal : cantidadInvitados;
+        }
     }
 
     public DatosDeCierre datos(long eventoId) {
         Evento e = evento(eventoId);
-        return new DatosDeCierre(e.getCantidadInvitados(), catalogos.tipoEvento(e.getTipoEventoId()).isUsaSegmentos());
+        AsistenciaPorSegmento.Asistencia asistencia = asistencias.de(e);
+        return new DatosDeCierre(e.getCantidadInvitados(), asistencia != null, asistencia == null ? null : asistencia.totalReal());
     }
 
     /** Los eventos realizados que esperan su cierre, del más viejo al más nuevo. */

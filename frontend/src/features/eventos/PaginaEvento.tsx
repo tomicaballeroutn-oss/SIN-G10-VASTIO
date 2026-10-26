@@ -4,7 +4,7 @@ import type { EstadoEvento } from '../../api/agenda';
 import { ROLES_CONSUMO } from '../../api/consumos';
 import { ROLES_PREPARACION } from '../../api/preparaciones';
 import { useSesion } from '../sesion/contexto';
-import { CAMPO_PREVISTA, PestanaAsistencia } from './PestanaAsistencia';
+import { CAMPO_PREVISTA, CAMPO_REAL, PestanaAsistencia } from './PestanaAsistencia';
 import { PestanaConsumo } from './PestanaConsumo';
 import { PestanaPreparacion } from './PestanaPreparacion';
 import { hora } from '../../api/catalogos';
@@ -403,6 +403,9 @@ function corto(valor: string | undefined): string {
 }
 
 function describirModificacion(m: Modificacion): string {
+  if (m.campo.startsWith(CAMPO_REAL)) {
+    return `Asistencia real de ${m.campo.slice(CAMPO_REAL.length)}: ${m.valorAnterior ?? 'sin dato'} → ${m.valorNuevo ?? 'sin dato'}`;
+  }
   if (m.campo.startsWith(CAMPO_PREVISTA)) {
     return `Asistencia prevista de ${m.campo.slice(CAMPO_PREVISTA.length)}: ${m.valorAnterior ?? 'sin dato'} → ${m.valorNuevo ?? 'sin dato'}`;
   }

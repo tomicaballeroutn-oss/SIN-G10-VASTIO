@@ -18,6 +18,7 @@ import org.springframework.stereotype.Component;
 
 import ar.edu.utn.vastio.agenda.dominio.EstadoEvento;
 import ar.edu.utn.vastio.agenda.dominio.Evento;
+import ar.edu.utn.vastio.configuracion.aplicacion.CatalogoService;
 import ar.edu.utn.vastio.notificaciones.aplicacion.NotificacionService;
 import ar.edu.utn.vastio.notificaciones.dominio.TipoNotificacion;
 import ar.edu.utn.vastio.usuarios.aplicacion.UsuarioService;
@@ -65,8 +66,11 @@ public class AvisosEvento {
     private final NotificacionService notificaciones;
     private final DescripcionEvento descripcion;
     private final UsuarioService usuarios;
+    private final CatalogoService catalogos;
 
-    public AvisosEvento(NotificacionService notificaciones, DescripcionEvento descripcion, UsuarioService usuarios) {
+    public AvisosEvento(NotificacionService notificaciones, DescripcionEvento descripcion, UsuarioService usuarios,
+            CatalogoService catalogos) {
+        this.catalogos = catalogos;
         this.notificaciones = notificaciones;
         this.descripcion = descripcion;
         this.usuarios = usuarios;
@@ -74,7 +78,8 @@ public class AvisosEvento {
 
     /**
      * Lo llama {@code MaquinaDeEstados} después de cada transición. Los estados sin aviso (Liberada, En curso,
-     * Realizado, Cerrado) no generan nada.
+     * Cerrado) no generan nada. Realizado avisa solo a la planner de un evento con asistencia por segmento, para que
+     * cargue la real (docs/sprint-4.md, decisión 9).
      *
      * @param origenId null si la transición es automática.
      */
@@ -91,6 +96,12 @@ public class AvisosEvento {
             case CONFIRMADO -> avisar(evento, TipoNotificacion.CONFIRMACION, accion(autor, "confirmó el evento"), "",
                     origenId, List.of(COMPRAS, COCINA, ADMINISTRACION),
                     Map.of(evento.getVendedoraId(), accion(autor, "confirmó tu evento")));
+            case REALIZADO -> {
+                if (evento.getPlannerId() != null && catalogos.tipoEvento(evento.getTipoEventoId()).isUsaSegmentos()) {
+                    avisar(evento, TipoNotificacion.ASISTENCIA_REAL, "Cargá la asistencia real de cierre", "", origenId,
+                            List.of(), Map.of(evento.getPlannerId(), "Cargá la asistencia real de cierre"));
+                }
+            }
             case CANCELADO -> avisar(evento, TipoNotificacion.CANCELACION, accion(autor, "canceló el evento"), "", origenId,
                     TODAS_LAS_AREAS, titularYPlanner(evento, accion(autor, "canceló tu evento")));
             default -> {

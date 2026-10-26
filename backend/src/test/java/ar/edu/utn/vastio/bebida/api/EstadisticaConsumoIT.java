@@ -70,7 +70,7 @@ class EstadisticaConsumoIT {
     void totalesGruposYCocientesDeSumasSinDuplicarInvitados() throws Exception {
         consultar("", RolCodigo.COMPRAS).andExpect(status().isOk())
                 .andExpect(jsonPath("$.unidad").value("BOTELLAS"))
-                .andExpect(jsonPath("$.denominador").value("INVITADOS_REGISTRADOS"))
+                .andExpect(jsonPath("$.denominador").value("ASISTENTES"))
                 .andExpect(jsonPath("$.resumen.eventos").value(3))
                 .andExpect(jsonPath("$.resumen.eventosConConsumoRegistrado").value(2))
                 .andExpect(jsonPath("$.resumen.consumoTotal").value(21.01))
@@ -120,7 +120,7 @@ class EstadisticaConsumoIT {
         Map<String, Object> medidas = filas.getFirst();
         assertThat(medidas).containsOnlyKeys("eventos", "eventosConConsumoRegistrado", "consumoTotal",
                 "promedioPorEvento", "eventosConInvitadosValidos", "invitadosRegistrados",
-                "consumoConInvitadosValidos", "porInvitadoRegistrado");
+                "consumoConInvitadosValidos", "porInvitadoRegistrado", "eventosConAsistenciaReal");
         assertThat(((Number) medidas.get("eventos")).longValue()).isEqualTo(eventos);
         assertThat(((Number) medidas.get("eventosConConsumoRegistrado")).longValue()).isEqualTo(conRegistro);
         assertThat(((Number) medidas.get("eventosConInvitadosValidos")).longValue()).isEqualTo(validos);

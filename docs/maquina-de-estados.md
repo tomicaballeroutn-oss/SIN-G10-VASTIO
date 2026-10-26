@@ -29,7 +29,7 @@ Estados activos (ocupan la unidad): todos salvo `LIBERADA` y `CANCELADO`.
 | CONTRATADO → CONFIRMADO | Confirmar evento | Planner asignada, Coordinación | Planner asignada, invitados definitivos, servicios en las categorías requeridas | Habilita la orden de preparación. Notifica a compras, cocina, administración y la vendedora titular. |
 | CONFIRMADO → EN_CURSO | Automático | Sistema | Llega la hora de inicio del turno | Bloquea la edición comercial. Habilita salidas a barra. |
 | EN_CURSO → REALIZADO | Automático | Sistema | Termina el turno (hora_fin, día siguiente si cruza medianoche) | — |
-| REALIZADO → CERRADO | Registrar cierre de evento | Encargada de barra, Compras, Coordinación, Dirección | Entregas cerradas (todas las devoluciones registradas). La asistencia real por segmento todavía no se exige: llega en el Sprint 4 y mientras tanto se divide por la cantidad de invitados | Escribe `consumo_evento` (cantidades por artículo, congeladas) y deja CERRADA la orden de preparación. No mueve stock: lo consumido salió con la devolución. |
+| REALIZADO → CERRADO | Registrar cierre de evento | Encargada de barra, Compras, Coordinación, Dirección | Entregas cerradas (todas las devoluciones registradas). La asistencia real por segmento no se exige (docs/sprint-4.md, decisión 7): la planner la carga con el evento Realizado o Cerrado y, mientras falte, el consumo por asistente se divide por la cantidad de invitados | Escribe `consumo_evento` (cantidades por artículo, congeladas) y deja CERRADA la orden de preparación. No mueve stock: lo consumido salió con la devolución. |
 | SENADO / CONTRATADO / CONFIRMADO → CANCELADO | Cancelar evento | Coordinación | Motivo obligatorio | Libera la unidad. Descarta la orden de preparación. Notifica a todas las áreas (salvo barra), la vendedora titular y la planner. |
 
 ### Operaciones que no cambian el estado
@@ -40,6 +40,8 @@ Estados activos (ocupan la unidad): todos salvo `LIBERADA` y `CANCELADO`.
 | Modificar evento | PRE_RESERVA a CONFIRMADO | Vendedora titular, Planner asignada, Coordinación | `modificacion_evento` |
 | Reprogramar | PRE_RESERVA*, SENADO, CONTRATADO, CONFIRMADO | Coordinación, Vendedora titular | `reprogramacion` (conserva la unidad original). *En pre-reserva es simplemente modificar la fecha. |
 | Asignar planner | CONTRATADO, CONFIRMADO | Coordinación | `modificacion_evento` + notificación a la planner |
+| Registrar asistencia prevista por segmento | PRE_RESERVA a CONFIRMADO | Planner asignada, Coordinación, Dirección | `asistencia_segmento.cantidad_prevista` + `modificacion_evento` |
+| Registrar asistencia real de cierre | REALIZADO, CERRADO | Planner asignada, Coordinación, Dirección | `asistencia_segmento.cantidad_real` + `modificacion_evento`; al pasar a Realizado un evento con segmentos, aviso `ASISTENCIA_REAL` a la planner |
 | Registrar servicios contratados | PRE_RESERVA a CONFIRMADO | Vendedora titular, Planner asignada, Coordinación | `servicio_contratado` |
 | Registrar salida / retiro / devolución | EN_CURSO (devolución también en REALIZADO) | Encargada de barra, Compras | `movimiento_stock` (la devolución registra también el `CONSUMO`, que deja la barra en el remanente) |
 

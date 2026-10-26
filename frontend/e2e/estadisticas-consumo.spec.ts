@@ -26,11 +26,11 @@ test('consulta real, filtros, ceros, período inválido y tablas adaptables', as
   const respuesta = page.waitForResponse((r) => r.url().includes('/estadisticas/consumo') && r.request().method() === 'GET');
   await page.getByRole('button', { name: 'Consultar estadísticas' }).click();
   const datos = await (await respuesta).json();
-  expect(datos.denominador).toBe('INVITADOS_REGISTRADOS');
+  expect(datos.denominador).toBe('ASISTENTES');
   expect(datos.resumen).toMatchObject({ eventos: 3, consumoTotal: 21, promedioPorEvento: 7,
     eventosConInvitadosValidos: 2, invitadosRegistrados: 300, consumoConInvitadosValidos: 12, porInvitadoRegistrado: 0.04 });
   await expect(page.getByRole('table', { name: 'Consumo por bebida' })).toBeVisible();
-  await expect(page.getByText(/El cálculo por invitado usa 2 de 3 eventos/)).toBeVisible();
+  await expect(page.getByText(/El cálculo por asistente usa 2 de 3 eventos/)).toBeVisible();
   const bebida = datos.porBebida.find((b: { nombre: string }) => b.nombre === 'E2E B501 Fernet');
   await page.getByLabel('Tipo de evento').selectOption('2');
   await page.getByLabel('Salón', { exact: true }).selectOption('1');

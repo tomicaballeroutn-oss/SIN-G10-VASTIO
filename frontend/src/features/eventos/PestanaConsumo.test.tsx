@@ -7,7 +7,7 @@ import { backendFalso, json, montar, pedidos, problema, sesionDe } from '../../t
 import { fichaDePrueba } from '../../test/fichas';
 
 const CONSUMO: ConsumoEvento = {
-  invitados: 150, denominador: 'INVITADOS', usaSegmentos: false,
+  invitados: 150, asistenciaReal: null, denominador: 'INVITADOS', usaSegmentos: false,
   renglones: [{ bebidaId: 1, nombre: 'Fernet', presentacion: '750 ml', unidad: 'Caja', unidadesPorBulto: 6,
     entregado: 12, devuelto: 6, remanente: 2, consumo: 4, porInvitado: 0.0267 }],
   consumoTotal: 4, porInvitadoTotal: 0.0267,
@@ -66,13 +66,23 @@ it('mantiene el detalle si hay registros con consumo cero', async () => {
   expect(screen.getByRole('row', { name: /Fernet/ })).toBeInTheDocument();
 });
 
+it('con la asistencia real por segmento calcula sobre ella', async () => {
+  backend(['COMPRAS'], () => json(200, { ...CONSUMO, usaSegmentos: true, asistenciaReal: 204, denominador: 'ASISTENCIA_REAL' }));
+  const persona = userEvent.setup();
+  montar('/eventos/5');
+  await persona.click(await screen.findByRole('tab', { name: 'Consumo de bebida' }));
+
+  expect(await screen.findByText('Calculado sobre 204 asistentes reales (asistencia por segmento).')).toBeInTheDocument();
+  expect(screen.queryByText(/Falta la asistencia real/)).not.toBeInTheDocument();
+});
+
 it.each([null, 0])('sin invitados válidos (%s) no presenta un cociente', async (invitados) => {
   backend(['COMPRAS'], () => json(200, { ...CONSUMO, invitados, porInvitadoTotal: null,
     renglones: [{ ...CONSUMO.renglones[0], porInvitado: null }], usaSegmentos: true }));
   montar('/eventos/5?pestana=consumo');
   expect(await screen.findByText(/La cantidad de invitados es desconocida o cero/)).toBeInTheDocument();
   expect(screen.getAllByText('No disponible')).toHaveLength(2);
-  expect(screen.getByText(/Este evento usa segmentos/)).toBeInTheDocument();
+  expect(screen.getByText(/Falta la asistencia real por segmento/)).toBeInTheDocument();
 });
 
 it('distingue falta de cierre de consumo cero y permite actualizar', async () => {

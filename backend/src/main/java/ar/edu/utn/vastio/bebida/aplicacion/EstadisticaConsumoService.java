@@ -42,9 +42,14 @@ public class EstadisticaConsumoService {
     }
 
     public record Filtros(LocalDate desde, LocalDate hasta, Short tipoEventoId, Short salonId, Long bebidaId) { }
+    /**
+     * Los «invitados» de cada evento son sus asistentes (docs/sprint-4.md, decisión 8): la asistencia real si el tipo la
+     * cuenta por segmento y está completa; si no, la cantidad de invitados. {@code eventosConAsistenciaReal}: cuántos de
+     * los válidos usan la real.
+     */
     public record Medidas(long eventos, long eventosConConsumoRegistrado, BigDecimal consumoTotal,
             BigDecimal promedioPorEvento, long eventosConInvitadosValidos, long invitadosRegistrados,
-            BigDecimal consumoConInvitadosValidos, BigDecimal porInvitadoRegistrado) { }
+            BigDecimal consumoConInvitadosValidos, BigDecimal porInvitadoRegistrado, long eventosConAsistenciaReal) { }
     public record PorBebida(long bebidaId, String nombre, String presentacion, boolean activo, Medidas medidas) { }
     public record PorTipo(short tipoEventoId, String nombre, boolean activo, Medidas medidas) { }
     public record Detalle(short tipoEventoId, long bebidaId, Medidas medidas) { }
@@ -120,6 +125,7 @@ public class EstadisticaConsumoService {
     private static final class Acumulador {
         long eventos;
         long validos;
+        long conAsistenciaReal;
         long invitados;
         BigDecimal consumo = BigDecimal.ZERO;
         BigDecimal consumoValido = BigDecimal.ZERO;
@@ -130,6 +136,9 @@ public class EstadisticaConsumoService {
             if (e.invitados() != null && e.invitados() > 0) {
                 validos++;
                 invitados += e.invitados();
+                if (e.asistenciaReal()) {
+                    conAsistenciaReal++;
+                }
             }
         }
 
@@ -137,6 +146,7 @@ public class EstadisticaConsumoService {
             Acumulador a = new Acumulador();
             a.eventos = eventos;
             a.validos = validos;
+            a.conAsistenciaReal = conAsistenciaReal;
             a.invitados = invitados;
             return a;
         }
@@ -149,7 +159,7 @@ public class EstadisticaConsumoService {
 
         Medidas medidas() {
             return new Medidas(eventos, conRegistro.size(), consumo, dividir(consumo, eventos), validos, invitados,
-                    consumoValido, dividir(consumoValido, invitados));
+                    consumoValido, dividir(consumoValido, invitados), conAsistenciaReal);
         }
 
         private static BigDecimal dividir(BigDecimal n, long d) {

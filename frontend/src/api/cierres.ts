@@ -24,6 +24,8 @@ export interface Cierre {
   salon: SalonResumen;
   invitados: number | null;
   usaSegmentos: boolean;
+  /** Total de la asistencia real por segmento, si ya se cargó: es el divisor del consumo por asistente. */
+  asistenciaReal: number | null;
   pendientes: UbicacionResumen[];
   renglones: RenglonCierre[];
   consumoTotal: number;

@@ -104,13 +104,16 @@ function Conciliacion({ cierre, alCerrar }: { cierre: Cierre; alCerrar: (c: Cier
 
       <Card title="Consumo por asistente">
         <p className="body">
-          {cierre.invitados
-            ? <>En total, <span className="numeral">{porAsistente(cierre.porAsistenteTotal)}</span> por asistente, sobre {cierre.invitados} invitados.</>
-            : 'El evento no tiene la cantidad de invitados cargada: no se puede calcular por asistente.'}
+          {cierre.asistenciaReal
+            ? <>En total, <span className="numeral">{porAsistente(cierre.porAsistenteTotal)}</span> por asistente, sobre {cierre.asistenciaReal} asistentes reales.</>
+            : cierre.invitados
+              ? <>En total, <span className="numeral">{porAsistente(cierre.porAsistenteTotal)}</span> por asistente, sobre {cierre.invitados} invitados.</>
+              : 'El evento no tiene la cantidad de invitados cargada: no se puede calcular por asistente.'}
         </p>
-        {cierre.usaSegmentos && (
+        {cierre.usaSegmentos && !cierre.asistenciaReal && (
           <p className="body-sm v-muted">
-            Este tipo de evento usa asistencia por segmento, que todavía no se registra: mientras tanto se divide por la cantidad de invitados.
+            Este tipo de evento cuenta la asistencia por segmento. Mientras la planner no cargue la real, se divide por la cantidad de
+            invitados; cuando la cargue, el consumo por asistente se recalcula sobre ella (lo consumido no cambia).
           </p>
         )}
       </Card>

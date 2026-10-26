@@ -14,6 +14,7 @@ export const SIN_ACCIONES: Acciones = {
   cancelar: false,
   reprogramar: false,
   registrarAsistenciaPrevista: false,
+  registrarAsistenciaReal: false,
 };
 
 /** Las categorías de servicio activas desde V10 (con su id de la base), sin nada cargado. */

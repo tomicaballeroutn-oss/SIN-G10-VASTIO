@@ -17,7 +17,9 @@ export interface DetalleConsumo {
 
 export interface ConsumoEvento {
   invitados: number | null;
-  denominador: 'INVITADOS';
+  /** Total de la asistencia real por segmento, si ya se cargó (entonces el denominador es ASISTENCIA_REAL). */
+  asistenciaReal: number | null;
+  denominador: 'INVITADOS' | 'ASISTENCIA_REAL';
   usaSegmentos: boolean;
   renglones: DetalleConsumo[];
   consumoTotal: number;

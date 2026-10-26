@@ -8,11 +8,12 @@ import { fichaDePrueba, SIN_ACCIONES } from '../../test/fichas';
 
 const ASISTENCIA: Asistencia = {
   segmentos: [
-    { id: 1, nombre: 'Comensales cena', activo: true, equivaleInvitados: true, prevista: 140 },
-    { id: 2, nombre: 'Entradas anticipadas', activo: true, equivaleInvitados: false, prevista: null },
-    { id: 3, nombre: 'Venta en puerta', activo: true, equivaleInvitados: false, prevista: null },
+    { id: 1, nombre: 'Comensales cena', activo: true, equivaleInvitados: true, prevista: 140, real: null },
+    { id: 2, nombre: 'Entradas anticipadas', activo: true, equivaleInvitados: false, prevista: null, real: null },
+    { id: 3, nombre: 'Venta en puerta', activo: true, equivaleInvitados: false, prevista: null, real: null },
   ],
   totalPrevisto: 140,
+  totalReal: null,
 };
 
 const EGRESADOS = fichaDePrueba({
@@ -62,7 +63,7 @@ describe('UI-19 · asistencia prevista por segmento', () => {
     backend();
     montar('/eventos/5?pestana=asistencia');
 
-    const tabla = await screen.findByRole('table', { name: 'Asistencia prevista por segmento' });
+    const tabla = await screen.findByRole('table', { name: 'Asistencia por segmento' });
     expect(within(tabla).getByText('Comensales cena (los invitados)')).toBeInTheDocument();
     expect(within(tabla).getByText('140')).toBeInTheDocument();
   });
@@ -121,5 +122,63 @@ describe('UI-19 · asistencia prevista por segmento', () => {
 
     expect(await screen.findByRole('tab', { name: /Datos/ })).toBeInTheDocument();
     expect(screen.queryByRole('tab', { name: /Asistencia/ })).not.toBeInTheDocument();
+  });
+});
+
+describe('UI-20 · asistencia real de cierre', () => {
+  const REALIZADO = fichaDePrueba({
+    ...EGRESADOS,
+    estado: 'REALIZADO',
+    asistencia: {
+      segmentos: ASISTENCIA.segmentos.map((s) => (s.id === 2 ? { ...s, prevista: 60 } : s)),
+      totalPrevisto: 200,
+      totalReal: null,
+    },
+    acciones: { ...SIN_ACCIONES, registrarAsistenciaReal: true },
+  });
+  const CARGADA: Ficha = {
+    ...REALIZADO,
+    version: 7,
+    asistencia: {
+      segmentos: REALIZADO.asistencia!.segmentos.map((s) => ({ ...s, real: { 1: 132, 2: 58, 3: 14 }[s.id] ?? null })),
+      totalPrevisto: 200,
+      totalReal: 204,
+    },
+  };
+
+  function backendReal() {
+    return backendFalso(sesionDe(['PLANNER']), (p) => {
+      if (p.metodo === 'GET' && p.ruta === '/eventos/5') return json(200, REALIZADO);
+      if (p.metodo === 'PUT' && p.ruta === '/eventos/5/asistencia/real') return json(200, CARGADA);
+      return undefined;
+    });
+  }
+
+  it('avisa que falta y carga la real de todos los segmentos', async () => {
+    const fetchMock = backendReal();
+    const usuario = userEvent.setup();
+    montar('/eventos/5?pestana=asistencia');
+
+    expect(await screen.findByText('Falta la asistencia real')).toBeInTheDocument();
+    await usuario.click(screen.getByRole('button', { name: 'Registrar asistencia real' }));
+    const dialogo = screen.getByRole('dialog', { name: 'Asistencia real de cierre' });
+    expect(within(dialogo).getByText('Previsto: 60')).toBeInTheDocument();
+    await usuario.type(within(dialogo).getByLabelText(/Comensales cena/), '132');
+    await usuario.type(within(dialogo).getByLabelText(/Entradas anticipadas/), '58');
+    await usuario.click(within(dialogo).getByRole('button', { name: 'Guardar asistencia real' }));
+    // Falta la venta en puerta: no se manda nada.
+    expect(within(dialogo).getByText('Escribí un número entero de 0 a 5000.')).toBeInTheDocument();
+    expect(pedidos(fetchMock).some((p) => p.metodo === 'PUT')).toBe(false);
+
+    await usuario.type(within(dialogo).getByLabelText(/Venta en puerta/), '14');
+    expect(within(dialogo).getByText('204')).toBeInTheDocument();
+    await usuario.click(within(dialogo).getByRole('button', { name: 'Guardar asistencia real' }));
+
+    expect(await screen.findByText(/Asistencia real guardada/)).toBeInTheDocument();
+    expect(screen.queryByText('Falta la asistencia real')).not.toBeInTheDocument();
+    expect(pedidos(fetchMock).find((p) => p.metodo === 'PUT')?.cuerpo).toEqual({
+      version: 6,
+      segmentos: [{ segmentoId: 1, cantidad: 132 }, { segmentoId: 2, cantidad: 58 }, { segmentoId: 3, cantidad: 14 }],
+    });
   });
 });

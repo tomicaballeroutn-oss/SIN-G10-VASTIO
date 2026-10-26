@@ -24,6 +24,9 @@ public final class Permisos {
     /** Configurar parámetros. */
     public static final String CONFIGURAR = "hasAnyRole('DIRECCION', 'COORDINACION', 'ADMINISTRACION')";
 
+    /** A1-02: registrar, consultar y desbloquear bloqueos de unidades. Administración, además del acceso total. */
+    public static final String BLOQUEAR_UNIDADES = "hasAnyRole('DIRECCION', 'COORDINACION', 'ADMINISTRACION')";
+
     /** Consultar agenda: todos menos Barra y Cocina. */
     public static final String AGENDA = "hasAnyRole('DIRECCION', 'COORDINACION', 'ADMINISTRACION', 'VENDEDORA', 'PLANNER', 'COMPRAS')";
 

@@ -2,6 +2,7 @@ import type { ReactNode } from 'react';
 import type { RouteObject } from 'react-router';
 import { PaginaAgenda } from './features/agenda/PaginaAgenda';
 import { PaginaBarra } from './features/bebidas/PaginaBarra';
+import { PaginaBloqueos } from './features/bloqueos/PaginaBloqueos';
 import { PaginaCierre } from './features/bebidas/PaginaCierre';
 import { PaginaCocina } from './features/cocina/PaginaCocina';
 import { PaginaCatalogo } from './features/bebidas/PaginaCatalogo';
@@ -26,6 +27,7 @@ import { PaginaIngreso } from './features/sesion/PaginaIngreso';
 const PANTALLAS: Partial<Record<string, ReactNode>> = {
   agenda: <PaginaAgenda />,
   barra: <PaginaBarra />,
+  bloqueos: <PaginaBloqueos />,
   catalogo: <PaginaCatalogo />,
   cocina: <PaginaCocina />,
   existencias: <PaginaExistencias />,

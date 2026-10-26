@@ -570,7 +570,7 @@ Entrega abierta de un evento hacia una barra. Agrupa la salida inicial y los ret
 | `entrega_id` | bigint | PK | NO | Identificador. |
 | `evento_id` | bigint | FK | NO | → evento. |
 | `ubicacion_destino_id` | smallint | FK | NO | → ubicacion (barra). |
-| `orden_id` | bigint | FK | SÍ | → orden_preparacion, si existía. |
+| `orden_id` | bigint | FK | SÍ | → orden_preparacion: la confirmada del evento al abrir la entrega, si había (docs/sprint-4.md, decisión 25). |
 | `estado` | varchar(10) |  | NO | ABIERTA · CERRADA. |
 | `usuario_apertura_id` | bigint | FK | NO | → usuario. |
 | `fecha_apertura` | timestamptz |  | NO | Default now(). |

@@ -3,7 +3,8 @@ import { bebidas, type Bebida } from '../../api/bebidas';
 import { preparaciones, ROLES_PREPARACION, type PantallaPreparacion, type Preparacion, type SolicitudPreparacion } from '../../api/preparaciones';
 import { useDatos, useEnvio } from '../../api/useDatos';
 import { ProblemaApi } from '../../api/problema';
-import { Actor, Alert, Button, CantidadEnCajas, Card, Combobox, Dialog, EmptyState, IconButton, Input, LectorCodigo, Select, cantidadLegible } from '../../ds';
+import { ESTADO_ORDEN } from '../../api/ordenes';
+import { Actor, Alert, Button, CantidadEnCajas, Card, Combobox, Dialog, EmptyState, IconButton, Input, LectorCodigo, Select, Table, cantidadLegible } from '../../ds';
 import { Cargando } from '../comun/Cargando';
 import { fechaHora } from '../comun/formato';
 import { useSesion } from '../sesion/contexto';
@@ -126,6 +127,14 @@ function Formulario({ pantalla, catalogo, alRegistrar }: { pantalla: PantallaPre
     {aviso && <Alert tone="success">{aviso}</Alert>}
     {!estadoValido && <Alert tone="info">El evento está {pantalla.evento.estado.toLowerCase().replaceAll('_', ' ')}. Solo podés preparar bebida con el evento confirmado o en curso.</Alert>}
     {!pantalla.madre && <Alert tone="warning">No hay un depósito madre activo. Configuralo en Ubicaciones de stock.</Alert>}
+    {pantalla.orden && pantalla.orden.renglones.length > 0 && <Card title="Según la orden de preparación"
+      subtitle={`Orden ${ESTADO_ORDEN[pantalla.orden.estado].label.toLowerCase()}: es una referencia, no se carga sola.`}>
+      <Table caption="Según la orden de preparación" dense rows={pantalla.orden.renglones.map((r) => ({ ...r, id: r.bebidaId }))}
+        columns={[
+          { key: 'bebida', header: 'Bebida', render: (r) => `${r.nombre} ${r.presentacion}` },
+          { key: 'aRetirar', header: 'Según orden', numeric: true, render: (r) => cantidadLegible(r.aRetirar, r.unidadesPorBulto, r.unidad) },
+        ]} />
+    </Card>}
     {pantalla.circuitos.length === 0 && <EmptyState title="No hay barras activas en el salón" icon="warehouse">Configuralas en Ubicaciones de stock.</EmptyState>}
     {pantalla.circuitos.length > 0 && <Card title="Circuito de preparación">
       <div className="ingreso-bebida__cabecera">

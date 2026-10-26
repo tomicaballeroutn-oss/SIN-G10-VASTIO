@@ -160,6 +160,40 @@ public class OrdenPreparacion {
         });
     }
 
+    /**
+     * Ajustar orden (docs/sprint-4.md, decisión 23): lo que se va a retirar de cada bebida, en botellas. Una bebida que
+     * no estaba se agrega con sugerida 0; para «sacarla» se deja en 0. Las que no vienen no cambian. Pasa a Modificada.
+     */
+    public void ajustar(Map<Bebida, BigDecimal> retirar, long usuarioId, OffsetDateTime momento) {
+        Map<Long, DetalleOrden> actuales = new LinkedHashMap<>();
+        renglones.forEach(r -> actuales.put(r.getBebida().getId(), r));
+        retirar.forEach((bebida, cantidad) -> {
+            DetalleOrden renglon = actuales.get(bebida.getId());
+            if (renglon == null) {
+                renglones.add(new DetalleOrden(this, bebida, BigDecimal.ZERO, cantidad));
+            } else {
+                renglon.retirar(cantidad);
+            }
+        });
+        this.estado = EstadoOrden.MODIFICADA;
+        this.usuarioModificacionId = usuarioId;
+        this.fechaModificacion = momento;
+    }
+
+    /** Confirmar orden (decisión 24): ya no se edita; la salida a barra queda vinculada a ella. */
+    public void confirmar(long usuarioId, OffsetDateTime momento) {
+        this.estado = EstadoOrden.CONFIRMADA;
+        this.usuarioConfirmacionId = usuarioId;
+        this.fechaConfirmacion = momento;
+    }
+
+    /** Reabrir orden (decisión 24): si algo cambió sobre la marcha, vuelve a Modificada. */
+    public void reabrir(long usuarioId, OffsetDateTime momento) {
+        this.estado = EstadoOrden.MODIFICADA;
+        this.usuarioReaperturaId = usuarioId;
+        this.fechaReapertura = momento;
+    }
+
     /** Al cancelar el evento: deja lugar para otra orden. */
     public void descartar() {
         this.estado = EstadoOrden.DESCARTADA;

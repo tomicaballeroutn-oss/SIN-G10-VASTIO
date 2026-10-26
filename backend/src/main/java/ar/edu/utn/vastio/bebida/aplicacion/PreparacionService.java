@@ -35,13 +35,15 @@ public class PreparacionService {
     private final ConsultaEventoService consultas;
     private final OperacionEventoService operaciones;
     private final NotificacionService avisos;
+    private final OrdenPreparacionRepository ordenes;
     private final EntityManager em;
     private final Clock reloj;
 
     public PreparacionService(PreparacionRepository preparaciones, MovimientoStockRepository movimientos,
             MovimientoService motor, UbicacionRepository ubicaciones, BebidaRepository bebidas,
             ConsultaEventoService consultas, OperacionEventoService operaciones, NotificacionService avisos,
-            EntityManager em, Clock reloj) {
+            OrdenPreparacionRepository ordenes, EntityManager em, Clock reloj) {
+        this.ordenes = ordenes;
         this.preparaciones = preparaciones;
         this.movimientos = movimientos;
         this.motor = motor;
@@ -59,14 +61,17 @@ public class PreparacionService {
     public record Registrada(PreparacionEvento preparacion, List<MovimientoStock> renglones) { }
     public record Resultado(Registrada registrada, boolean repetida) { }
     public record Circuito(Ubicacion barra, Ubicacion abastecimiento) { }
-    public record Pantalla(EventoOperativo evento, Ubicacion madre, List<Circuito> circuitos, List<Registrada> historial) { }
+    /** {@code orden}: la orden de preparación vigente, como referencia (docs/sprint-4.md, decisión 25); null si no hay. */
+    public record Pantalla(EventoOperativo evento, Ubicacion madre, List<Circuito> circuitos, List<Registrada> historial,
+            OrdenPreparacion orden) { }
 
     public Pantalla pantalla(long eventoId) {
         EventoOperativo evento = consultas.operativo(eventoId);
         List<Circuito> circuitos = ubicaciones.findByTipoAndSalonIdAndActivoTrue(TipoUbicacion.BARRA, evento.salonId())
                 .stream().sorted(Comparator.comparing(Ubicacion::getNombre)).map(b -> new Circuito(b, b.getAbastecimiento())).toList();
         return new Pantalla(evento, ubicaciones.findFirstByTipoAndActivoTrue(TipoUbicacion.DEPOSITO).orElse(null), circuitos,
-                preparaciones.findByEventoIdOrderByIdDesc(eventoId).stream().map(this::registrada).toList());
+                preparaciones.findByEventoIdOrderByIdDesc(eventoId).stream().map(this::registrada).toList(),
+                ordenes.vigente(eventoId).orElse(null));
     }
 
     @Transactional

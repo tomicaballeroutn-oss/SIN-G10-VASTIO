@@ -24,6 +24,7 @@ Motor: PostgreSQL. Convenciones: nombres en `snake_case` y en español; claves p
 | `ubicacion`: tipo y salón | Depósito de transición configurable y barra de cada salón. (V6 quitó los sectores y la ubicación padre.) |
 | `movimiento_stock`: fecha y hora, motivo, movimiento corregido, ingreso | Auditoría (RNF-SEG-03) y asiento de ajuste que referencia al original (UI-38). |
 | `asistencia_segmento`: cantidad prevista además de la real; PK simple | UI-19 pide la prevista por segmento. La PK triple del v1 era redundante. |
+| `orden_preparacion`: destino y responsable opcionales, fuente y base de la sugerencia, auditoría y versión (V16, Sprint 4) | Una orden por evento con los totales de todas sus barras; la que se genera al confirmar no tiene usuario. Ver docs/sprint-4.md, decisiones 11 a 25. |
 | `tipo_segmento_asistencia.equivale_invitados` (V14, Sprint 4) | En egresados, la cantidad de invitados son los comensales de la cena: el segmento que la representa no se carga aparte y nadie se cuenta dos veces. |
 | `turno`: horario | Sin horario el sistema no puede pasar el evento a En curso ni a Realizado. |
 | `orden_preparacion`: estado, origen y destino | Tiene su propia máquina de estados (§6.1). |
@@ -530,10 +531,19 @@ Propuesta de bebida a retirar para un evento confirmado.
 | `evento_id` | bigint | FK | NO | → evento. |
 | `estado` | varchar(12) |  | NO | SUGERIDA · MODIFICADA · CONFIRMADA · DESCARTADA · CERRADA. |
 | `ubicacion_origen_id` | smallint | FK | NO | → ubicacion (depósito o transición). |
-| `ubicacion_destino_id` | smallint | FK | NO | → ubicacion (barra). |
-| `responsable_id` | bigint | FK | NO | → usuario. Encargado de compras. |
+| `ubicacion_destino_id` | smallint | FK | SÍ | → ubicacion. Sin uso desde V16: la orden es por evento, no por barra. |
+| `responsable_id` | bigint | FK | SÍ | → usuario. Quién la generó; null si se generó sola al confirmar el evento (V16). |
 | `fecha_creacion` | timestamptz |  | NO | Default now(). |
 | `fecha_confirmacion` | timestamptz |  | SÍ |  |
+| `fuente` | varchar(20) |  | NO | V16. HISTORICO_TIPO · PROPORCIONES · HISTORICO_GENERAL · SIN_DATOS: de dónde salieron las botellas por asistente. |
+| `eventos_base` | integer |  | NO | V16. Eventos cerrados sobre los que se calculó (0 con proporciones o sin datos). |
+| `asistentes_base` | integer |  | SÍ | V16. Asistentes del evento al calcular; si cambian, la orden lo avisa. |
+| `margen_porcentaje` | smallint |  | NO | V16. El de `MARGEN_ORDEN_PORCENTAJE` al calcular. |
+| `fecha_calculo` | timestamptz |  | NO | V16. Última vez que se calculó la sugerencia. |
+| `usuario_modificacion_id`, `fecha_modificacion` | bigint, timestamptz | FK | SÍ | V16. Último ajuste o recálculo. |
+| `usuario_confirmacion_id` | bigint | FK | SÍ | V16. Quién la confirmó (con `fecha_confirmacion`). |
+| `usuario_reapertura_id`, `fecha_reapertura` | bigint, timestamptz | FK | SÍ | V16. Última reapertura. |
+| `version` | integer |  | NO | V16. Bloqueo optimista: no se pisan ajustes ajenos. |
 
 *Restricciones:* CREATE UNIQUE INDEX ux_orden_evento_vigente ON orden_preparacion(evento_id) WHERE estado <> 'DESCARTADA'.
 
@@ -632,7 +642,7 @@ Resultado del cierre por artículo, congelado: se escribe al registrar el cierre
 
 #### PROPORCION_CONSUMO
 
-Estimación de consumo por asistente según tipo de evento. Alimenta la orden sugerida mientras no hay histórico propio.
+Estimación de consumo por asistente según tipo de evento. Alimenta la orden sugerida mientras haya menos de 3 eventos cerrados del tipo (docs/sprint-4.md, decisiones 13 y 14). Se carga en Parámetros; se borra físicamente.
 
 | Campo | Tipo | Clave | Nulo | Descripción / valores posibles |
 |---|---|---|---|---|

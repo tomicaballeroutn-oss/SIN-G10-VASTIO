@@ -6,7 +6,9 @@ package ar.edu.utn.vastio.configuracion.dominio;
 public enum ParametroClave {
     HORIZONTE_COCINA_DIAS(1, 90),
     MINUTOS_EXPIRACION_SESION(5, 480),
-    MINUTOS_AVISO_EXPIRACION(1, 60);
+    MINUTOS_AVISO_EXPIRACION(1, 60),
+    /** Margen que se suma a la orden de preparación sugerida (docs/sprint-4.md, decisión 15). */
+    MARGEN_ORDEN_PORCENTAJE(0, 100);
 
     private final int minimo;
     private final int maximo;

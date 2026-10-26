@@ -2,10 +2,12 @@ import { useCallback, useState, type ReactNode } from 'react';
 import { useLocation, useNavigate, useParams, useSearchParams } from 'react-router';
 import type { EstadoEvento } from '../../api/agenda';
 import { ROLES_CONSUMO } from '../../api/consumos';
+import { ROLES_ORDEN } from '../../api/ordenes';
 import { ROLES_PREPARACION } from '../../api/preparaciones';
 import { useSesion } from '../sesion/contexto';
 import { CAMPO_PREVISTA, CAMPO_REAL, PestanaAsistencia } from './PestanaAsistencia';
 import { PestanaConsumo } from './PestanaConsumo';
+import { PestanaOrden } from '../ordenes/PestanaOrden';
 import { PestanaPreparacion } from './PestanaPreparacion';
 import { hora } from '../../api/catalogos';
 import {
@@ -54,16 +56,20 @@ export function PaginaEvento() {
 /** Diálogos de las acciones que cambian el estado desde la ficha. */
 type Dialogo = 'liberar' | 'sena' | 'firma' | 'invitados' | 'planner' | 'confirmar' | 'cancelar' | null;
 
-type Pestana = 'datos' | 'servicios' | 'asistencia' | 'documentos' | 'historial' | 'consumo' | 'preparacion';
+type Pestana = 'datos' | 'servicios' | 'asistencia' | 'documentos' | 'historial' | 'consumo' | 'orden' | 'preparacion';
 
 function ContenidoFicha({ ficha, alCambiar }: { ficha: Ficha; alCambiar: (ficha: Ficha) => void }) {
   const { usuario } = useSesion();
   const veConsumo = usuario?.roles.some((rol) => ROLES_CONSUMO.includes(rol)) ?? false;
   const vePreparacion = usuario?.roles.some((rol) => ROLES_PREPARACION.includes(rol)) ?? false;
+  // La orden existe desde que el evento se confirma (docs/sprint-4.md, decisión 11).
+  const veOrden = (usuario?.roles.some((rol) => ROLES_ORDEN.includes(rol)) ?? false)
+    && ['CONFIRMADO', 'EN_CURSO', 'REALIZADO', 'CERRADO', 'CANCELADO'].includes(ficha.estado);
   const [busqueda, setBusqueda] = useSearchParams();
   const pedida = busqueda.get('pestana');
   const pestana: Pestana = pedida === 'consumo' && veConsumo ? 'consumo'
     : pedida === 'preparacion' && vePreparacion ? 'preparacion'
+    : pedida === 'orden' && veOrden ? 'orden'
     : pedida === 'asistencia' && ficha.asistencia ? 'asistencia'
     : pedida === 'historial' || pedida === 'servicios' ? pedida
     : pedida === 'documentos' && ficha.documentos ? 'documentos' : 'datos';
@@ -194,6 +200,7 @@ function ContenidoFicha({ ficha, alCambiar }: { ficha: Ficha; alCambiar: (ficha:
           ...(ficha.documentos ? [{ id: 'documentos', label: 'Documentos', count: ficha.documentos.length }] : []),
           { id: 'historial', label: 'Historial', count: ficha.historial.length },
           ...(veConsumo ? [{ id: 'consumo', label: 'Consumo de bebida' }] : []),
+          ...(veOrden ? [{ id: 'orden', label: 'Orden de preparación' }] : []),
           ...(vePreparacion ? [{ id: 'preparacion', label: 'Preparación' }] : []),
         ]}
         value={pestana}
@@ -208,6 +215,7 @@ function ContenidoFicha({ ficha, alCambiar }: { ficha: Ficha; alCambiar: (ficha:
       {pestana === 'documentos' && <Documentos ficha={ficha} documentos={ficha.documentos ?? []} />}
       {pestana === 'historial' && <Historial historial={ficha.historial} cambio={busqueda.get('cambio')} />}
       {pestana === 'consumo' && <PestanaConsumo key={ficha.id} eventoId={ficha.id} />}
+      {pestana === 'orden' && <PestanaOrden key={ficha.id} eventoId={ficha.id} tipoEvento={ficha.tipo.nombre} />}
       {pestana === 'preparacion' && <PestanaPreparacion key={ficha.id} eventoId={ficha.id} />}
     </>
   );

@@ -65,7 +65,7 @@ export interface Motivo {
   activo: boolean;
 }
 
-export type ClaveParametro = 'HORIZONTE_COCINA_DIAS' | 'MINUTOS_EXPIRACION_SESION' | 'MINUTOS_AVISO_EXPIRACION';
+export type ClaveParametro = 'HORIZONTE_COCINA_DIAS' | 'MINUTOS_EXPIRACION_SESION' | 'MINUTOS_AVISO_EXPIRACION' | 'MARGEN_ORDEN_PORCENTAJE';
 
 export interface Parametro {
   clave: ClaveParametro;

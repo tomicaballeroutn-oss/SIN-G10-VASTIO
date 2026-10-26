@@ -21,6 +21,7 @@ const ICONO: Record<TipoNotificacion, IconName> = {
   PLANNER_ASIGNADA: 'user-plus',
   ALERTA_STOCK: 'triangle-alert',
   ASISTENCIA_REAL: 'users',
+  ORDEN_PREPARACION: 'clipboard-list',
 };
 
 /** Perfiles que abren la ficha del evento. Cocina no tiene ficha: su aviso abre la tarjeta en la vista de cocina (A7-02). */
@@ -114,7 +115,8 @@ export function ListaNotificaciones({ alIrAlEvento, limite }: { alIrAlEvento?: (
       // Conservar el historial de #39 para quienes pueden consultar la ficha.
       navegar(n.tipo === 'MODIFICACION'
         ? `/eventos/${n.eventoId}?pestana=historial&cambio=${encodeURIComponent(n.fechaHora)}`
-        : n.tipo === 'ASISTENCIA_REAL' ? `/eventos/${n.eventoId}?pestana=asistencia` : `/eventos/${n.eventoId}`);
+        : n.tipo === 'ASISTENCIA_REAL' ? `/eventos/${n.eventoId}?pestana=asistencia`
+          : n.tipo === 'ORDEN_PREPARACION' ? `/eventos/${n.eventoId}?pestana=orden` : `/eventos/${n.eventoId}`);
     } else if (esCocina && n.eventoId) {
       alIrAlEvento?.();
       navegar(`/cocina?evento=${n.eventoId}`);

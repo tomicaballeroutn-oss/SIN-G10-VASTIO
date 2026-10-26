@@ -16,6 +16,7 @@ import java.util.EnumSet;
 import java.util.Map;
 import java.util.Set;
 
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
@@ -29,7 +30,8 @@ import ar.edu.utn.vastio.comun.errores.ProblemaException;
 
 /**
  * Único lugar que cambia {@code evento.estado} (regla 4 de CLAUDE.md): valida la transición contra
- * docs/maquina-de-estados.md, escribe {@code cambio_estado_evento} y genera los avisos ({@link AvisosEvento}).
+ * docs/maquina-de-estados.md, escribe {@code cambio_estado_evento}, genera los avisos ({@link AvisosEvento}) y publica
+ * {@link CambioDeEstadoEvento} para los otros módulos.
  * Quién puede disparar cada transición y sus condiciones de datos las valida el caso de uso que la llama.
  */
 @Service
@@ -47,11 +49,14 @@ public class MaquinaDeEstados {
     private final EventoRepository eventos;
     private final CambioEstadoEventoRepository historial;
     private final AvisosEvento avisos;
+    private final ApplicationEventPublisher publicador;
 
-    public MaquinaDeEstados(EventoRepository eventos, CambioEstadoEventoRepository historial, AvisosEvento avisos) {
+    public MaquinaDeEstados(EventoRepository eventos, CambioEstadoEventoRepository historial, AvisosEvento avisos,
+            ApplicationEventPublisher publicador) {
         this.eventos = eventos;
         this.historial = historial;
         this.avisos = avisos;
+        this.publicador = publicador;
     }
 
     /** — → Pre-reserva. Guarda el evento (hace falta su id para el historial). */
@@ -87,6 +92,7 @@ public class MaquinaDeEstados {
         historial.save(new CambioEstadoEvento(evento.getId(), anterior, evento.getEstado(), usuarioId,
                 OffsetDateTime.now(), observacion));
         avisos.cambioDeEstado(evento, usuarioId);
+        publicador.publishEvent(new CambioDeEstadoEvento(evento.getId(), anterior, evento.getEstado(), usuarioId));
     }
 
     /** Nombre en pantalla: «Pre-reserva», «Señado», … */

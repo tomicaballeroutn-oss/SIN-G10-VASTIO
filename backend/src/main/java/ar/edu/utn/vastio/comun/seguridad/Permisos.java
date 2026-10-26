@@ -15,6 +15,12 @@ public final class Permisos {
     /** A7-01: reporte comercial de ocupación, reservado a Dirección y Coordinación. */
     public static final String CONSULTAR_REPORTE_OCUPACION = "hasAnyRole('DIRECCION', 'COORDINACION')";
 
+    /** Orden de preparación (docs/sprint-4.md, decisión 22): Administración consulta; la barra nunca la ve. */
+    public static final String CONSULTAR_ORDEN = "hasAnyRole('DIRECCION', 'COORDINACION', 'ADMINISTRACION', 'COMPRAS')";
+
+    /** Generar, recalcular, ajustar, confirmar y reabrir la orden de preparación: Compras, además del acceso total. */
+    public static final String GESTIONAR_ORDEN = "hasAnyRole('DIRECCION', 'COORDINACION', 'COMPRAS')";
+
     /** B5-04: preparación manual; no otorga operación de barra. */
     public static final String REGISTRAR_PREPARACION = "hasAnyRole('DIRECCION', 'COORDINACION', 'ADMINISTRACION', 'COMPRAS')";
 

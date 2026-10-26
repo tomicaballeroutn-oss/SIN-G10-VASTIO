@@ -2,6 +2,7 @@ package ar.edu.utn.vastio.agenda.aplicacion;
 
 import java.time.LocalDate;
 import java.time.ZoneId;
+import java.util.Comparator;
 import java.util.EnumSet;
 import java.util.HashSet;
 import java.util.List;
@@ -226,6 +227,37 @@ public class ConsultaEventoService {
         public String nombreDelEstado() {
             return MaquinaDeEstados.nombre(estado);
         }
+    }
+
+    /**
+     * Lo que necesita la orden de preparación (docs/sprint-4.md, decisiones 12 y 18): tipo, fecha de jornada y
+     * asistentes previstos (el total por segmento si el tipo lo cuenta así; si no, los invitados).
+     */
+    public record EventoParaOrden(EventoOperativo evento, short tipoEventoId, LocalDate fecha, Integer asistentesPrevistos) {
+    }
+
+    /** Estados en los que el evento tiene orden de preparación por delante. */
+    public static final Set<EstadoEvento> CON_ORDEN = EnumSet.of(EstadoEvento.CONFIRMADO, EstadoEvento.EN_CURSO);
+
+    public EventoParaOrden paraOrden(long eventoId) {
+        Evento e = eventos.conDetalle(eventoId).orElseThrow(() -> ProblemaException.noEncontrado("EVENTO_INEXISTENTE",
+                "No encontramos ese evento."));
+        return paraOrden(e);
+    }
+
+    /** Los eventos Confirmados y En curso, del más próximo al más lejano. */
+    public List<EventoParaOrden> paraOrdenes() {
+        return CON_ORDEN.stream().flatMap(estado -> eventos.enEstado(estado).stream()).map(this::paraOrden)
+                .sorted(Comparator.comparing(EventoParaOrden::fecha)
+                        .thenComparing(o -> o.evento().eventoId()))
+                .toList();
+    }
+
+    private EventoParaOrden paraOrden(Evento e) {
+        AsistenciaPorSegmento.Asistencia asistencia = asistencias.de(e);
+        return new EventoParaOrden(new EventoOperativo(e.getId(), e.getCodigo(), e.getNombre(), e.getUnidad().getSalonId(),
+                e.getEstado()), e.getTipoEventoId(), e.getUnidad().getFecha(),
+                asistencia != null ? asistencia.totalPrevisto() : e.getCantidadInvitados());
     }
 
     /**

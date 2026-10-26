@@ -1,5 +1,5 @@
-import { useState, type ReactNode } from 'react';
-import { Card, EmptyState, Nav, Tabs, aplicarTema, temaGuardado, type Tema } from '../../ds';
+import type { ReactNode } from 'react';
+import { Card, EmptyState, Nav } from '../../ds';
 import { Navigate, useNavigate } from 'react-router';
 import { useSesion } from '../sesion/contexto';
 import { BloqueCuenta } from './BloqueCuenta';
@@ -65,40 +65,6 @@ export function PaginaMas() {
           const destino = items.find((it) => it.id === id);
           if (destino) navegar(destino.ruta);
         }} className="pagina-mas__nav" footer={<BloqueCuenta />} />
-      </Card>
-    </section>
-  );
-}
-
-/** Provisoria hasta UI-03: datos de la sesión y tema de la pantalla. */
-export function PaginaMiCuenta() {
-  const { usuario } = useSesion();
-  const [tema, setTema] = useState<Tema>(temaGuardado());
-  if (!usuario) return null;
-  return (
-    <section className="pantalla">
-      <Encabezado titulo="Mi cuenta" />
-      <Card title={usuario.nombreCompleto} subtitle={`Usuario: ${usuario.nombreUsuario}`}>
-        <div className="pantalla">
-          <div className="pantalla__titulos">
-            <p className="label">Tema de la pantalla</p>
-            <p className="body-sm v-muted">El oscuro es para la operación nocturna en barra y depósito.</p>
-          </div>
-          <Tabs
-            variant="segmented"
-            label="Tema de la pantalla"
-            value={tema}
-            onChange={(id) => {
-              setTema(id as Tema);
-              aplicarTema(id as Tema);
-            }}
-            items={[
-              { id: 'claro', label: 'Claro', icon: 'sun' },
-              { id: 'oscuro', label: 'Oscuro', icon: 'moon' },
-              { id: 'sistema', label: 'Como el dispositivo' },
-            ]}
-          />
-        </div>
       </Card>
     </section>
   );

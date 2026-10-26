@@ -7,6 +7,8 @@ import { BloqueCuenta } from './BloqueCuenta';
 import { ITEM_MAS, itemsInferiores, itemsPara } from './menu';
 import './layout.css';
 
+const RUTA_MI_CUENTA = '/mi-cuenta';
+
 /**
  * Marco de las pantallas con sesión: riel flotante en escritorio (≥ 960 px) y barra inferior flotante en teléfono y tableta.
  * Cada perfil ve solo sus ítems; un grupo sin ítems no se dibuja. Arriba del contenido, la campana de notificaciones.
@@ -19,6 +21,11 @@ export function Layout() {
   if (estado === 'cargando') return null;
   if (estado === 'anonima' || !usuario) {
     return <Navigate to={`/login?volver=${encodeURIComponent(ubicacion.pathname)}`} replace />;
+  }
+
+  // Entró con la contraseña inicial del alta: tiene que elegir una propia antes de usar el sistema (UI-03).
+  if (usuario.debeCambiarContrasena && ubicacion.pathname !== RUTA_MI_CUENTA) {
+    return <Navigate to={RUTA_MI_CUENTA} replace />;
   }
 
   const items = itemsPara(usuario.roles);

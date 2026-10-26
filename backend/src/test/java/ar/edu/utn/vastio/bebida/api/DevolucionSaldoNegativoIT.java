@@ -54,7 +54,8 @@ class DevolucionSaldoNegativoIT {
 
     @BeforeEach
     void datos() throws Exception {
-        String unico = UUID.randomUUID().toString();
+        // El nombre no debe contener "-3": esa cadena se comprueba como posible fuga del saldo negativo.
+        String unico = UUID.randomUUID().toString().replace("-", "");
         autorizacion = personas.bearer(RolCodigo.COMPRAS);
         evento = escenario.evento("avril", LocalDate.of(2040, 1, 1).plusDays(
                 jdbc.queryForObject("SELECT count(*) FROM evento", Integer.class)), "noche", "EN_CURSO",

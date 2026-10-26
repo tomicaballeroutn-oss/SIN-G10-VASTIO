@@ -301,6 +301,7 @@ export const fichas = {
     api<Ficha>(`/eventos/${id}/servicios`, { metodo: 'PUT', cuerpo: { version, servicios } }),
   descargarDocumento: (id: number, documentoId: number) => descargarArchivo(`/eventos/${id}/documentos/${documentoId}`),
   /** Comprobante interno de la seña en PDF (M-07): solo para quien ve el importe. */
+  emitirComprobante: (id: number) => descargarArchivo(`/eventos/${id}/sena/comprobante`, 'POST'),
   descargarComprobante: (id: number) => descargarArchivo(`/eventos/${id}/sena/comprobante`),
 };
 

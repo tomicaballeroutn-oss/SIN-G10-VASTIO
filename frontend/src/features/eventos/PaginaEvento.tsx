@@ -294,18 +294,21 @@ function Datos({ ficha }: { ficha: Ficha }) {
 /** Legajo del evento: el contrato digitalizado. Solo llega a quien ve datos económicos. */
 /**
  * M-07 · Comprobante interno de la seña en PDF. Solo se ofrece a quien recibió el importe; el backend lo verifica igual.
- * El número se asigna en la primera descarga y se repite en las siguientes.
+ * Emitir usa POST; Descargar usa GET y nunca emite. Ambos devuelven el PDF original.
  */
 function DescargarComprobante({ ficha }: { ficha: Ficha }) {
   const { guardando, error, enviar } = useEnvio();
 
-  async function descargar() {
-    const archivo = await enviar(() => fichas.descargarComprobante(ficha.id));
+  async function descargar(emitir = false) {
+    const archivo = await enviar(() => emitir ? fichas.emitirComprobante(ficha.id) : fichas.descargarComprobante(ficha.id));
     if (archivo) guardarArchivo(archivo.contenido, archivo.nombre ?? `comprobante-sena-${ficha.codigo}.pdf`);
   }
 
   return (
     <div className="ficha__comprobante">
+      <Button variant="outline" size="sm" icon="file-text" loading={guardando} onClick={() => void descargar(true)}>
+        Emitir comprobante
+      </Button>
       <Button variant="outline" size="sm" icon="file-text" loading={guardando} onClick={() => void descargar()}>
         Descargar comprobante
       </Button>

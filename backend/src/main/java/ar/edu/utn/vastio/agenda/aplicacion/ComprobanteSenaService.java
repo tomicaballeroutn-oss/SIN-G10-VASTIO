@@ -10,6 +10,7 @@ import jakarta.persistence.LockModeType;
 
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.stereotype.Service;
+import org.springframework.http.HttpStatus;
 import org.springframework.transaction.annotation.Transactional;
 
 import ar.edu.utn.vastio.agenda.dominio.ComprobanteSena;
@@ -24,12 +25,7 @@ import ar.edu.utn.vastio.configuracion.aplicacion.CatalogoService;
 import ar.edu.utn.vastio.configuracion.aplicacion.LogoSalon;
 import ar.edu.utn.vastio.usuarios.aplicacion.UsuarioService;
 
-/**
- * Comprobante interno de la seña en PDF (M-07). Lo descargan solo quienes ven el importe (Dirección, Coordinación,
- * Administración y la vendedora titular), una vez señado el evento. La primera descarga le asigna un número correlativo
- * (CS-AAAA-NNNNN) y guarda quién y cuándo; las siguientes repiten número y fecha de emisión. Si el salón tiene logo
- * ({@link LogoSalon}, M-04), va en el encabezado; si no, su nombre.
- */
+/** Emisión transaccional por POST y descarga del PDF histórico por GET (M-07). */
 @Service
 public class ComprobanteSenaService {
 
@@ -57,36 +53,59 @@ public class ComprobanteSenaService {
         this.reloj = reloj;
     }
 
-    public record Comprobante(String numero, byte[] pdf) {
+    public record Comprobante(String numero, byte[] pdf, boolean creado) {
+    }
+
+    @Transactional(readOnly = true)
+    public Comprobante descargar(long id, UsuarioActual quien) {
+        autorizar(consultas.visible(id, quien), quien);
+        return original(comprobantes.findByEventoId(id).orElseThrow(() -> ProblemaException.noEncontrado(
+                "COMPROBANTE_NO_EMITIDO", "Todavía no se emitió el comprobante. Usá Emitir comprobante.")), false);
     }
 
     @Transactional
     public Comprobante emitir(long id, UsuarioActual quien) {
         Evento evento = consultas.visible(id, quien);
-        if (!AccesoEvento.veImportes(quien, evento)) {
-            throw ConsultaEventoService.sinPermiso();
-        }
+        autorizar(evento, quien);
+        // Refresca después de obtener el bloqueo: no se emite sobre un evento leído antes de esperar.
+        entityManager.refresh(evento, LockModeType.PESSIMISTIC_WRITE);
+        autorizar(evento, quien);
+        var existente = comprobantes.findByEventoId(id);
+        if (existente.isPresent()) return original(existente.get(), false);
         if (evento.getFechaSena() == null) {
-            throw ProblemaException.reglaDeNegocio("SIN_SENA",
-                    "El evento todavía no tiene seña registrada: el comprobante se emite una vez señado.");
+            throw ProblemaException.reglaDeNegocio("SIN_SENA", "El evento todavía no tiene seña registrada.");
         }
-        // Dos primeras descargas a la vez: la segunda espera y encuentra el comprobante de la primera.
-        entityManager.lock(evento, LockModeType.PESSIMISTIC_WRITE);
-        ComprobanteSena comprobante = comprobantes.findByEventoId(id).orElseGet(() -> nuevo(id, quien));
-        return new Comprobante(comprobante.getNumero(), generador.generar(datos(evento, comprobante)));
-    }
-
-    private ComprobanteSena nuevo(long eventoId, UsuarioActual quien) {
         OffsetDateTime ahora = OffsetDateTime.now(reloj);
         String numero = NumeradorComprobante.numero(ahora.getYear(), numerador.siguiente(ahora.getYear()));
-        return comprobantes.save(new ComprobanteSena(eventoId, numero, ahora, quien.id()));
+        byte[] pdf;
+        try {
+            pdf = generador.generar(datos(evento, numero, ahora));
+            if (pdf == null || pdf.length < 5 || !new String(pdf, 0, 5, java.nio.charset.StandardCharsets.US_ASCII).equals("%PDF-")) {
+                throw new IllegalStateException("El generador no produjo un PDF");
+            }
+        } catch (RuntimeException e) {
+            throw new ProblemaException(HttpStatus.INTERNAL_SERVER_ERROR, "COMPROBANTE_GENERACION_FALLIDA",
+                    "No pudimos emitir el comprobante", "No se guardó ningún comprobante. Volvé a intentar la emisión.");
+        }
+        return original(comprobantes.saveAndFlush(new ComprobanteSena(id, numero, ahora, quien.id(), pdf)), true);
     }
 
-    private Datos datos(Evento e, ComprobanteSena c) {
+    private void autorizar(Evento evento, UsuarioActual quien) {
+        if (!AccesoEvento.veImportes(quien, evento)) throw ConsultaEventoService.sinPermiso();
+    }
+
+    private Comprobante original(ComprobanteSena c, boolean creado) {
+        byte[] pdf = c.getPdfOriginal();
+        if (pdf == null) throw ProblemaException.conflicto("COMPROBANTE_SIN_ORIGINAL",
+                "Este comprobante anterior no tiene un PDF original conservado. Requiere revisión; no se reconstruye con datos actuales.");
+        return new Comprobante(c.getNumero(), pdf, creado);
+    }
+
+    private Datos datos(Evento e, String numero, OffsetDateTime emision) {
         short salonId = e.getUnidad().getSalonId();
         LogoSalon logo = logos.getIfAvailable();
         Map<Long, String> nombres = usuarios.nombres(List.of(e.getVendedoraId()));
-        return new Datos(c.getNumero(), c.getFechaEmision(), catalogos.salon(salonId).getNombre(),
+        return new Datos(numero, emision, catalogos.salon(salonId).getNombre(),
                 logo == null ? null : logo.de(salonId).orElse(null), e.getCliente().getNombre(), e.getCliente().getDocumento(),
                 e.getFirmanteNombre(), e.getFirmanteDni(), catalogos.tipoEvento(e.getTipoEventoId()).getNombre(), e.getNombre(),
                 e.getUnidad().getFecha(), catalogos.turno(e.getUnidad().getTurnoId()).getNombre(), e.getImporteSena(),

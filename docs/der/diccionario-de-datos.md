@@ -1,6 +1,6 @@
 # Vastio — Modelo de datos y diccionario de datos
 
-Modelo operativo actualizado a V11. Los PNG `DER_1` y `DER_2` son referencias históricas del DER v2. [DER_3_bebida.png](DER_3_bebida.png) fue regenerado desde PostgreSQL posterior a V9, con [fuente editable DOT](DER_3_bebida.dot). Ver [alcance y reproducción del módulo B](modelo-bebida-v9.md) y [resguardo antes de V9](../eliminacion-proveedores-despliegue.md).
+Modelo operativo actualizado a V13. Los PNG `DER_1` y `DER_2` son referencias históricas del DER v2. [DER_3_bebida.png](DER_3_bebida.png) fue regenerado desde PostgreSQL posterior a V9, con [fuente editable DOT](DER_3_bebida.dot). Ver [alcance y reproducción del módulo B](modelo-bebida-v9.md) y [resguardo antes de V9](../eliminacion-proveedores-despliegue.md).
 
 Motor: PostgreSQL. Convenciones: nombres en `snake_case` y en español; claves primarias sustitutas (`bigint` generado para tablas transaccionales, `smallint` para catálogos); importes en `numeric(14,2)`, en la moneda que indica su columna de moneda (el único es el de la seña, en ARS o USD sin conversión desde V11: el sistema no maneja precios ni costos); fechas y horas en `timestamptz`; cantidades de bebida en `numeric(10,2)` expresadas siempre en **botellas** (unidad base). Los estados y tipos fijos se modelan como `varchar` con restricción `CHECK`, no como tablas, porque el comportamiento del sistema depende de ellos y no son configurables.
 
@@ -398,7 +398,7 @@ Destinatarios de cada aviso. El ruteo por perfil y dato modificado se resuelve a
 
 #### COMPROBANTE_SENA
 
-Comprobante interno de la seña en PDF (V12, M-07; opcional). Uno por evento: se crea en la primera descarga y las siguientes repiten número y fecha de emisión. No es una factura. Lo descargan solo quienes ven el importe.
+Comprobante interno de la seña en PDF (V12, M-07; opcional). Uno por evento: POST conserva el PDF original, número, fecha de emisión y emisor. GET descarga esos mismos bytes, sin reconstruirlos con los datos actuales. V13 protege el registro contra UPDATE y DELETE. Los registros de V12 sin original se conservan, pero requieren revisión y devuelven 409; no se inventa su contenido histórico. No es una factura. Lo descargan solo quienes ven el importe.
 
 | Campo | Tipo | Clave | Nulo | Descripción / valores posibles |
 |---|---|---|---|---|
@@ -407,6 +407,7 @@ Comprobante interno de la seña en PDF (V12, M-07; opcional). Uno por evento: se
 | `numero` | varchar(14) | UQ | NO | CS-AAAA-NNNNN, correlativo por año (`numerador_comprobante`). |
 | `fecha_emision` | timestamptz |  | NO | Primera emisión. Default now(). |
 | `usuario_id` | bigint | FK | NO | → usuario. Quién lo emitió por primera vez. |
+| `pdf_original` | bytea | | SÍ (legado) | PDF de la primera emisión (V13). Obligatorio por trigger en nuevas filas; nunca se regenera. |
 
 #### NUMERADOR_COMPROBANTE
 

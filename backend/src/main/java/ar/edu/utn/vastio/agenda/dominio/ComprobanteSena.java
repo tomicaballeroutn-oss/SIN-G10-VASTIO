@@ -11,7 +11,7 @@ import jakarta.persistence.Table;
 
 /**
  * Comprobante interno de la seña (M-07, V12): uno por evento, con número correlativo por año (CS-AAAA-NNNNN). Se crea
- * la primera vez que alguien lo descarga; las descargas siguientes repiten número y fecha de emisión. No es una factura.
+ * por POST; las descargas GET devuelven el PDF original sin regenerarlo. No es una factura.
  */
 @Entity
 @Table(name = "comprobante_sena")
@@ -35,14 +35,22 @@ public class ComprobanteSena {
     @Column(name = "usuario_id", nullable = false)
     private Long usuarioId;
 
+    @Column(name = "pdf_original", columnDefinition = "bytea", updatable = false)
+    private byte[] pdfOriginal;
+
     protected ComprobanteSena() {
     }
 
-    public ComprobanteSena(long eventoId, String numero, OffsetDateTime fechaEmision, long usuarioId) {
+    public ComprobanteSena(long eventoId, String numero, OffsetDateTime fechaEmision, long usuarioId, byte[] pdfOriginal) {
         this.eventoId = eventoId;
         this.numero = numero;
         this.fechaEmision = fechaEmision;
         this.usuarioId = usuarioId;
+        this.pdfOriginal = pdfOriginal.clone();
+    }
+
+    public byte[] getPdfOriginal() {
+        return pdfOriginal == null ? null : pdfOriginal.clone();
     }
 
     public Long getId() {

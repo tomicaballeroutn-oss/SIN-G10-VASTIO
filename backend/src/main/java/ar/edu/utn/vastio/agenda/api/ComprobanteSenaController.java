@@ -10,6 +10,9 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import java.net.URI;
+import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -35,17 +38,35 @@ public class ComprobanteSenaController {
         this.comprobantes = comprobantes;
     }
 
+    @PostMapping("/{id}/sena/comprobante")
+    @PreAuthorize(Permisos.COMPROBANTE_SENA)
+    @Operation(summary = "Emitir comprobante interno de seña", description = """
+            Primera emisión: guarda el PDF original, número CS-AAAA-NNNNN, fecha y emisor (201).
+            Si existe, devuelve exactamente el original (200), sin consumir otro número.
+            Solo quienes ven el importe; un cancelado conserva su comprobante. No es una factura.""")
+    @ApiResponse(responseCode = "422", description = "SIN_SENA o NUMERADOR_COMPROBANTE_AGOTADO")
+    @ApiResponse(responseCode = "409", description = "Comprobante anterior sin PDF original: requiere revisión")
+    @ApiResponse(responseCode = "500", description = "Generación fallida: emisión y numerador se revierten")
+    public ResponseEntity<byte[]> emitir(@PathVariable long id, @AuthenticationPrincipal Jwt jwt) {
+        var c = comprobantes.emitir(id, UsuarioActual.de(jwt));
+        return respuesta(c, c.creado() ? HttpStatus.CREATED : HttpStatus.OK, id);
+    }
+
     @GetMapping("/{id}/sena/comprobante")
     @PreAuthorize(Permisos.COMPROBANTE_SENA)
-    @Operation(summary = "Comprobante interno de la seña (PDF)", description = """
-            Para quien ve el importe (Dirección, Coordinación, Administración y la vendedora titular), una vez señado el
-            evento. La primera descarga asigna el número correlativo CS-AAAA-NNNNN; las siguientes lo repiten con la misma
-            fecha de emisión. No es una factura.""")
+    @Operation(summary = "Descargar comprobante existente", description = """
+            Devuelve el PDF original sin modificar datos, consultar logos ni regenerar el documento.
+            No emite: si no existe responde 404. Solo quienes ven el importe de esa seña.""")
+    @ApiResponse(responseCode = "404", description = "COMPROBANTE_NO_EMITIDO")
     @ApiResponse(responseCode = "403", description = "No ve el importe de esa seña")
-    @ApiResponse(responseCode = "422", description = "El evento todavía no tiene seña (SIN_SENA)")
+    @ApiResponse(responseCode = "409", description = "Comprobante anterior sin PDF original")
     public ResponseEntity<byte[]> comprobante(@PathVariable long id, @AuthenticationPrincipal Jwt jwt) {
-        ComprobanteSenaService.Comprobante c = comprobantes.emitir(id, UsuarioActual.de(jwt));
-        return ResponseEntity.ok()
+        return respuesta(comprobantes.descargar(id, UsuarioActual.de(jwt)), HttpStatus.OK, id);
+    }
+
+    private ResponseEntity<byte[]> respuesta(ComprobanteSenaService.Comprobante c, HttpStatus estado, long id) {
+        return ResponseEntity.status(estado)
+                .location(URI.create("/api/v1/eventos/" + id + "/sena/comprobante"))
                 .contentType(MediaType.APPLICATION_PDF)
                 .header(HttpHeaders.CONTENT_DISPOSITION, ContentDisposition.attachment()
                         .filename("comprobante-sena-" + c.numero() + ".pdf", StandardCharsets.UTF_8).build().toString())

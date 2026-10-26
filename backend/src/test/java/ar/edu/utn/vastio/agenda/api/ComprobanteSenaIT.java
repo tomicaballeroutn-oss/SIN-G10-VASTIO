@@ -137,6 +137,14 @@ class ComprobanteSenaIT {
     }
 
     @Test
+    void unaSenaEnDolaresConservaLosCentavos() throws Exception {
+        jdbc.update("UPDATE evento SET importe_sena = 1500.75, moneda_sena = 'USD' WHERE evento_id = ?", senado);
+
+        assertThat(texto(emitir(lucia, senado).andReturn().getResponse().getContentAsByteArray()))
+                .contains("US$ 1.500,75");
+    }
+
+    @Test
     void conLogoDelSalonLoUsaEnElEncabezado() throws Exception {
         when(logos.de(anyShort())).thenReturn(Optional.of(png()));
 

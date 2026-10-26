@@ -59,30 +59,29 @@ services:
         condition: service_healthy
     restart: unless-stopped
 
-  # Un pg_dump por día a ./respaldos, se conservan 14, y copia de los archivos nuevos del legajo a ./respaldos/legajo.
+  # Un pg_dump al iniciar y cada 86400 segundos. Retencion por antiguedad (>14 dias).
+  # Cada entorno/base tiene su carpeta; solo los .dump estan terminados.
   # Espera al backend para respaldar la base ya migrada.
   # Copiarlos fuera del servidor: ver docs/despliegue.md.
   respaldo:
-    image: postgres:17
+    image: vastio-respaldo:local
+    build:
+      context: .
+      dockerfile: deploy/respaldo.Dockerfile
     environment:
       PGHOST: db
       PGDATABASE: ${DB_NAME:-vastio}
       PGUSER: ${DB_USER:-vastio}
       PGPASSWORD: ${DB_PASSWORD}
       TZ: America/Argentina/Cordoba
+      RESPALDO_ENTORNO: ${RESPALDO_ENTORNO:?Falta RESPALDO_ENTORNO unico para esta instalacion}
     volumes:
       - ./respaldos:/respaldos
       - legajo:/legajo:ro
-    entrypoint: ["/bin/sh", "-c"]
-    command:
-      - |
-        while true; do
-          archivo=/respaldos/vastio-$$(date +%Y%m%d-%H%M).dump
-          if pg_dump -Fc -f "$$archivo"; then echo "Respaldo $$archivo"; else echo "Falló el respaldo" >&2; rm -f "$$archivo"; fi
-          find /respaldos -name 'vastio-*.dump' -mtime +14 -delete
-          mkdir -p /respaldos/legajo && cp -ru /legajo/. /respaldos/legajo/
-          sleep 86400
-        done
+      - ./scripts/respaldo_local.sh:/opt/vastio/respaldo_local.sh:ro
+      - ./scripts/transferir_respaldo.sh:/opt/vastio/transferir_respaldo.sh:ro
+    entrypoint: ["/bin/sh", "/opt/vastio/respaldo_local.sh"]
+    command: []
     depends_on:
       backend:
         condition: service_healthy

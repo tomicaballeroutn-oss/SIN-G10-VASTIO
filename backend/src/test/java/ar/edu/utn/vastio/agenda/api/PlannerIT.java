@@ -13,6 +13,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Map;
 
 import jakarta.persistence.EntityManager;
 
@@ -86,16 +87,23 @@ class PlannerIT {
     void cambiarDePlannerAvisaALaNuevaYALaAnterior() throws Exception {
         Usuario administracion = personas.de(RolCodigo.ADMINISTRACION);
         asignar(coordinacion, contratado, ana.getId()).andExpect(status().isOk());
+        entityManager.flush();
+        long anteriores = jdbc.queryForObject("SELECT max(notificacion_id) FROM notificacion", Long.class);
         asignar(coordinacion, contratado, carla.getId())
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.historial[?(@.campo == 'planner' && @.valorAnterior == 'Ana Sosa')].valorNuevo", hasItem("Carla Núñez")));
         entityManager.flush();
 
-        List<Long> destinatarios = jdbc.queryForList("""
-                SELECT usuario_id FROM notificacion_destinatario WHERE notificacion_id =
-                  (SELECT max(notificacion_id) FROM notificacion WHERE evento_id = ? AND tipo = 'PLANNER_ASIGNADA')""",
-                Long.class, contratado);
-        assertThat(destinatarios).contains(ana.getId(), carla.getId(), administracion.getId()).doesNotContain(coordinacion.getId());
+        // El general (Administración) y uno para cada planner, en segunda persona.
+        List<Map<String, Object>> avisos = jdbc.queryForList("""
+                SELECT d.usuario_id, n.mensaje FROM notificacion_destinatario d JOIN notificacion n USING (notificacion_id)
+                WHERE n.evento_id = ? AND n.tipo = 'PLANNER_ASIGNADA' AND n.notificacion_id > ?""", contratado, anteriores);
+        assertThat(avisos).extracting(a -> ((Number) a.get("usuario_id")).longValue())
+                .contains(ana.getId(), carla.getId(), administracion.getId()).doesNotContain(coordinacion.getId());
+        assertThat(avisos).filteredOn(a -> ((Number) a.get("usuario_id")).longValue() == carla.getId())
+                .singleElement().satisfies(a -> assertThat((String) a.get("mensaje")).startsWith("Melina Sifón te asignó como planner:"));
+        assertThat(avisos).filteredOn(a -> ((Number) a.get("usuario_id")).longValue() == ana.getId())
+                .singleElement().satisfies(a -> assertThat((String) a.get("mensaje")).startsWith("Melina Sifón te quitó como planner:"));
     }
 
     @Test

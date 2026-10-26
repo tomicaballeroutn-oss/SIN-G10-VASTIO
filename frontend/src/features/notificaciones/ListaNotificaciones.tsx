@@ -22,14 +22,15 @@ const ICONO: Record<TipoNotificacion, IconName> = {
   ALERTA_STOCK: 'triangle-alert',
 };
 
-/** Perfiles que abren la ficha del evento. Cocina y Barra leen el aviso pero no tienen ficha (Sprint 3: vista de cocina). */
+/** Perfiles que abren la ficha del evento. Cocina no tiene ficha: su aviso abre la tarjeta en la vista de cocina (A7-02). */
 const ABREN_FICHA: Rol[] = ['DIRECCION', 'COORDINACION', 'ADMINISTRACION', 'VENDEDORA', 'PLANNER', 'COMPRAS'];
 
 type Filtro = 'sin-leer' | 'todas';
 
 /**
  * UI-22 · Lista de notificaciones (en el panel de la campana y en la página): más recientes primero, filtro
- * «Sin leer» / «Todas», de a 20. Abrir un aviso lo marca como leído y lleva a la ficha del evento; «Marcar todas como
+ * «Sin leer» / «Todas», de a 20. Abrir un aviso lo marca como leído y lleva a la ficha del evento (el de una
+ * modificación, a su historial con ese cambio resaltado); «Marcar todas como
  * leídas» deja el contador en 0. Cada cambio del contador se avisa a la campana.
  *
  * @param alIrAlEvento antes de navegar a la ficha (p. ej. cerrar el panel).
@@ -38,7 +39,9 @@ type Filtro = 'sin-leer' | 'todas';
 export function ListaNotificaciones({ alIrAlEvento, limite }: { alIrAlEvento?: () => void; limite?: number }) {
   const navegar = useNavigate();
   const { usuario } = useSesion();
-  const abreFicha = !!usuario?.roles.some((r) => ABREN_FICHA.includes(r));
+  const esCocina = !!usuario?.roles.includes('COCINA');
+  // Vendedora no garantiza acceso a la ficha de un aviso recibido por Cocina.
+  const abreFicha = !!usuario?.roles.some((r) => ABREN_FICHA.includes(r) && (!esCocina || r !== 'VENDEDORA'));
   const [filtro, setFiltro] = useState<Filtro>('sin-leer');
   const [lista, setLista] = useState<Notificacion[]>([]);
   const [pagina, setPagina] = useState(0);
@@ -107,7 +110,13 @@ export function ListaNotificaciones({ alIrAlEvento, limite }: { alIrAlEvento?: (
       navegar('/existencias');
     } else if (abreFicha && n.eventoId) {
       alIrAlEvento?.();
-      navegar(`/eventos/${n.eventoId}`);
+      // Conservar el historial de #39 para quienes pueden consultar la ficha.
+      navegar(n.tipo === 'MODIFICACION'
+        ? `/eventos/${n.eventoId}?pestana=historial&cambio=${encodeURIComponent(n.fechaHora)}`
+        : `/eventos/${n.eventoId}`);
+    } else if (esCocina && n.eventoId) {
+      alIrAlEvento?.();
+      navegar(`/cocina?evento=${n.eventoId}`);
     }
   }
 

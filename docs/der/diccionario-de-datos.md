@@ -1,6 +1,6 @@
 # Vastio — Modelo de datos y diccionario de datos
 
-Modelo operativo actualizado a V9. Los PNG `DER_1` y `DER_2` son referencias históricas del DER v2. [DER_3_bebida.png](DER_3_bebida.png) fue regenerado desde PostgreSQL posterior a V9, con [fuente editable DOT](DER_3_bebida.dot). Ver [alcance y reproducción del módulo B](modelo-bebida-v9.md) y [resguardo antes de V9](../eliminacion-proveedores-despliegue.md).
+Modelo operativo actualizado a V11. Los PNG `DER_1` y `DER_2` son referencias históricas del DER v2. [DER_3_bebida.png](DER_3_bebida.png) fue regenerado desde PostgreSQL posterior a V9, con [fuente editable DOT](DER_3_bebida.dot). Ver [alcance y reproducción del módulo B](modelo-bebida-v9.md) y [resguardo antes de V9](../eliminacion-proveedores-despliegue.md).
 
 Motor: PostgreSQL. Convenciones: nombres en `snake_case` y en español; claves primarias sustitutas (`bigint` generado para tablas transaccionales, `smallint` para catálogos); importes en `numeric(14,2)`, en la moneda que indica su columna de moneda (el único es el de la seña, en ARS o USD sin conversión desde V11: el sistema no maneja precios ni costos); fechas y horas en `timestamptz`; cantidades de bebida en `numeric(10,2)` expresadas siempre en **botellas** (unidad base). Los estados y tipos fijos se modelan como `varchar` con restricción `CHECK`, no como tablas, porque el comportamiento del sistema depende de ellos y no son configurables.
 
@@ -167,10 +167,10 @@ Categoría configurable de servicio contratado (decisión de Meli: sin desplegab
 | Campo | Tipo | Clave | Nulo | Descripción / valores posibles |
 |---|---|---|---|---|
 | `categoria_id` | smallint | PK | NO | Identificador. |
-| `nombre` | varchar(40) | UQ | NO | Recepción · Plato principal · Postre · After · Bodega · Tipo de barra · Técnica · Mobiliario · Menús especiales · Extras. |
+| `nombre` | varchar(40) | UQ | NO | Activas desde V10: Menú · Menús especiales · Bodega · Tipo de barra · Otros. Dadas de baja en V10 (conservan lo cargado): Recepción · Postre · After · Técnica · Mobiliario · Extras. |
 | `orden` | smallint |  | NO | Orden de presentación en la ficha. |
-| `visible_en_cocina` | boolean |  | NO | true si se muestra en la vista de cocina. |
-| `requerida_para_confirmar` | boolean |  | NO | true para Plato principal y Tipo de barra (condición de Confirmar evento). |
+| `visible_en_cocina` | boolean |  | NO | true si se muestra en la vista de cocina. Activas visibles desde V10: Menú y Menús especiales. |
+| `requerida_para_confirmar` | boolean |  | NO | true para Menú (antes «Plato principal») y Tipo de barra (condición de Confirmar evento). |
 | `avisa_a_compras` | boolean |  | NO | true para Bodega y Tipo de barra (V4): un cambio en un evento confirmado le llega a Compras. Default false. |
 | `activo` | boolean |  | NO | Default true. |
 
@@ -275,18 +275,29 @@ Contactos del evento además del cliente (padre, madre, organizador).
 
 #### SERVICIO_CONTRATADO
 
-Servicio acordado con el cliente, con descripción libre dentro de una categoría configurable.
+Servicio acordado con el cliente dentro de una categoría configurable: renglones libres con cantidad opcional (`servicio_renglon`) y un detalle libre (M-09, V10). Existe solo si tiene algo cargado.
 
 | Campo | Tipo | Clave | Nulo | Descripción / valores posibles |
 |---|---|---|---|---|
 | `servicio_id` | bigint | PK | NO | Identificador. |
 | `evento_id` | bigint | FK | NO | → evento. |
 | `categoria_id` | smallint | FK | NO | → categoria_servicio. |
-| `descripcion` | text |  | NO | Detalle libre. Ej.: «Malbec Luigi Bosca y Chardonnay Alamos». |
+| `descripcion` | text |  | SÍ | Detalle libre de la categoría. Ej.: «Avisar en la mesa 4». Lo cargado antes de V10 quedó acá. Nulo si solo hay renglones (V10). |
 | `usuario_id` | bigint | FK | NO | → usuario. Último en modificarlo. |
 | `fecha_modificacion` | timestamptz |  | NO | Default now(). |
 
-*Restricciones (V4):* `ux_servicio_contratado_evento_categoria` UNIQUE (evento_id, categoria_id): un texto por categoría y evento.
+*Restricciones (V4):* `ux_servicio_contratado_evento_categoria` UNIQUE (evento_id, categoria_id): un servicio por categoría y evento.
+
+#### SERVICIO_RENGLON
+
+Renglón libre de un servicio contratado, con cantidad opcional (V10, M-09). Nada predefinido: «Celíaco · 2», «Sin lactosa · 3», «Malbec». Se reemplazan juntos al guardar la categoría.
+
+| Campo | Tipo | Clave | Nulo | Descripción / valores posibles |
+|---|---|---|---|---|
+| `servicio_id` | bigint | PK/FK | NO | → servicio_contratado. ON DELETE CASCADE. |
+| `orden` | integer | PK | NO | Posición del renglón (0, 1, …). |
+| `texto` | varchar(120) |  | NO | Qué es. No vacío (`ck_servicio_renglon_texto`). |
+| `cantidad` | integer |  | SÍ | Cuántos. Mayor a 0 si está (`ck_servicio_renglon_cantidad`). |
 
 #### ASISTENCIA_SEGMENTO
 

@@ -1,5 +1,6 @@
 import type { Rol } from '../../api/cliente';
 import type { NavItem } from '../../ds';
+import { ROLES_ESTADISTICAS } from '../../api/estadisticas';
 
 /**
  * Menú por perfil. Sale de la matriz de docs/perfiles-y-permisos.md y de la arquitectura de información
@@ -29,6 +30,7 @@ export const MENU: readonly ItemDeMenu[] = [
   { id: 'movimientos', label: 'Movimientos', icon: 'history', group: 'Bebidas', ruta: '/movimientos', roles: [...TOTAL, 'ADMINISTRACION', 'COMPRAS'] },
   { id: 'ordenes', label: 'Órdenes de preparación', icon: 'file-text', group: 'Bebidas', ruta: '/ordenes', roles: [...TOTAL, 'ADMINISTRACION', 'COMPRAS'] },
   { id: 'catalogo', label: 'Catálogo', icon: 'wine', group: 'Bebidas', ruta: '/catalogo', roles: [...TOTAL, 'ADMINISTRACION', 'COMPRAS'] },
+  { id: 'estadisticas', label: 'Estadísticas de consumo', icon: 'chart-column', group: 'Bebidas', ruta: '/bebidas/estadisticas', roles: ROLES_ESTADISTICAS },
 
   { id: 'reportes', label: 'Reportes', icon: 'chart-column', group: 'Gestión', ruta: '/reportes', roles: [...TOTAL, 'ADMINISTRACION', 'COMPRAS'] },
   { id: 'usuarios', label: 'Usuarios y perfiles', icon: 'users', group: 'Gestión', ruta: '/usuarios', roles: TOTAL },

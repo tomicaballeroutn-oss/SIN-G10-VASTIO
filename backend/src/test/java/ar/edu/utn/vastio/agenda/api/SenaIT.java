@@ -99,7 +99,7 @@ class SenaIT {
         Map<String, Object> aviso = jdbc.queryForMap(
                 "SELECT notificacion_id, mensaje, usuario_origen_id FROM notificacion WHERE evento_id = ? AND tipo = 'SENA'", preReserva);
         assertThat(aviso).containsEntry("usuario_origen_id", lucia.getId());
-        assertThat((String) aviso.get("mensaje")).startsWith("Seña registrada: Casamiento de Camila Ruiz · Santa Bárbara").doesNotContain("150");
+        assertThat((String) aviso.get("mensaje")).startsWith(lucia.getNombreCompleto() + " registró la seña: Casamiento de Camila Ruiz · Santa Bárbara").doesNotContain("150");
         List<Long> destinatarios = jdbc.queryForList(
                 "SELECT usuario_id FROM notificacion_destinatario WHERE notificacion_id = ?", Long.class, aviso.get("notificacion_id"));
         assertThat(destinatarios).contains(administracion.getId(), coordinacion.getId()).doesNotContain(lucia.getId());
@@ -117,6 +117,24 @@ class SenaIT {
         assertThat(jdbc.queryForMap("SELECT importe_sena, moneda_sena FROM evento WHERE evento_id = ?", preReserva))
                 .containsEntry("moneda_sena", "USD")
                 .hasEntrySatisfying("importe_sena", importe -> assertThat(importe.toString()).isEqualTo("1500.00"));
+    }
+
+    @Test
+    void conservaLosCentavosDeUnaSenaEnDolaresEnRespuestaBaseYFicha() throws Exception {
+        registrar(lucia, preReserva, """
+                {"importe":1500.75,"moneda":"USD","fechaPago":"%s","firmanteDni":"30111222"}""".formatted(HOY))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.sena.importe").value(1500.75))
+                .andExpect(jsonPath("$.sena.moneda").value("USD"));
+        entityManager.flush();
+        entityManager.clear();
+        assertThat(jdbc.queryForObject("SELECT importe_sena FROM evento WHERE evento_id = ?", java.math.BigDecimal.class, preReserva))
+                .isEqualByComparingTo("1500.75");
+        mvc.perform(org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get("/api/v1/eventos/{id}", preReserva)
+                        .header(HttpHeaders.AUTHORIZATION, personas.bearer(lucia)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.sena.importe").value(1500.75))
+                .andExpect(jsonPath("$.sena.moneda").value("USD"));
     }
 
     @Test

@@ -168,15 +168,35 @@ export interface PlannerCandidata {
  * Una categoría de servicio de la ficha, en el orden configurado. `activa = false`: categoría dada de baja con algo
  * cargado (se ve, no se edita). Sin servicio, `descripcion` es null.
  */
+/** Un renglón de servicio (M-09): texto libre y cantidad opcional, p. ej. «Celíaco» · 2. */
+export interface RenglonServicio {
+  texto: string;
+  cantidad: number | null;
+}
+
 export interface ServicioFicha {
   categoriaId: number;
   categoria: string;
   activa: boolean;
   requeridaParaConfirmar: boolean;
   visibleEnCocina: boolean;
+  renglones: RenglonServicio[];
+  /** Detalle libre de la categoría. */
   descripcion: string | null;
   usuario: Nombre | null;
   fechaModificacion: string | null;
+}
+
+/** Lo que se manda de una categoría al guardar los servicios: todo lo que tiene, reemplaza lo anterior. */
+export interface ServicioAGuardar {
+  categoriaId: number;
+  descripcion: string;
+  renglones: RenglonServicio[];
+}
+
+/** Hay algo cargado en la categoría. */
+export function tieneServicio(s: ServicioFicha): boolean {
+  return !!s.descripcion || s.renglones.length > 0;
 }
 
 /** Archivo del legajo (p. ej. una hoja del contrato). */
@@ -242,7 +262,7 @@ export interface EventoResumen {
   cantidadInvitados: number | null;
 }
 
-/** Registrar seña: importe en pesos, fecha del pago (yyyy-mm-dd) y firmante. */
+/** Registrar seña: importe en ARS o USD, sin conversión, fecha del pago (yyyy-mm-dd) y firmante. */
 export interface PedidoSena {
   importe: number | null;
   moneda: Moneda;
@@ -277,7 +297,7 @@ export const fichas = {
     api<Ficha>(`/eventos/${id}/planner`, { metodo: 'PUT', cuerpo: { plannerId } }),
   registrarInvitados: (id: number, version: number, cantidad: number, definitivos: boolean) =>
     api<Ficha>(`/eventos/${id}/invitados`, { metodo: 'PUT', cuerpo: { version, cantidad, definitivos } }),
-  registrarServicios: (id: number, version: number, servicios: { categoriaId: number; descripcion: string }[]) =>
+  registrarServicios: (id: number, version: number, servicios: ServicioAGuardar[]) =>
     api<Ficha>(`/eventos/${id}/servicios`, { metodo: 'PUT', cuerpo: { version, servicios } }),
   descargarDocumento: (id: number, documentoId: number) => descargarArchivo(`/eventos/${id}/documentos/${documentoId}`),
   /** Comprobante interno de la seña en PDF (M-07): solo para quien ve el importe. */

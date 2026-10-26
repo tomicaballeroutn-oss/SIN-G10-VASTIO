@@ -1,0 +1,13 @@
+/* A7-02 · Vista de cocina (UI-23). Usa la grilla de la agenda (agenda.css) y suma las tarjetas del día. */
+.cocina__dia { display: flex; flex-direction: column; gap: var(--space-4); scroll-margin-top: var(--space-4); }
+.cocina__tarjeta { border-radius: var(--radius-lg); scroll-margin: var(--space-6); }
+/* El evento al que llevó un aviso: un anillo de marca alrededor de su tarjeta. */
+.cocina__tarjeta--destacada { box-shadow: 0 0 0 3px var(--brand); }
+.cocina__hora { color: var(--brand-ink); }
+.cocina__cuerpo { display: flex; flex-direction: column; gap: var(--space-4); }
+.cocina__datos { display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-2) var(--space-3); margin: 0; }
+.cocina__servicios { display: flex; flex-direction: column; gap: var(--space-3); margin: 0; }
+.cocina__servicio { display: flex; flex-direction: column; gap: 2px; padding-top: var(--space-3); border-top: 1px solid var(--line); }
+.cocina__servicio dd { margin: 0; }
+.cocina__cantidad { display: inline-block; min-width: 2.5ch; margin-right: var(--space-2); text-align: right; }
+.cocina__detalle { white-space: pre-line; }

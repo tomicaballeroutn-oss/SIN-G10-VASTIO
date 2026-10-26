@@ -5,6 +5,7 @@ import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -163,7 +164,7 @@ public class DatosEventoService {
         }
 
         Set<String> campos() {
-            Set<String> campos = new HashSet<>();
+            Set<String> campos = new LinkedHashSet<>();
             filas.forEach(f -> campos.add(f.getCampo()));
             return campos;
         }

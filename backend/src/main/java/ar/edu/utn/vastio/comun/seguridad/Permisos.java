@@ -6,6 +6,9 @@ package ar.edu.utn.vastio.comun.seguridad;
  */
 public final class Permisos {
 
+    /** B5-01 A: estadísticas históricas de solo lectura. */
+    public static final String CONSULTAR_ESTADISTICAS_CONSUMO = "hasAnyRole('DIRECCION', 'COORDINACION', 'ADMINISTRACION', 'COMPRAS')";
+
     /** B4-05: consulta histórica, independiente de la operación de barra y del cierre. */
     public static final String CONSULTAR_CONSUMO = "hasAnyRole('DIRECCION', 'COORDINACION', 'ADMINISTRACION', 'COMPRAS')";
 
@@ -17,6 +20,8 @@ public final class Permisos {
      * verifica en el servicio.
      */
     public static final String COMPROBANTE_SENA = "hasAnyRole('DIRECCION', 'COORDINACION', 'ADMINISTRACION', 'VENDEDORA')";
+    /** A7-02: vista de cocina, como en la matriz (Planner, Compras y Cocina consultan; Administración y Vendedora no). */
+    public static final String VISTA_COCINA = "hasAnyRole('DIRECCION', 'COORDINACION', 'PLANNER', 'COMPRAS', 'COCINA')";
 
     /** Administrar usuarios. */
     public static final String ACCESO_TOTAL = "hasAnyRole('DIRECCION', 'COORDINACION')";

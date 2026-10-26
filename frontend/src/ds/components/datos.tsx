@@ -302,13 +302,25 @@ export interface TimelineItem {
   at?: string;
   icon?: IconName;
   tone?: TimelineTone;
+  /** La entrada que se vino a ver (p. ej. desde un aviso): se resalta y se lleva a la vista. */
+  highlighted?: boolean;
+}
+
+/** Lleva a la vista la entrada resaltada al montarla. */
+function aLaVista(li: HTMLLIElement | null) {
+  li?.scrollIntoView?.({ block: 'center', behavior: 'smooth' });
 }
 
 export function Timeline({ items, className }: { items: TimelineItem[]; className?: string }) {
   return (
     <ol className={cx('v-timeline', className)}>
       {items.map((it, i) => (
-        <li key={i} className="v-tl__item">
+        <li
+          key={i}
+          className={cx('v-tl__item', it.highlighted && 'is-destacado')}
+          aria-current={it.highlighted ? 'true' : undefined}
+          ref={it.highlighted ? aLaVista : undefined}
+        >
           <span className={cx('v-tl__dot', `v-tl__dot--${it.tone ?? 'neutral'}`)} aria-hidden>
             <Icon name={it.icon ?? 'circle-check'} size={16} strokeWidth={2.25} />
           </span>

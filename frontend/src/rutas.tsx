@@ -3,8 +3,10 @@ import type { RouteObject } from 'react-router';
 import { PaginaAgenda } from './features/agenda/PaginaAgenda';
 import { PaginaBarra } from './features/bebidas/PaginaBarra';
 import { PaginaCierre } from './features/bebidas/PaginaCierre';
+import { PaginaCocina } from './features/cocina/PaginaCocina';
 import { PaginaCatalogo } from './features/bebidas/PaginaCatalogo';
 import { PaginaExistencias } from './features/bebidas/PaginaExistencias';
+import { PaginaEstadisticas } from './features/bebidas/PaginaEstadisticas';
 import { PaginaIngresoBebida } from './features/bebidas/PaginaIngresoBebida';
 import { PaginaDs } from './features/ds/PaginaDs';
 import { PaginaDatosEvento } from './features/eventos/PaginaDatosEvento';
@@ -25,7 +27,9 @@ const PANTALLAS: Partial<Record<string, ReactNode>> = {
   agenda: <PaginaAgenda />,
   barra: <PaginaBarra />,
   catalogo: <PaginaCatalogo />,
+  cocina: <PaginaCocina />,
   existencias: <PaginaExistencias />,
+  estadisticas: <PaginaEstadisticas />,
   ingreso: <PaginaIngresoBebida />,
   inicio: <PaginaInicio />,
   eventos: <PaginaEventos />,

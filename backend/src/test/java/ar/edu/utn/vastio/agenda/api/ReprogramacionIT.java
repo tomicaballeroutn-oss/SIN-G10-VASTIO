@@ -101,8 +101,9 @@ class ReprogramacionIT {
                 SELECT d.usuario_id FROM notificacion_destinatario d JOIN notificacion n USING (notificacion_id)
                 WHERE n.evento_id = ? AND n.tipo = 'REPROGRAMACION'""", Long.class, contratado);
         assertThat(destinatarios).contains(cocina.getId(), compras.getId(), lucia.getId(), ana.getId()).doesNotContain(coordinacion.getId());
-        assertThat(jdbc.queryForObject("SELECT mensaje FROM notificacion WHERE evento_id = ? AND tipo = 'REPROGRAMACION'", String.class, contratado))
-                .startsWith("Evento reprogramado: Bruno y Martina · Avril · sáb 21/5 · Noche").endsWith("(antes Avril · sáb 14/5 · Noche)");
+        assertThat(mensajePara(cocina)).startsWith(coordinacion.getNombreCompleto() + " reprogramó el evento: Bruno y Martina · Avril · sáb 21/5 · Noche")
+                .endsWith("(antes Avril · sáb 14/5 · Noche)");
+        assertThat(mensajePara(lucia)).startsWith(coordinacion.getNombreCompleto() + " reprogramó tu evento: Bruno y Martina");
 
         mvc.perform(post("/api/v1/eventos").header(HttpHeaders.AUTHORIZATION, personas.bearer(lucia))
                         .contentType(MediaType.APPLICATION_JSON).content("""
@@ -193,5 +194,12 @@ class ReprogramacionIT {
 
     private ResultActions ficha(Usuario quien, long id) throws Exception {
         return mvc.perform(get("/api/v1/eventos/{id}", id).header(HttpHeaders.AUTHORIZATION, personas.bearer(quien)));
+    }
+
+    /** Lo que leyó esa persona en el aviso de reprogramación del evento contratado. */
+    private String mensajePara(Usuario quien) {
+        return jdbc.queryForObject("""
+                SELECT n.mensaje FROM notificacion n JOIN notificacion_destinatario d USING (notificacion_id)
+                WHERE n.evento_id = ? AND n.tipo = 'REPROGRAMACION' AND d.usuario_id = ?""", String.class, contratado, quien.getId());
     }
 }

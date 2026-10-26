@@ -4,6 +4,7 @@ import type { EstadoEvento } from '../../api/agenda';
 import { ROLES_CONSUMO } from '../../api/consumos';
 import { ROLES_PREPARACION } from '../../api/preparaciones';
 import { useSesion } from '../sesion/contexto';
+import { CAMPO_PREVISTA, PestanaAsistencia } from './PestanaAsistencia';
 import { PestanaConsumo } from './PestanaConsumo';
 import { PestanaPreparacion } from './PestanaPreparacion';
 import { hora } from '../../api/catalogos';
@@ -53,7 +54,7 @@ export function PaginaEvento() {
 /** Diálogos de las acciones que cambian el estado desde la ficha. */
 type Dialogo = 'liberar' | 'sena' | 'firma' | 'invitados' | 'planner' | 'confirmar' | 'cancelar' | null;
 
-type Pestana = 'datos' | 'servicios' | 'documentos' | 'historial' | 'consumo' | 'preparacion';
+type Pestana = 'datos' | 'servicios' | 'asistencia' | 'documentos' | 'historial' | 'consumo' | 'preparacion';
 
 function ContenidoFicha({ ficha, alCambiar }: { ficha: Ficha; alCambiar: (ficha: Ficha) => void }) {
   const { usuario } = useSesion();
@@ -63,6 +64,7 @@ function ContenidoFicha({ ficha, alCambiar }: { ficha: Ficha; alCambiar: (ficha:
   const pedida = busqueda.get('pestana');
   const pestana: Pestana = pedida === 'consumo' && veConsumo ? 'consumo'
     : pedida === 'preparacion' && vePreparacion ? 'preparacion'
+    : pedida === 'asistencia' && ficha.asistencia ? 'asistencia'
     : pedida === 'historial' || pedida === 'servicios' ? pedida
     : pedida === 'documentos' && ficha.documentos ? 'documentos' : 'datos';
   // Aviso que deja otra pantalla al volver a la ficha (p. ej. «Datos del evento guardados.»).
@@ -188,6 +190,7 @@ function ContenidoFicha({ ficha, alCambiar }: { ficha: Ficha; alCambiar: (ficha:
         items={[
           { id: 'datos', label: 'Datos' },
           { id: 'servicios', label: 'Servicios', count: ficha.servicios.filter(tieneServicio).length },
+          ...(ficha.asistencia ? [{ id: 'asistencia', label: 'Asistencia' }] : []),
           ...(ficha.documentos ? [{ id: 'documentos', label: 'Documentos', count: ficha.documentos.length }] : []),
           { id: 'historial', label: 'Historial', count: ficha.historial.length },
           ...(veConsumo ? [{ id: 'consumo', label: 'Consumo de bebida' }] : []),
@@ -199,6 +202,9 @@ function ContenidoFicha({ ficha, alCambiar }: { ficha: Ficha; alCambiar: (ficha:
 
       {pestana === 'datos' && <Datos ficha={ficha} />}
       {pestana === 'servicios' && <PestanaServicios key={ficha.id} ficha={ficha} alGuardar={alCambiar} />}
+      {pestana === 'asistencia' && ficha.asistencia && (
+        <PestanaAsistencia ficha={ficha} asistencia={ficha.asistencia} alGuardar={alCambiar} />
+      )}
       {pestana === 'documentos' && <Documentos ficha={ficha} documentos={ficha.documentos ?? []} />}
       {pestana === 'historial' && <Historial historial={ficha.historial} cambio={busqueda.get('cambio')} />}
       {pestana === 'consumo' && <PestanaConsumo key={ficha.id} eventoId={ficha.id} />}
@@ -240,6 +246,7 @@ function Datos({ ficha }: { ficha: Ficha }) {
             {ficha.cantidadInvitados == null
               ? 'Sin definir'
               : `${ficha.cantidadInvitados}${ficha.invitadosDefinitivos ? ' (definitivos)' : ' (previstos)'}`}
+            {ficha.asistencia && <span className="body-sm v-muted"> · comensales de la cena</span>}
           </Dato>
           <Dato etiqueta="Vendedora"><Actor name={ficha.vendedora.nombre} size="sm" /></Dato>
           <Dato etiqueta="Planner">{ficha.planner ? <Actor name={ficha.planner.nombre} size="sm" /> : 'Sin asignar'}</Dato>
@@ -396,6 +403,9 @@ function corto(valor: string | undefined): string {
 }
 
 function describirModificacion(m: Modificacion): string {
+  if (m.campo.startsWith(CAMPO_PREVISTA)) {
+    return `Asistencia prevista de ${m.campo.slice(CAMPO_PREVISTA.length)}: ${m.valorAnterior ?? 'sin dato'} → ${m.valorNuevo ?? 'sin dato'}`;
+  }
   if (m.campo.startsWith('servicio.')) {
     const categoria = m.campo.slice('servicio.'.length);
     if (!m.valorAnterior) return `Cargó ${categoria}: ${corto(m.valorNuevo)}`;

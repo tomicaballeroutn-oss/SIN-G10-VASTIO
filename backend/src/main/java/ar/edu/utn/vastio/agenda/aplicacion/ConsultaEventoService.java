@@ -56,11 +56,13 @@ public class ConsultaEventoService {
     private final RequisitosConfirmacion requisitos;
     private final ReprogramacionRepository reprogramaciones;
     private final UsuarioService usuarios;
+    private final AsistenciaPorSegmento asistencias;
 
     public ConsultaEventoService(EventoRepository eventos, CambioEstadoEventoRepository historial,
             ModificacionEventoRepository modificaciones, DocumentoEventoRepository documentos,
             ServicioContratadoRepository servicios, RequisitosConfirmacion requisitos,
-            ReprogramacionRepository reprogramaciones, UsuarioService usuarios) {
+            ReprogramacionRepository reprogramaciones, UsuarioService usuarios, AsistenciaPorSegmento asistencias) {
+        this.asistencias = asistencias;
         this.reprogramaciones = reprogramaciones;
         this.requisitos = requisitos;
         this.eventos = eventos;
@@ -73,7 +75,8 @@ public class ConsultaEventoService {
 
     /** Lo que la persona puede hacer con el evento según su perfil y el estado actual. */
     public record Acciones(boolean modificar, boolean liberar, boolean registrarSena, boolean registrarFirma,
-            boolean asignarPlanner, boolean confirmar, boolean cancelar, boolean reprogramar) {
+            boolean asignarPlanner, boolean confirmar, boolean cancelar, boolean reprogramar,
+            boolean registrarAsistenciaPrevista) {
     }
 
     /**
@@ -81,11 +84,12 @@ public class ConsultaEventoService {
      *
      * @param documentos null si la persona no ve el legajo (el contrato tiene importes).
      * @param requisitos condiciones para confirmar; null salvo en Contratado.
+     * @param asistencia por segmento; null si el tipo de evento no la cuenta por partes.
      */
     public record Ficha(Evento evento, boolean veImportes, Acciones acciones, List<ContactoEvento> contactos,
             List<CambioEstadoEvento> cambios, List<ModificacionEvento> modificaciones, List<DocumentoEvento> documentos,
             List<ServicioContratado> servicios, List<RequisitosConfirmacion.Requisito> requisitos,
-            List<Reprogramacion> reprogramaciones, Map<Long, String> nombres) {
+            List<Reprogramacion> reprogramaciones, AsistenciaPorSegmento.Asistencia asistencia, Map<Long, String> nombres) {
     }
 
     /**
@@ -111,12 +115,15 @@ public class ConsultaEventoService {
         }
         contratados.forEach(s -> personas.add(s.getUsuarioId()));
         cambiosDeUnidad.forEach(r -> personas.add(r.getUsuarioId()));
-        return new Ficha(evento, veImportes, acciones(evento, quien), List.copyOf(evento.getContactos()), cambios, datos,
-                legajo, contratados, evento.getEstado() == EstadoEvento.CONTRATADO ? requisitos.de(evento) : null,
-                cambiosDeUnidad, usuarios.nombres(personas));
+        AsistenciaPorSegmento.Asistencia asistencia = asistencias.de(evento);
+        return new Ficha(evento, veImportes, acciones(evento, asistencia != null, quien), List.copyOf(evento.getContactos()),
+                cambios, datos, legajo, contratados,
+                evento.getEstado() == EstadoEvento.CONTRATADO ? requisitos.de(evento) : null, cambiosDeUnidad, asistencia,
+                usuarios.nombres(personas));
     }
 
-    public static Acciones acciones(Evento evento, UsuarioActual quien) {
+    /** @param usaSegmentos el tipo de evento cuenta la asistencia por segmento. */
+    public static Acciones acciones(Evento evento, boolean usaSegmentos, UsuarioActual quien) {
         boolean preReserva = evento.getEstado() == EstadoEvento.PRE_RESERVA;
         boolean titular = AccesoEvento.puedeOperarComoTitular(quien, evento);
         return new Acciones(EDITABLES.contains(evento.getEstado()) && AccesoEvento.puedeModificar(quien, evento),
@@ -125,7 +132,8 @@ public class ConsultaEventoService {
                 PlannerService.ESTADOS.contains(evento.getEstado()) && quien.accesoTotal(),
                 evento.getEstado() == EstadoEvento.CONTRATADO && AccesoEvento.puedeConfirmar(quien, evento),
                 CancelacionService.ESTADOS.contains(evento.getEstado()) && quien.accesoTotal(),
-                EDITABLES.contains(evento.getEstado()) && titular);
+                EDITABLES.contains(evento.getEstado()) && titular,
+                usaSegmentos && EDITABLES.contains(evento.getEstado()) && AccesoEvento.puedeRegistrarAsistencia(quien, evento));
     }
 
     /** El evento, si existe y la persona puede ver su detalle. */

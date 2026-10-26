@@ -195,6 +195,9 @@ public class AvisosEvento {
         if (campo.startsWith("servicio.")) {
             return "el servicio de " + campo.substring("servicio.".length());
         }
+        if (campo.startsWith(AsistenciaService.CAMPO_PREVISTA)) {
+            return "la asistencia prevista de " + campo.substring(AsistenciaService.CAMPO_PREVISTA.length());
+        }
         return NOMBRE_CAMPO.getOrDefault(campo, campo);
     }
 

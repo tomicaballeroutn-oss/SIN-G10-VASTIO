@@ -147,6 +147,7 @@ export interface Acciones {
   confirmar: boolean;
   cancelar: boolean;
   reprogramar: boolean;
+  registrarAsistenciaPrevista: boolean;
 }
 
 /** Una condición de «Confirmar evento»: lo que hay («Ana Sosa», «180») o lo que falta. */
@@ -210,6 +211,25 @@ export interface DocumentoLegajo {
   fechaCarga: string;
 }
 
+/**
+ * Un segmento de asistencia del evento (UI-19). `equivaleInvitados`: su previsto es la cantidad de invitados y no se
+ * carga aparte. `activo` falso: dado de baja con algo cargado (se ve, no se edita).
+ */
+export interface SegmentoAsistencia {
+  id: number;
+  nombre: string;
+  activo: boolean;
+  equivaleInvitados: boolean;
+  prevista: number | null;
+}
+
+/** Asistencia por segmento de un evento de egresados. */
+export interface Asistencia {
+  segmentos: SegmentoAsistencia[];
+  /** Suma de lo previsto; null si no hay nada. Sobre esto se dimensiona la bebida. */
+  totalPrevisto: number | null;
+}
+
 export interface Ficha {
   id: number;
   codigo: string;
@@ -238,6 +258,8 @@ export interface Ficha {
   /** null para quien no ve el legajo: el contrato tiene importes. */
   documentos: DocumentoLegajo[] | null;
   servicios: ServicioFicha[];
+  /** null si el tipo de evento no cuenta la asistencia por segmento. */
+  asistencia: Asistencia | null;
   /** Solo en Contratado: lo que muestra el diálogo «Confirmar evento». */
   requisitosConfirmacion: RequisitoConfirmacion[] | null;
   fechaCreacion: string;
@@ -297,6 +319,9 @@ export const fichas = {
     api<Ficha>(`/eventos/${id}/planner`, { metodo: 'PUT', cuerpo: { plannerId } }),
   registrarInvitados: (id: number, version: number, cantidad: number, definitivos: boolean) =>
     api<Ficha>(`/eventos/${id}/invitados`, { metodo: 'PUT', cuerpo: { version, cantidad, definitivos } }),
+  /** `cantidad` null deja el segmento sin previsto; los que no van no cambian. */
+  registrarAsistenciaPrevista: (id: number, version: number, segmentos: { segmentoId: number; cantidad: number | null }[]) =>
+    api<Ficha>(`/eventos/${id}/asistencia/prevista`, { metodo: 'PUT', cuerpo: { version, segmentos } }),
   registrarServicios: (id: number, version: number, servicios: ServicioAGuardar[]) =>
     api<Ficha>(`/eventos/${id}/servicios`, { metodo: 'PUT', cuerpo: { version, servicios } }),
   descargarDocumento: (id: number, documentoId: number) => descargarArchivo(`/eventos/${id}/documentos/${documentoId}`),

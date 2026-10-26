@@ -215,12 +215,18 @@ export function SeccionSegmentos() {
       {(segmentos) => (
         <ListaYEdicion<Segmento>
           items={segmentos}
-          fila={(s) => <span className="label">{s.nombre}</span>}
+          fila={(s) => (
+            <span className="label">
+              {s.nombre}
+              {s.equivaleInvitados && <span className="body-sm v-muted"> · los invitados del evento</span>}
+            </span>
+          )}
           etiqueta={(s) => s.nombre}
           inactivo={(s) => !s.activo}
           agregar="Agregar segmento"
           titulo={(s) => (s ? 'Editar segmento' : 'Agregar segmento')}
-          alGuardar={(s) => datos.fijar((previos) => reemplazar(previos, s))}
+          // Marcar uno como los invitados se lo quita al anterior: se vuelve a pedir la lista.
+          alGuardar={(s) => (s.equivaleInvitados ? datos.recargar() : datos.fijar((previos) => reemplazar(previos, s)))}
           formulario={(s, listo) => <FormularioSegmento segmento={s} listo={listo} />}
         />
       )}
@@ -231,11 +237,14 @@ export function SeccionSegmentos() {
 function FormularioSegmento({ segmento, listo }: { segmento?: Segmento; listo: (s: Segmento) => void }) {
   const [nombre, setNombre] = useState(segmento?.nombre ?? '');
   const [activo, setActivo] = useState(segmento?.activo ?? true);
+  const [equivaleInvitados, setEquivaleInvitados] = useState(segmento?.equivaleInvitados ?? false);
   const { guardando, error, enviar } = useEnvio();
 
   async function guardar() {
     const guardado = await enviar(() =>
-      segmento ? catalogos.actualizarSegmento(segmento.id, { nombre, activo }) : catalogos.crearSegmento({ nombre }),
+      segmento
+        ? catalogos.actualizarSegmento(segmento.id, { nombre, activo, equivaleInvitados })
+        : catalogos.crearSegmento({ nombre, equivaleInvitados }),
     );
     if (guardado) listo(guardado);
   }
@@ -243,6 +252,12 @@ function FormularioSegmento({ segmento, listo }: { segmento?: Segmento; listo: (
   return (
     <Formulario alEnviar={guardar} error={error} accion={segmento ? 'Guardar cambios' : 'Agregar segmento'} guardando={guardando}>
       <Input label="Nombre" value={nombre} onChange={(e) => setNombre(e.target.value)} error={error?.errorDe('nombre')} required />
+      <Checkbox
+        label="Equivale a los invitados del evento"
+        hint="Su asistencia prevista es la cantidad de invitados (en egresados, los comensales de la cena). Marcarlo se lo quita al segmento que lo tenía."
+        checked={equivaleInvitados}
+        onChange={(e) => setEquivaleInvitados(e.target.checked)}
+      />
       {segmento && <SwitchActivo activo={activo} onChange={setActivo} ayuda={AYUDA_BAJA} />}
     </Formulario>
   );

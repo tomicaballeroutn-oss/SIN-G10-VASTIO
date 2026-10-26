@@ -34,6 +34,8 @@ export interface Segmento {
   id: number;
   nombre: string;
   activo: boolean;
+  /** Su asistencia prevista es la cantidad de invitados del evento (en egresados, los comensales). Uno solo la tiene. */
+  equivaleInvitados: boolean;
 }
 
 export interface Categoria {

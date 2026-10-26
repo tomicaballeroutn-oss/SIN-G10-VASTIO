@@ -57,6 +57,10 @@
 .invitados { display: flex; flex-direction: column; gap: var(--space-4); min-width: min(400px, 100%); }
 .invitados p { margin: 0; }
 
+/* UI-19 · Asistencia por segmento */
+.asistencia { display: flex; flex-direction: column; gap: var(--space-4); min-width: min(400px, 100%); }
+.asistencia p { margin: 0; }
+
 /* UI-16 · Asignar planner */
 .planner { display: flex; flex-direction: column; gap: var(--space-4); min-width: min(400px, 100%); }
 

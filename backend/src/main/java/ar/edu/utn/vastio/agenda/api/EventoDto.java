@@ -14,6 +14,7 @@ import org.springframework.stereotype.Component;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 
+import ar.edu.utn.vastio.agenda.aplicacion.AsistenciaPorSegmento;
 import ar.edu.utn.vastio.agenda.aplicacion.ConsultaEventoService.Acciones;
 import ar.edu.utn.vastio.agenda.aplicacion.ConsultaEventoService.Ficha;
 import ar.edu.utn.vastio.agenda.aplicacion.DescripcionEvento;
@@ -112,19 +113,37 @@ public class EventoDto {
         }
     }
 
+    /**
+     * Asistencia por segmento (UI-19). {@code equivaleInvitados}: su previsto es la cantidad de invitados y no se carga
+     * aparte. {@code activo} falso: dado de baja con algo cargado (se ve, no se edita).
+     */
+    public record SegmentoDto(short id, String nombre, boolean activo, boolean equivaleInvitados, Integer prevista) {
+    }
+
+    /** {@code totalPrevisto}: la suma de lo previsto (null si no hay nada); sobre eso se dimensiona la bebida. */
+    public record AsistenciaDto(List<SegmentoDto> segmentos, Integer totalPrevisto) {
+
+        static AsistenciaDto de(AsistenciaPorSegmento.Asistencia a) {
+            return a == null ? null : new AsistenciaDto(a.segmentos().stream()
+                    .map(s -> new SegmentoDto(s.id(), s.nombre(), s.activo(), s.equivaleInvitados(), s.prevista()))
+                    .toList(), a.totalPrevisto());
+        }
+    }
+
     /** Motivo y detalle de un evento cancelado. */
     public record CancelacionDto(String motivo, String detalle) {
     }
 
     /**
      * {@code documentos} es null para quien no ve el legajo (el contrato tiene importes). {@code requisitosConfirmacion}
-     * es null salvo en Contratado: lo que muestra el diálogo «Confirmar evento».
+     * es null salvo en Contratado: lo que muestra el diálogo «Confirmar evento». {@code asistencia} es null si el tipo
+     * de evento no la cuenta por segmento.
      */
     public record FichaResponse(long id, String codigo, EstadoEvento estado, String nombre, Nombre tipo, SalonDto salon,
             LocalDate fecha, TurnoDto turno, LocalTime horaInicio, String reprogramadoDesde, ClienteDto cliente,
             List<ContactoDto> contactos, Nombre vendedora, Nombre planner, Integer cantidadInvitados,
             boolean invitadosDefinitivos, String observacionesInternas, SenaDto sena, LocalDate fechaFirmaContrato, CancelacionDto cancelacion, List<DocumentoDto> documentos,
-            List<ServicioDto> servicios,
+            List<ServicioDto> servicios, AsistenciaDto asistencia,
             List<Requisito> requisitosConfirmacion, OffsetDateTime fechaCreacion, int version, Acciones acciones,
             List<HistorialDto> historial) {
     }
@@ -156,7 +175,7 @@ public class EventoDto {
                 e.getMotivoCancelacionId() == null ? null
                         : new CancelacionDto(catalogos.motivo(e.getMotivoCancelacionId()).getNombre(), e.getDetalleCancelacion()),
                 f.documentos() == null ? null : f.documentos().stream().map(d -> documento(d, nombres)).toList(),
-                servicios(f.servicios(), nombres), f.requisitos(), e.getFechaCreacion(), e.getVersion(), f.acciones(),
+                servicios(f.servicios(), nombres), AsistenciaDto.de(f.asistencia()), f.requisitos(), e.getFechaCreacion(), e.getVersion(), f.acciones(),
                 historial);
     }
 

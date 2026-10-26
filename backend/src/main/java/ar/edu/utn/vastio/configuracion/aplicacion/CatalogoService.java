@@ -132,22 +132,42 @@ public class CatalogoService {
     }
 
     @Transactional
-    public TipoSegmentoAsistencia crearSegmento(String nombre) {
+    public TipoSegmentoAsistencia crearSegmento(String nombre, boolean equivaleInvitados) {
         if (segmentos.existsByNombreIgnoreCaseAndIdNot(nombre, SIN_ID)) {
             throw repetido("Ya hay un segmento con ese nombre.");
         }
-        return segmentos.save(new TipoSegmentoAsistencia(nombre));
+        TipoSegmentoAsistencia segmento = new TipoSegmentoAsistencia(nombre);
+        if (equivaleInvitados) {
+            quitarEquivalencia(SIN_ID);
+        }
+        segmento.setEquivaleInvitados(equivaleInvitados);
+        return segmentos.save(segmento);
     }
 
+    /**
+     * @param equivaleInvitados marcarlo se la quita al segmento que la tenía (docs/sprint-4.md, decisión 2).
+     */
     @Transactional
-    public TipoSegmentoAsistencia actualizarSegmento(short id, String nombre, boolean activo) {
+    public TipoSegmentoAsistencia actualizarSegmento(short id, String nombre, boolean activo, boolean equivaleInvitados) {
         TipoSegmentoAsistencia segmento = segmentos.findById(id).orElseThrow(() -> ProblemaException.noEncontrado(
                 "SEGMENTO_INEXISTENTE", "No encontramos ese segmento."));
         if (segmentos.existsByNombreIgnoreCaseAndIdNot(nombre, id)) {
             throw repetido("Ya hay un segmento con ese nombre.");
         }
+        if (equivaleInvitados && !segmento.isEquivaleInvitados()) {
+            quitarEquivalencia(id);
+        }
         segmento.actualizar(nombre, activo);
+        segmento.setEquivaleInvitados(equivaleInvitados);
         return segmento;
+    }
+
+    /** Antes de marcar otro: el índice único no admite dos marcados ni por un instante. */
+    private void quitarEquivalencia(short salvo) {
+        segmentos.findAll().stream()
+                .filter(s -> s.isEquivaleInvitados() && s.getId() != salvo)
+                .forEach(s -> s.setEquivaleInvitados(false));
+        segmentos.flush();
     }
 
     // ---------- categorías de servicio ----------

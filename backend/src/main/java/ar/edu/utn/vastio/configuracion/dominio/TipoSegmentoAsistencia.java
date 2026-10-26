@@ -25,6 +25,13 @@ public class TipoSegmentoAsistencia {
     @Column(name = "activo", nullable = false)
     private boolean activo = true;
 
+    /**
+     * Su asistencia prevista es la cantidad de invitados del evento (en egresados, los comensales de la cena), así
+     * nadie se cuenta dos veces. Uno solo la tiene ({@code ux_segmento_equivale_invitados}).
+     */
+    @Column(name = "equivale_invitados", nullable = false)
+    private boolean equivaleInvitados;
+
     protected TipoSegmentoAsistencia() {
     }
 
@@ -37,6 +44,10 @@ public class TipoSegmentoAsistencia {
         this.activo = activo;
     }
 
+    public void setEquivaleInvitados(boolean equivaleInvitados) {
+        this.equivaleInvitados = equivaleInvitados;
+    }
+
     public Short getId() {
         return id;
     }
@@ -47,5 +58,9 @@ public class TipoSegmentoAsistencia {
 
     public boolean isActivo() {
         return activo;
+    }
+
+    public boolean isEquivaleInvitados() {
+        return equivaleInvitados;
     }
 }

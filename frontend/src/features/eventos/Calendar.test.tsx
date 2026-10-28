@@ -85,6 +85,13 @@ describe('M-06 · Calendar manual', () => {
     expect(await screen.findByText('Resultado incierto: requiere verificación')).toHaveAttribute('role','status');
     expect(screen.getByRole('button',{name:'Exportar a Google Calendar'})).toBeEnabled();
   });
+  it('una operación de otro usuario bloquea escrituras y permite volver a consultar', async()=>{
+    const fetch=backend({...pendiente,estado:'EN_PROCESO'}); montar('/eventos/5');
+    expect(await screen.findByRole('button',{name:'Exportar a Google Calendar'})).toBeDisabled();
+    await userEvent.click(screen.getByRole('button',{name:'Volver a consultar publicación'}));
+    await vi.waitFor(()=>expect(pedidos(fetch).filter(p=>p.ruta.endsWith('/calendar')&&p.metodo==='GET')).toHaveLength(2));
+    expect(pedidos(fetch).filter(p=>p.metodo==='POST')).toHaveLength(0);
+  });
   it('lista persistente permite abrir la ficha', async()=>{
     backend(pendiente); montar('/calendar/pendientes');
     const tabla=await screen.findByRole('table',{name:'Pendientes de Google Calendar'});

@@ -16,6 +16,8 @@ Integración dentro de agenda: `CalendarEventoController` → `ExportacionCalend
 
 `PENDIENTE`, `EXPORTADO`, `RETIRADO`, `EN_PROCESO`, `ERROR`, `INCIERTO`. Son técnicos; no modifican `Evento.estado`.
 
+La intención de retirada manual también se persiste (`retiro_solicitado`): un error no la convierte en una actualización aunque el evento siga activo.
+
 La acción pendiente es independiente: `EXPORTAR`, `ACTUALIZAR`, `RETIRAR`, `NINGUNA`. Una operación fallida puede conservar el mismo trabajo pendiente. `ultimoExito` solo se actualiza al persistir una confirmación.
 
 Después de una retirada manual confirmada no se vuelve a crear automáticamente la entrada. La recreación de un ID eliminado requiere revisión: Google puede conservar una lápida del evento. Nunca se cambia silenciosamente el ID para sortearla.
@@ -89,9 +91,9 @@ Proyecto/identidad/calendario separados del productivo, datos sintéticos y audi
 
 Un registro por evento Vastio (un destino por evento en este MVP), con unicidad adicional de calendario/ID. El ID remoto es SHA-256 hexadecimal de instalación + separador + eventoId: 64 caracteres admitidos por base32hex, estable entre reintentos y separado por entorno.
 
-Antes de escribir se persiste la identidad y la operación. Se usa un advisory lock PostgreSQL de sesión por evento durante toda la operación remota. No es un lock Java ni una lease con vencimiento que permita ejecutar dos escritores simultáneos. Una colisión del hash numérico del lock solo serializa eventos adicionales.
+Antes de escribir se persiste la identidad, la operación y la huella del intento. La huella del intento permite recuperar una escritura exitosa aun cuando el contenido local cambió antes del reintento. Se usa un advisory lock PostgreSQL de sesión por evento durante toda la operación remota. No es un lock Java ni una lease con vencimiento que permita ejecutar dos escritores simultáneos. Una colisión del hash numérico del lock solo serializa eventos adicionales.
 
-El lock usa una conexión dedicada sin transacción comercial abierta. Las transacciones de preparación/confirmación son cortas. La conexión se desbloquea antes de volver al pool. Al caer el proceso se libera la sesión; `EN_PROCESO` queda durable y una consulta posterior lo identifica como incierto si el lock ya está libre.
+El lock usa una conexión dedicada sin transacción comercial abierta. Las transacciones de preparación/confirmación son cortas. La entrada del caso de uso remoto usa propagación NEVER para rechazar su ejecución dentro de una transacción comercial. La conexión se desbloquea antes de volver al pool. Al caer el proceso se libera la sesión; `EN_PROCESO` queda durable y una consulta posterior lo identifica como incierto si el lock ya está libre.
 
 ## 11. Errores externos
 

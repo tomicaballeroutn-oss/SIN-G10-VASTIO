@@ -142,6 +142,9 @@ class CalendarIT {
         }).when(google).crear(anyString(),anyString(),any());
         assertThatThrownBy(()->servicio.operar(id,false,quien)).hasMessageContaining("RED_GOOGLE");
         assertThat(servicio.estado(id,quien).estado()).isEqualTo("INCIERTO");
+        doThrow(new Fallo("RED_GOOGLE",false)).when(google).comprobarDestino(anyString());
+        assertThatThrownBy(()->servicio.operar(id,false,quien)).hasMessageContaining("RED_GOOGLE");
+        doNothing().when(google).comprobarDestino(anyString());
         assertThat(servicio.operar(id,false,quien).estado()).isEqualTo("EXPORTADO");
         verify(google,times(1)).crear(anyString(),eq(ContenidoCalendar.identidad("m06-it",id)),any());
     }

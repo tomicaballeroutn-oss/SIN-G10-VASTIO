@@ -159,7 +159,8 @@ public class ExportacionCalendarService {
         Remoto actual = cliente.consultar(i.calendario(), i.googleId());
         if (i.retirar()) {
             if (actual == null || actual.eliminado()) return null;
-            if (!i.recuperar() && i.etag() != null && !Objects.equals(i.etag(), actual.etag())) throw new Fallo("CONFLICTO_REMOTO", false);
+            if (i.etag() != null && !Objects.equals(i.etag(), actual.etag())
+                    && !(i.recuperar() && Objects.equals(i.huellaIntento(), actual.huella()))) throw new Fallo("CONFLICTO_REMOTO", false);
             cliente.retirar(i.calendario(), i.googleId(), actual.etag());
             return null;
         }
@@ -173,7 +174,8 @@ public class ExportacionCalendarService {
             }
         }
         if (actual.eliminado()) throw new Fallo("EVENTO_REMOTO_ELIMINADO", false);
-        if (i.recuperar() && i.contenido().huella().equals(actual.huella())) return actual;
+        // Confirmar contenido propio idéntico tampoco necesita otra escritura después de un fallo de lectura.
+        if (i.contenido().huella().equals(actual.huella())) return actual;
         if (!i.recuperar() && (i.etag() == null || !Objects.equals(i.etag(), actual.etag()))) throw new Fallo("CONFLICTO_REMOTO", false);
         // Una recuperación solo puede sobrescribir si coincide con la última versión confirmada.
         if (i.recuperar() && !Objects.equals(i.huellaAnterior(), actual.huella()) && !Objects.equals(i.huellaIntento(), actual.huella())) throw new Fallo("CONFLICTO_REMOTO", false);

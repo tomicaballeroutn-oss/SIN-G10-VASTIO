@@ -39,14 +39,15 @@ export function EstadoGoogleCalendar({ eventoId, version }: { eventoId: number; 
         {puede && accion !== 'NINGUNA' && <Button
           tone={accion === 'EXPORTAR' ? 'danger' : undefined}
           variant={accion === 'EXPORTAR' ? 'solid' : 'outline'} icon="calendar"
-          loading={guardando} disabled={!e.configurado || datos.cargando}
+          loading={guardando} disabled={!e.configurado || datos.cargando || e.estado === 'EN_PROCESO'}
           onClick={() => void operar(accion)}>
           {accion === 'EXPORTAR' ? 'Exportar a Google Calendar' : accion === 'ACTUALIZAR' ? 'Actualizar en Google Calendar' : 'Retirar de Google Calendar'}
         </Button>}
         {(e.estado === 'EN_PROCESO' || e.estado === 'INCIERTO' || e.error) && accion === 'NINGUNA' &&
-          <Button variant="outline" disabled={!e.configurado} loading={guardando} onClick={() => void operar(e.puedeRetirar && !e.puedeExportar ? 'RETIRAR' : 'ACTUALIZAR')}>Verificar y reintentar</Button>}
+          <Button variant="outline" disabled={!e.configurado || e.estado === 'EN_PROCESO'} loading={guardando} onClick={() => void operar(e.puedeRetirar && !e.puedeExportar ? 'RETIRAR' : 'ACTUALIZAR')}>Verificar y reintentar</Button>}
+        {e.estado === 'EN_PROCESO' && <Button variant="text" onClick={datos.recargar}>Volver a consultar publicación</Button>}
         {e.puedeRetirar && accion !== 'RETIRAR' && !guardando &&
-          <Button variant="text" tone="danger" disabled={!e.configurado || datos.cargando} onClick={() => void operar('RETIRAR')}>Retirar de Google Calendar</Button>}
+          <Button variant="text" tone="danger" disabled={!e.configurado || datos.cargando || e.estado === 'EN_PROCESO'} onClick={() => void operar('RETIRAR')}>Retirar de Google Calendar</Button>}
         <p className="body-sm v-muted">Las publicaciones, actualizaciones y retiradas se realizan solo cuando las solicitás.</p>
       </div>}
     </Card>

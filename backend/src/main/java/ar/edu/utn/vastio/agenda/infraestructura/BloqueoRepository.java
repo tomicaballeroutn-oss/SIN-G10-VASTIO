@@ -31,8 +31,15 @@ public interface BloqueoRepository extends JpaRepository<Bloqueo, Long> {
     List<Bloqueo> activosEn(long unidadId);
 
     /** Los bloqueos activos con sus unidades: la lista de UI-21. */
-    @Query("select distinct b from Bloqueo b join fetch b.unidades where b.activo = true")
-    List<Bloqueo> activosConUnidades();
+    // Filtra cabeceras por vigencia, pero trae todas sus unidades para conservar el rango original.
+    @Query("""
+            select distinct b from Bloqueo b join fetch b.unidades
+            where b.activo = true and exists (
+                select u.id from Bloqueo vigente join vigente.unidades u
+                where vigente.id = b.id and u.fecha >= :hoy
+            )
+            """)
+    List<Bloqueo> activosConUnidades(LocalDate hoy);
 
     /** SELECT … FOR UPDATE: dos desbloqueos simultáneos no se pisan; el segundo ve el bloqueo ya inactivo. */
     @Lock(LockModeType.PESSIMISTIC_WRITE)

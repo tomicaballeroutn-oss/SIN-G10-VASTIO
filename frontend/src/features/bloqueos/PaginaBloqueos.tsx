@@ -2,9 +2,9 @@ import { useState, type FormEvent } from 'react';
 import { bloqueos, MAXIMO_DIAS_DE_BLOQUEO, type Bloqueo } from '../../api/bloqueos';
 import { catalogos, type Motivo, type Salon, type Turno } from '../../api/catalogos';
 import { useDatos, useEnvio } from '../../api/useDatos';
-import { Alert, Button, Card, Checkbox, Dialog, Input, Select, Table, type TableColumn } from '../../ds';
+import { Actor, Alert, Button, Card, Checkbox, Dialog, Input, Select, Table, type TableColumn } from '../../ds';
 import { Cargando } from '../comun/Cargando';
-import { fechaCorta } from '../comun/formato';
+import { fechaCorta, fechaHora } from '../comun/formato';
 import { Encabezado } from '../layout/paginas';
 import './bloqueos.css';
 
@@ -69,6 +69,11 @@ export function PaginaBloqueos() {
           {b.detalle && <span className="v-muted"> · {b.detalle}</span>}
         </>
       ),
+    },
+    {
+      key: 'registro',
+      header: 'Registro',
+      render: (b) => <Actor name={b.registradoPor} action="registró el bloqueo" at={fechaHora(b.fechaRegistro)} size="sm" />,
     },
     {
       key: 'acciones',

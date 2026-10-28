@@ -9,9 +9,9 @@ import { fichaDePrueba } from '../../test/fichas';
 
 const camara = vi.hoisted(() => ({ leer: (() => undefined) as (codigo: string) => void }));
 vi.mock('@zxing/browser', () => ({ BrowserMultiFormatReader: class {
-  decodeFromConstraints(_c: unknown, _v: unknown, alLeer: (r: { getText: () => string }) => void) {
+  scan(_v: unknown, alLeer: (r: { getText: () => string }) => void) {
     camara.leer = (codigo) => alLeer({ getText: () => codigo });
-    return Promise.resolve({ stop: () => undefined });
+    return { stop: () => undefined };
   }
 } }));
 const MADRE = { id: 1, nombre: 'Depósito madre', tipo: 'DEPOSITO' as const };
@@ -35,7 +35,7 @@ function backend(roles: Rol[] = ['COMPRAS'], pantalla = PANTALLA, post?: (p: Ped
   });
 }
 beforeEach(() => _reiniciarCliente());
-afterEach(() => { vi.unstubAllGlobals(); Reflect.deleteProperty(navigator, 'mediaDevices'); });
+afterEach(() => { vi.restoreAllMocks(); vi.unstubAllGlobals(); Reflect.deleteProperty(navigator, 'mediaDevices'); });
 
 async function cargar() {
   montar('/eventos/5?pestana=preparacion');
@@ -210,7 +210,8 @@ describe('B5-04 · preparación', () => {
   });
   it('escanea sin sumar cantidades ni duplicar renglones', async () => {
     vi.stubGlobal('isSecureContext', true);
-    Object.defineProperty(navigator, 'mediaDevices', { configurable:true, value:{ getUserMedia:vi.fn() } });
+    vi.spyOn(HTMLMediaElement.prototype, 'play').mockResolvedValue();
+    Object.defineProperty(navigator, 'mediaDevices', { configurable:true, value:{ getUserMedia:vi.fn().mockResolvedValue({ getTracks: () => [], getVideoTracks: () => [] }) } });
     backend(); montar('/eventos/5?pestana=preparacion'); const u=userEvent.setup();
     const lecturaAnterior = camara.leer;
     await u.click(await screen.findByRole('button', { name:'Leer código' }));

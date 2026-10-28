@@ -32,7 +32,7 @@ export const MENU: readonly ItemDeMenu[] = [
   { id: 'catalogo', label: 'Catálogo', icon: 'wine', group: 'Bebidas', ruta: '/catalogo', roles: [...TOTAL, 'ADMINISTRACION', 'COMPRAS'] },
   { id: 'estadisticas', label: 'Estadísticas de consumo', icon: 'chart-column', group: 'Bebidas', ruta: '/bebidas/estadisticas', roles: ROLES_ESTADISTICAS },
 
-  { id: 'reportes', label: 'Reportes', icon: 'chart-column', group: 'Gestión', ruta: '/reportes', roles: [...TOTAL, 'ADMINISTRACION', 'COMPRAS'] },
+  { id: 'reportes', label: 'Reportes', icon: 'chart-column', group: 'Gestión', ruta: '/reportes', roles: TOTAL },
   { id: 'usuarios', label: 'Usuarios y perfiles', icon: 'users', group: 'Gestión', ruta: '/usuarios', roles: TOTAL },
   { id: 'parametros', label: 'Parámetros', icon: 'settings', group: 'Gestión', ruta: '/parametros', roles: [...TOTAL, 'ADMINISTRACION'] },
 ];

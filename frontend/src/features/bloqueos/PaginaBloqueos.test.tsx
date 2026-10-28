@@ -1,4 +1,4 @@
-import { fireEvent, screen, waitFor, within } from '@testing-library/react';
+import { act, fireEvent, screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import type { Bloqueo, PedidoDeBloqueo } from '../../api/bloqueos';
@@ -52,7 +52,7 @@ const NAVIDAD: Bloqueo = {
 function backend(
   roles: Rol[] = ['ADMINISTRACION'],
   inicial: Bloqueo[] = [PINTURA, NAVIDAD],
-  rechazos: { alRegistrar?: (p: Pedido) => Response; alDesbloquear?: (p: Pedido) => Response } = {},
+  rechazos: { alRegistrar?: (p: Pedido) => Response | Promise<Response>; alDesbloquear?: (p: Pedido) => Response | Promise<Response> } = {},
 ) {
   let lista = [...inicial];
   return backendFalso(sesionDe(roles), (p) => {
@@ -106,6 +106,8 @@ describe('UI-21 · bloqueo de unidades', () => {
     expect(filas[0]).toHaveTextContent('lun 4 abr 2033 al vie 8 abr 2033');
     expect(filas[0]).toHaveTextContent('Ambos');
     expect(filas[0]).toHaveTextContent('Mantenimiento · Pintura');
+    expect(filas[0]).toHaveTextContent('Gabriela Soria');
+    expect(filas[0]).toHaveTextContent('mar 1 mar 10:00');
     expect(filas[1]).toHaveTextContent('Santa Bárbara');
     expect(filas[1]).toHaveTextContent('dom 25 dic 2033');
     expect(filas[1]).toHaveTextContent('Noche');
@@ -269,11 +271,51 @@ describe('UI-21 · bloqueo de unidades', () => {
     expect(await within(screen.getByRole('dialog')).findByRole('alert')).toHaveTextContent('Ese bloqueo ya estaba desbloqueado');
   });
 
-  it('los perfiles sin permiso no ven la pantalla', async () => {
-    backend(['VENDEDORA']);
+  it.each<Rol>(['VENDEDORA', 'PLANNER', 'COMPRAS', 'BARRA', 'COCINA'])('el perfil %s no ve la pantalla', async (rol) => {
+    backend([rol]);
     montar('/bloqueos');
 
     expect(await screen.findByText('Tu perfil no tiene acceso a esta pantalla')).toBeInTheDocument();
     expect(screen.queryByRole('button', { name: 'Registrar bloqueo' })).not.toBeInTheDocument();
+  });
+});
+
+describe('UI-21 · envío en curso', () => {
+  it('mantiene el registro ocupado y no duplica el pedido al volver a pulsar', async () => {
+    let responder!: (respuesta: Response) => void;
+    const pendiente = new Promise<Response>((resolve) => { responder = resolve; });
+    const fetchMock = backend(['ADMINISTRACION'], [], { alRegistrar: () => pendiente });
+    montar('/bloqueos');
+    await userEvent.click(await screen.findByRole('checkbox', { name: 'Avril' }));
+    fecha('Desde', '2033-04-04');
+    await userEvent.selectOptions(screen.getByLabelText('Turnos'), 'Noche');
+    await userEvent.selectOptions(screen.getByLabelText('Motivo'), 'Mantenimiento');
+    const boton = screen.getByRole('button', { name: 'Registrar bloqueo' });
+    await userEvent.click(boton);
+    expect(boton).toBeDisabled();
+    expect(boton).toHaveAttribute('aria-busy', 'true');
+    await userEvent.click(boton);
+    expect(pedidos(fetchMock).filter((p) => p.metodo === 'POST')).toHaveLength(1);
+    await act(async () => responder(problema(503, 'NO_DISPONIBLE', 'Volvé a intentarlo.')));
+    expect(await screen.findByText('Volvé a intentarlo.')).toBeInTheDocument();
+    expect(boton).toBeEnabled();
+    expect(screen.getByLabelText('Desde')).toHaveValue('2033-04-04');
+  });
+
+  it('no duplica un desbloqueo pendiente y conserva el diálogo al fallar', async () => {
+    let responder!: (respuesta: Response) => void;
+    const pendiente = new Promise<Response>((resolve) => { responder = resolve; });
+    const fetchMock = backend(['ADMINISTRACION'], [PINTURA], { alDesbloquear: () => pendiente });
+    montar('/bloqueos');
+    const tabla = await screen.findByRole('table', { name: 'Bloqueos activos' });
+    await userEvent.click(within(tabla).getByRole('button', { name: 'Desbloquear' }));
+    const boton = within(screen.getByRole('dialog')).getByRole('button', { name: 'Desbloquear' });
+    await userEvent.click(boton);
+    expect(boton).toBeDisabled();
+    await userEvent.click(boton);
+    expect(pedidos(fetchMock).filter((p) => p.metodo === 'POST')).toHaveLength(1);
+    await act(async () => responder(problema(409, 'BLOQUEO_YA_DESBLOQUEADO', 'Ese bloqueo ya estaba desbloqueado.')));
+    expect(await within(screen.getByRole('dialog')).findByRole('alert')).toHaveTextContent('ya estaba desbloqueado');
+    expect(boton).toBeEnabled();
   });
 });

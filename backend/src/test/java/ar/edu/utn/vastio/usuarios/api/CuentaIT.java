@@ -61,6 +61,7 @@ class CuentaIT {
     @EnumSource(RolCodigo.class)
     void cualquierPerfilCambiaSuContrasena(RolCodigo rol) throws Exception {
         Usuario usuario = personas.de(rol);
+        usuario.setDebeCambiarContrasena(true);
 
         cambiar(usuario, Personas.CONTRASENA, NUEVA).andExpect(status().isNoContent());
 
@@ -90,6 +91,7 @@ class CuentaIT {
     @Test
     void conLaActualIncorrectaNoCambiaNada() throws Exception {
         Usuario usuario = personas.de(RolCodigo.COMPRAS);
+        usuario.setDebeCambiarContrasena(true);
         String hashAntes = usuario.getHashContrasena();
 
         cambiar(usuario, "no-es-esta", NUEVA)
@@ -140,6 +142,70 @@ class CuentaIT {
         cambiar(usuario, Personas.CONTRASENA, NUEVA)
                 .andExpect(status().isUnprocessableContent())
                 .andExpect(jsonPath("$.codigo").value("USUARIO_INACTIVO"));
+    }
+
+
+    @ParameterizedTest
+    @EnumSource(RolCodigo.class)
+    void laContrasenaInicialBloqueaLaApiHastaCambiarlaInclusoConElMismoToken(RolCodigo rol) throws Exception {
+        Usuario usuario = personas.de(rol);
+        usuario.setDebeCambiarContrasena(true);
+        String token = personas.bearer(usuario);
+        mvc.perform(org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get("/api/v1/_sonda/autenticado")
+                .header(HttpHeaders.AUTHORIZATION, token)).andExpect(status().isForbidden());
+        mvc.perform(post("/api/v1/usuarios").header(HttpHeaders.AUTHORIZATION, token)
+                .contentType(MediaType.APPLICATION_JSON).content("{}")).andExpect(status().isForbidden());
+
+        cambiar(usuario, Personas.CONTRASENA, NUEVA).andExpect(status().isNoContent());
+        mvc.perform(org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get("/api/v1/_sonda/autenticado")
+                .header(HttpHeaders.AUTHORIZATION, token)).andExpect(status().isOk());
+    }
+
+    @Test
+    void variosRolesNoEvitanElCambioYElRefrescoLeeElEstadoActual() throws Exception {
+        Usuario usuario = personas.usuario("inicial.multiperfil", "Primer ingreso", RolCodigo.DIRECCION, RolCodigo.COMPRAS);
+        usuario.setDebeCambiarContrasena(true);
+        var ingreso = mvc.perform(login(usuario.getNombreUsuario(), Personas.CONTRASENA))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.usuario.debeCambiarContrasena").value(true)).andReturn();
+        var cookie = ingreso.getResponse().getCookie(AutenticacionController.COOKIE_REFRESCO);
+        mvc.perform(post("/api/v1/auth/refresh").cookie(cookie)).andExpect(status().isOk())
+                .andExpect(jsonPath("$.usuario.debeCambiarContrasena").value(true));
+        mvc.perform(post("/api/v1/usuarios").header(HttpHeaders.AUTHORIZATION, personas.bearer(usuario))
+                .contentType(MediaType.APPLICATION_JSON).content("{}")).andExpect(status().isForbidden());
+        cambiar(usuario, Personas.CONTRASENA, NUEVA).andExpect(status().isNoContent());
+        mvc.perform(post("/api/v1/auth/refresh").cookie(cookie)).andExpect(status().isOk())
+                .andExpect(jsonPath("$.usuario.debeCambiarContrasena").value(false));
+        mvc.perform(post("/api/v1/auth/logout").cookie(cookie)).andExpect(status().isNoContent());
+    }
+
+    @Test
+    void unIdEnElCuerpoNoPermiteCambiarOtraCuenta() throws Exception {
+        Usuario propia = personas.de(RolCodigo.VENDEDORA);
+        Usuario ajena = personas.de(RolCodigo.DIRECCION);
+        String hashAjeno = ajena.getHashContrasena();
+        mvc.perform(post("/api/v1/cuenta/contrasena")
+                .header(HttpHeaders.AUTHORIZATION, personas.bearer(propia))
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("{\"usuarioId\":%d,\"contrasenaActual\":\"%s\",\"contrasenaNueva\":\"%s\"}"
+                        .formatted(ajena.getId(), Personas.CONTRASENA, NUEVA)))
+                .andExpect(status().isNoContent());
+        entityManager.flush();
+        entityManager.clear();
+        assertThat(usuarios.findById(ajena.getId()).orElseThrow().getHashContrasena()).isEqualTo(hashAjeno);
+        assertThat(passwordEncoder.matches(NUEVA, usuarios.findById(propia.getId()).orElseThrow().getHashContrasena())).isTrue();
+    }
+
+    @Test
+    void respetaElLimiteRealDeBcryptConUnicodeSinResponder500() throws Exception {
+        Usuario usuario = personas.de(RolCodigo.BARRA);
+        String hash = usuario.getHashContrasena();
+        cambiar(usuario, Personas.CONTRASENA, "á".repeat(37))
+                .andExpect(status().isUnprocessableContent())
+                .andExpect(jsonPath("$.codigo").value("CONTRASENA_DEMASIADO_LARGA"));
+        assertThat(usuarios.findById(usuario.getId()).orElseThrow().getHashContrasena()).isEqualTo(hash);
+        cambiar(usuario, Personas.CONTRASENA, "á".repeat(36)).andExpect(status().isNoContent());
+        assertThat(passwordEncoder.matches("á".repeat(36), usuario.getHashContrasena())).isTrue();
     }
 
     private ResultActions cambiar(Usuario usuario, String actual, String nueva) throws Exception {

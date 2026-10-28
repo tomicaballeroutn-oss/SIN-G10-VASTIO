@@ -219,6 +219,7 @@ class AutenticacionIT {
             return;
         }
         Usuario usuario = new Usuario(nombre, nombreUsuario, passwordEncoder.encode(CONTRASENA));
+        usuario.setDebeCambiarContrasena(false);
         for (RolCodigo codigo : codigos) {
             usuario.asignarRol(roles.findByCodigo(codigo).orElseThrow());
         }

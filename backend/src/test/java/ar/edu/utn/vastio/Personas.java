@@ -37,6 +37,9 @@ public class Personas {
     public Usuario usuario(String nombreUsuario, String nombreCompleto, RolCodigo... codigos) {
         return usuarios.findByNombreUsuario(nombreUsuario).orElseGet(() -> {
             Usuario usuario = new Usuario(nombreCompleto, nombreUsuario, passwordEncoder.encode(CONTRASENA));
+            // Las pruebas comerciales parten de cuentas con el primer ingreso completado.
+            // Los casos de contraseña inicial activan la marca explícitamente.
+            usuario.setDebeCambiarContrasena(false);
             for (RolCodigo codigo : codigos) {
                 usuario.asignarRol(roles.findByCodigo(codigo).orElseThrow());
             }

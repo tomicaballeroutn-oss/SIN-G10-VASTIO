@@ -56,6 +56,12 @@ public final class Permisos {
     /** Consultar stock: Administración y Compras ven todo; Barra, solo las barras de la jornada (en el servicio). */
     public static final String CONSULTAR_STOCK = "hasAnyRole('DIRECCION', 'COORDINACION', 'ADMINISTRACION', 'COMPRAS', 'BARRA')";
 
+    /**
+     * Consultar movimientos de stock (UI-37): Administración y Compras, además del acceso total. La barra no, por la
+     * operación a ciegas (docs/sprint-4.md, decisión 26).
+     */
+    public static final String CONSULTAR_MOVIMIENTOS = "hasAnyRole('DIRECCION', 'COORDINACION', 'ADMINISTRACION', 'COMPRAS')";
+
     /** Ajuste de stock (recuento y rotura): Administración y Compras, además del acceso total. */
     public static final String AJUSTE_STOCK = CATALOGO_BEBIDA;
 

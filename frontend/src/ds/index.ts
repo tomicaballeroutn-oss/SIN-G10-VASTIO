@@ -27,6 +27,6 @@ export {
   AgendaGrid, AgendaLeyenda, EventCard, MiniCalendar,
   type AgendaEvent, type AgendaGridProps, type AgendaLeyendaProps, type EventCardProps, type MiniCalendarProps, type DiaOcupado,
 } from './components/agenda';
-export { StockLevel, MovementCard, type StockLevelProps, type MovementCardProps } from './components/stock';
+export { StockLevel, MovementCard, type StockLevelProps, type MovementCardProps, type TipoMovimientoCard } from './components/stock';
 export { aplicarTema, temaGuardado, type Tema } from './tema';
 export { tamanoLegible } from './util';

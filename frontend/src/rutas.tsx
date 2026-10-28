@@ -8,6 +8,7 @@ import { PaginaCatalogo } from './features/bebidas/PaginaCatalogo';
 import { PaginaExistencias } from './features/bebidas/PaginaExistencias';
 import { PaginaEstadisticas } from './features/bebidas/PaginaEstadisticas';
 import { PaginaIngresoBebida } from './features/bebidas/PaginaIngresoBebida';
+import { PaginaMovimientos } from './features/bebidas/PaginaMovimientos';
 import { PaginaDs } from './features/ds/PaginaDs';
 import { PaginaDatosEvento } from './features/eventos/PaginaDatosEvento';
 import { PaginaEvento } from './features/eventos/PaginaEvento';
@@ -33,6 +34,7 @@ const PANTALLAS: Partial<Record<string, ReactNode>> = {
   estadisticas: <PaginaEstadisticas />,
   ingreso: <PaginaIngresoBebida />,
   inicio: <PaginaInicio />,
+  movimientos: <PaginaMovimientos />,
   eventos: <PaginaEventos />,
   notificaciones: <PaginaNotificaciones />,
   parametros: <PaginaParametros />,

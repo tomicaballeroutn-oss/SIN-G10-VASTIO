@@ -236,6 +236,10 @@ public class MovimientoStock {
         return entregaId;
     }
 
+    public Long getPreparacionId() {
+        return preparacionId;
+    }
+
     public Long getIngresoId() {
         return ingresoId;
     }

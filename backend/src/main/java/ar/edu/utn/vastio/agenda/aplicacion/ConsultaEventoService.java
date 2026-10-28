@@ -2,7 +2,9 @@ package ar.edu.utn.vastio.agenda.aplicacion;
 
 import java.time.LocalDate;
 import java.time.ZoneId;
+import java.util.Collection;
 import java.util.EnumSet;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -227,5 +229,17 @@ public class ConsultaEventoService {
         Evento e = eventos.conDetalle(eventoId).orElseThrow(() -> ProblemaException.noEncontrado("EVENTO_INEXISTENTE",
                 "No encontramos ese evento."));
         return new EventoOperativo(e.getId(), e.getCodigo(), e.getNombre(), e.getUnidad().getSalonId(), e.getEstado());
+    }
+
+    /** Un evento nombrado en otra pantalla (p. ej. un movimiento de stock): sin datos comerciales. */
+    public record EventoResumido(long eventoId, String codigo, String nombre, short salonId, LocalDate fecha) {
+    }
+
+    /** Los eventos de esos ids que existan, por id. Los usan los movimientos de stock (UI-37). */
+    public Map<Long, EventoResumido> resumidos(Collection<Long> ids) {
+        Map<Long, EventoResumido> porId = new HashMap<>();
+        eventos.findAllById(ids).forEach(e -> porId.put(e.getId(), new EventoResumido(e.getId(), e.getCodigo(), e.getNombre(),
+                e.getUnidad().getSalonId(), e.getUnidad().getFecha())));
+        return porId;
     }
 }

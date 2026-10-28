@@ -133,9 +133,7 @@ public class BloqueoService {
     @Transactional(readOnly = true)
     public List<BloqueoVista> activos() {
         LocalDate hoy = LocalDate.now(ZONA);
-        List<Bloqueo> vigentes = bloqueos.activosConUnidades().stream()
-                .filter(b -> b.getUnidades().stream().anyMatch(u -> !u.getFecha().isBefore(hoy)))
-                .toList();
+        List<Bloqueo> vigentes = bloqueos.activosConUnidades(hoy);
         Nombres nombres = nombresDeLaLista(vigentes);
         return vigentes.stream().map(b -> vista(b, nombres))
                 .sorted(Comparator.comparing(BloqueoVista::desde).thenComparing(BloqueoVista::id))

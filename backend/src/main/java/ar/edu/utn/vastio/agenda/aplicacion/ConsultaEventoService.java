@@ -2,7 +2,6 @@ package ar.edu.utn.vastio.agenda.aplicacion;
 
 import java.time.LocalDate;
 import java.time.ZoneId;
-import java.util.Collection;
 import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -236,7 +235,7 @@ public class ConsultaEventoService {
     }
 
     /** Los eventos de esos ids que existan, por id. Los usan los movimientos de stock (UI-37). */
-    public Map<Long, EventoResumido> resumidos(Collection<Long> ids) {
+    public Map<Long, EventoResumido> resumidos(Iterable<Long> ids) {
         Map<Long, EventoResumido> porId = new HashMap<>();
         eventos.findAllById(ids).forEach(e -> porId.put(e.getId(), new EventoResumido(e.getId(), e.getCodigo(), e.getNombre(),
                 e.getUnidad().getSalonId(), e.getUnidad().getFecha())));

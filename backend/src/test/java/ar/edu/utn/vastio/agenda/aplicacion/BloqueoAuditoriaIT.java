@@ -64,7 +64,7 @@ class BloqueoAuditoriaIT {
     }
 
     @ParameterizedTest
-    @CsvSource({"0,true", "6,true", "11,true", "0,false", "6,false", "11,false"})
+    @CsvSource({"0,true", "3,true", "11,true", "0,false", "3,false", "11,false"})
     void unConflictoAlInicioMedioOFinalNoDejaNingunaFilaParcial(int posicion, boolean evento) {
         short salon = (short) (1 + posicion / 6);
         LocalDate dia = fecha.plusDays((posicion % 6) / 2);

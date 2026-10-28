@@ -22,7 +22,7 @@ BloqueoProtocoloIT añade 15 casos con transacciones independientes, barreras de
 Los casos verifican que no coexistan evento y bloqueo activos ni dos bloqueos activos sobre la misma unidad.
 No son una demostración universal de ausencia de deadlocks frente a futuros escritores o SQL externo.
 
-BloqueoAuditoriaIT verifica rollback real de doce unidades ante conflictos de evento o bloqueo en las posiciones 0, 6 y 11; también un fallo posterior al alta. No quedan cabeceras, relaciones ni unidades parciales.
+BloqueoAuditoriaIT verifica rollback real de doce unidades ante conflictos de evento o bloqueo en las posiciones 0, 3 y 11 (primer día, día intermedio y último día); también un fallo posterior al alta. No quedan cabeceras, relaciones ni unidades parciales.
 BloqueoValidacionIT amplía nulos, listas vacías, duplicados, longitud exacta de detalle, las tres operaciones para los perfiles permitidos, ausencia de autenticación y roles combinados.
 Los usuarios de las nuevas pruebas completaron explícitamente el primer ingreso, para conservar su validez al integrar #49.
 

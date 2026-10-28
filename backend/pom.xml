@@ -19,6 +19,7 @@
     <properties>
         <java.version>25</java.version>
         <springdoc.version>3.1.1</springdoc.version>
+        <openpdf.version>3.0.5</openpdf.version>
         <!-- Misma zona que VastioApplication.ZONA_HORARIA para los tests (surefire y failsafe) -->
         <argLine>-Duser.timezone=America/Argentina/Cordoba</argLine>
     </properties>
@@ -51,6 +52,12 @@
             <artifactId>spring-boot-starter-oauth2-resource-server</artifactId>
         </dependency>
 
+        <!-- Comprobante interno de la seña en PDF (M-07). Gratuita: LGPL 2.1 / MPL 2.0. -->
+        <dependency>
+            <groupId>com.github.librepdf</groupId>
+            <artifactId>openpdf</artifactId>
+            <version>${openpdf.version}</version>
+        </dependency>
         <!-- OpenAPI y Swagger UI en /api/docs (solo en dev) -->
         <dependency>
             <groupId>org.springdoc</groupId>

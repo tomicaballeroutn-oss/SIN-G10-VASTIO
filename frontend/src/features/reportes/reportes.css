@@ -1,0 +1,58 @@
+.reporte-ocupacion__filtros { display: grid; gap: var(--space-5); }
+.reporte-ocupacion__filtros-campos { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 190px), 1fr)); align-items: end; gap: var(--space-4); }
+.reporte-ocupacion__acciones { display: flex; justify-content: flex-end; }
+.reporte-ocupacion__resumen { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 200px), 1fr)); gap: var(--space-4); }
+.v-card.reporte-ocupacion__stat .v-card__body { display: flex; flex-direction: column; gap: var(--space-1); }
+.reporte-ocupacion__stat p { margin: 0; }
+.reporte-ocupacion__grafico { display: grid; gap: var(--space-4); }
+.reporte-ocupacion__barra-fila { display: grid; grid-template-columns: minmax(100px, 140px) minmax(50px, 1fr) 52px; align-items: center; gap: var(--space-3); }
+.reporte-ocupacion__barra-fila > :last-child { text-align: right; }
+.reporte-ocupacion__riel { height: 14px; overflow: hidden; border-radius: var(--radius-pill); background: var(--surface-sunken); }
+.reporte-ocupacion__relleno { display: block; height: 100%; border-radius: inherit; background: var(--brand); transition: width 180ms ease; }
+.reporte-ocupacion__relleno--avril { background: var(--salon-avril); }
+.reporte-ocupacion__relleno--club { background: var(--salon-club); }
+.reporte-ocupacion__relleno--santa-barbara { background: var(--salon-santa-barbara); }
+.reporte-ocupacion__impresion { display: none; }
+@media print {
+  @page { size: A4 portrait; margin: 13mm 14mm; }
+  html, body { width: auto; min-width: 0; margin: 0; background: #fff !important; color: #17212b; }
+  body { print-color-adjust: exact; -webkit-print-color-adjust: exact; }
+  .app { display: block !important; min-height: 0; background: #fff !important; }
+  .app__contenido { width: auto; max-width: none; margin: 0; padding: 0; }
+  .reporte-ocupacion {
+    --canvas: #fff; --surface: #fff; --surface-raised: #fff; --surface-sunken: #edf0f3;
+    --line: #cbd1d7; --line-strong: #aeb7c0; --ink: #17212b; --ink-muted: #52606d;
+    --brand: #153e6c; --on-brand: #fff; --brand-tint: #e1eefe; --brand-ink: #153e6c;
+    --info: #245d9e; --on-info: #fff; --info-tint: #f1f7ff; --info-ink: #0d2e54;
+    --success: #036961; --on-success: #fff; --success-tint: #e7faf7; --success-ink: #013c37;
+    --salon-avril: #a9244e; --salon-club: #764d2d; --salon-santa-barbara: #1b7da6;
+    display: flex; padding: 0; gap: 10px; color: #17212b;
+  }
+  .reporte-ocupacion__filtros, .app__lateral, .app__inferior, .app__barra, .reporte-ocupacion [role="status"] { display: none !important; }
+  .reporte-ocupacion__impresion { display: block; padding: 8px 11px; border-left: 4px solid var(--brand); background: #f5f6f8; color: #17212b; font-size: 9pt; }
+  .reporte-ocupacion__impresion p { margin: 0 0 4px; }
+  .reporte-ocupacion__impresion p:last-child { margin-bottom: 0; }
+  .reporte-ocupacion__impresion-nota { color: #52606d; font-size: 8pt; }
+  .reporte-ocupacion__impresion-fecha { margin-top: 5px !important; color: #52606d; font-size: 8pt; }
+  .reporte-ocupacion .pantalla__titulos { gap: 2px; }
+  .reporte-ocupacion h1 { margin: 0; font-size: 22pt; }
+  .reporte-ocupacion__resumen { grid-template-columns: 1fr 1fr 1.4fr; gap: 8px; }
+  .reporte-ocupacion .v-card { break-inside: avoid; box-shadow: none !important; border: 1px solid #cbd1d7; border-radius: 8px; background: #fff !important; color: #17212b; }
+  .reporte-ocupacion .v-card__head { padding: 9px 11px 0; }
+  .reporte-ocupacion .v-card__body { padding: 9px 11px; }
+  .reporte-ocupacion .v-card__head .h3 { font-size: 11pt; }
+  .reporte-ocupacion .v-card__head .body-sm { font-size: 8pt; }
+  .reporte-ocupacion__tabla, .reporte-ocupacion .v-table-wrap { overflow: visible; }
+  .reporte-ocupacion .v-table-wrap { border: 0; border-radius: 0; }
+  .reporte-ocupacion .v-table { color: #17212b; font-size: 8.5pt; }
+  .reporte-ocupacion .v-table thead { display: table-header-group; }
+  .reporte-ocupacion .v-table th { position: static; padding: 6px 8px; background: #edf0f3 !important; color: #17212b; }
+  .reporte-ocupacion .v-table td { padding: 6px 8px; border-bottom: 1px solid #d9dee3; }
+  .reporte-ocupacion .v-table tr { break-inside: avoid; }
+  .reporte-ocupacion__riel { background: #e9ecef !important; }
+  .reporte-ocupacion__relleno { print-color-adjust: exact; -webkit-print-color-adjust: exact; }
+}
+@media (max-width: 600px) {
+  .reporte-ocupacion__barra-fila { grid-template-columns: minmax(78px, 100px) minmax(40px, 1fr) 44px; gap: var(--space-2); }
+  .reporte-ocupacion__acciones { justify-content: flex-start; }
+}

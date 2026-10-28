@@ -29,8 +29,11 @@ import org.springframework.security.oauth2.jwt.NimbusJwtDecoder;
 import org.springframework.security.oauth2.jwt.NimbusJwtEncoder;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationConverter;
 import org.springframework.security.oauth2.server.resource.authentication.JwtGrantedAuthoritiesConverter;
+import org.springframework.security.authorization.AuthorizationDecision;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.web.servlet.HandlerExceptionResolver;
+
+import ar.edu.utn.vastio.usuarios.infraestructura.UsuarioRepository;
 
 /**
  * API sin estado con JWT. Las rutas de /api/v1/auth son públicas; el resto exige token de acceso.
@@ -43,7 +46,7 @@ import org.springframework.web.servlet.HandlerExceptionResolver;
 public class SeguridadConfig {
 
     @Bean
-    SecurityFilterChain api(HttpSecurity http,
+    SecurityFilterChain api(HttpSecurity http, UsuarioRepository usuarios,
             @Qualifier("handlerExceptionResolver") HandlerExceptionResolver errores) throws Exception {
         http
                 .csrf(csrf -> csrf.disable()) // sin sesión de servidor; la cookie de refresco es SameSite=Strict
@@ -55,7 +58,13 @@ public class SeguridadConfig {
                         .requestMatchers(HttpMethod.POST, "/api/v1/auth/login", "/api/v1/auth/refresh", "/api/v1/auth/logout").permitAll()
                         .requestMatchers("/actuator/health/**", "/api/docs/**", "/swagger-ui/**").permitAll()
                         .requestMatchers("/error").permitAll()
-                        .anyRequest().authenticated())
+                        .requestMatchers(HttpMethod.POST, "/api/v1/cuenta/contrasena").authenticated()
+                        .anyRequest().access((autenticacion, contexto) -> {
+                            // Estado vigente: alcanza a tokens previos y libera el acceso al guardar el cambio.
+                            var principal = autenticacion.get().getPrincipal();
+                            return new AuthorizationDecision(principal instanceof Jwt jwt
+                                    && !usuarios.existsByIdAndDebeCambiarContrasenaTrue(Long.parseLong(jwt.getSubject())));
+                        }))
                 .oauth2ResourceServer(o -> o
                         .jwt(j -> j.jwtAuthenticationConverter(convertidorDeRoles()))
                         .authenticationEntryPoint((req, res, ex) -> errores.resolveException(req, res, null, ex))

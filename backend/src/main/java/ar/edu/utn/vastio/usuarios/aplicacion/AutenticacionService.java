@@ -75,13 +75,18 @@ public class AutenticacionService {
      */
     @Transactional
     public void cambiarContrasena(long usuarioId, String actual, String nueva) {
-        Usuario usuario = usuarios.findById(usuarioId)
+        Usuario usuario = usuarios.buscarParaCambiarContrasena(usuarioId)
                 .filter(Usuario::isActivo)
                 .orElseThrow(() -> ProblemaException.reglaDeNegocio("USUARIO_INACTIVO",
                         "Tu usuario ya no está activo. Pedile a Dirección o a Coordinación que lo revise."));
         if (!passwordEncoder.matches(actual, usuario.getHashContrasena())) {
             throw ProblemaException.reglaDeNegocio("CONTRASENA_ACTUAL_INCORRECTA",
                     "La contraseña actual no es correcta. Volvé a escribirla.");
+        }
+        // BCrypt limita bytes UTF-8; @Size limita caracteres. Evita un 500 con tildes o símbolos.
+        if (nueva.getBytes(java.nio.charset.StandardCharsets.UTF_8).length > 72) {
+            throw ProblemaException.reglaDeNegocio("CONTRASENA_DEMASIADO_LARGA",
+                    "La contraseña nueva es demasiado larga. Usá menos caracteres.");
         }
         if (passwordEncoder.matches(nueva, usuario.getHashContrasena())) {
             throw ProblemaException.reglaDeNegocio("CONTRASENA_REPETIDA",

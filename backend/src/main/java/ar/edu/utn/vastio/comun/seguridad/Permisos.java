@@ -12,9 +12,17 @@ public final class Permisos {
     /** B4-05: consulta histórica, independiente de la operación de barra y del cierre. */
     public static final String CONSULTAR_CONSUMO = "hasAnyRole('DIRECCION', 'COORDINACION', 'ADMINISTRACION', 'COMPRAS')";
 
+    /** A7-01: reporte comercial de ocupación, reservado a Dirección y Coordinación. */
+    public static final String CONSULTAR_REPORTE_OCUPACION = "hasAnyRole('DIRECCION', 'COORDINACION')";
+
     /** B5-04: preparación manual; no otorga operación de barra. */
     public static final String REGISTRAR_PREPARACION = "hasAnyRole('DIRECCION', 'COORDINACION', 'ADMINISTRACION', 'COMPRAS')";
 
+    /**
+     * M-07: comprobante interno de la seña. Los perfiles que pueden ver el importe; que la vendedora sea la titular se
+     * verifica en el servicio.
+     */
+    public static final String COMPROBANTE_SENA = "hasAnyRole('DIRECCION', 'COORDINACION', 'ADMINISTRACION', 'VENDEDORA')";
     /** A7-02: vista de cocina, como en la matriz (Planner, Compras y Cocina consultan; Administración y Vendedora no). */
     public static final String VISTA_COCINA = "hasAnyRole('DIRECCION', 'COORDINACION', 'PLANNER', 'COMPRAS', 'COCINA')";
 

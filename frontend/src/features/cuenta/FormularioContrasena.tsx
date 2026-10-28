@@ -1,6 +1,6 @@
-import { useState, type FormEvent } from 'react';
+import { useEffect, useState, type FormEvent } from 'react';
 import { cuenta } from '../../api/cuenta';
-import { renovarSesion } from '../../api/cliente';
+import { renovarSesion, suscribirSesion } from '../../api/cliente';
 import { ProblemaApi } from '../../api/problema';
 import { Alert, Button, Input } from '../../ds';
 
@@ -22,9 +22,35 @@ export function FormularioContrasena({ alCambiar }: { alCambiar?: () => void }) 
   const [errores, setErrores] = useState<Errores>({});
   const [enviando, setEnviando] = useState(false);
   const [cambiada, setCambiada] = useState(false);
+  const [renovacionPendiente, setRenovacionPendiente] = useState(false);
+
+  useEffect(() => suscribirSesion((evento) => {
+    if (renovacionPendiente && (evento.tipo === 'iniciada' || evento.tipo === 'renovada')
+        && !evento.sesion.usuario.debeCambiarContrasena) {
+      setRenovacionPendiente(false);
+      setCambiada(true);
+    }
+  }), [renovacionPendiente]);
+
+  async function actualizarSesion() {
+    try {
+      const sesion = await renovarSesion();
+      // Una renovación compartida pudo iniciarse antes de que se guardara el cambio.
+      if (sesion.usuario.debeCambiarContrasena) {
+        setRenovacionPendiente(true);
+        return;
+      }
+      setRenovacionPendiente(false);
+      setCambiada(true);
+      alCambiar?.();
+    } catch {
+      setRenovacionPendiente(true);
+    }
+  }
 
   async function enviar(e: FormEvent) {
     e.preventDefault();
+    if (enviando) return;
     setCambiada(false);
     const faltan: Errores = {
       actual: actual ? undefined : 'Escribí tu contraseña actual.',
@@ -40,15 +66,13 @@ export function FormularioContrasena({ alCambiar }: { alCambiar?: () => void }) 
       setActual('');
       setNueva('');
       setRepetida('');
-      setCambiada(true);
-      // La renovación trae la sesión con «debe cambiar la contraseña» en falso: se libera la navegación.
-      await renovarSesion().catch(() => undefined);
-      alCambiar?.();
+      // El cambio ya se guardó; el fallo de sesión tiene su propia recuperación.
+      await actualizarSesion();
     } catch (error) {
       if (!(error instanceof ProblemaApi)) throw error;
       if (error.codigo === 'CONTRASENA_ACTUAL_INCORRECTA') {
         setErrores({ actual: error.message });
-      } else if (error.codigo === 'CONTRASENA_REPETIDA') {
+      } else if (error.codigo === 'CONTRASENA_REPETIDA' || error.codigo === 'CONTRASENA_DEMASIADO_LARGA') {
         setErrores({ nueva: error.message });
       } else {
         setErrores({
@@ -93,7 +117,16 @@ export function FormularioContrasena({ alCambiar }: { alCambiar?: () => void }) 
         error={errores.repetida}
       />
       {errores.general && <Alert tone="danger" title={errores.general.titulo}>{errores.general.detalle}</Alert>}
-      {cambiada && <Alert tone="success" title="Contraseña actualizada">La próxima vez que ingreses, usá la nueva.</Alert>}
+      {cambiada && !renovacionPendiente && <Alert tone="success" title="Contraseña actualizada">La próxima vez que ingreses, usá la nueva.</Alert>}
+      {renovacionPendiente && (
+        <Alert tone="warning" title="Contraseña guardada; sesión sin actualizar">
+          Tu contraseña nueva ya está guardada. Reintentá actualizar la sesión o cerrá sesión y volvé a ingresar con la nueva contraseña.
+          <Button type="button" loading={enviando} onClick={async () => {
+            setEnviando(true);
+            try { await actualizarSesion(); } finally { setEnviando(false); }
+          }}>Reintentar actualizar sesión</Button>
+        </Alert>
+      )}
       <div>
         <Button type="submit" loading={enviando}>Actualizar contraseña</Button>
       </div>
@@ -105,6 +138,9 @@ function validarNueva(nueva: string, actual: string): string | undefined {
   if (!nueva) return 'Escribí la contraseña nueva.';
   if (nueva.length < MINIMO_CONTRASENA || nueva.length > MAXIMO_CONTRASENA) {
     return `La contraseña nueva tiene que tener entre ${MINIMO_CONTRASENA} y ${MAXIMO_CONTRASENA} caracteres.`;
+  }
+  if (new TextEncoder().encode(nueva).length > MAXIMO_CONTRASENA) {
+    return 'La contraseña nueva es demasiado larga. Usá menos caracteres.';
   }
   if (nueva === actual) return 'La contraseña nueva tiene que ser distinta de la actual. Elegí otra.';
   return undefined;

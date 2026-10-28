@@ -64,8 +64,8 @@ export async function api<T>(ruta: string, opciones: Opciones = {}): Promise<T> 
 }
 
 /** Un archivo descargado con la sesión (p. ej. el contrato del legajo), con el nombre que manda el servidor. */
-export async function descargarArchivo(ruta: string): Promise<{ contenido: Blob; nombre: string | null }> {
-  const respuesta = await pedir(ruta, {}, '*/*');
+export async function descargarArchivo(ruta: string, metodo: 'GET' | 'POST' = 'GET'): Promise<{ contenido: Blob; nombre: string | null }> {
+  const respuesta = await pedir(ruta, { metodo }, '*/*');
   return { contenido: await respuesta.blob(), nombre: nombreDeArchivo(respuesta.headers.get('Content-Disposition')) };
 }
 

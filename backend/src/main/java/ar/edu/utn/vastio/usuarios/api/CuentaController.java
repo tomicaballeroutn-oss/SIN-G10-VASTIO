@@ -37,11 +37,11 @@ public class CuentaController {
     @PostMapping("/contrasena")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     @Operation(summary = "Cambiar mi contraseña", description = """
-            Pide la contraseña actual y una nueva de 8 a 72 caracteres, distinta de la actual (las mismas reglas del alta).
+            Pide la contraseña actual y una nueva de 8 a 72 caracteres y hasta 72 bytes UTF-8 (BCrypt), distinta de la actual.
             Quita la marca «debe cambiar la contraseña» del usuario. Las sesiones ya abiertas siguen valiendo hasta que venzan.""")
     @ApiResponse(responseCode = "204", description = "Contraseña cambiada")
     @ApiResponse(responseCode = "400", description = "Falta algún dato o la nueva no tiene entre 8 y 72 caracteres")
-    @ApiResponse(responseCode = "422", description = "La contraseña actual no es correcta o la nueva es igual a la actual")
+    @ApiResponse(responseCode = "422", description = "La contraseña actual no es correcta, la nueva es igual a la actual o supera 72 bytes UTF-8")
     public void cambiarContrasena(@Valid @RequestBody CambioContrasenaRequest pedido, @AuthenticationPrincipal Jwt jwt) {
         autenticacion.cambiarContrasena(UsuarioActual.de(jwt).id(), pedido.contrasenaActual(), pedido.contrasenaNueva());
     }

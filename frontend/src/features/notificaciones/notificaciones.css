@@ -13,16 +13,38 @@
 .avisos__punto { width: 10px; height: 10px; margin-top: 6px; border-radius: 50%; background: var(--accent); }
 .avisos__pie { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: var(--space-2); }
 
-/* Cada tipo conserva su tono en la lista, el panel y el resumen de Inicio. */
-.avisos__aviso--evento-nuevo { --aviso-tipo: #315eb5; }
-.avisos__aviso--sena { --aviso-tipo: #3b7d3f; }
-.avisos__aviso--contrato { --aviso-tipo: #7653a6; }
-.avisos__aviso--confirmacion { --aviso-tipo: #92700e; }
-.avisos__aviso--modificacion { --aviso-tipo: #0d7188; }
-.avisos__aviso--reprogramacion { --aviso-tipo: #ad641e; }
-.avisos__aviso--cancelacion { --aviso-tipo: #c62828; }
-.avisos__aviso--planner-asignada { --aviso-tipo: #a33d74; }
-.avisos__aviso--alerta-stock { --aviso-tipo: #d18400; }
+/* Tokens por tipo, ajustados para conservar contraste en ambos temas. */
+:root {
+  --noti-evento-nuevo: #315eb5;
+  --noti-sena: #3b7d3f;
+  --noti-contrato: #7653a6;
+  --noti-confirmacion: #8f6e0e;
+  --noti-modificacion: #0d7188;
+  --noti-reprogramacion: #aa621d;
+  --noti-cancelacion: #c62828;
+  --noti-planner-asignada: #a33d74;
+  --noti-alerta-stock: #a16700;
+}
+[data-theme="dark"] {
+  --noti-evento-nuevo: #7895ca;
+  --noti-sena: #719f74;
+  --noti-contrato: #a189c1;
+  --noti-confirmacion: #a88d3e;
+  --noti-modificacion: #5a9dae;
+  --noti-reprogramacion: #bc854b;
+  --noti-cancelacion: #d96c6c;
+  --noti-planner-asignada: #c07ea1;
+  --noti-alerta-stock: #d18400;
+}
+.avisos__aviso--evento-nuevo { --aviso-tipo: var(--noti-evento-nuevo); }
+.avisos__aviso--sena { --aviso-tipo: var(--noti-sena); }
+.avisos__aviso--contrato { --aviso-tipo: var(--noti-contrato); }
+.avisos__aviso--confirmacion { --aviso-tipo: var(--noti-confirmacion); }
+.avisos__aviso--modificacion { --aviso-tipo: var(--noti-modificacion); }
+.avisos__aviso--reprogramacion { --aviso-tipo: var(--noti-reprogramacion); }
+.avisos__aviso--cancelacion { --aviso-tipo: var(--noti-cancelacion); }
+.avisos__aviso--planner-asignada { --aviso-tipo: var(--noti-planner-asignada); }
+.avisos__aviso--alerta-stock { --aviso-tipo: var(--noti-alerta-stock); }
 .avisos__aviso[class*="avisos__aviso--"] > .v-icon { color: var(--aviso-tipo); }
 .avisos__aviso.is-nuevo[class*="avisos__aviso--"] {
   background: color-mix(in srgb, var(--aviso-tipo) 12%, var(--surface));

@@ -1,0 +1,59 @@
+package ar.edu.utn.vastio.agenda.infraestructura;
+
+import static org.assertj.core.api.Assertions.*;
+import java.io.IOException;
+import java.time.ZonedDateTime;
+import java.util.ArrayDeque;
+import java.util.ArrayList;
+import java.util.List;
+import org.junit.jupiter.api.Test;
+import com.google.api.client.testing.http.MockHttpTransport;
+import com.google.api.client.testing.http.MockLowLevelHttpRequest;
+import com.google.api.client.testing.http.MockLowLevelHttpResponse;
+import com.google.api.client.json.gson.GsonFactory;
+import com.google.api.services.calendar.Calendar;
+import ar.edu.utn.vastio.agenda.aplicacion.ContenidoCalendar;
+
+/** Transporte Google oficial simulado: valida HTTP real del adaptador sin sockets ni claves. */
+class GoogleCalendarHttpTest {
+    static class Transporte extends MockHttpTransport {
+        final ArrayDeque<MockLowLevelHttpResponse> respuestas=new ArrayDeque<>();
+        final List<MockLowLevelHttpRequest> pedidos=new ArrayList<>();
+        @Override public MockLowLevelHttpRequest buildRequest(String metodo,String url) throws IOException {
+            var r=new MockLowLevelHttpRequest(url).setResponse(respuestas.removeFirst()); pedidos.add(r); return r;
+        }
+        void respuesta(int status,String cuerpo) { respuestas.add(new MockLowLevelHttpResponse().setStatusCode(status).setContentType("application/json").setContent(cuerpo)); }
+    }
+    private GoogleCalendarClient cliente(Transporte transporte) {
+        var api=new Calendar.Builder(transporte,GsonFactory.getDefaultInstance(),r->{r.setNumberOfRetries(0);r.setLoggingEnabled(false);}).setApplicationName("prueba-sin-red").build();
+        return new GoogleCalendarClient(new CalendarProperties(true,"prueba","instalacion","archivo-inexistente",5000,10000),api);
+    }
+    @Test void scopeYDestinoNoSeConfundenConAusenciaDeEvento() {
+        var t=new Transporte(); var cliente=cliente(t);
+        t.respuesta(404,"{\"error\":{\"code\":404,\"message\":\"no disponible\"}}");
+        assertThatThrownBy(()->cliente.comprobarDestino("calendario")).hasMessage("DESTINO_NO_ACCESIBLE");
+        t.respuesta(200,"{\"items\":[]}");cliente.comprobarDestino("calendario");
+        t.respuesta(404,"{\"error\":{\"code\":404}}");assertThat(cliente.consultar("calendario","id123")).isNull();
+        assertThat(t.pedidos).hasSize(3);
+        assertThat(t.pedidos.getFirst().getUrl()).contains("calendars/calendario/events");
+    }
+    @Test void retiradaUsaIfMatchYNoPropagaEl401ComoSesionVastio() {
+        var t=new Transporte();var cliente=cliente(t);
+        t.respuesta(204,"");cliente.retirar("prueba","id123","\"etag\"");
+        assertThat(t.pedidos.getFirst().getFirstHeaderValue("If-Match")).isEqualTo("\"etag\"");
+        t.respuesta(401,"{\"error\":{\"code\":401,\"message\":\"secret-do-not-expose\"}}");
+        assertThatThrownBy(()->cliente.comprobarDestino("prueba")).hasMessage("AUTORIZACION_GOOGLE_REVOCADA")
+                .hasMessageNotContaining("secret-do-not-expose");
+    }
+    @Test void actualizacionUsaIfMatchYElModeloMinimo() throws Exception {
+        var t=new Transporte();var cliente=cliente(t);
+        var inicio=ZonedDateTime.parse("2032-01-01T20:00:00-03:00[America/Argentina/Cordoba]");
+        var c=new ContenidoCalendar.Contenido("EV · Avril · Noche","Código Vastio: EV.","Avril",inicio,inicio.plusHours(10),"huella");
+        // La respuesta inválida no se interpreta como una publicación propia.
+        t.respuesta(200,"{\"id\":\"id123\",\"etag\":\"etag\"}");
+        assertThatThrownBy(()->cliente.actualizar("prueba","id123",c,"anterior")).hasMessage("IDENTIDAD_REMOTA_AJENA");
+        assertThat(t.pedidos.getFirst().getFirstHeaderValue("If-Match")).isEqualTo("anterior");
+        assertThat(t.pedidos.getFirst().getContentAsString()).contains("America/Argentina/Cordoba", "vastio-id")
+                .doesNotContain("attendees", "attachments", "importeSena");
+    }
+}

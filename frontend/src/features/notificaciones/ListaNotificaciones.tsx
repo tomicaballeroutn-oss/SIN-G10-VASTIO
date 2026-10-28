@@ -20,6 +20,7 @@ const ICONO: Record<TipoNotificacion, IconName> = {
   CANCELACION: 'calendar-x',
   PLANNER_ASIGNADA: 'user-plus',
   ALERTA_STOCK: 'triangle-alert',
+  CALENDAR_PENDIENTE: 'calendar-clock',
 };
 
 /** Perfiles que abren la ficha del evento. Cocina no tiene ficha: su aviso abre la tarjeta en la vista de cocina (A7-02). */

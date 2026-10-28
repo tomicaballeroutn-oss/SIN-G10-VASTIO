@@ -22,6 +22,19 @@ const ICONO: Record<TipoNotificacion, IconName> = {
   ALERTA_STOCK: 'triangle-alert',
 };
 
+/** Una identidad visual por tipo; el texto y el ícono siguen comunicando el aviso sin depender del color. */
+const COLOR: Record<TipoNotificacion, string> = {
+  EVENTO_NUEVO: 'evento-nuevo',
+  SENA: 'sena',
+  CONTRATO: 'contrato',
+  CONFIRMACION: 'confirmacion',
+  MODIFICACION: 'modificacion',
+  REPROGRAMACION: 'reprogramacion',
+  CANCELACION: 'cancelacion',
+  PLANNER_ASIGNADA: 'planner-asignada',
+  ALERTA_STOCK: 'alerta-stock',
+};
+
 /** Perfiles que abren la ficha del evento. Cocina no tiene ficha: su aviso abre la tarjeta en la vista de cocina (A7-02). */
 const ABREN_FICHA: Rol[] = ['DIRECCION', 'COORDINACION', 'ADMINISTRACION', 'VENDEDORA', 'PLANNER', 'COMPRAS'];
 
@@ -151,7 +164,7 @@ export function ListaNotificaciones({ alIrAlEvento, limite }: { alIrAlEvento?: (
         <ul className="avisos__lista">
           {(limite ? lista.slice(0, limite) : lista).map((n) => (
             <li key={n.id}>
-              <button type="button" className={n.leida ? 'avisos__aviso' : 'avisos__aviso is-nuevo'} onClick={() => void abrir(n)}>
+              <button type="button" className={`avisos__aviso avisos__aviso--${COLOR[n.tipo]}${n.leida ? '' : ' is-nuevo'}`} onClick={() => void abrir(n)}>
                 <Icon name={ICONO[n.tipo]} size={18} />
                 <span className="avisos__texto">
                   <span className="body-sm">

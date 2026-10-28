@@ -12,3 +12,22 @@
 .avisos__texto { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
 .avisos__punto { width: 10px; height: 10px; margin-top: 6px; border-radius: 50%; background: var(--accent); }
 .avisos__pie { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: var(--space-2); }
+
+/* Cada tipo conserva su tono en la lista, el panel y el resumen de Inicio. */
+.avisos__aviso--evento-nuevo { --aviso-tipo: #315eb5; }
+.avisos__aviso--sena { --aviso-tipo: #3b7d3f; }
+.avisos__aviso--contrato { --aviso-tipo: #7653a6; }
+.avisos__aviso--confirmacion { --aviso-tipo: #92700e; }
+.avisos__aviso--modificacion { --aviso-tipo: #0d7188; }
+.avisos__aviso--reprogramacion { --aviso-tipo: #ad641e; }
+.avisos__aviso--cancelacion { --aviso-tipo: #c62828; }
+.avisos__aviso--planner-asignada { --aviso-tipo: #a33d74; }
+.avisos__aviso--alerta-stock { --aviso-tipo: #d18400; }
+.avisos__aviso[class*="avisos__aviso--"] > .v-icon { color: var(--aviso-tipo); }
+.avisos__aviso.is-nuevo[class*="avisos__aviso--"] {
+  background: color-mix(in srgb, var(--aviso-tipo) 12%, var(--surface));
+}
+.avisos__aviso.is-nuevo[class*="avisos__aviso--"] .avisos__punto { background: var(--aviso-tipo); }
+[data-theme="dark"] .avisos__aviso.is-nuevo[class*="avisos__aviso--"] {
+  background: color-mix(in srgb, var(--aviso-tipo) 24%, var(--surface));
+}

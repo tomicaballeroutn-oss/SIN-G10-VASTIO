@@ -11,9 +11,9 @@ import { backendFalso, json, montar, pedidos, problema, sesionDe, type Pedido } 
 const camara = vi.hoisted(() => ({ leer: (() => undefined) as (codigo: string) => void }));
 vi.mock('@zxing/browser', () => ({
   BrowserMultiFormatReader: class {
-    decodeFromConstraints(_c: unknown, _v: unknown, alLeer: (r: { getText: () => string }) => void) {
+    scan(_v: unknown, alLeer: (r: { getText: () => string }) => void) {
       camara.leer = (codigo) => alLeer({ getText: () => codigo });
-      return Promise.resolve({ stop: () => undefined });
+      return { stop: () => undefined };
     }
   },
 }));
@@ -57,7 +57,7 @@ beforeEach(() => {
 });
 
 afterEach(() => {
-  vi.unstubAllGlobals();
+  vi.restoreAllMocks(); vi.unstubAllGlobals();
   Reflect.deleteProperty(navigator, 'mediaDevices');
 });
 
@@ -121,7 +121,8 @@ describe('UI-29 · ingreso de mercadería', () => {
 
   it('el lector agrega la bebida del código y avisa los códigos que no sirven', async () => {
     vi.stubGlobal('isSecureContext', true);
-    Object.defineProperty(navigator, 'mediaDevices', { value: { getUserMedia: vi.fn() }, configurable: true });
+    vi.spyOn(HTMLMediaElement.prototype, 'play').mockResolvedValue();
+    Object.defineProperty(navigator, 'mediaDevices', { value: { getUserMedia: vi.fn().mockResolvedValue({ getTracks: () => [], getVideoTracks: () => [] }) }, configurable: true });
     backendFalso(sesionDe(['COMPRAS']), backend());
     const persona = userEvent.setup();
     montar('/ingreso');

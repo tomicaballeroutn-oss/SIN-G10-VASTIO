@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState, type ReactNode } from 'react';
+import { iniciarConZxing } from './camaraLector';
 import { Button } from './Button';
 import { Alert, Dialog } from './feedback';
 
@@ -11,20 +12,7 @@ export interface ControlLector {
  * Enciende la cámara trasera en `video` y llama a `alLeer` con cada código leído. Separado del componente para
  * poder reemplazarlo en los tests (jsdom no tiene cámara). La librería se carga recién al abrir el lector.
  */
-export type IniciarLector = (video: HTMLVideoElement, alLeer: (codigo: string) => void) => Promise<ControlLector>;
-
-const iniciarConZxing: IniciarLector = async (video, alLeer) => {
-  const [{ BrowserMultiFormatReader }, { BarcodeFormat, DecodeHintType }] = await Promise.all([
-    import('@zxing/browser'),
-    import('@zxing/library'),
-  ]);
-  // Botella (EAN-13, EAN-8, UPC-A) y caja (DUN-14 en ITF, GS1-128): menos formatos, lectura más rápida.
-  const formatos = [BarcodeFormat.EAN_13, BarcodeFormat.EAN_8, BarcodeFormat.UPC_A, BarcodeFormat.ITF, BarcodeFormat.CODE_128];
-  const lector = new BrowserMultiFormatReader(new Map([[DecodeHintType.POSSIBLE_FORMATS, formatos]]));
-  return lector.decodeFromConstraints({ audio: false, video: { facingMode: { ideal: 'environment' } } }, video, (resultado) => {
-    if (resultado) alLeer(resultado.getText());
-  });
-};
+export type IniciarLector = (video: HTMLVideoElement, alLeer: (codigo: string) => void, signal?: AbortSignal) => Promise<ControlLector>;
 
 type Problema = 'sin-https' | 'sin-camara' | 'sin-permiso' | 'error';
 
@@ -38,7 +26,7 @@ const MENSAJES: Record<Problema, string> = {
 function problemaDe(error: unknown): Problema {
   const nombre = error instanceof Error || error instanceof DOMException ? error.name : '';
   if (nombre === 'NotAllowedError' || nombre === 'SecurityError') return 'sin-permiso';
-  if (nombre === 'NotFoundError' || nombre === 'OverconstrainedError' || nombre === 'NotReadableError') return 'sin-camara';
+  if (nombre === 'NotFoundError' || nombre === 'OverconstrainedError') return 'sin-camara';
   return 'error';
 }
 
@@ -78,7 +66,7 @@ function problemaDelDispositivo(): Problema | null {
 }
 
 function LectorAbierto({ onClose, onRead, manualLabel = 'Elegir a mano', onManual, instruction = 'Apuntá al código de barras', children, iniciar = iniciarConZxing }: LectorCodigoProps) {
-  const video = useRef<HTMLVideoElement>(null);
+  const visor = useRef<HTMLDivElement>(null);
   const [fallo, setFallo] = useState<Problema | null>(null);
   const [intento, setIntento] = useState(0);
   const delDispositivo = problemaDelDispositivo();
@@ -90,18 +78,48 @@ function LectorAbierto({ onClose, onRead, manualLabel = 'Elegir a mano', onManua
 
   useEffect(() => {
     if (delDispositivo) return;
+    const contenedor = visor.current;
+    if (!contenedor) return;
+    // StrictMode conserva el DOM entre efectos: nunca compartir el video entre sesiones.
+    const video = document.createElement('video');
+    video.className = 'v-lector__video';
+    video.setAttribute('aria-label', 'Vista de la cámara');
+    video.muted = true;
+    video.playsInline = true;
+    video.autoplay = true;
+    contenedor.append(video);
+    const abort = new AbortController();
     let vigente = true;
     let control: ControlLector | undefined;
     let ultimo = { codigo: '', momento: 0 };
-    iniciar(video.current as HTMLVideoElement, (codigo) => {
-      const ahora = Date.now();
-      if (codigo === ultimo.codigo && ahora - ultimo.momento < PAUSA_MISMO_CODIGO_MS) return;
-      ultimo = { codigo, momento: ahora };
-      alLeer.current(codigo);
-    }).then(
+    const interrumpido = () => {
+      if (!vigente) return;
+      vigente = false;
+      abort.abort();
+      control?.stop();
+      setFallo('error');
+    };
+    const pistas: MediaStreamTrack[] = [];
+    video.addEventListener('pause', interrumpido);
+    video.addEventListener('ended', interrumpido);
+    (async () => {
+      return iniciar(video, (codigo) => {
+        if (!vigente) return;
+        const ahora = Date.now();
+        if (codigo === ultimo.codigo && ahora - ultimo.momento < PAUSA_MISMO_CODIGO_MS) return;
+        ultimo = { codigo, momento: ahora };
+        alLeer.current(codigo);
+      }, abort.signal);
+    })().then(
       (c) => {
-        if (vigente) control = c;
-        else c.stop();
+        if (!c) return;
+        if (vigente) {
+          control = c;
+          const stream = video.srcObject as MediaStream | null;
+          pistas.push(...(stream?.getVideoTracks() ?? []));
+          pistas.forEach((track) => track.addEventListener('ended', interrumpido));
+          if (pistas.some((track) => track.readyState === 'ended')) interrumpido();
+        } else c.stop();
       },
       (error: unknown) => {
         if (vigente) setFallo(problemaDe(error));
@@ -109,7 +127,12 @@ function LectorAbierto({ onClose, onRead, manualLabel = 'Elegir a mano', onManua
     );
     return () => {
       vigente = false;
+      video.removeEventListener('pause', interrumpido);
+      video.removeEventListener('ended', interrumpido);
+      pistas.forEach((track) => track.removeEventListener('ended', interrumpido));
+      abort.abort();
       control?.stop();
+      video.remove();
     };
   }, [delDispositivo, iniciar, intento]);
 
@@ -143,7 +166,7 @@ function LectorAbierto({ onClose, onRead, manualLabel = 'Elegir a mano', onManua
         {/* Siempre montado, para que «Reintentar» tenga dónde mostrar la cámara. */}
         <div className="v-lector__visor" hidden={problema !== null}>
           {/* playsInline y muted: sin ellos iOS abre el video a pantalla completa o no lo reproduce. */}
-          <video ref={video} className="v-lector__video" playsInline muted autoPlay aria-label="Vista de la cámara" />
+          <div ref={visor} style={{ width: '100%', height: '100%' }} />
           <div className="v-lector__marco" aria-hidden="true" />
         </div>
         {children && <div className="v-lector__lectura" role="status">{children}</div>}

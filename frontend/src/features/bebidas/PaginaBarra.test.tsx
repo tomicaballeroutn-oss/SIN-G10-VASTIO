@@ -11,9 +11,9 @@ const sinCamara = vi.hoisted(() => () => undefined);
 const camara = vi.hoisted(() => ({ leer: sinCamara as (codigo: string) => void }));
 vi.mock('@zxing/browser', () => ({
   BrowserMultiFormatReader: class {
-    decodeFromConstraints(_c: unknown, _v: unknown, alLeer: (r: { getText: () => string }) => void) {
+    scan(_v: unknown, alLeer: (r: { getText: () => string }) => void) {
       camara.leer = (codigo) => alLeer({ getText: () => codigo });
-      return Promise.resolve({ stop: () => undefined });
+      return { stop: () => undefined };
     }
   },
 }));
@@ -72,7 +72,7 @@ beforeEach(() => {
 const LARGO = 20_000;
 
 afterEach(() => {
-  vi.unstubAllGlobals();
+  vi.restoreAllMocks(); vi.unstubAllGlobals();
   Reflect.deleteProperty(navigator, 'mediaDevices');
 });
 
@@ -167,7 +167,8 @@ describe('UI-31 · salida a barra', () => {
 
   it('el lector agrega la bebida del código y avisa si el código no está en el catálogo', async () => {
     vi.stubGlobal('isSecureContext', true);
-    Object.defineProperty(navigator, 'mediaDevices', { value: { getUserMedia: vi.fn() }, configurable: true });
+    vi.spyOn(HTMLMediaElement.prototype, 'play').mockResolvedValue();
+    Object.defineProperty(navigator, 'mediaDevices', { value: { getUserMedia: vi.fn().mockResolvedValue({ getTracks: () => [], getVideoTracks: () => [] }) }, configurable: true });
     backendFalso(sesionDe(['BARRA']), backend());
     const persona = userEvent.setup();
     montar('/barra');

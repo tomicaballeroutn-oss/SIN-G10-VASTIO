@@ -39,19 +39,25 @@ export function Layout() {
   };
 
   return (
-    <div className="app">
-      <div className="app__lateral">
-        <Nav layout="rail" label="Navegación principal" items={items} value={actual} onSelect={ir} logo={<Logo variant="marca" reverse />} footer={<BloqueCuenta />} />
-      </div>
-      <main className="app__contenido">
-        <div className="app__barra">
-          <Campana />
+    <div className={usuario.debeCambiarContrasena ? 'app app--cuenta-inicial' : 'app'}>
+      {!usuario.debeCambiarContrasena && (
+        <div className="app__lateral">
+          <Nav layout="rail" label="Navegación principal" items={items} value={actual} onSelect={ir} logo={<Logo variant="marca" reverse />} footer={<BloqueCuenta />} />
         </div>
+      )}
+      <main className="app__contenido">
+        {!usuario.debeCambiarContrasena && (
+          <div className="app__barra">
+            <Campana />
+          </div>
+        )}
         <Outlet />
       </main>
-      <div className="app__inferior">
-        <Nav layout="bottom" label="Navegación principal" items={inferiores} value={actualInferior} onSelect={ir} />
-      </div>
+      {!usuario.debeCambiarContrasena && (
+        <div className="app__inferior">
+          <Nav layout="bottom" label="Navegación principal" items={inferiores} value={actualInferior} onSelect={ir} />
+        </div>
+      )}
       <AvisosDeSesion />
     </div>
   );

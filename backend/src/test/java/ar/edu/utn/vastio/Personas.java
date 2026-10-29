@@ -56,7 +56,7 @@ public class Personas {
     /** Encabezado {@code Authorization} para ese usuario. */
     public String bearer(Usuario usuario) {
         var codigos = Arrays.stream(RolCodigo.values()).filter(usuario.codigosDeRol()::contains).map(RolCodigo::name).toList();
-        return "Bearer " + tokens.emitirAcceso(usuario.getId(), usuario.getNombreUsuario(), codigos).valor();
+        return "Bearer " + tokens.emitirAcceso(usuario.getId(), usuario.getNombreUsuario(), codigos, usuario.isDebeCambiarContrasena()).valor();
     }
 
     public String bearer(RolCodigo rol) {

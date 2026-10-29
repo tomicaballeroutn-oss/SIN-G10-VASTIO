@@ -88,7 +88,9 @@ public class AutenticacionService {
             throw ProblemaException.reglaDeNegocio("CONTRASENA_DEMASIADO_LARGA",
                     "La contraseña nueva es demasiado larga. Usá menos caracteres.");
         }
-        if (passwordEncoder.matches(nueva, usuario.getHashContrasena())) {
+        // La igualdad textual permite un atajo, pero no reemplaza la equivalencia del codificador:
+        // BCrypt acepta una actual con sufijo posterior a sus primeros 72 bytes.
+        if (actual.equals(nueva) || passwordEncoder.matches(nueva, usuario.getHashContrasena())) {
             throw ProblemaException.reglaDeNegocio("CONTRASENA_REPETIDA",
                     "La contraseña nueva tiene que ser distinta de la actual. Elegí otra.");
         }
@@ -99,7 +101,7 @@ public class AutenticacionService {
         List<String> roles = usuario.codigosDeRol().stream().map(RolCodigo::name).sorted().toList();
         int minutosSesion = parametros.entero(ParametroClave.MINUTOS_EXPIRACION_SESION);
         int minutosAviso = parametros.entero(ParametroClave.MINUTOS_AVISO_EXPIRACION);
-        TokenEmitido acceso = tokens.emitirAcceso(usuario.getId(), usuario.getNombreUsuario(), roles);
+        TokenEmitido acceso = tokens.emitirAcceso(usuario.getId(), usuario.getNombreUsuario(), roles, usuario.isDebeCambiarContrasena());
         TokenEmitido refresco = tokens.emitirRefresco(usuario.getId(), Duration.ofMinutes(minutosSesion));
         return new Sesion(acceso, refresco, minutosSesion, minutosAviso,
                 new UsuarioSesion(usuario.getId(), usuario.getNombreCompleto(), usuario.getNombreUsuario(), roles,

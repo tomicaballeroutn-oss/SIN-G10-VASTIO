@@ -38,7 +38,7 @@ public class CuentaController {
     @ResponseStatus(HttpStatus.NO_CONTENT)
     @Operation(summary = "Cambiar mi contraseña", description = """
             Pide la contraseña actual y una nueva de 8 a 72 caracteres y hasta 72 bytes UTF-8 (BCrypt), distinta de la actual.
-            Quita la marca «debe cambiar la contraseña» del usuario. Las sesiones ya abiertas siguen valiendo hasta que venzan.""")
+            Quita la marca «debe cambiar la contraseña» del usuario. Un token inicial sigue restringido hasta renovar la sesión; no se revocan todas las sesiones abiertas.""")
     @ApiResponse(responseCode = "204", description = "Contraseña cambiada")
     @ApiResponse(responseCode = "400", description = "Falta algún dato o la nueva no tiene entre 8 y 72 caracteres")
     @ApiResponse(responseCode = "422", description = "La contraseña actual no es correcta, la nueva es igual a la actual o supera 72 bytes UTF-8")

@@ -28,3 +28,7 @@
 .pantalla { display: flex; flex-direction: column; gap: var(--space-6); }
 .pantalla__titulos { display: flex; flex-direction: column; gap: var(--space-1); }
 .pagina-mas__nav.v-nav--sidebar { width: 100%; height: auto; border-right: 0; }
+
+/* El flujo inicial no monta navegación comercial ni reserva su espacio. */
+.app--cuenta-inicial { display: block; }
+.app--cuenta-inicial .app__contenido { padding-bottom: calc(var(--space-8) + env(safe-area-inset-bottom, 0px)); }

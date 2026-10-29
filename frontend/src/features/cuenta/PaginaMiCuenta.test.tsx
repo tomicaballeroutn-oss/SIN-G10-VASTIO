@@ -1,4 +1,4 @@
-import { act, render, screen, within } from '@testing-library/react';
+import { act, render, screen, within, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { createMemoryRouter, RouterProvider } from 'react-router';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
@@ -92,6 +92,8 @@ describe('UI-03 · cambiar la contraseña', () => {
     await actualizar();
 
     expect(await screen.findByText('Contraseña actualizada')).toBeInTheDocument();
+    expect(screen.getAllByRole('navigation').length).toBeGreaterThan(0);
+    await waitFor(() => expect(fetchMock.mock.calls.some(([url]) => url.includes('/notificaciones'))).toBe(true));
     const llamada = fetchMock.mock.calls.find(([url]) => String(url).endsWith('/cuenta/contrasena'));
     expect(JSON.parse(String(llamada?.[1].body))).toEqual({ contrasenaActual: 'la-inicial-123', contrasenaNueva: 'una-clave-mejor' });
     expect(screen.queryByText('Elegí tu contraseña')).not.toBeInTheDocument();
@@ -325,5 +327,27 @@ describe('UI-03 · límites y renovación compartida', () => {
     await userEvent.click(screen.getByRole('button', { name: 'Reintentar actualizar sesión' }));
     expect(await screen.findByText('Contraseña actualizada')).toBeInTheDocument();
     expect(screen.queryByText('Elegí tu contraseña')).not.toBeInTheDocument();
+  });
+});
+
+describe('UI-03 · marco restringido', () => {
+  it('no monta menús comerciales ni campana, pero conserva el cierre de sesión', async () => {
+    backend(sesion(true));
+    montar('/mi-cuenta');
+    await screen.findByText('Elegí tu contraseña');
+    expect(screen.queryByRole('navigation')).not.toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: /Notificaciones/ })).not.toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Cerrar sesión' })).toBeEnabled();
+  });
+
+  it('no pide notificaciones ni instala su polling mientras está restringido', async () => {
+    vi.useFakeTimers({ toFake: ['setInterval', 'clearInterval'] });
+    try {
+      const fetchMock = backend(sesion(true));
+      montar('/mi-cuenta');
+      await screen.findByText('Elegí tu contraseña');
+      await act(async () => { vi.advanceTimersByTime(125_000); });
+      expect(fetchMock.mock.calls.filter(([url]) => url.includes('/notificaciones'))).toHaveLength(0);
+    } finally { vi.useRealTimers(); }
   });
 });

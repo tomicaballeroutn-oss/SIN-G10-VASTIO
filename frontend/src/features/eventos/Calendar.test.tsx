@@ -57,10 +57,11 @@ describe('M-06 · Calendar manual', () => {
     expect(await screen.findByText('Publicación retirada')).toBeInTheDocument();
     expect(pedidos(fetch).some(p=>p.metodo==='DELETE'&&p.ruta.endsWith('/calendar'))).toBe(true);
   });
-  it('desactivada conserva el pendiente y bloquea la escritura', async()=>{
+  it('desactivada conserva el historial sin ofrecer acciones', async()=>{
     const fetch=backend({...pendiente,configurado:false}); montar('/eventos/5');
-    expect(await screen.findByRole('button',{name:'Exportar a Google Calendar'})).toBeDisabled();
-    expect(screen.getByText(/El pendiente sigue registrado/)).toBeInTheDocument();
+    expect(await screen.findByText('Integración desactivada')).toBeInTheDocument();
+    expect(screen.queryByRole('button',{name:'Exportar a Google Calendar'})).not.toBeInTheDocument();
+    expect(screen.getByText(/El historial se conserva/)).toBeInTheDocument();
     expect(pedidos(fetch).every(p=>p.metodo==='GET')).toBe(true);
   });
   it('error y reintento seguro sin renovar el login por un fallo Google', async()=>{
@@ -104,5 +105,31 @@ describe('M-06 · Calendar manual', () => {
     const fetch=backend(pendiente,['ADMINISTRACION']); montar('/calendar/pendientes');
     expect(await screen.findByText('Tu perfil no tiene acceso a esta pantalla')).toBeInTheDocument();
     expect(pedidos(fetch).some(p=>p.ruta==='/calendar/pendientes')).toBe(false);
+  });
+  it('no muestra confirmación vigente mientras hay seguimiento local pendiente',async()=>{
+    backend({...exportado,seguimientoPendiente:true,errorSeguimiento:'SEGUIMIENTO_CALENDAR_FALLIDO'});montar('/eventos/5');
+    expect(await screen.findByText('Seguimiento local pendiente')).toBeInTheDocument();
+    expect(screen.queryByText('✓ Exportado')).not.toBeInTheDocument();
+    expect(screen.getByRole('button',{name:'Volver a consultar seguimiento'})).toBeEnabled();
+  });
+  it('conflicto exige revisar y aceptar el ETag antes de otra escritura',async()=>{
+    let actual:EstadoCalendar={...exportado,estado:'ERROR',pendiente:'ACTUALIZAR',error:'CONFLICTO_REMOTO'};
+    const fetch=backendFalso(sesionDe(['DIRECCION']),p=>{
+      if(p.ruta==='/eventos/5') return json(200,fichaDePrueba());
+      if(p.ruta==='/eventos/5/calendar') return json(200,actual);
+      if(p.ruta==='/eventos/5/calendar/verificacion') return json(200,{etag:'externo-v2',coincideConVastio:false});
+      if(p.ruta==='/eventos/5/calendar/reconciliacion') {
+        actual={...actual,estado:'PENDIENTE',error:null};return json(200,actual);
+      }
+      return undefined;
+    });
+    montar('/eventos/5');
+    await userEvent.click(await screen.findByRole('button',{name:'Revisar cambios externos'}));
+    expect(screen.queryByRole('button',{name:'Actualizar en Google Calendar'})).not.toBeInTheDocument();
+    expect(screen.getByText(/Esta aceptación no modifica Google/)).toBeInTheDocument();
+    await userEvent.click(screen.getByRole('button',{name:'Aceptar revisión externa'}));
+    expect(await screen.findByRole('button',{name:'Actualizar en Google Calendar'})).toBeEnabled();
+    expect(pedidos(fetch).some(p=>p.metodo==='PUT'||p.metodo==='DELETE')).toBe(false);
+    expect(pedidos(fetch).find(p=>p.ruta.endsWith('/reconciliacion'))?.cuerpo).toEqual({etag:'externo-v2'});
   });
 });

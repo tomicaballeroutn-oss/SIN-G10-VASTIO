@@ -1,4 +1,4 @@
-import { useCallback, useRef } from 'react';
+import { useCallback, useRef, useState } from 'react';
 import { calendar, etiquetaCalendar, type EstadoCalendar } from '../../api/calendar';
 import { useDatos, useEnvio } from '../../api/useDatos';
 import { Alert, Button, Card } from '../../ds';
@@ -10,6 +10,19 @@ export function EstadoGoogleCalendar({ eventoId, version }: { eventoId: number; 
   const datos = useDatos(cargar);
   const { guardando, error, enviar } = useEnvio();
   const enVuelo = useRef(false);
+  const [revision, fijarRevision] = useState<{ etag: string; coincideConVastio: boolean } | null>(null);
+
+  async function revisar() {
+    const resultado = await enviar(() => calendar.verificar(eventoId));
+    if (resultado) fijarRevision(resultado);
+  }
+  async function aceptar() {
+    if (!revision) return;
+    const resultado = await enviar(() => calendar.aceptarRevision(eventoId, revision.etag));
+    fijarRevision(null);
+    if (resultado) datos.fijar(() => resultado);
+    else datos.recargar();
+  }
 
   async function operar(operacion: EstadoCalendar['pendiente']) {
     if (enVuelo.current || operacion === 'NINGUNA') return;
@@ -22,9 +35,10 @@ export function EstadoGoogleCalendar({ eventoId, version }: { eventoId: number; 
   }
 
   const e = datos.datos;
-  const vigente = !!e && e.estado === 'EXPORTADO' && e.pendiente === 'NINGUNA' && !e.error;
+  const vigente = !!e && e.configurado && !e.seguimientoPendiente && !e.errorSeguimiento && e.estado === 'EXPORTADO' && e.pendiente === 'NINGUNA' && !e.error;
   const accion = e?.pendiente ?? 'NINGUNA';
-  const puede = e && (accion === 'RETIRAR' ? e.puedeRetirar : e.puedeExportar);
+  const conflicto = e?.error === 'CONFLICTO_REMOTO';
+  const puede = e?.configurado && !conflicto && (accion === 'RETIRAR' ? e.puedeRetirar : e.puedeExportar);
   return (
     <Card title="Google Calendar">
       {datos.cargando && <p role="status">Consultando publicación…</p>}
@@ -33,8 +47,17 @@ export function EstadoGoogleCalendar({ eventoId, version }: { eventoId: number; 
         <p role="status" className={vigente ? 'calendar-evento__vigente' : undefined}>
           {vigente ? '✓ ' : ''}{etiquetaCalendar(e)}
         </p>
-        {!e.configurado && <Alert tone="warning">La integración está desactivada o no está configurada. El pendiente sigue registrado en Vastio.</Alert>}
-        {e.error && <Alert tone="warning">No confirmamos la operación ({e.error}). Volvé a verificar el resultado antes de intentar otra acción.</Alert>}
+        {!e.configurado && <Alert tone="warning">La integración está desactivada. El historial se conserva; los cambios se revisarán al activarla.</Alert>}
+        {e.configurado && (e.seguimientoPendiente || e.errorSeguimiento) && <Alert tone="warning">Hay cambios locales pendientes de revisión. El seguimiento se recupera automáticamente.<Button variant="text" onClick={datos.recargar}>Volver a consultar seguimiento</Button></Alert>}
+        {e.configurado && e.error && <Alert tone="warning">No confirmamos la operación ({e.error}). Volvé a verificar el resultado antes de intentar otra acción.</Alert>}
+        {e.configurado && conflicto && <div>
+          <Button variant="outline" loading={guardando} onClick={() => void revisar()}>Revisar cambios externos</Button>
+          {revision && <Alert tone="warning">
+            {revision.coincideConVastio ? 'El contenido coincide con Vastio.' : 'Google contiene cambios externos. Revisá la entrada en el calendario de prueba antes de continuar.'}
+            {' '}Aceptar esta revisión habilita una actualización posterior que reemplaza esos campos, o una retirada que elimina la entrada. Esta aceptación no modifica Google.
+            <Button variant="outline" loading={guardando} onClick={() => void aceptar()}>Aceptar revisión externa</Button>
+          </Alert>}
+        </div>}
         {error && <Alert tone="danger">{error.message}</Alert>}
         {puede && accion !== 'NINGUNA' && <Button
           tone={accion === 'EXPORTAR' ? 'danger' : undefined}
@@ -43,10 +66,10 @@ export function EstadoGoogleCalendar({ eventoId, version }: { eventoId: number; 
           onClick={() => void operar(accion)}>
           {accion === 'EXPORTAR' ? 'Exportar a Google Calendar' : accion === 'ACTUALIZAR' ? 'Actualizar en Google Calendar' : 'Retirar de Google Calendar'}
         </Button>}
-        {(e.estado === 'EN_PROCESO' || e.estado === 'INCIERTO' || e.error) && accion === 'NINGUNA' &&
+        {e.configurado && !conflicto && (e.estado === 'EN_PROCESO' || e.estado === 'INCIERTO' || e.error) && accion === 'NINGUNA' &&
           <Button variant="outline" disabled={!e.configurado || e.estado === 'EN_PROCESO'} loading={guardando} onClick={() => void operar(e.puedeRetirar && !e.puedeExportar ? 'RETIRAR' : 'ACTUALIZAR')}>Verificar y reintentar</Button>}
-        {e.estado === 'EN_PROCESO' && <Button variant="text" onClick={datos.recargar}>Volver a consultar publicación</Button>}
-        {e.puedeRetirar && accion !== 'RETIRAR' && !guardando &&
+        {e.configurado && e.estado === 'EN_PROCESO' && <Button variant="text" onClick={datos.recargar}>Volver a consultar publicación</Button>}
+        {e.configurado && !conflicto && e.puedeRetirar && accion !== 'RETIRAR' && !guardando &&
           <Button variant="text" tone="danger" disabled={!e.configurado || datos.cargando || e.estado === 'EN_PROCESO'} onClick={() => void operar('RETIRAR')}>Retirar de Google Calendar</Button>}
         <p className="body-sm v-muted">Las publicaciones, actualizaciones y retiradas se realizan solo cuando las solicitás.</p>
       </div>}

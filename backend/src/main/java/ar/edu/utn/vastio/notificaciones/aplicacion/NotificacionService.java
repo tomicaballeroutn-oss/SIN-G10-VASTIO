@@ -126,6 +126,9 @@ public class NotificacionService {
     @Transactional
     public void resolverCalendar(long eventoId) { notificaciones.resolverCalendar(eventoId); }
 
+    @Transactional
+    public void silenciarCalendar() { notificaciones.silenciarCalendar(); }
+
     public List<Notificacion> delEvento(long eventoId) {
         return notificaciones.findByEventoIdOrderByIdAsc(eventoId);
     }

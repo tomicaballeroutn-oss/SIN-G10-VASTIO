@@ -2,7 +2,6 @@ package ar.edu.utn.vastio.agenda.aplicacion;
 
 import java.util.List;
 import java.util.Set;
-import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ar.edu.utn.vastio.agenda.dominio.EstadoEvento;
@@ -14,7 +13,7 @@ import ar.edu.utn.vastio.notificaciones.aplicacion.NotificacionService;
 import ar.edu.utn.vastio.notificaciones.dominio.TipoNotificacion;
 import ar.edu.utn.vastio.usuarios.dominio.RolCodigo;
 
-/** Solo seguimiento local. Se ejecuta en la misma transacción comercial; jamás llama a Google. */
+/** Proyección local. Solo desde el procesador aislado o una operación Calendar explícita. */
 @Service
 @Transactional
 public class SeguimientoCalendar {
@@ -24,26 +23,18 @@ public class SeguimientoCalendar {
     private final ContenidoCalendar contenido;
     private final NotificacionService avisos;
     private final jakarta.persistence.EntityManager em;
+    private final ClienteCalendar cliente;
 
     public SeguimientoCalendar(EventoRepository eventos, PublicacionCalendarRepository publicaciones,
-            ContenidoCalendar contenido, NotificacionService avisos, jakarta.persistence.EntityManager em) {
+            ContenidoCalendar contenido, NotificacionService avisos, jakarta.persistence.EntityManager em, ClienteCalendar cliente) {
         this.eventos = eventos; this.publicaciones = publicaciones; this.contenido = contenido; this.avisos = avisos;
-        this.em = em;
+        this.em = em; this.cliente=cliente;
     }
-
-    @EventListener
-    public void cambio(CambioCalendar cambio) {
-        if (cambio.eventoId() != null) revisar(cambio.eventoId());
-        else publicaciones.ids().forEach(this::revisar);
-    }
-
-    @EventListener
-    public void catalogo(ar.edu.utn.vastio.comun.CatalogoCambiado cambio) { publicaciones.ids().forEach(this::revisar); }
 
     public PublicacionCalendar revisar(long id) {
+        if(!cliente.configurado()) return publicaciones.consultar(id);
         Evento evento = eventos.conDetalle(id).orElseThrow(() -> ar.edu.utn.vastio.comun.errores.ProblemaException.noEncontrado("EVENTO_INEXISTENTE", "No encontramos ese evento."));
-        // Primero guardar cambios propios; refresh nunca debe descartarlos. Mismo orden de locks que los casos de uso.
-        em.flush();
+        // Solo proyección aislada: no fuerza flush de operaciones comerciales.
         em.refresh(evento, jakarta.persistence.LockModeType.PESSIMISTIC_WRITE);
         var p = publicaciones.de(id);
         if (p == null && !NUEVOS.contains(evento.getEstado())) return null;

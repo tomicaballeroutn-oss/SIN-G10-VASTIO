@@ -147,10 +147,13 @@ class CuentaIT {
 
     @ParameterizedTest
     @EnumSource(RolCodigo.class)
-    void laContrasenaInicialBloqueaLaApiHastaCambiarlaInclusoConElMismoToken(RolCodigo rol) throws Exception {
+    void laContrasenaInicialBloqueaLaApiYRequiereRenovarDespuesDelCambio(RolCodigo rol) throws Exception {
         Usuario usuario = personas.de(rol);
         usuario.setDebeCambiarContrasena(true);
-        String token = personas.bearer(usuario);
+        var ingreso = mvc.perform(login(usuario.getNombreUsuario(), Personas.CONTRASENA))
+                .andExpect(status().isOk()).andReturn().getResponse();
+        var refresco = ingreso.getCookie(AutenticacionController.COOKIE_REFRESCO);
+        String token = "Bearer " + com.jayway.jsonpath.JsonPath.read(ingreso.getContentAsString(), "$.tokenAcceso");
         mvc.perform(org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get("/api/v1/_sonda/autenticado")
                 .header(HttpHeaders.AUTHORIZATION, token)).andExpect(status().isForbidden());
         mvc.perform(post("/api/v1/usuarios").header(HttpHeaders.AUTHORIZATION, token)
@@ -158,7 +161,13 @@ class CuentaIT {
 
         cambiar(usuario, Personas.CONTRASENA, NUEVA).andExpect(status().isNoContent());
         mvc.perform(org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get("/api/v1/_sonda/autenticado")
-                .header(HttpHeaders.AUTHORIZATION, token)).andExpect(status().isOk());
+                .header(HttpHeaders.AUTHORIZATION, token)).andExpect(status().isForbidden());
+        var renovada = mvc.perform(post("/api/v1/auth/refresh").cookie(refresco))
+                .andExpect(status().isOk()).andExpect(jsonPath("$.usuario.debeCambiarContrasena").value(false))
+                .andReturn().getResponse();
+        String nuevo = com.jayway.jsonpath.JsonPath.read(renovada.getContentAsString(), "$.tokenAcceso");
+        mvc.perform(org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get("/api/v1/_sonda/autenticado")
+                .header(HttpHeaders.AUTHORIZATION, "Bearer " + nuevo)).andExpect(status().isOk());
     }
 
     @Test
@@ -206,6 +215,20 @@ class CuentaIT {
         assertThat(usuarios.findById(usuario.getId()).orElseThrow().getHashContrasena()).isEqualTo(hash);
         cambiar(usuario, Personas.CONTRASENA, "á".repeat(36)).andExpect(status().isNoContent());
         assertThat(passwordEncoder.matches("á".repeat(36), usuario.getHashContrasena())).isTrue();
+    }
+
+
+    @ParameterizedTest
+    @org.junit.jupiter.params.provider.ValueSource(strings={"x","á"})
+    void noPermiteRepetirUnaClaveDe72BytesAunqueLaActualIncluyaUnSufijo(String letra) throws Exception {
+        Usuario usuario = personas.de(RolCodigo.PLANNER);
+        String anterior = letra.repeat(letra.equals("á") ? 36 : 72);
+        usuario.cambiarContrasena(passwordEncoder.encode(anterior));
+        usuarios.saveAndFlush(usuario);
+        String hash = usuario.getHashContrasena();
+        cambiar(usuario, anterior + "sufijo", anterior).andExpect(status().isUnprocessableContent())
+                .andExpect(jsonPath("$.codigo").value("CONTRASENA_REPETIDA"));
+        assertThat(usuarios.findById(usuario.getId()).orElseThrow().getHashContrasena()).isEqualTo(hash);
     }
 
     private ResultActions cambiar(Usuario usuario, String actual, String nueva) throws Exception {

@@ -33,7 +33,7 @@ import org.springframework.security.authorization.AuthorizationDecision;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.web.servlet.HandlerExceptionResolver;
 
-import ar.edu.utn.vastio.usuarios.infraestructura.UsuarioRepository;
+import ar.edu.utn.vastio.comun.errores.SesionVencidaException;
 
 /**
  * API sin estado con JWT. Las rutas de /api/v1/auth son públicas; el resto exige token de acceso.
@@ -46,7 +46,7 @@ import ar.edu.utn.vastio.usuarios.infraestructura.UsuarioRepository;
 public class SeguridadConfig {
 
     @Bean
-    SecurityFilterChain api(HttpSecurity http, UsuarioRepository usuarios,
+    SecurityFilterChain api(HttpSecurity http,
             @Qualifier("handlerExceptionResolver") HandlerExceptionResolver errores) throws Exception {
         http
                 .csrf(csrf -> csrf.disable()) // sin sesión de servidor; la cookie de refresco es SameSite=Strict
@@ -58,12 +58,14 @@ public class SeguridadConfig {
                         .requestMatchers(HttpMethod.POST, "/api/v1/auth/login", "/api/v1/auth/refresh", "/api/v1/auth/logout").permitAll()
                         .requestMatchers("/actuator/health/**", "/api/docs/**", "/swagger-ui/**").permitAll()
                         .requestMatchers("/error").permitAll()
-                        .requestMatchers(HttpMethod.POST, "/api/v1/cuenta/contrasena").authenticated()
+                        .requestMatchers(HttpMethod.POST, "/api/v1/cuenta/contrasena")
+                        .access((autenticacion, contexto) -> new AuthorizationDecision(
+                                autenticacion.get().getPrincipal() instanceof Jwt))
                         .anyRequest().access((autenticacion, contexto) -> {
-                            // Estado vigente: alcanza a tokens previos y libera el acceso al guardar el cambio.
+                            // La marca firmada se emite desde la base al iniciar o renovar la sesión.
                             var principal = autenticacion.get().getPrincipal();
                             return new AuthorizationDecision(principal instanceof Jwt jwt
-                                    && !usuarios.existsByIdAndDebeCambiarContrasenaTrue(Long.parseLong(jwt.getSubject())));
+                                    && Boolean.FALSE.equals(jwt.getClaims().get(TokenService.CLAIM_CAMBIO_OBLIGATORIO)));
                         }))
                 .oauth2ResourceServer(o -> o
                         .jwt(j -> j.jwtAuthenticationConverter(convertidorDeRoles()))
@@ -100,10 +102,25 @@ public class SeguridadConfig {
 
     private static JwtDecoder decoder(SeguridadProperties propiedades, String tipo) {
         NimbusJwtDecoder decoder = NimbusJwtDecoder.withSecretKey(clave(propiedades)).macAlgorithm(MacAlgorithm.HS256).build();
-        OAuth2TokenValidator<Jwt> delTipo = jwt -> tipo.equals(jwt.getClaimAsString(TokenService.CLAIM_TIPO))
+        OAuth2TokenValidator<Jwt> delTipo = jwt -> tipo.equals(jwt.getClaims().get(TokenService.CLAIM_TIPO))
                 ? OAuth2TokenValidatorResult.success()
                 : OAuth2TokenValidatorResult.failure(new OAuth2Error("invalid_token", "Tipo de token incorrecto", null));
-        decoder.setJwtValidator(new DelegatingOAuth2TokenValidator<>(JwtValidators.createDefaultWithIssuer("vastio"), delTipo));
+        OAuth2Error invalida = new OAuth2Error("invalid_token", "Claims de sesión inválidos", null);
+        OAuth2TokenValidator<Jwt> deLaSesion = jwt -> {
+            try {
+                TokenService.usuarioId(jwt);
+                if (TokenService.TIPO_ACCESO.equals(tipo)
+                        && !(jwt.getClaims().get(TokenService.CLAIM_CAMBIO_OBLIGATORIO) instanceof Boolean)) {
+                    // Un access token anterior al claim debe pasar por refresh; nunca se asume false.
+                    return OAuth2TokenValidatorResult.failure(invalida);
+                }
+                return OAuth2TokenValidatorResult.success();
+            } catch (SesionVencidaException e) {
+                return OAuth2TokenValidatorResult.failure(invalida);
+            }
+        };
+        decoder.setJwtValidator(new DelegatingOAuth2TokenValidator<>(
+                JwtValidators.createDefaultWithIssuer("vastio"), delTipo, deLaSesion));
         return decoder;
     }
 

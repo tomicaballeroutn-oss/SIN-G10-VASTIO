@@ -17,8 +17,6 @@ public interface UsuarioRepository extends JpaRepository<Usuario, Long> {
 
     boolean existsByNombreUsuario(String nombreUsuario);
 
-    boolean existsByIdAndDebeCambiarContrasenaTrue(Long id);
-
     /** Serializa la verificación de la contraseña actual y su reemplazo. */
     @Lock(LockModeType.PESSIMISTIC_WRITE)
     @Query("select u from Usuario u where u.id = :id")

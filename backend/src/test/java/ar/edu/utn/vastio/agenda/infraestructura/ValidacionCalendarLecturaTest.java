@@ -17,6 +17,10 @@ import com.google.auth.oauth2.ServiceAccountCredentials;
 /** Aceptación optativa: SOLO GET de calendario aislado/identidad guardada; sin Spring ni DB. */
 @EnabledIfEnvironmentVariable(named="VASTIO_VALIDACION_SOLO_LECTURA",matches="true")
 class ValidacionCalendarLecturaTest {
+    static String textoOpcional(com.google.api.client.json.GenericJson fuente,String campo) {
+        Object valor=fuente.get(campo);
+        return valor==null || com.google.api.client.util.Data.isNull(valor)?null:(String)valor;
+    }
     @Test void compruebaDestinoIdentidadYContenidoSinEscribir() {
         var fase=DiagnosticoCalendar.Fase.CREDENCIALES;
         try {
@@ -61,8 +65,9 @@ class ValidacionCalendarLecturaTest {
                 var inicio=fecha.atTime(LocalTime.parse((String)fuente.get("inicio"))).atZone(zona);
                 var fin=fecha.plusDays(Boolean.TRUE.equals(fuente.get("cruza"))?1:0).atTime(LocalTime.parse((String)fuente.get("fin"))).atZone(zona);
                 String titulo=fuente.get("codigo")+" · "+fuente.get("salon")+" · "+fuente.get("turno");
+                String particular=textoOpcional(fuente,"particular");
                 String descripcion="Tipo de evento: "+fuente.get("tipo")+".\nSalón: "+fuente.get("salon")+".\nTurno: "+fuente.get("turno")+".\n"
-                    +(fuente.get("particular")==null?"":"Hora particular de inicio: "+LocalTime.parse((String)fuente.get("particular")).format(java.time.format.DateTimeFormatter.ofPattern("HH:mm"))+".\n")
+                    +(particular==null?"":"Hora particular de inicio: "+LocalTime.parse(particular).format(java.time.format.DateTimeFormatter.ofPattern("HH:mm"))+".\n")
                     +"Código Vastio: "+fuente.get("codigo")+".";
                 boolean coincide=titulo.equals(remoto.getSummary()) && descripcion.equals(remoto.getDescription()) && fuente.get("salon").equals(remoto.getLocation())
                     && inicio.toInstant().toEpochMilli()==remoto.getStart().getDateTime().getValue() && fin.toInstant().toEpochMilli()==remoto.getEnd().getDateTime().getValue()

@@ -2,7 +2,7 @@
 
 ## Entorno y corrección
 
-Base inicial `c50b4dc`. Corrección en `codex/m06-diagnostico-oauth`: `cc6acff` evita la doble descompresión gzip de OAuth; `ccdf920` agrega causas/fases sanitizadas. No cambia publicación, identidad ni recuperación. El JSON de la cuenta de servicio se usa únicamente desde su archivo privado, sin mostrar/copiar claves, tokens ni contraseñas.
+Base inicial `c50b4dc`. La versión de backend validada es `a35dbea`, en la rama de corrección `codex/m06-diagnostico-oauth`: incorpora `cc6acff` para evitar la doble descompresión gzip y corrige la instrumentación inicial de `ccdf920` manteniendo causas/fases sanitizadas. No cambia publicación, identidad ni recuperación. El JSON de la cuenta de servicio se usa únicamente desde su archivo privado, sin mostrar/copiar claves, tokens ni contraseñas.
 
 El worktree limpio `C:\Users\tomic\VASTIO-CALENDAR-TEST` pasó a una rama local independiente `codex/m06-validacion-real` en `ccdf920`. Se preservaron todas las variables del proceso anterior en memoria y sus argumentos de Spring/JVM. Se verificaron directorio, puerto, URL de base e instalación antes de detener exclusivamente el backend de pruebas. Se ejecutó `mvnw.cmd clean package -DskipTests` y se arrancó el jar con la configuración conservada. Salud UP en localhost:8080. Frontend 5173 y PostgreSQL 5433 conservaron sus procesos originales. El repositorio principal/main y su base no se modificaron.
 
@@ -40,4 +40,30 @@ La lectura optativa del cliente de producción, que antes fallaba con NullPointe
 
 Regresión posterior: 26 unitarias simuladas y 38 integraciones CalendarIT con PostgreSQL descartable Testcontainers, todas aprobadas sin omisiones; BUILD SUCCESS. No se utilizó vastio_calendar_test para esas integraciones. La comprobación real de contenido, idempotencia, actualización y retirada sigue pendiente; no se acredita con las pruebas simuladas.
 
-**Estado:** M-06 no terminada; exportación confirmada, idempotencia, actualización y retirada pendientes. Antes de reanudar se requiere una decisión explícita tras el resultado incierto, conforme a la condición del usuario. El PR #51 sigue abierto, Draft, sin fusionar, en c50b4dc; no se modifica, aprueba ni cierra. La revisión debe considerar las correcciones y el resultado real completo, sin acreditar aceptación con mocks.
+## Reanudación expresamente autorizada y ciclo real completado
+
+El usuario autorizó una única recuperación y el ciclo completo después de conocer el resultado incierto, la corrección y la ausencia remota confirmada. Todas las escrituras se hicieron mediante Vastio autenticado; los auxiliares de Google únicamente efectuaron GET. No se regeneró la identidad ni se editaron filas para forzar un éxito.
+
+| Etapa | Vastio / auditoría | Google real |
+|---|---|---|
+| Recuperación manual desde la ficha, Dirección | EXPORTADO / NINGUNA / sin error. REINTENTO + CREACION_CONFIRMADA; 6 operaciones acumuladas. | PRESENTE, propia, una entrada activa. |
+| Repetición controlada de POST en la API autenticada de Vastio | EXPORTADO / NINGUNA. Misma identidad, hash de auditoría y 6 operaciones; no se generó otra operación remota. | Sigue una entrada activa, con contenido exacto. |
+| Hora particular 12:30 guardada en el formulario | Estado comercial SENADO; pendiente ACTUALIZAR; siguen 6 operaciones. No se publicó automáticamente. | No se solicitó escritura remota; se verificó el pendiente local antes de actualizar. |
+| Actualización manual desde la ficha | EXPORTADO / NINGUNA / sin error. SOLICITUD + ACTUALIZACION_CONFIRMADA; 8 operaciones. | Misma identidad y una entrada activa; descripción con hora particular 12:30. |
+| Retirada manual desde la ficha | RETIRADO / NINGUNA / sin error, retiro_solicitado=false. SOLICITUD + RETIRADA_CONFIRMADA; 10 operaciones. | ELIMINADA y cero entradas propias activas. |
+
+En creación, repetición y actualización se compararon contra la proyección pública exacta: título `EV-2026-00001 · Avril · Mediodía`, tipo Egresados, salón/ubicación Avril, descripción prevista, fecha 07/11/2026, inicio 12:00, fin 18:00 y zona `America/Argentina/Cordoba`. La hora particular solo cambia la descripción, no el intervalo del turno. Se comprobó ausencia de invitados y adjuntos. La igualdad exacta con la proyección permitida confirma que no se incorporaron nombre del cliente/evento libre, documento del firmante, importe de seña ni otros datos de la ficha.
+
+La repetición usó un login normal de Dirección en la API de Vastio y una única petición POST, nunca una escritura directa a Google ni tokens fabricados. Contraseña y tokens se mantuvieron solo en memoria, sin imprimirlos, y se cerró únicamente esa sesión auxiliar. Las otras escrituras se realizaron desde la sesión de Dirección de la UI. No se modificaron credenciales, ACL, permisos globales ni configuración de seguridad.
+
+La primera comparación del evento presente detectó ClassCastException en el auxiliar: GenericJson representa JSON null mediante un sentinel. Se corrigió la lectura opcional con Data.isNull y se agregó una regresión. No fue un fallo de la publicación ni se repitió una escritura por esa falla del auxiliar. Las comparaciones posteriores pasaron. El primer guardado del control nativo de hora no produjo cambio; se completó la entrada con teclado, se verificó 12:30 y se guardó. Solo la modificación efectiva agregó un registro al historial comercial (de 2 a 3).
+
+## Estado final y entrega
+
+- Backend de pruebas saludable en localhost:8080, código `a35dbea`; rama local `codex/m06-validacion-real`. Frontend y PostgreSQL originales de pruebas siguen en sus mismos procesos/puertos. No se reiniciaron servicios ajenos ni se borraron volúmenes.
+- Evento ficticio permanece SENADO, con hora particular 12:30. La publicación queda RETIRADO, sin pendiente ni error y conservando su identidad. Los dos registros de auditoría anteriores se verificaron por hash y permanecen dentro de las diez operaciones acumuladas. No se canceló ni eliminó el evento comercial.
+- Se guardaron evidencias sanitizadas de estados/lecturas y capturas de Exportado y Publicación retirada en el directorio local de validación, fuera del repositorio y sin claves/tokens. Los JSON de lectura remota contienen solo nombre del calendario, rol, presencia, coincidencia de contenido, intervalo y cantidad de entradas.
+- Pruebas focales de la corrección: 26 unitarias simuladas y 38 CalendarIT aprobadas; además, pruebas optativas reales de OAuth, cliente de producción y lecturas por etapa aprobadas. La nueva regresión del null JSON también pasó. El resultado de CI del commit final se informa en el PR de correcciones; no se sustituye por resultados de commits anteriores.
+- El PR #51 permanece abierto, Draft, sin fusionar, en c50b4dc. La corrección se entrega en rama independiente para revisión, sin modificar main ni la rama del #51, sin force-push, aprobación, cierre o merge automático.
+
+**Alcance acreditado:** el ciclo real autorizado de recuperación/exportación, idempotencia, actualización, privacidad y retirada está COMPLETADO en el calendario aislado `Vastio - Pruebas`. No se declara aprobada toda M-06 ni autorizado su merge: siguen sujetos a revisión humana los cambios y la integración con otros PR. No se ejecutaron en Google real pruebas de permisos insuficientes (no se alteraron ACL), conflicto por edición externa, turno nocturno o activación/desactivación; cuentan con cobertura automatizada donde corresponde, pero no se presentan como aceptación externa ejecutada.

@@ -45,19 +45,8 @@ public class GoogleCalendarClient implements ClienteCalendar {
                             .setDefaultRetriesEnabled(false).build()
                             .createScoped(List.of("https://www.googleapis.com/auth/calendar.events"));
                     var auth = new HttpCredentialsAdapter(credenciales);
-                    api = new Calendar.Builder(new NetHttpTransport(), GsonFactory.getDefaultInstance(), request -> {
-                        auth.initialize(request);
-                        var interceptorOAuth=request.getInterceptor();
-                        request.setInterceptor(pedido->{
-                            try { interceptorOAuth.intercept(pedido); }
-                            catch(IOException e) { throw new DiagnosticoCalendar.FalloOAuth(e); }
-                        });
-                        request.setConnectTimeout(config.conexionMs());
-                        request.setReadTimeout(config.lecturaMs());
-                        request.setNumberOfRetries(0); // Reconciliar antes de volver a escribir.
-                        request.setLoggingEnabled(false);
-                        request.setCurlLoggingEnabled(false);
-                    }).setApplicationName("Vastio M-06").build();
+                    api = new Calendar.Builder(new NetHttpTransport(), GsonFactory.getDefaultInstance(), inicializador(auth,config))
+                            .setApplicationName("Vastio M-06").build();
                 } catch (IOException | RuntimeException e) {
                     DiagnosticoCalendar.registrar(DiagnosticoCalendar.Fase.CREDENCIALES,e);
                     log.warn("Calendar: carga de credenciales fallida ({}); revisar archivo y permisos y reiniciar tras rotación.",e.getClass().getSimpleName());
@@ -66,6 +55,17 @@ public class GoogleCalendarClient implements ClienteCalendar {
             }
         }
         return api;
+    }
+
+    static com.google.api.client.http.HttpRequestInitializer inicializador(HttpCredentialsAdapter auth,CalendarProperties config) {
+        return request->{
+            // El adaptador autentica en initialize(); no instala un HttpExecuteInterceptor.
+            try { auth.initialize(request); }
+            catch(IOException e) { throw new DiagnosticoCalendar.FalloOAuth(e); }
+            request.setConnectTimeout(config.conexionMs());request.setReadTimeout(config.lecturaMs());
+            request.setNumberOfRetries(0); // Reconciliar antes de volver a escribir.
+            request.setLoggingEnabled(false);request.setCurlLoggingEnabled(false);
+        };
     }
 
     public void comprobarDestino(String calendario) {

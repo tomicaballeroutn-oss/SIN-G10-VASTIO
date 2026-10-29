@@ -20,13 +20,17 @@ class DiagnosticoOAuthRealTest {
         if(ruta==null || destino==null || identidad==null || !identidad.matches("[0-9a-f]{64}"))
             throw new AssertionError("Configuración de diagnóstico incompleta; copiar identidad y destino persistidos, sin regenerarlos.");
         var cliente=new GoogleCalendarClient(new CalendarProperties(true,destino,"diagnostico-solo-lectura",ruta,5000,10000));
+        var fase=DiagnosticoCalendar.Fase.CALENDAR_LISTAR;
         try {
             cliente.comprobarDestino(destino); // GET, antes de interpretar ausencia.
+            fase=DiagnosticoCalendar.Fase.CALENDAR_CONSULTAR;
             var remoto=cliente.consultar(destino,identidad); // GET exclusivamente.
             System.out.println(remoto==null?"Identidad: AUSENTE en la consulta; no se creó nada.":
                     remoto.eliminado()?"Identidad: ELIMINADA; no se creó nada.":"Identidad: PRESENTE y propia; no se modificó nada.");
         } catch(ar.edu.utn.vastio.agenda.aplicacion.ClienteCalendar.Fallo error) {
             throw new AssertionError("Consulta de identidad no confirmada. Código sanitizado: "+error.codigo());
+        } catch(RuntimeException error) {
+            throw new AssertionError("Consulta de identidad fallida: "+DiagnosticoCalendar.detalle(fase,error));
         }
     }
     @Test void obtieneTokenSinOperarCalendar() {

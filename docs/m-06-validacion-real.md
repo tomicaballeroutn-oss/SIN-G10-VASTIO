@@ -24,10 +24,16 @@ La lectura usa un test optativo `ValidacionCalendarLecturaTest`, desactivado sal
 - Compilación limpia del backend de validación: BUILD SUCCESS; no se reutilizaron clases anteriores. Los tests se ejecutaron previamente en el worktree de corrección y el empaquetado se hizo con skipTests.
 - `git diff --check`: aprobado. No se ejecutaron suites completas ni CI de estos commits durante esta fase.
 
-## Operaciones de escritura: pendientes de autorización explícita
+## Único intento autorizado y detención ante resultado incierto
 
 La sesión de Dirección en Vastio pudo renovarse y se conservó después del reinicio. La ficha muestra el error histórico pendiente; no se borró ni reseteó para ocultarlo. No se pulsó exportar/reintentar/retirar ni se llamó directamente a escrituras Google.
 
-Se solicitó autorización para una exportación mediante Vastio, comprobación de contenido e idempotencia y, si se confirma el éxito, cambiar la hora particular ficticia a 12:30, actualizar y retirar la publicación. El intervalo exportado seguirá siendo el turno completo: 07/11/2026, Avril, Mediodía, 12:00–18:00, America/Argentina/Cordoba. Cualquier resultado incierto detiene el ensayo: no hay reintentos automáticos.
+El usuario autorizó explícitamente el ciclo completo mediante Vastio, conservando identidad y deteniendo cualquier resultado incierto. Se pulsó exportar una sola vez desde la sesión autenticada de Dirección. Vastio devolvió INCIERTO / RESULTADO_NO_PERSISTIDO. Se detuvo el ciclo: no se repitió la exportación ni se modificó hora particular, actualizó o retiró la entrada.
 
-Hasta recibir la autorización, exportación, actualización y retirada reales permanecen PENDIENTES. M-06 no se declara terminada. El PR #51 sigue abierto, Draft, sin fusionar, en c50b4dc; no se modifica, aprueba ni cierra. La revisión debe considerar los commits OAuth y los resultados finales del ensayo, cuando se autorice y complete.
+La lectura posterior confirmó identidad AUSENTE y cero entradas propias activas. DB conserva SENADO, la misma identidad y los dos registros anteriores, más REINTENTO e INCIERTO/RESULTADO_NO_PERSISTIDO (cuatro operaciones en total). No se borró historial ni se restableció el estado.
+
+Un test optativo de solo lectura del cliente real reprodujo NullPointerException en CALENDAR_LISTAR. La instrumentación de ccdf920 suponía que HttpCredentialsAdapter instalaba un HttpExecuteInterceptor; la versión fijada implementa HttpRequestInitializer/HttpUnsuccessfulResponseHandler y autentica en initialize(). El interceptor era null, por lo que el fallo sucedía antes de enviar el GET y antes de INSERT. El catch genérico de RuntimeException lo convirtió conservadoramente en RESULTADO_NO_PERSISTIDO; ese rótulo no demostró un fallo de PostgreSQL.
+
+Se corrigió la instrumentación para envolver únicamente auth.initialize(request), sin instalar ni depender de un interceptor. La clasificación sanitizada de fallos OAuth permanece. Se agregaron regresiones con el adaptador real y un token sintético contra transporte simulado, y otra para IOException OAuth. La nueva tanda de 28 tests pasó sin fallos/omisiones, incluyendo OAuth y lectura real; no efectuó escrituras Calendar.
+
+**Estado:** M-06 no terminada; exportación confirmada, idempotencia, actualización y retirada pendientes. Antes de reanudar se requiere una decisión explícita tras el resultado incierto, conforme a la condición del usuario. El PR #51 sigue abierto, Draft, sin fusionar, en c50b4dc; no se modifica, aprueba ni cierra. La revisión debe considerar las correcciones y el resultado real completo, sin acreditar aceptación con mocks.

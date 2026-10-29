@@ -26,7 +26,7 @@ La comparación confirma carga válida de la cuenta/clave para OAuth y conectivi
 
 El puente sigue usando el stream de `HttpResponse.getContent()`. Para respuestas gzip ya descomprimidas no vuelve a anunciar Content-Encoding y descarta Content-Length comprimido (longitud desconocida: -1). Se mantienen conexión/lectura acotadas, cero reintentos, cero redirecciones y logging HTTP desactivado. Se prueban cuerpo comprimido exitoso, token OAuth real de la biblioteca contra transporte simulado, error HTTP comprimido y límites previos.
 
-Se agrega diagnóstico con fases cerradas: CREDENCIALES, OAUTH_TOKEN y operaciones CALENDAR. El interceptor identifica un fallo al obtener el token. Los logs contienen únicamente fase, categoría, nombres de clases de la cadena causal y estado HTTP. No contienen mensajes de excepciones, cuerpos, rutas, URLs, claves, tokens ni stack traces. No se cambia el código público RED_GOOGLE ni la semántica de resultado incierto.
+Se agrega diagnóstico con fases cerradas: CREDENCIALES, OAUTH_TOKEN y operaciones CALENDAR. Se identifica el fallo OAuth al ejecutar `HttpCredentialsAdapter.initialize(request)`. Este adaptador no instala un HttpExecuteInterceptor; no se debe envolver un interceptor inexistente. La instrumentación inicial de ccdf920 lo suponía y provocaba un NullPointerException, detectado/corregido durante la validación real posterior (ver `m-06-validacion-real.md`). Los logs contienen únicamente fase, categoría, nombres de clases de la cadena causal y estado HTTP. No contienen mensajes de excepciones, cuerpos, rutas, URLs, claves, tokens ni stack traces. No se cambia el código público RED_GOOGLE ni la semántica de resultado incierto.
 
 | Evidencia | Interpretación |
 |---|---|

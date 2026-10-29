@@ -15,8 +15,10 @@ public class PublicacionCalendarRepository {
     public void asegurar(long id) {
         jdbc.update("INSERT INTO publicacion_calendar(evento_id) VALUES (?) ON CONFLICT DO NOTHING", id);
     }
-    public PublicacionCalendar de(long id) {
-        return jdbc.query("SELECT * FROM publicacion_calendar WHERE evento_id = ? FOR UPDATE", (r, n) ->
+    public PublicacionCalendar de(long id) { return leer(id,true); }
+    public PublicacionCalendar consultar(long id) { return leer(id,false); }
+    private PublicacionCalendar leer(long id,boolean bloquear) {
+        return jdbc.query("SELECT * FROM publicacion_calendar WHERE evento_id = ?"+(bloquear?" FOR UPDATE":""), (r, n) ->
             new PublicacionCalendar(r.getLong("evento_id"), r.getString("calendar_id"), r.getString("instalacion"),
                 r.getString("google_id"), r.getString("estado"), r.getString("pendiente"), r.getString("huella"),
                 r.getString("huella_intento"), r.getBoolean("retiro_solicitado"), r.getString("etag"), r.getObject("intento", java.time.OffsetDateTime.class),

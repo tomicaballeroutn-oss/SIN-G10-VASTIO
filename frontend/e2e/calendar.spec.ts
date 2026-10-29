@@ -69,7 +69,7 @@ test('Calendar: pendiente, publicación, actualización, retirada y avisos en es
   await page.screenshot({ path: testInfo.outputPath('calendar-retirado.png'), fullPage: true });
 });
 
-test('Calendar: desactivado y error incierto conservan una acción accesible', async ({ page }) => {
+test('Calendar: desactivado sin acciones y error incierto con reintento explícito', async ({ page }) => {
   let habilitado = false;
   let incierto = false;
   await page.route('**/api/v1/**', async route => {
@@ -85,7 +85,8 @@ test('Calendar: desactivado y error incierto conservan una acción accesible', a
     await route.fulfill({ json: { cantidad: 0 } });
   });
   await page.goto('/eventos/5');
-  await expect(page.getByRole('button', { name: 'Exportar a Google Calendar' })).toBeDisabled();
+  await expect(page.getByText('Integración desactivada', { exact: true })).toBeVisible();
+  await expect(page.getByRole('button', { name: 'Exportar a Google Calendar' })).toHaveCount(0);
   habilitado = true;
   await page.reload();
   await page.getByRole('button', { name: 'Exportar a Google Calendar' }).click();

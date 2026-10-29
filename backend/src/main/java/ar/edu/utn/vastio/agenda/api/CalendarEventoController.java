@@ -28,6 +28,17 @@ public class CalendarEventoController {
     @PutMapping("/eventos/{id}/calendar")
     @Operation(summary="Actualizar o reconciliar la publicación")
     public Estado actualizar(@PathVariable long id, @AuthenticationPrincipal Jwt jwt) { return servicio.operar(id, false, UsuarioActual.de(jwt)); }
+    @PostMapping("/eventos/{id}/calendar/verificacion")
+    @Operation(summary="Revisar un conflicto remoto",description="Solo lectura de Google por una acción manual; devuelve ETag sin datos privados externos.")
+    public ExportacionCalendarService.RevisionRemota verificar(@PathVariable long id,@AuthenticationPrincipal Jwt jwt) {
+        return servicio.verificarConflicto(id,UsuarioActual.de(jwt));
+    }
+    public record RevisionRequest(@jakarta.validation.constraints.NotBlank @jakarta.validation.constraints.Size(max=255) String etag) { }
+    @PostMapping("/eventos/{id}/calendar/reconciliacion")
+    @Operation(summary="Aceptar explícitamente la revisión externa",description="No cambia Google. Una actualización/retirada posterior sigue usando If-Match y exige otra acción manual.")
+    public Estado aceptar(@PathVariable long id,@jakarta.validation.Valid @RequestBody RevisionRequest pedido,@AuthenticationPrincipal Jwt jwt) {
+        return servicio.aceptarRevision(id,pedido.etag(),UsuarioActual.de(jwt));
+    }
     @DeleteMapping("/eventos/{id}/calendar")
     @Operation(summary="Retirar una publicación", description="Repetir una retirada confirmada no llama a Google.")
     public Estado retirar(@PathVariable long id, @AuthenticationPrincipal Jwt jwt) { return servicio.operar(id, true, UsuarioActual.de(jwt)); }

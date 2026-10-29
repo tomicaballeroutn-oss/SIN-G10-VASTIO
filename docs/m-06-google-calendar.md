@@ -10,7 +10,7 @@ Base de implementación: main `feb8ae3d3c5ae14d258f3d226caa1260a282919b` (27/10/
 
 Integración dentro de agenda: `CalendarEventoController` → `ExportacionCalendarService` → interfaz `ClienteCalendar` → adaptador oficial `GoogleCalendarClient`. `ContenidoCalendar` construye una proyección explícita, sin serializar la ficha. `PublicacionCalendarRepository` usa JDBC para coordinación PostgreSQL y estado durable; `PublicacionCalendar` representa ese estado.
 
-`SeguimientoCalendar` recibe señales locales de `AvisosEvento` y cambios de catálogo. Solo toca PostgreSQL y el servicio de notificaciones. Las operaciones comerciales funcionan aunque Google esté caído o la integración desactivada.
+V15 captura cambios en una cola coalescente de PostgreSQL (`calendar_seguimiento`) dentro de la transacción de origen. `ProcesadorSeguimientoCalendar` ejecuta la proyección local `SeguimientoCalendar` después del commit, en `REQUIRES_NEW` con timeout de 10 segundos. Las señales AFTER_COMMIT aceleran el trabajo; un barrido local cada 5 segundos recupera revisiones pendientes después de una caída. No consulta Google. Fallos de proyección revierten únicamente esa proyección, quedan registrados con código sanitizado y backoff de hasta 300 segundos, y no revierten la operación comercial ya confirmada. Si tampoco puede registrarse el fallo, la revisión sigue sin confirmar y se registra el incidente en logs.
 
 ## 3. Estados de publicación
 
@@ -36,17 +36,21 @@ Todas estas rutas exigen DIRECCION o COORDINACION mediante `@PreAuthorize`, y el
 
 | Método | Ruta | Resultado |
 |---|---|---|
-| GET | `/api/v1/eventos/{id}/calendar` | Estado local actualizado; sin red Google |
+| GET | `/api/v1/eventos/{id}/calendar` | Lectura local sin escrituras ni red Google; informa seguimiento pendiente |
 | POST | `/api/v1/eventos/{id}/calendar` | Exportar/reconciliar identidad estable |
 | PUT | `/api/v1/eventos/{id}/calendar` | Actualizar/reconciliar |
 | DELETE | `/api/v1/eventos/{id}/calendar` | Retirar/reconciliar retirada |
 | GET | `/api/v1/calendar/pendientes` | Pendientes persistidos, separados de lectura de avisos |
+| POST | `/api/v1/eventos/{id}/calendar/verificacion` | Lee ETag y coincidencia de contenido remoto por solicitud explícita |
+| POST | `/api/v1/eventos/{id}/calendar/reconciliacion` | Acepta el ETag revisado tras comprobar su vigencia; no escribe en Google |
 
-El navegador solo envía la intención y el ID Vastio. No recibe ni elige credenciales/destino. Los errores Google se traducen a `ProblemDetail` 503 con un código sanitizado; nunca se devuelve su 401 como expiración del login de Vastio. Las reglas comerciales usan 422 y la concurrencia de operaciones usa 409.
+El navegador envía intención e ID Vastio; en la aceptación de un conflicto también el ETag revisado. No recibe ni elige credenciales/destino. Los errores Google se traducen a `ProblemDetail`: conflicto 409, entrada ausente/eliminada 410, datos inválidos 422, cuota 429, red 504, respuesta inválida 502, configuración/autorización/disponibilidad 503. El 401 de Google nunca se devuelve como expiración del login de Vastio. POST y PUT conservan el mismo coordinador idempotente: los rótulos expresan intención de UI, pero ambos reconcilian la identidad estable antes de escribir. Separarlos duplicaría recuperación y permitiría carreras innecesarias.
 
 ## 6. Configuración
 
-Por defecto `VASTIO_CALENDAR_HABILITADO=false`: el backend arranca sin archivo de credenciales y no conecta a Google. El seguimiento local continúa registrando pendientes.
+Por defecto `VASTIO_CALENDAR_HABILITADO=false`: el backend arranca sin archivo de credenciales y no conecta a Google. La cola captura cambios, pero no proyecta nuevos avisos. Los GET devuelven pendiente NINGUNA, capacidades falsas y listado vacío; el historial e identidades se conservan. Al iniciar desactivado se resuelven avisos Calendar anteriores y se restablece su clave de deduplicación; el barrido reintenta esa limpieza si falla. V14 conserva sus registros históricos y V15 no emite avisos masivos.
+
+La configuración cambia mediante reinicio. Al activar se encolan eventos elegibles preexistentes y todas las publicaciones anteriores: se recalculan exportaciones, diferencias acumuladas y retiradas necesarias. Un aviso activo por problema/evento evita duplicaciones; una retirada confirmada no se republica automáticamente. El procesamiento es eventual y por lotes de 50; el estado informa `seguimientoPendiente`/`errorSeguimiento` para no presentar una publicación como vigente antes de revisar los cambios acumulados.
 
 Variables para una instalación habilitada:
 
@@ -55,7 +59,7 @@ Variables para una instalación habilitada:
 - `VASTIO_CALENDAR_INSTALACION`: identidad estable y única por entorno, hasta 120 caracteres. No cambiar tras publicar.
 - `VASTIO_CALENDAR_CREDENCIALES`: ruta del JSON **fuera del repositorio**, legible solo por backend/operador.
 
-Timeouts: `vastio.calendar.conexion-ms=5000`, `lectura-ms=10000`; configurables de 100 a 30000 ms. Los reintentos automáticos HTTP están desactivados: cada intento manual reconcilia antes de escribir y tiene un número acotado de solicitudes. Ante cuota/caída, esperar antes de solicitar otro intento; no mantener un bucle de reintentos desde el navegador.
+Timeouts: `vastio.calendar.conexion-ms=5000`, `lectura-ms=10000`; configurables de 100 a 30000 ms. Se aplican tanto a Calendar como al transporte de obtención de tokens OAuth. El transporte OAuth desactiva redirecciones, reintentos y logging de peticiones; la estrategia de reintentos de la biblioteca de autenticación también está desactivada. Cada intento manual reconcilia antes de escribir y tiene un número acotado de solicitudes. Ante cuota/caída, esperar antes de solicitar otro intento; no mantener un bucle de reintentos desde el navegador. Son límites de conexión/lectura, no un deadline global que incluya DNS.
 
 En Docker utilizar el override optativo:
 
@@ -93,11 +97,13 @@ Un registro por evento Vastio (un destino por evento en este MVP), con unicidad 
 
 Antes de escribir se persiste la identidad, la operación y la huella del intento. La huella del intento permite recuperar una escritura exitosa aun cuando el contenido local cambió antes del reintento. Se usa un advisory lock PostgreSQL de sesión por evento durante toda la operación remota. No es un lock Java ni una lease con vencimiento que permita ejecutar dos escritores simultáneos. Una colisión del hash numérico del lock solo serializa eventos adicionales.
 
-El lock usa una conexión dedicada sin transacción comercial abierta. Las transacciones de preparación/confirmación son cortas. La entrada del caso de uso remoto usa propagación NEVER para rechazar su ejecución dentro de una transacción comercial. La conexión se desbloquea antes de volver al pool. Al caer el proceso se libera la sesión; `EN_PROCESO` queda durable y una consulta posterior lo identifica como incierto si el lock ya está libre.
+El lock usa un pool propio, perezoso, de máximo dos conexiones, mínimo cero y espera de adquisición de un segundo. Ninguna llamada Google retiene conexiones del pool comercial. Las transacciones de preparación/confirmación son cortas. La entrada del caso de uso remoto usa propagación NEVER para rechazar su ejecución dentro de una transacción comercial. La conexión se desbloquea antes de volver al pool; si falla el desbloqueo se aborta. Al caer el proceso se libera la sesión; `EN_PROCESO` queda durable y el procesador local lo identifica como incierto si el lock ya está libre. Los GET no recuperan ni escriben.
 
 ## 11. Errores externos
 
 Permisos/autorización requieren revisar ACL o credenciales. Cuotas/5xx/red admiten reintento manual acotado. 412 o un ETag distinto indican conflicto: no se pisan cambios remotos silenciosamente. Una identidad ajena no se adopta. Un evento ya confirmado pero ausente no se recrea automáticamente.
+
+Para CONFLICTO_REMOTO, Dirección/Coordinación solicita «Revisar cambios externos», revisa la entrada en Google y acepta explícitamente el ETag vigente. El servidor vuelve a leerlo y rechaza una revisión que cambió mientras se revisaba. La aceptación queda auditada y solo guarda metadatos técnicos; nunca importa campos a Evento. La actualización o retirada requiere otra acción manual y sigue usando If-Match. Una edición posterior vuelve a producir conflicto. Identidades ajenas, contenido no interpretable y entradas eliminadas requieren intervención operativa; no hay recreación automática.
 
 Antes de interpretar un 404 de evento se consulta el calendario mediante events.list. Si no hay acceso al destino no se crea nada. Aun así, no existe atomicidad entre comprobar acceso y la siguiente llamada; un fallo posterior mantiene error/resultado incierto y necesita revisión.
 
@@ -115,13 +121,13 @@ Una clave persistida deduplica el mismo problema por evento. Cambiar el problema
 
 ## 14. Seguimiento persistente
 
-`publicacion_calendar` es fuente de verdad; `operacion_calendar` es historial de solo inserción. Los eventos elegibles anteriores a M-06 se incorporan con pendiente EXPORTAR mediante V14, sin contactar Google. Al consultar se recalculan diferencias y se emite el aviso si faltaba.
+`publicacion_calendar` conserva estado técnico; `operacion_calendar` es historial de solo inserción. V14 permanece intacta. V15 agrega `calendar_seguimiento`, captura inserción/cambios relevantes de evento y nombres/horarios de catálogos mediante triggers mínimos, y encola publicaciones existentes. Solo después del commit el procesador recalcula diferencias y avisos. La captura durable se confirma o revierte junto con el cambio comercial: no depende de que llegue una señal en memoria. Una indisponibilidad de la base o un fallo de captura impide confirmar esa transacción; no se promete durabilidad si la propia base no puede guardar el cambio. Ninguna excepción de la proyección Calendar participa en ese commit.
 
 La huella depende del contenido efectivo, incluyendo nombres/horarios de catálogo, no de Evento.version. Los cambios comerciales y de catálogos recalculan localmente. Si el evento cambia mientras Google responde, se guarda la versión efectivamente publicada y permanece pendiente actualizar/retirar.
 
 ## 15. Pruebas automatizadas
 
-`ContenidoCalendarTest`: privacidad, horario particular, medianoche/año, catálogo y estabilidad de identidad. `GoogleCalendarClientTest`: modelo oficial, roundtrip, cambios remotos y configuración desactivada. `CalendarIT`: PostgreSQL real, cliente Google sustituido, seguridad, estados, concurrencia, timeout y avisos. `MigracionCalendarIT`: instalación y V13→V14, unicidad y triggers de auditoría. Frontend: Vitest/Testing Library y Playwright con API simulada en escritorio y teléfono.
+`ContenidoCalendarTest`: privacidad, horario particular, medianoche/año, catálogo y estabilidad de identidad. `GoogleCalendarClientTest`/`GoogleCalendarHttpTest`: modelo oficial, roundtrip, cambios remotos y HTTP simulado. `TransporteTokenCalendarTest`: límites y ausencia de reintentos OAuth sin sockets. `CalendarIT`: PostgreSQL real, cliente Google sustituido, fallos de proyección inyectados en cinco flujos comerciales, recuperación, rollback de captura, GET sin escrituras, activación/desactivación, conflictos, seguridad, concurrencia y pool comercial liberado. `MigracionCalendarIT`: instalación, V13→V14 y V14→V15 sin alterar datos/historial. Frontend: Vitest/Testing Library y Playwright con API simulada en escritorio y teléfono.
 
 Comandos: `backend/mvnw verify`; en frontend `npm test`, `npm run lint`, `npm run build`, `npx tsc -b`, `npx playwright test calendar.spec.ts`. Docker es necesario para Testcontainers. Usar un Node compatible con las dependencias fijadas en package-lock. No añadir credenciales a CI.
 
@@ -132,8 +138,8 @@ Con autorización y calendario exclusivamente de prueba: exportar, repetir, camb
 ## 17. Limitaciones
 
 - No hay polling Google ni reconciliación remota automática. Ediciones/eliminaciones externas se detectan en la siguiente operación remota explícita; el estado verde significa última confirmación, no monitoreo continuo.
-- La lista del MVP no publica en lote. El número de conexiones dedicado por operación limita concurrencia junto al pool de backend.
-- Conflictos ajenos, IDs eliminados y cambio de destino/instalación requieren intervención; no hay botón de forzar sobrescritura ni regeneración silenciosa de ID.
+- La lista del MVP no publica en lote. El pool dedicado admite dos operaciones remotas simultáneas por instancia y no consume el pool comercial durante la red.
+- Identidades ajenas, IDs eliminados y cambio de destino/instalación requieren intervención; los conflictos ETag tienen revisión y aceptación explícitas, sin regeneración silenciosa de ID.
 - Los eventos manuales previos en el calendario no se deduplican por título: usar calendario dedicado o conciliarlos antes del despliegue.
 - La API de Google puede tener cuotas/políticas cambiantes. El uso estándar es sin costo adicional según la documentación consultada; verificar condiciones del proyecto al activar.
 

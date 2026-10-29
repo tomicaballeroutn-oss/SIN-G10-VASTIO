@@ -27,6 +27,7 @@ import ar.edu.utn.vastio.agenda.aplicacion.ContenidoCalendar.Contenido;
 @Component
 @EnableConfigurationProperties(CalendarProperties.class)
 public class GoogleCalendarClient implements ClienteCalendar {
+    private static final org.slf4j.Logger log=org.slf4j.LoggerFactory.getLogger(GoogleCalendarClient.class);
     private final CalendarProperties config;
     private volatile Calendar api;
     @org.springframework.beans.factory.annotation.Autowired
@@ -40,6 +41,8 @@ public class GoogleCalendarClient implements ClienteCalendar {
             if (api == null) {
                 try (var archivo = Files.newInputStream(Path.of(config.credenciales()))) {
                     var credenciales = ServiceAccountCredentials.fromStream(archivo)
+                            .toBuilder().setHttpTransportFactory(()->new TransporteTokenCalendar(new NetHttpTransport(),config.conexionMs(),config.lecturaMs()))
+                            .setDefaultRetriesEnabled(false).build()
                             .createScoped(List.of("https://www.googleapis.com/auth/calendar.events"));
                     var auth = new HttpCredentialsAdapter(credenciales);
                     api = new Calendar.Builder(new NetHttpTransport(), GsonFactory.getDefaultInstance(), request -> {
@@ -50,7 +53,10 @@ public class GoogleCalendarClient implements ClienteCalendar {
                         request.setLoggingEnabled(false);
                         request.setCurlLoggingEnabled(false);
                     }).setApplicationName("Vastio M-06").build();
-                } catch (IOException | RuntimeException e) { throw new Fallo("CREDENCIALES_NO_DISPONIBLES", false); }
+                } catch (IOException | RuntimeException e) {
+                    log.warn("Calendar: carga de credenciales fallida ({}); revisar archivo y permisos y reiniciar tras rotación.",e.getClass().getSimpleName());
+                    throw new Fallo("CREDENCIALES_NO_DISPONIBLES", false);
+                }
             }
         }
         return api;

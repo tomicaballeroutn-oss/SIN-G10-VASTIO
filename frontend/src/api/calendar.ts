@@ -14,15 +14,21 @@ export interface EstadoCalendar {
   configurado: boolean;
   puedeExportar: boolean;
   puedeRetirar: boolean;
+  seguimientoPendiente?: boolean;
+  errorSeguimiento?: string | null;
 }
 export const calendar = {
   estado: (id: number) => api<EstadoCalendar>(`/eventos/${id}/calendar`),
   pendientes: () => api<EstadoCalendar[]>('/calendar/pendientes'),
+  verificar: (id: number) => api<{ etag: string; coincideConVastio: boolean }>(`/eventos/${id}/calendar/verificacion`, { metodo: 'POST' }),
+  aceptarRevision: (id: number, etag: string) => api<EstadoCalendar>(`/eventos/${id}/calendar/reconciliacion`, { metodo: 'POST', cuerpo: { etag } }),
   operar: (id: number, operacion: 'EXPORTAR' | 'ACTUALIZAR' | 'RETIRAR') => api<EstadoCalendar>(`/eventos/${id}/calendar`, {
     metodo: operacion === 'RETIRAR' ? 'DELETE' : operacion === 'ACTUALIZAR' ? 'PUT' : 'POST',
   }),
 };
 export function etiquetaCalendar(e: EstadoCalendar): string {
+  if (!e.configurado) return 'Integración desactivada';
+  if (e.seguimientoPendiente || e.errorSeguimiento) return 'Seguimiento local pendiente';
   if (e.estado === 'EN_PROCESO') return 'Operación en proceso';
   if (e.estado === 'INCIERTO') return 'Resultado incierto: requiere verificación';
   if (e.error) return 'Error: requiere atención';

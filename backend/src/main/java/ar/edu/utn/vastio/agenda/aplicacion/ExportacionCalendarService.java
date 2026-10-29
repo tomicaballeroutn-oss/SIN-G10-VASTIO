@@ -1,12 +1,9 @@
 package ar.edu.utn.vastio.agenda.aplicacion;
 
-import java.sql.Connection;
-import java.sql.SQLException;
 import java.time.LocalDate;
 import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.Objects;
-import javax.sql.DataSource;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.LockModeType;
 import org.springframework.http.HttpStatus;
@@ -26,7 +23,6 @@ import ar.edu.utn.vastio.comun.seguridad.UsuarioActual;
 /** Transacciones cortas antes/después de Google. El lock de sesión libera al morir el proceso. */
 @Service
 public class ExportacionCalendarService {
-    private static final int LOCK_NAMESPACE = 6006;
     private final PublicacionCalendarRepository publicaciones;
     private final EventoRepository eventos;
     private final SeguimientoCalendar seguimiento;
@@ -35,56 +31,95 @@ public class ExportacionCalendarService {
     private final CalendarProperties config;
     private final TransactionTemplate tx;
     private final EntityManager em;
-    private final DataSource db;
+    private final ar.edu.utn.vastio.agenda.infraestructura.BloqueosCalendar bloqueos;
+    private final ar.edu.utn.vastio.agenda.infraestructura.SeguimientoCalendarRepository cola;
 
     public ExportacionCalendarService(PublicacionCalendarRepository publicaciones, EventoRepository eventos,
             SeguimientoCalendar seguimiento, ContenidoCalendar contenidos, ClienteCalendar cliente,
-            CalendarProperties config, TransactionTemplate tx, EntityManager em, DataSource db) {
+            CalendarProperties config, TransactionTemplate tx, EntityManager em, ar.edu.utn.vastio.agenda.infraestructura.BloqueosCalendar bloqueos, ar.edu.utn.vastio.agenda.infraestructura.SeguimientoCalendarRepository cola) {
         this.publicaciones = publicaciones; this.eventos = eventos; this.seguimiento = seguimiento;
-        this.contenidos = contenidos; this.cliente = cliente; this.config = config; this.tx = tx; this.em = em; this.db = db;
+        this.contenidos = contenidos; this.cliente = cliente; this.config = config; this.tx = tx; this.em = em; this.bloqueos=bloqueos;this.cola=cola;
     }
 
     public record Estado(long eventoId, String codigo, String salon, LocalDate fecha, String turno,
             String estado, String pendiente, String error, OffsetDateTime ultimoExito, boolean configurado,
-            boolean puedeExportar, boolean puedeRetirar) { }
+            boolean puedeExportar, boolean puedeRetirar, boolean seguimientoPendiente, String errorSeguimiento) { }
     private record Intento(long id, String calendario, String googleId, String etag, String huellaAnterior, String huellaIntento,
             Contenido contenido, boolean retirar, boolean recuperar, boolean confirmado, boolean crearPermitido) { }
+    public record RevisionRemota(String etag, boolean coincideConVastio) { }
 
-    public Estado estado(long id, UsuarioActual quien) {
+    /** Lectura remota solicitada explícitamente. No importa campos de Google a Vastio. */
+    @org.springframework.transaction.annotation.Transactional(propagation=org.springframework.transaction.annotation.Propagation.NEVER)
+    public RevisionRemota verificarConflicto(long id,UsuarioActual quien) {
         autorizar(quien);
-        return tx.execute(t -> ver(id));
+        if(!cliente.configurado()) throw problema("CALENDAR_NO_CONFIGURADO");
+        try(var lock=bloqueos.tomar(id)) {
+            var p=tx.execute(t->publicacionEnConflicto(id));
+            cliente.comprobarDestino(p.calendarId());
+            var remoto=cliente.consultar(p.calendarId(),p.googleId());
+            if(remoto==null || remoto.eliminado()) throw problema("EVENTO_REMOTO_AUSENTE");
+            String huella=tx.execute(t->contenidos.de(evento(id)).huella());
+            return new RevisionRemota(remoto.etag(),huella.equals(remoto.huella()));
+        } catch(Fallo f) { throw problema(f.codigo()); }
     }
 
+    /** Aceptar un ETag permite una futura acción explícita; aquí NO se escribe en Google. */
+    @org.springframework.transaction.annotation.Transactional(propagation=org.springframework.transaction.annotation.Propagation.NEVER)
+    public Estado aceptarRevision(long id,String etagEsperado,UsuarioActual quien) {
+        autorizar(quien);
+        if(!cliente.configurado()) throw problema("CALENDAR_NO_CONFIGURADO");
+        try(var lock=bloqueos.tomar(id)) {
+            var p=tx.execute(t->publicacionEnConflicto(id));
+            cliente.comprobarDestino(p.calendarId());
+            var remoto=cliente.consultar(p.calendarId(),p.googleId());
+            if(remoto==null || remoto.eliminado()) throw problema("EVENTO_REMOTO_AUSENTE");
+            if(etagEsperado==null || !etagEsperado.equals(remoto.etag())) throw problema("CONFLICTO_REMOTO");
+            tx.executeWithoutResult(t->{
+                Evento e=evento(id);em.refresh(e,LockModeType.PESSIMISTIC_WRITE);
+                publicacionEnConflicto(id);
+                publicaciones.jdbc().update("UPDATE publicacion_calendar SET etag=?,error=NULL,estado='PENDIENTE',version=version+1 WHERE evento_id=?",remoto.etag(),id);
+                publicaciones.auditar(id,"REVISION_ACEPTADA",quien.id(),null);
+                seguimiento.revisar(id);
+            });
+            return tx.execute(t->ver(id));
+        } catch(Fallo f) { throw problema(f.codigo()); }
+    }
+    private PublicacionCalendar publicacionEnConflicto(long id) {
+        evento(id);
+        var p=publicaciones.consultar(id);
+        if(p==null || !"CONFLICTO_REMOTO".equals(p.error())) throw ProblemaException.conflicto("CALENDAR_SIN_CONFLICTO","La publicación no tiene un conflicto pendiente.");
+        if(!Objects.equals(p.calendarId(),config.calendarId()) || !Objects.equals(p.instalacion(),config.instalacion())) throw ProblemaException.conflicto("CALENDAR_DESTINO_CAMBIADO","Revisá el destino antes de aceptar una revisión.");
+        return p;
+    }
+
+    @org.springframework.transaction.annotation.Transactional(readOnly=true)
+    public Estado estado(long id, UsuarioActual quien) { autorizar(quien);return ver(id); }
+
+    @org.springframework.transaction.annotation.Transactional(readOnly=true)
     public List<Estado> pendientes(UsuarioActual quien) {
         autorizar(quien);
-        // Cada evento en su transacción, igual que RealizacionService. No llama a Google.
-        return publicaciones.ids().stream().map(id -> tx.execute(t -> ver(id)))
-                .filter(e -> !e.pendiente().equals("NINGUNA") || e.error() != null || e.estado().equals("INCIERTO")
-                        || e.estado().equals("EN_PROCESO")).toList();
+        if(!cliente.configurado()) return List.of();
+        return publicaciones.ids().stream().map(this::ver)
+                .filter(e -> !e.pendiente().equals("NINGUNA") || e.error()!=null || e.seguimientoPendiente()
+                        || e.estado().equals("INCIERTO") || e.estado().equals("EN_PROCESO")).toList();
     }
-
     private Estado ver(long id) {
-        Evento e = evento(id);
-        var p = seguimiento.revisar(id);
-        if (p != null && p.estado().equals("EN_PROCESO") && libreEnTransaccion(id)) {
-            publicaciones.jdbc().update("UPDATE publicacion_calendar SET estado='INCIERTO', error='OPERACION_ABANDONADA' WHERE evento_id=?", id);
-            publicaciones.auditar(id, "INCIERTO", null, "OPERACION_ABANDONADA");
-            p = seguimiento.revisar(id);
-        }
-        var c = contenidos.de(e);
-        boolean nuevo = SeguimientoCalendar.NUEVOS.contains(e.getEstado());
-        return new Estado(id, e.getCodigo(), c.salon(), e.getUnidad().getFecha(),
-                // La proyección evita enviar el nombre libre del evento o datos del cliente.
-                c.titulo().substring(c.titulo().lastIndexOf(" · ") + 3),
-                p == null ? "NO_EXPORTABLE" : p.estado(), p == null ? "NINGUNA" : p.pendiente(),
-                p == null ? null : p.error(), p == null ? null : p.exito(), cliente.configurado(),
-                (nuevo || p != null && p.googleId() != null) && (p == null || !p.estado().equals("RETIRADO") && !p.pendiente().equals("RETIRAR")),
-                p != null && p.googleId() != null && !p.estado().equals("RETIRADO"));
-    }
-
-    private boolean libreEnTransaccion(long id) {
-        return Boolean.TRUE.equals(publicaciones.jdbc().queryForObject(
-                "SELECT pg_try_advisory_xact_lock(?, ?)", Boolean.class, LOCK_NAMESPACE, lockId(id)));
+        Evento e=evento(id);
+        var p=publicaciones.consultar(id);
+        var trabajo=cola.consultar(id);
+        var c=contenidos.de(e);
+        boolean habilitado=cliente.configurado();
+        boolean nuevo=SeguimientoCalendar.NUEVOS.contains(e.getEstado());
+        String pendiente=p==null ? nuevo?"EXPORTAR":"NINGUNA" : p.pendiente();
+        boolean retrasado=habilitado && trabajo!=null && trabajo.revision()>trabajo.procesada();
+        return new Estado(id,e.getCodigo(),c.salon(),e.getUnidad().getFecha(),
+                c.titulo().substring(c.titulo().lastIndexOf(" · ")+3),
+                p==null?"NO_EXPORTABLE":p.estado(),habilitado?pendiente:"NINGUNA",
+                p==null?null:p.error(),p==null?null:p.exito(),habilitado,
+                habilitado && (nuevo || p!=null && p.googleId()!=null)
+                    && (p==null || !p.estado().equals("RETIRADO") && !p.pendiente().equals("RETIRAR")),
+                habilitado && p!=null && p.googleId()!=null && !p.estado().equals("RETIRADO"),
+                retrasado,habilitado && trabajo!=null?trabajo.error():null);
     }
 
     /** Todas las mutaciones remotas pasan por este lock, incluso retirada versus actualización. */
@@ -92,9 +127,7 @@ public class ExportacionCalendarService {
     public Estado operar(long id, boolean retirar, UsuarioActual quien) {
         autorizar(quien);
         if (!cliente.configurado()) throw problema("CALENDAR_NO_CONFIGURADO");
-        try (Connection lock = db.getConnection()) {
-            if (!tomar(lock, id)) throw ProblemaException.conflicto("CALENDAR_EN_PROCESO", "Ya hay una operación de Calendar en curso. Volvé a consultar el estado.");
-            try {
+        try (var lock = bloqueos.tomar(id)) {
                 Intento intento = tx.execute(t -> preparar(id, retirar, quien));
                 if (intento != null) {
                     try {
@@ -115,8 +148,7 @@ public class ExportacionCalendarService {
                     }
                 }
                 return tx.execute(t -> ver(id));
-            } finally { soltar(lock, id); }
-        } catch (SQLException e) { throw problema("CALENDAR_COORDINACION_NO_DISPONIBLE"); }
+        }
     }
 
     private Intento preparar(long id, boolean retirar, UsuarioActual quien) {
@@ -188,7 +220,7 @@ public class ExportacionCalendarService {
         publicaciones.de(i.id());
         publicaciones.jdbc().update("""
             UPDATE publicacion_calendar SET estado=?, pendiente='NINGUNA', huella=?, etag=?, error=NULL,
-            exito=now(), version=version+1 WHERE evento_id=?
+            exito=now(), retiro_solicitado=false, version=version+1 WHERE evento_id=?
             """, i.retirar() ? "RETIRADO" : "EXPORTADO", i.retirar() ? null : i.contenido().huella(),
                 remoto == null ? null : remoto.etag(), i.id());
         publicaciones.auditar(i.id(), i.retirar() ? "RETIRADA_CONFIRMADA" : i.confirmado() ? "ACTUALIZACION_CONFIRMADA" : "CREACION_CONFIRMADA", quien.id(), null);
@@ -209,20 +241,25 @@ public class ExportacionCalendarService {
         return eventos.conDetalle(id).orElseThrow(() -> ProblemaException.noEncontrado("EVENTO_INEXISTENTE", "No encontramos ese evento."));
     }
     private static void autorizar(UsuarioActual quien) { if (!quien.accesoTotal()) throw ConsultaEventoService.sinPermiso(); }
-    private static int lockId(long id) { return Long.hashCode(id); } // Colisiones solo serializan eventos adicionales.
-    private static boolean tomar(Connection c, long id) throws SQLException {
-        try (var s = c.prepareStatement("SELECT pg_try_advisory_lock(?, ?)")) {
-            s.setInt(1, LOCK_NAMESPACE); s.setInt(2, lockId(id));
-            try (var r = s.executeQuery()) { r.next(); return r.getBoolean(1); }
-        }
-    }
-    private static void soltar(Connection c, long id) throws SQLException {
-        try (var s = c.prepareStatement("SELECT pg_advisory_unlock(?, ?)")) {
-            s.setInt(1, LOCK_NAMESPACE); s.setInt(2, lockId(id)); s.execute();
-        }
-    }
     private static ProblemaException problema(String codigo) {
-        return new ProblemaException(HttpStatus.SERVICE_UNAVAILABLE, codigo, "Google Calendar requiere atención",
-                "No confirmamos la operación de Google Calendar (" + codigo + "). Consultá el pendiente y reintentá cuando corresponda. Los datos de Vastio están guardados.");
+        HttpStatus status=switch(codigo) {
+            case "CONFLICTO_REMOTO", "IDENTIDAD_REMOTA_AJENA", "CONTENIDO_REMOTO_MODIFICADO", "ID_EXISTENTE" -> HttpStatus.CONFLICT;
+            case "EVENTO_REMOTO_AUSENTE", "EVENTO_REMOTO_ELIMINADO" -> HttpStatus.GONE;
+            case "DATOS_CALENDAR_INVALIDOS" -> HttpStatus.UNPROCESSABLE_ENTITY;
+            case "CUOTA_GOOGLE" -> HttpStatus.TOO_MANY_REQUESTS;
+            case "RED_GOOGLE" -> HttpStatus.GATEWAY_TIMEOUT;
+            case "RESPUESTA_GOOGLE_INCONSISTENTE", "ERROR_GOOGLE" -> HttpStatus.BAD_GATEWAY;
+            default -> HttpStatus.SERVICE_UNAVAILABLE;
+        };
+        String accion=switch(codigo) {
+            case "CONFLICTO_REMOTO" -> "Revisá los cambios externos y aceptá explícitamente la revisión antes de volver a actualizar o retirar.";
+            case "CALENDAR_NO_CONFIGURADO" -> "La integración está desactivada. No se realizó ninguna operación externa.";
+            case "CUOTA_GOOGLE" -> "Esperá antes de reintentar: Google limitó las solicitudes.";
+            case "AUTORIZACION_GOOGLE_REVOCADA", "PERMISO_GOOGLE_INSUFICIENTE" -> "Revisá las credenciales y el permiso de escritura del calendario. La sesión de Vastio sigue vigente.";
+            case "CREDENCIALES_NO_DISPONIBLES" -> "Revisá el archivo y sus permisos; luego reiniciá el backend tras reemplazar las credenciales.";
+            case "EVENTO_REMOTO_AUSENTE", "EVENTO_REMOTO_ELIMINADO" -> "La entrada externa no está disponible. Verificá el destino; no se recreó silenciosamente.";
+            default -> "No confirmamos la operación. Consultá el pendiente y verificá el resultado antes de reintentar.";
+        };
+        return new ProblemaException(status,codigo,"Google Calendar requiere atención",accion+" Código: "+codigo+". Los datos de Vastio están guardados.");
     }
 }

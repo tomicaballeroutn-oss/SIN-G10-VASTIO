@@ -16,6 +16,25 @@ import ar.edu.utn.vastio.agenda.aplicacion.ContenidoCalendar;
 
 /** Transporte Google oficial simulado: valida HTTP real del adaptador sin sockets ni claves. */
 class GoogleCalendarHttpTest {
+    @Test void inicializadorRealAutenticaSinDependerDeUnInterceptor() throws Exception {
+        var t=new Transporte();t.respuesta(200,"{\"items\":[]}");
+        var credenciales=com.google.auth.oauth2.OAuth2Credentials.create(new com.google.auth.oauth2.AccessToken("token-sintetico",new java.util.Date(System.currentTimeMillis()+3600000)));
+        var auth=new com.google.auth.http.HttpCredentialsAdapter(credenciales);
+        var config=new CalendarProperties(true,"prueba","instalacion","archivo-inexistente",1234,2345);
+        var api=new Calendar.Builder(t,GsonFactory.getDefaultInstance(),GoogleCalendarClient.inicializador(auth,config)).setApplicationName("prueba-sin-red").build();
+        new GoogleCalendarClient(config,api).comprobarDestino("prueba");
+        assertThat(t.pedidos).hasSize(1);
+        assertThat(t.pedidos.getFirst().getFirstHeaderValue("Authorization")).isEqualTo("Bearer token-sintetico");
+    }
+    @Test void inicializadorClasificaIOExceptionOAuthSinMensajesPrivados() throws Exception {
+        var auth=org.mockito.Mockito.mock(com.google.auth.http.HttpCredentialsAdapter.class);
+        org.mockito.Mockito.doThrow(new IOException("secreto-no-imprimir")).when(auth).initialize(org.mockito.ArgumentMatchers.any());
+        var config=new CalendarProperties(true,"prueba","instalacion","archivo-inexistente",1234,2345);
+        var t=new Transporte();
+        var api=new Calendar.Builder(t,GsonFactory.getDefaultInstance(),GoogleCalendarClient.inicializador(auth,config)).setApplicationName("prueba-sin-red").build();
+        assertThatThrownBy(()->new GoogleCalendarClient(config,api).comprobarDestino("prueba")).hasMessage("RED_GOOGLE").hasMessageNotContaining("secreto-no-imprimir");
+        assertThat(t.pedidos).isEmpty();
+    }
     static class Transporte extends MockHttpTransport {
         final ArrayDeque<MockLowLevelHttpResponse> respuestas=new ArrayDeque<>();
         final List<MockLowLevelHttpRequest> pedidos=new ArrayList<>();

@@ -45,15 +45,10 @@ public class GoogleCalendarClient implements ClienteCalendar {
                             .setDefaultRetriesEnabled(false).build()
                             .createScoped(List.of("https://www.googleapis.com/auth/calendar.events"));
                     var auth = new HttpCredentialsAdapter(credenciales);
-                    api = new Calendar.Builder(new NetHttpTransport(), GsonFactory.getDefaultInstance(), request -> {
-                        auth.initialize(request);
-                        request.setConnectTimeout(config.conexionMs());
-                        request.setReadTimeout(config.lecturaMs());
-                        request.setNumberOfRetries(0); // Reconciliar antes de volver a escribir.
-                        request.setLoggingEnabled(false);
-                        request.setCurlLoggingEnabled(false);
-                    }).setApplicationName("Vastio M-06").build();
+                    api = new Calendar.Builder(new NetHttpTransport(), GsonFactory.getDefaultInstance(), inicializador(auth,config))
+                            .setApplicationName("Vastio M-06").build();
                 } catch (IOException | RuntimeException e) {
+                    DiagnosticoCalendar.registrar(DiagnosticoCalendar.Fase.CREDENCIALES,e);
                     log.warn("Calendar: carga de credenciales fallida ({}); revisar archivo y permisos y reiniciar tras rotación.",e.getClass().getSimpleName());
                     throw new Fallo("CREDENCIALES_NO_DISPONIBLES", false);
                 }
@@ -62,27 +57,38 @@ public class GoogleCalendarClient implements ClienteCalendar {
         return api;
     }
 
+    static com.google.api.client.http.HttpRequestInitializer inicializador(HttpCredentialsAdapter auth,CalendarProperties config) {
+        return request->{
+            // El adaptador autentica en initialize(); no instala un HttpExecuteInterceptor.
+            try { auth.initialize(request); }
+            catch(IOException e) { throw new DiagnosticoCalendar.FalloOAuth(e); }
+            request.setConnectTimeout(config.conexionMs());request.setReadTimeout(config.lecturaMs());
+            request.setNumberOfRetries(0); // Reconciliar antes de volver a escribir.
+            request.setLoggingEnabled(false);request.setCurlLoggingEnabled(false);
+        };
+    }
+
     public void comprobarDestino(String calendario) {
         try { api().events().list(calendario).setMaxResults(1).setFields("items(id)").execute(); }
-        catch (IOException e) { throw traducir(e, false); }
+        catch (IOException e) { throw fallo(DiagnosticoCalendar.Fase.CALENDAR_LISTAR,e, false); }
     }
     public Remoto consultar(String calendario, String id) {
         try { return remoto(api().events().get(calendario, id).execute(), id); }
         catch (GoogleJsonResponseException e) {
             if (e.getStatusCode() == 404 || e.getStatusCode() == 410) return null;
-            throw traducir(e, false);
-        } catch (IOException e) { throw traducir(e, false); }
+            throw fallo(DiagnosticoCalendar.Fase.CALENDAR_CONSULTAR,e, false);
+        } catch (IOException e) { throw fallo(DiagnosticoCalendar.Fase.CALENDAR_CONSULTAR,e, false); }
     }
     public Remoto crear(String calendario, String id, Contenido contenido) {
         try { return remoto(api().events().insert(calendario, evento(id, contenido)).execute(), id); }
-        catch (IOException e) { throw traducir(e, true); }
+        catch (IOException e) { throw fallo(DiagnosticoCalendar.Fase.CALENDAR_CREAR,e, true); }
     }
     public Remoto actualizar(String calendario, String id, Contenido contenido, String etag) {
         try {
             var pedido = api().events().update(calendario, id, evento(id, contenido));
             pedido.getRequestHeaders().setIfMatch(etag);
             return remoto(pedido.execute(), id);
-        } catch (IOException e) { throw traducir(e, true); }
+        } catch (IOException e) { throw fallo(DiagnosticoCalendar.Fase.CALENDAR_ACTUALIZAR,e, true); }
     }
     public void retirar(String calendario, String id, String etag) {
         try {
@@ -90,8 +96,8 @@ public class GoogleCalendarClient implements ClienteCalendar {
             pedido.getRequestHeaders().setIfMatch(etag);
             pedido.execute();
         } catch (GoogleJsonResponseException e) {
-            if (e.getStatusCode() != 410) throw traducir(e, true);
-        } catch (IOException e) { throw traducir(e, true); }
+            if (e.getStatusCode() != 410) throw fallo(DiagnosticoCalendar.Fase.CALENDAR_RETIRAR,e, true);
+        } catch (IOException e) { throw fallo(DiagnosticoCalendar.Fase.CALENDAR_RETIRAR,e, true); }
     }
 
     static Event evento(String id, Contenido c) {
@@ -112,6 +118,10 @@ public class GoogleCalendarClient implements ClienteCalendar {
             String hash = ContenidoCalendar.hash(String.join("\u0000", e.getSummary(), e.getDescription(), e.getLocation(), inicio.toString(), fin.toString()));
             return new Remoto(e.getEtag(), hash, false);
         } catch (RuntimeException ex) { throw new Fallo("CONTENIDO_REMOTO_MODIFICADO", false); }
+    }
+    private static Fallo fallo(DiagnosticoCalendar.Fase fase,IOException e,boolean escritura) {
+        DiagnosticoCalendar.registrar(fase,e);
+        return traducir(e,escritura);
     }
     static Fallo traducir(IOException e, boolean escritura) {
         if (e instanceof GoogleJsonResponseException g) {

@@ -27,6 +27,9 @@ public class Notificacion {
     @Column(name = "notificacion_id")
     private Long id;
 
+    @Column(name = "resuelta", nullable = false)
+    private boolean resuelta;
+
     /** El aviso lleva a la ficha de este evento. */
     @Column(name = "evento_id")
     private Long eventoId;

@@ -1,3 +1,4 @@
+import { PaginaPendientesCalendar } from './features/eventos/PaginaPendientesCalendar';
 import type { ReactNode } from 'react';
 import type { RouteObject } from 'react-router';
 import { PaginaAgenda } from './features/agenda/PaginaAgenda';
@@ -27,6 +28,7 @@ import { PaginaIngreso } from './features/sesion/PaginaIngreso';
 /** Pantallas ya construidas, por id del menú. El resto muestra PaginaPendiente hasta que llegue su historia. */
 const PANTALLAS: Partial<Record<string, ReactNode>> = {
   agenda: <PaginaAgenda />,
+  'calendar-pendientes': <PaginaPendientesCalendar />,
   barra: <PaginaBarra />,
   bloqueos: <PaginaBloqueos />,
   catalogo: <PaginaCatalogo />,

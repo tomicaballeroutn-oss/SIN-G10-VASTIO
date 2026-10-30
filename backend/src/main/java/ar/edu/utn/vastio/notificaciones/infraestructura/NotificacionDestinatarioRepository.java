@@ -16,12 +16,12 @@ public interface NotificacionDestinatarioRepository extends JpaRepository<Notifi
     /** Los avisos de una persona, más recientes primero, con la notificación. */
     @Query("""
             select d from NotificacionDestinatario d join fetch d.notificacion n
-            where d.id.usuarioId = :usuarioId and (:soloSinLeer = false or d.leida = false)
+            where n.resuelta = false and d.id.usuarioId = :usuarioId and (:soloSinLeer = false or d.leida = false)
             order by n.fechaHora desc, n.id desc
             """)
     Slice<NotificacionDestinatario> delUsuario(long usuarioId, boolean soloSinLeer, Pageable pagina);
 
-    @Query("select count(d) from NotificacionDestinatario d where d.id.usuarioId = :usuarioId and d.leida = false")
+    @Query("select count(d) from NotificacionDestinatario d where d.notificacion.resuelta = false and d.id.usuarioId = :usuarioId and d.leida = false")
     long sinLeer(long usuarioId);
 
     @Query("select d from NotificacionDestinatario d where d.id.notificacionId = :notificacionId and d.id.usuarioId = :usuarioId")

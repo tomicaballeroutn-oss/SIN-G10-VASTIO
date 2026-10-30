@@ -75,6 +75,18 @@ class CuentaJwtIT {
         } finally { stats.setStatisticsEnabled(anterior); }
     }
 
+    @Test void alterarLaMarcaSinVolverAFirmarNoHabilitaLaApi() throws Exception {
+        String[] partes = token(true).split("[.]");
+        String payload = new String(java.util.Base64.getUrlDecoder().decode(partes[1]),
+                java.nio.charset.StandardCharsets.UTF_8);
+        assertThat(payload).contains("\"debeCambiarContrasena\":true");
+        payload = payload.replace("\"debeCambiarContrasena\":true", "\"debeCambiarContrasena\":false");
+        String adulterado = partes[0] + "." + java.util.Base64.getUrlEncoder().withoutPadding()
+                .encodeToString(payload.getBytes(java.nio.charset.StandardCharsets.UTF_8)) + "." + partes[2];
+        mvc.perform(get("/api/v1/_sonda/direccion").header(HttpHeaders.AUTHORIZATION, "Bearer " + adulterado))
+                .andExpect(status().isUnauthorized()).andExpect(jsonPath("$.codigo").value("SESION_VENCIDA"));
+    }
+
     @Test void unTokenAntiguoSinMarcaDebeRenovarse() throws Exception {
         mvc.perform(get("/api/v1/_sonda/autenticado").header(HttpHeaders.AUTHORIZATION, "Bearer " + token(null)))
                 .andExpect(status().isUnauthorized()).andExpect(jsonPath("$.codigo").value("SESION_VENCIDA"));
@@ -104,6 +116,31 @@ class CuentaJwtIT {
         mvc.perform(get("/api/v1/_sonda/direccion")).andExpect(status().isForbidden());
         mvc.perform(post("/api/v1/cuenta/contrasena").contentType(MediaType.APPLICATION_JSON).content(CAMBIO))
                 .andExpect(status().isForbidden());
+    }
+
+    @Test @WithMockUser(username="prueba.direccion", roles="DIRECCION")
+    void withMockUserPuedeUsarElAdaptadorSinOmitirElDecoder() throws Exception {
+        mvc.perform(get("/api/v1/_sonda/direccion").with(personas.jwtDeUsuarioSimulado()))
+                .andExpect(status().isOk());
+        mvc.perform(post("/api/v1/cuenta/contrasena").with(personas.jwtDeUsuarioSimulado())
+                .contentType(MediaType.APPLICATION_JSON).content(CAMBIO))
+                .andExpect(status().isNoContent());
+    }
+
+    @Test @WithMockUser(username="prueba.direccion", roles="VENDEDORA")
+    void elAdaptadorConservaLosRolesSimuladosSinAmpliarlosConLosDelFixture() throws Exception {
+        mvc.perform(get("/api/v1/_sonda/direccion").with(personas.jwtDeUsuarioSimulado()))
+                .andExpect(status().isForbidden());
+    }
+
+    @Test @WithMockUser(username="prueba.direccion", roles="DIRECCION")
+    void elAdaptadorConservaLaRestriccionInicialDelFixture() throws Exception {
+        usuario.setDebeCambiarContrasena(true); usuarios.saveAndFlush(usuario);
+        mvc.perform(get("/api/v1/_sonda/direccion").with(personas.jwtDeUsuarioSimulado()))
+                .andExpect(status().isForbidden());
+        mvc.perform(post("/api/v1/cuenta/contrasena").with(personas.jwtDeUsuarioSimulado())
+                .contentType(MediaType.APPLICATION_JSON).content(CAMBIO))
+                .andExpect(status().isNoContent());
     }
 
     @Test void sinAutenticacionOVencidoNoHayAcceso() throws Exception {

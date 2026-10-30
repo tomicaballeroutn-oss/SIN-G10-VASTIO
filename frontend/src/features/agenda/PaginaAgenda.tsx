@@ -4,10 +4,11 @@ import { agenda, estadoDs, fechaLarga, hoyEnCordoba, sumarMeses, type Agenda } f
 import type { PreReservaRegistrada } from '../../api/eventos';
 import { useDatos } from '../../api/useDatos';
 import {
-  AgendaGrid, Alert, Button, Card, ESTADOS, ESTADOS_DEL_EVENTO, Select, StatusChip, Tabs,
-  type AgendaEvent, type EventStatus, type SalonId,
+  AgendaGrid, Alert, Button, Card, ESTADOS, ESTADOS_DEL_EVENTO, SALONES, StatusChip, Tabs,
+  type AgendaEvent, type EventStatus, type SalonId, type TurnoId,
 } from '../../ds';
 import { Cargando } from '../comun/Cargando';
+import { FiltroMultiple } from '../comun/FiltroMultiple';
 import { Encabezado } from '../layout/paginas';
 import { useSesion } from '../sesion/contexto';
 import { disponibilidad } from './disponibilidad';
@@ -22,6 +23,7 @@ const ESTADOS_FILTRABLES: EventStatus[] = [
   ...ESTADOS_DEL_EVENTO.filter((e) => e !== 'liberada' && e !== 'cancelado'),
   'bloqueado',
 ];
+const TURNOS_FILTRABLES: TurnoId[] = ['mediodia', 'noche'];
 
 const MES_VALIDO = /^\d{4}-(0[1-9]|1[0-2])$/;
 
@@ -36,10 +38,13 @@ export function PaginaAgenda() {
   const pedido = busqueda.get('mes') ?? '';
   const mes = MES_VALIDO.test(pedido) ? pedido : hoy.slice(0, 7);
   const dia = busqueda.get('dia')?.startsWith(mes) ? busqueda.get('dia') : null;
-  const salon = (busqueda.get('salon') ?? '') as SalonId | '';
-  const estado = (busqueda.get('estado') ?? '') as EventStatus | '';
+  const salones = [...new Set(busqueda.getAll('salon').filter((codigo): codigo is SalonId => codigo in SALONES))];
+  const estados = [...new Set(busqueda.getAll('estado').filter((valor): valor is EventStatus =>
+    ESTADOS_FILTRABLES.includes(valor as EventStatus)))];
+  const turnos = [...new Set(busqueda.getAll('turno').filter((valor): valor is TurnoId =>
+    TURNOS_FILTRABLES.includes(valor as TurnoId)))];
   // Sin elegir, el detalle arranca en el salón del filtro.
-  const ver = busqueda.get('ver') || salon || null;
+  const ver = busqueda.get('ver') || salones[0] || null;
 
   const cargar = useCallback(() => agenda.mes(mes), [mes]);
   const datos = useDatos(cargar);
@@ -47,6 +52,7 @@ export function PaginaAgenda() {
   const preReserva = !!usuario?.roles.some((r) => r === 'VENDEDORA' || r === 'DIRECCION' || r === 'COORDINACION');
   const [elegida, setElegida] = useState<UnidadElegida | null>(null);
   const [registrada, setRegistrada] = useState<PreReservaRegistrada | null>(null);
+  const [filtrosAbiertos, setFiltrosAbiertos] = useState(false);
   const navegar = useNavigate();
 
   function cambiar(valores: Record<string, string | null>) {
@@ -55,6 +61,13 @@ export function PaginaAgenda() {
       if (valor) siguiente.set(clave, valor);
       else siguiente.delete(clave);
     }
+    setBusqueda(siguiente, { replace: true });
+  }
+
+  function cambiarLista(clave: string, valores: string[]) {
+    const siguiente = new URLSearchParams(busqueda);
+    siguiente.delete(clave);
+    valores.forEach((valor) => siguiente.append(clave, valor));
     setBusqueda(siguiente, { replace: true });
   }
 
@@ -72,24 +85,52 @@ export function PaginaAgenda() {
           {registrada.codigo} · {registrada.nombre}. La fecha queda apartada hasta que se señe o se libere.
         </Alert>
       )}
-      <div className="agenda__filtros">
-        <Button variant="outline" icon="calendar" onClick={() => cambiar({ mes: hoy.slice(0, 7), dia: hoy })}>Ir a hoy</Button>
-        <Select
-          label="Salón"
-          options={[
-            { value: '', label: 'Todos los salones' },
-            ...(datos.datos?.salones ?? []).map((s) => ({ value: s.codigo, label: s.nombre })),
-          ]}
-          value={salon}
-          onChange={(e) => cambiar({ salon: e.target.value })}
+      <Card
+        title="Filtros de búsqueda"
+        actions={(
+          <div className="agenda__filtros-acciones">
+            <Button variant="outline" icon="calendar" onClick={() => cambiar({ mes: hoy.slice(0, 7), dia: hoy })}>Ir a hoy</Button>
+            <Button
+              variant="outline"
+              iconEnd={filtrosAbiertos ? 'chevron-up' : 'chevron-down'}
+              ariaExpanded={filtrosAbiertos}
+              ariaControls="agenda-filtros-contenido"
+              onClick={() => setFiltrosAbiertos((abiertos) => !abiertos)}
+            >
+              {filtrosAbiertos ? 'Ocultar filtros' : 'Mostrar filtros'}
+            </Button>
+          </div>
+        )}
+        className={`agenda__filtros-panel${filtrosAbiertos ? '' : ' agenda__filtros-panel--cerrado'}`}
+      >
+      {filtrosAbiertos && <div className="agenda__filtros" id="agenda-filtros-contenido">
+        <FiltroMultiple
+          label="Salones"
+          opciones={(datos.datos?.salones ?? []).map((s) => ({ value: s.codigo, label: s.nombre }))}
+          valores={salones}
+          alCambiar={(valores) => cambiarLista('salon', valores)}
         />
-        <Select
-          label="Estado"
-          options={[{ value: '', label: 'Todos los estados' }, ...ESTADOS_FILTRABLES.map((e) => ({ value: e, label: ESTADOS[e].label }))]}
-          value={estado}
-          onChange={(e) => cambiar({ estado: e.target.value })}
+        <FiltroMultiple
+          label="Estados"
+          opciones={ESTADOS_FILTRABLES.map((e) => ({ value: e, label: ESTADOS[e].label }))}
+          valores={estados}
+          alCambiar={(valores) => cambiarLista('estado', valores)}
         />
+        <FiltroMultiple
+          label="Turnos"
+          opciones={(datos.datos?.turnos ?? []).map((t) => ({ value: t.codigo, label: t.nombre }))}
+          valores={turnos}
+          alCambiar={(valores) => cambiarLista('turno', valores)}
+        />
+        {(salones.length > 0 || estados.length > 0 || turnos.length > 0) && (
+          <Button variant="text" onClick={() => cambiar({ salon: null, estado: null, turno: null })}>Limpiar filtros</Button>
+        )}
+        <p className="caption v-muted agenda__filtros-ayuda">
+          Las unidades que coinciden se resaltan en el calendario.
+        </p>
       </div>
+      }
+      </Card>
       <Cargando datos={datos}>
         {(ag) => (
           <div className="agenda">
@@ -104,7 +145,11 @@ export function PaginaAgenda() {
                 onPrev={() => cambiar({ mes: sumarMeses(mes, -1), dia: null })}
                 onNext={() => cambiar({ mes: sumarMeses(mes, 1), dia: null })}
                 salones={ag.salones}
-                resaltar={salon || estado ? (u) => (!salon || u.salon === salon) && (!estado || u.status === estado) : undefined}
+                resaltar={salones.length > 0 || estados.length > 0 || turnos.length > 0
+                  ? (u) => (salones.length === 0 || salones.includes(u.salon))
+                    && (estados.length === 0 || estados.includes(u.status))
+                    && (turnos.length === 0 || turnos.includes(u.turno))
+                  : undefined}
               />
             </Card>
             <div className="agenda__lateral">

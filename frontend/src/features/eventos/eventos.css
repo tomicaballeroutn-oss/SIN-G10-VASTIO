@@ -1,4 +1,16 @@
-/* Lista de eventos: tarjetas en grilla. */
+/* Búsqueda destacada y filtros compactos para la lista de tarjetas. */
+.eventos__filtros { border-color: var(--line-strong); }
+.eventos__filtros .v-card__body { display: grid; gap: var(--space-4); }
+.eventos__filtros--cerrados .v-card__body { display: none; }
+.v-card.eventos__filtros--cerrados { gap: 0; padding: var(--space-3) var(--space-4); }
+.eventos__filtros--cerrados .v-card__head { align-items: center; }
+.eventos__filtros-acciones { display: flex; flex-wrap: wrap; align-items: center; justify-content: flex-end; gap: var(--space-2); }
+.eventos__filtros-contenido { display: grid; gap: var(--space-4); }
+.eventos__filtros-grupos { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 200px), 1fr)); gap: var(--space-3); align-items: start; }
+.eventos__filtros-fechas { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 180px), 1fr)); gap: var(--space-3); max-width: 440px; }
+.eventos__filtros-pie { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: var(--space-2); }
+.eventos__filtros-pie p { margin: 0; }
+.eventos__error-fechas { margin: 0; color: var(--danger-ink); }
 .eventos__lista { list-style: none; margin: 0; padding: 0; display: grid; gap: var(--space-4); }
 @media (min-width: 720px) { .eventos__lista { grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); } }
 .eventos__lista > li { display: flex; }

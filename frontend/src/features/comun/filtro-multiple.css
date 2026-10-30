@@ -1,0 +1,16 @@
+.filtro-multiple { min-width: 180px; }
+.filtro-multiple__trigger { width: 100%; justify-content: space-between; border-color: var(--line); background: var(--surface-raised); color: var(--ink); }
+.filtro-multiple__trigger:hover { background: var(--brand-tint); border-color: var(--brand-ink); }
+.filtro-multiple__trigger.is-activo { border-color: var(--brand); background: var(--brand-tint); color: var(--brand-ink); }
+.filtro-multiple__trigger.is-abierto { border-color: var(--brand); box-shadow: 0 0 0 2px color-mix(in srgb, var(--focus-ring) 24%, transparent); }
+.filtro-multiple__trigger > span:first-of-type { display: flex; flex: 1; align-items: center; justify-content: space-between; gap: var(--space-2); min-width: 0; }
+.filtro-multiple__nombre { font-weight: 600; }
+.filtro-multiple__panel { position: fixed; z-index: var(--z-dropdown); display: grid; grid-template-rows: auto minmax(0, 1fr) auto; gap: var(--space-3); max-height: min(60vh, 420px); padding: var(--space-4); overflow: hidden; border: 1px solid var(--line-strong); border-radius: var(--radius-lg); background: var(--surface-raised); box-shadow: var(--shadow-lg); }
+.filtro-multiple__cabecera { display: flex; align-items: flex-start; justify-content: space-between; gap: var(--space-3); padding-bottom: var(--space-2); border-bottom: 1px solid var(--line); }
+.filtro-multiple__cabecera p { margin: 0; }
+.filtro-multiple__cabecera > div { display: grid; gap: 2px; }
+.filtro-multiple__opciones { display: grid; align-content: start; gap: var(--space-1); min-height: 0; max-height: min(36vh, 280px); margin: 0; padding: 0; overflow-y: auto; border: 0; }
+.filtro-multiple__opcion { min-height: var(--control-md); align-items: center; margin: 0; padding: var(--space-2); border-radius: var(--radius-sm); }
+.filtro-multiple__opcion:hover { background: var(--surface-sunken); }
+.filtro-multiple__pie { display: flex; align-items: center; justify-content: space-between; gap: var(--space-3); padding-top: var(--space-2); border-top: 1px solid var(--line); }
+.filtro-multiple__vacio { margin: 0; padding: var(--space-2); }

@@ -1,6 +1,12 @@
-/* UI-07: filtros en fila desde tableta. */
-.agenda__filtros { display: grid; gap: var(--space-3); align-items: end; }
-@media (min-width: 640px) { .agenda__filtros { grid-template-columns: auto 220px 220px; justify-content: start; } }
+/* UI-07: filtros combinables, en una o varias columnas segÃºn el ancho. */
+.agenda__filtros { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 220px), 1fr)); gap: var(--space-3); align-items: start; }
+.agenda__filtros-ayuda { grid-column: 1 / -1; margin: 0; }
+.agenda__filtros-panel { border-color: var(--line-strong); }
+.agenda__filtros-panel .v-card__body { display: grid; gap: var(--space-3); }
+.agenda__filtros-panel--cerrado .v-card__body { display: none; }
+.v-card.agenda__filtros-panel--cerrado { gap: 0; padding: var(--space-3) var(--space-4); }
+.agenda__filtros-panel--cerrado .v-card__head { align-items: center; }
+.agenda__filtros-acciones { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: var(--space-2); }
 
 /* Mes y detalle del día: lado a lado en pantallas anchas, uno debajo del otro en el resto. */
 .agenda { display: grid; gap: var(--space-6); align-items: start; }

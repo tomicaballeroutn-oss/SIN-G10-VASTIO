@@ -18,10 +18,13 @@ export interface ButtonProps {
   type?: 'button' | 'submit';
   title?: string;
   className?: string;
+  ariaExpanded?: boolean;
+  ariaControls?: string;
 }
 
 export function Button({
   children, variant = 'solid', tone, size = 'md', icon, iconEnd, block, loading, disabled, onClick, href, type = 'button', title, className,
+  ariaExpanded, ariaControls,
 }: ButtonProps) {
   const cls = cx('v-btn', 'button', `v-btn--${variant}`, `v-btn--${size}`, tone === 'danger' && 'v-tone-danger',
     block && 'v-btn--block', loading && 'is-loading', className);
@@ -37,7 +40,16 @@ export function Button({
     return <a href={href} className={cls} onClick={onClick} title={title} aria-busy={loading || undefined}>{contenido}</a>;
   }
   return (
-    <button type={type} className={cls} onClick={onClick} title={title} disabled={disabled || loading} aria-busy={loading || undefined}>
+    <button
+      type={type}
+      className={cls}
+      onClick={onClick}
+      title={title}
+      disabled={disabled || loading}
+      aria-busy={loading || undefined}
+      aria-expanded={ariaExpanded}
+      aria-controls={ariaControls}
+    >
       {contenido}
     </button>
   );

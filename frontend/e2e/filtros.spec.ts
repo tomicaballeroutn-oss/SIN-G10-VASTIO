@@ -44,6 +44,16 @@ async function elegir(page: Page, nombre: string, opcion: string) {
   await expect(disparador).toBeFocused();
 }
 
+async function cabeceraSinSolapamiento(page: Page, selector: string) {
+  const cabecera = page.locator(`${selector} .v-card__head`);
+  const titulo = (await cabecera.getByRole('heading').boundingBox())!;
+  for (const boton of await cabecera.getByRole('button').all()) {
+    const caja = (await boton.boundingBox())!;
+    expect(titulo.x + titulo.width <= caja.x + 1 || caja.x + caja.width <= titulo.x + 1
+      || titulo.y + titulo.height <= caja.y + 1 || caja.y + caja.height <= titulo.y + 1).toBe(true);
+  }
+}
+
 test('Agenda resalta sin ocultar ocupación ni ampliar el detalle ajeno', async ({ page }, info) => {
   await backend(page, true);
   await page.goto('/agenda?mes=2030-03');
@@ -51,6 +61,7 @@ test('Agenda resalta sin ocultar ocupación ni ampliar el detalle ajeno', async 
   await expect(dia.locator('.v-pip')).toHaveCount(6);
   const descripcion = await dia.getAttribute('aria-label');
   await page.getByRole('button', { name: 'Mostrar filtros' }).click();
+  await cabeceraSinSolapamiento(page, '.agenda__filtros-panel');
   await elegir(page, 'Resaltar estados', 'Disponible');
   await expect(dia.locator('.is-match')).toHaveCount(3);
   await expect(dia.locator('.is-dim')).toHaveCount(3);
@@ -72,6 +83,7 @@ test('Eventos combina búsqueda, estado y fecha; recupera el vacío y conserva n
   await page.goto('/eventos');
   await expect(page.locator('.eventos__lista > li')).toHaveCount(3);
   await page.getByRole('button', { name: 'Mostrar filtros' }).click();
+  await cabeceraSinSolapamiento(page, '.eventos__filtros');
   await page.getByLabel('Buscar eventos').fill('RIOS delfina');
   await elegir(page, 'Estados', 'Señado');
   await page.getByLabel('Desde', { exact: true }).fill('2030-03-09');

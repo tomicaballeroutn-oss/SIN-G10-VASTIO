@@ -1,0 +1,15 @@
+diff --git a/frontend/src/features/notificaciones/ListaNotificaciones.tsx b/frontend/src/features/notificaciones/ListaNotificaciones.tsx
+--- a/frontend/src/features/notificaciones/ListaNotificaciones.tsx
++++ b/frontend/src/features/notificaciones/ListaNotificaciones.tsx
+@@ -36,2 +36,3 @@
+   ALERTA_STOCK: 'alerta-stock',
++  CALENDAR_PENDIENTE: 'calendar-pendiente',
+ };
+diff --git a/frontend/src/features/notificaciones/notificaciones.css b/frontend/src/features/notificaciones/notificaciones.css
+--- a/frontend/src/features/notificaciones/notificaciones.css
++++ b/frontend/src/features/notificaciones/notificaciones.css
+@@ -55 +55,4 @@
+ }
++
++/* M-06: reutiliza el token accesible de advertencia en ambos temas. */
++.avisos__aviso--calendar-pendiente { --aviso-tipo: var(--warning); }

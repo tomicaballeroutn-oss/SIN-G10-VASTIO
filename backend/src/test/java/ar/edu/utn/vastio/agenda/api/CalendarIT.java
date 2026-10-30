@@ -165,7 +165,7 @@ class CalendarIT {
     @Test void falloAlGuardarTrasExitoRemotoSeRecuperaSinDuplicar() {
         long id=evento("SENADO"); var fallar=new java.util.concurrent.atomic.AtomicBoolean(true);
         doAnswer(a->{
-            if ("CREACION_CONFIRMADA".equals(a.getArgument(1)) && fallar.getAndSet(false)) throw new IllegalStateException("fallo local simulado");
+            if ("CREACION_CONFIRMADA".equals(a.getArgument(1)) && fallar.getAndSet(false)) throw new org.springframework.dao.DataAccessResourceFailureException("fallo local simulado");
             return a.callRealMethod();
         }).when(publicaciones).auditar(eq(id),anyString(),any(),any());
         assertThatThrownBy(()->servicio.operar(id,false,quien)).hasMessageContaining("RESULTADO_NO_PERSISTIDO");
@@ -173,6 +173,124 @@ class CalendarIT {
         assertThat(servicio.operar(id,false,quien).estado()).isEqualTo("EXPORTADO");
         verify(google,times(1)).crear(anyString(),anyString(),any());
     }
+    @ParameterizedTest @ValueSource(strings = {"salon", "tipo_evento", "turno"})
+    void catalogoSoloEncolaCambiosRealesYNoLlamaAGoogle(String tabla) {
+        long id = evento("SENADO");
+        tx.executeWithoutResult(t -> {
+            String columna = tabla.equals("tipo_evento") ? "tipo_evento_id" : tabla + "_id";
+            String origen = tabla.equals("tipo_evento") ? "evento e" : "evento e JOIN unidad_comercializable u USING(unidad_id)";
+            int catalogoId = jdbc.queryForObject("SELECT " + columna + " FROM " + origen + " WHERE evento_id=?", Integer.class, id);
+            long antes = jdbc.queryForObject("SELECT revision FROM calendar_seguimiento WHERE evento_id=?", Long.class, id);
+            jdbc.update("UPDATE " + tabla + " SET nombre=nombre WHERE " + columna + "=?", catalogoId);
+            assertThat(jdbc.queryForObject("SELECT revision FROM calendar_seguimiento WHERE evento_id=?", Long.class, id)).isEqualTo(antes);
+            jdbc.update("UPDATE " + tabla + " SET nombre=nombre || ' prueba' WHERE " + columna + "=?", catalogoId);
+            assertThat(jdbc.queryForObject("SELECT revision FROM calendar_seguimiento WHERE evento_id=?", Long.class, id)).isEqualTo(antes + 1);
+            t.setRollbackOnly();
+        });
+        verify(google, never()).comprobarDestino(anyString());
+        verify(google, never()).crear(anyString(), anyString(), any());
+    }
+
+    @Test void inesperadoAntesDeEscribirNoSeAtribuyeALaBase() {
+        long id = evento("SENADO");
+        doThrow(new NullPointerException("dato privado")).when(google).comprobarDestino(anyString());
+        assertThatThrownBy(() -> servicio.operar(id, false, quien))
+                .hasMessageContaining("EJECUCION_CALENDAR_FALLIDA").hasMessageNotContaining("dato privado");
+        assertThat(servicio.estado(id, quien).estado()).isEqualTo("ERROR");
+        assertThat(servicio.estado(id, quien).error()).isEqualTo("EJECUCION_CALENDAR_FALLIDA");
+        verify(google, never()).crear(anyString(), anyString(), any());
+    }
+
+    @ParameterizedTest @ValueSource(booleans = {false, true})
+    void inesperadoDuranteEscrituraReconciliaSinSegundoInsert(boolean aplicada) {
+        long id = evento("SENADO");
+        doAnswer(a -> {
+            if (aplicada) remotos.put(a.getArgument(1), new Remoto("creado", ((ContenidoCalendar.Contenido) a.getArgument(2)).huella(), false));
+            throw new IllegalStateException("no sabemos si se envió");
+        }).when(google).crear(anyString(), anyString(), any());
+        assertThatThrownBy(() -> servicio.operar(id, false, quien)).hasMessageContaining("EJECUCION_CALENDAR_FALLIDA");
+        assertThat(servicio.estado(id, quien).estado()).isEqualTo("INCIERTO");
+        String identidad = jdbc.queryForObject("SELECT google_id FROM publicacion_calendar WHERE evento_id=?", String.class, id);
+        doThrow(new Fallo("OAUTH_GOOGLE", false)).when(google).comprobarDestino(anyString());
+        assertThatThrownBy(() -> servicio.operar(id, false, quien)).hasMessageContaining("OAUTH_GOOGLE");
+        assertThat(servicio.estado(id, quien).estado()).isEqualTo("INCIERTO");
+        verify(google, times(1)).crear(anyString(), eq(identidad), any());
+        if (aplicada) {
+            doNothing().when(google).comprobarDestino(anyString());
+            assertThat(servicio.operar(id, false, quien).estado()).isEqualTo("EXPORTADO");
+            verify(google, times(1)).crear(anyString(), eq(identidad), any());
+        }
+    }
+
+    @ParameterizedTest @ValueSource(booleans = {false, true})
+    void inesperadoTrasActualizarORetirarReconciliaSinRepetir(boolean retirar) {
+        long id = evento("SENADO");
+        servicio.operar(id, false, quien);
+        String identidad = ContenidoCalendar.identidad("m06-it", id);
+        if (retirar) {
+            doAnswer(a -> {
+                remotos.remove(a.getArgument(1));
+                throw new IllegalStateException("después de retirar");
+            }).when(google).retirar(anyString(), anyString(), anyString());
+        } else {
+            jdbc.update("UPDATE evento SET hora_inicio='22:30' WHERE evento_id=?", id);
+            procesador.procesar(id);
+            doAnswer(a -> {
+                remotos.put(a.getArgument(1), new Remoto("actualizado", ((ContenidoCalendar.Contenido) a.getArgument(2)).huella(), false));
+                throw new IllegalStateException("después de actualizar");
+            }).when(google).actualizar(anyString(), anyString(), any(), anyString());
+        }
+        assertThatThrownBy(() -> servicio.operar(id, retirar, quien)).hasMessageContaining("EJECUCION_CALENDAR_FALLIDA");
+        assertThat(servicio.estado(id, quien).estado()).isEqualTo("INCIERTO");
+        assertThat(servicio.operar(id, retirar, quien).estado()).isEqualTo(retirar ? "RETIRADO" : "EXPORTADO");
+        verify(google, times(1)).crear(anyString(), eq(identidad), any());
+        if (retirar) verify(google, times(1)).retirar(anyString(), eq(identidad), anyString());
+        else verify(google, times(1)).actualizar(anyString(), eq(identidad), any(), anyString());
+    }
+
+    @Test void oauthPrevioAlEnvioEsCiertoPeroNoConfirmaPublicacion() {
+        long id = evento("SENADO");
+        doThrow(new Fallo("OAUTH_GOOGLE", false)).when(google).crear(anyString(), anyString(), any());
+        assertThatThrownBy(() -> servicio.operar(id, false, quien)).hasMessageContaining("OAUTH_GOOGLE");
+        assertThat(servicio.estado(id, quien).estado()).isEqualTo("ERROR");
+        assertThat(servicio.estado(id, quien).ultimoExito()).isNull();
+        assertThat(remotos).isEmpty();
+    }
+
+    @Test void inesperadoEnConfirmacionNoSeAtribuyeAPostgresYRecupera() {
+        long id = evento("SENADO");
+        var primera = new java.util.concurrent.atomic.AtomicBoolean(true);
+        doAnswer(a -> {
+            if ("CREACION_CONFIRMADA".equals(a.getArgument(1)) && primera.getAndSet(false)) throw new IllegalStateException("programación");
+            return a.callRealMethod();
+        }).when(publicaciones).auditar(eq(id), anyString(), any(), any());
+        assertThatThrownBy(() -> servicio.operar(id, false, quien)).hasMessageContaining("EJECUCION_CALENDAR_FALLIDA");
+        assertThat(servicio.estado(id, quien).estado()).isEqualTo("INCIERTO");
+        assertThat(servicio.operar(id, false, quien).estado()).isEqualTo("EXPORTADO");
+        verify(google, times(1)).crear(anyString(), anyString(), any());
+    }
+
+    @Test void respuestaInvalidaNoSeConfirmaNiSeRotulaPersistencia() {
+        long id = evento("SENADO");
+        doReturn(new Remoto(null, "incorrecta", false)).when(google).crear(anyString(), anyString(), any());
+        assertThatThrownBy(() -> servicio.operar(id, false, quien)).hasMessageContaining("RESPUESTA_GOOGLE_INCONSISTENTE");
+        assertThat(servicio.estado(id, quien).estado()).isEqualTo("INCIERTO");
+        assertThat(servicio.estado(id, quien).ultimoExito()).isNull();
+    }
+
+    @Test void noPoderGuardarElFalloConservaEnProcesoYLaIdentidad() {
+        long id = evento("SENADO");
+        doThrow(new Fallo("RED_GOOGLE", true)).when(google).crear(anyString(), anyString(), any());
+        doAnswer(a -> {
+            if ("INCIERTO".equals(a.getArgument(1))) throw new org.springframework.dao.DataAccessResourceFailureException("base caída");
+            return a.callRealMethod();
+        }).when(publicaciones).auditar(eq(id), anyString(), any(), any());
+        assertThatThrownBy(() -> servicio.operar(id, false, quien)).hasMessageContaining("RED_GOOGLE");
+        assertThat(servicio.estado(id, quien).estado()).isEqualTo("EN_PROCESO");
+        assertThat(jdbc.queryForObject("SELECT google_id FROM publicacion_calendar WHERE evento_id=?", String.class, id))
+                .isEqualTo(ContenidoCalendar.identidad("m06-it", id));
+    }
+
     @Test void cuotaNoDeshaceCambiosComercialesYRetiradaInciertaEsRepetible() {
         long id=evento("SENADO");
         doThrow(new Fallo("CUOTA_GOOGLE",false)).when(google).comprobarDestino(anyString());

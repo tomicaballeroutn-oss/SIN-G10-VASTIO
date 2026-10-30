@@ -7,6 +7,16 @@ import ar.edu.utn.vastio.agenda.aplicacion.ContenidoCalendar;
 import ar.edu.utn.vastio.agenda.aplicacion.ClienteCalendar.Fallo;
 
 class GoogleCalendarClientTest {
+    @Test
+    @org.junit.jupiter.api.extension.ExtendWith(org.springframework.boot.test.system.OutputCaptureExtension.class)
+    void credencialesFallidasSeRegistranUnaSolaVezSinRuta(org.springframework.boot.test.system.CapturedOutput salida) {
+        String ruta = "archivo-privado-inexistente-m06.json";
+        var cliente = new GoogleCalendarClient(new CalendarProperties(true, "prueba", "prueba", ruta, 5000, 10000));
+        assertThatThrownBy(() -> cliente.comprobarDestino("prueba")).hasMessage("CREDENCIALES_NO_DISPONIBLES");
+        assertThat(salida.getAll().lines().filter(l -> l.contains("fase=CREDENCIALES")).count()).isEqualTo(1);
+        assertThat(salida.getAll()).doesNotContain(ruta, "carga de credenciales fallida");
+    }
+
     @Test void roundtripYModificacionManualSeDetectanPorContenidoReal() {
         var inicio=ZonedDateTime.parse("2032-12-31T20:00:00-03:00[America/Argentina/Cordoba]");
         var fin=inicio.plusHours(10);

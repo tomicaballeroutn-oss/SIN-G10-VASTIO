@@ -16,6 +16,50 @@ function fichaDePrueba() {
 /** E2E de la UI con API controlada: nunca necesita Google ni un backend productivo. */
 test.use({ channel: process.env.E2E_BROWSER_CHANNEL });
 
+test('Hora particular: primer guardado del control nativo y limpieza sin publicar', async ({ page }) => {
+  let ficha = { ...fichaDePrueba(), horaInicio: null as string | null,
+    acciones: { ...fichaDePrueba().acciones, modificar: true } };
+  const guardados: Array<{ horaInicio: string | null }> = [];
+  let escriturasCalendar = 0;
+  await page.route('**/api/v1/**', async route => {
+    const ruta = new URL(route.request().url()).pathname.replace('/api/v1', '');
+    const metodo = route.request().method();
+    let cuerpo: unknown = { cantidad: 0 };
+    if (ruta === '/auth/refresh') cuerpo = {
+      tokenAcceso: 'simulado', tokenAccesoVence: '2099-01-01T00:00:00Z', minutosExpiracionSesion: 60,
+      minutosAvisoExpiracion: 5, usuario: { id: 1, nombreCompleto: 'Dirección de prueba', nombreUsuario: 'prueba', roles: ['DIRECCION'], debeCambiarContrasena: false },
+    };
+    else if (ruta === '/eventos/5') {
+      if (metodo === 'PUT') {
+        const pedido = route.request().postDataJSON() as { horaInicio: string | null };
+        guardados.push(pedido);
+        ficha = { ...ficha, horaInicio: pedido.horaInicio, version: ficha.version + 1 };
+      }
+      cuerpo = ficha;
+    } else if (ruta === '/tipos-evento') cuerpo = [{ id: 1, nombre: 'Casamiento', usaSegmentos: false, activo: true }];
+    else if (ruta === '/eventos/5/calendar') {
+      if (metodo !== 'GET') escriturasCalendar++;
+      cuerpo = { configurado: false, estado: 'NO_EXPORTABLE', pendiente: 'NINGUNA', error: null };
+    }
+    await route.fulfill({ json: cuerpo });
+  });
+  await page.goto('/eventos/5/datos');
+  await page.getByLabel(/^Hora de inicio/).fill('12:30');
+  await page.getByLabel(/^Hora de inicio/).press('Tab');
+  await page.getByRole('button', { name: 'Guardar datos del evento' }).click();
+  await expect(page).toHaveURL(/eventos\/5$/);
+  expect(guardados).toHaveLength(1);
+  expect(guardados[0].horaInicio).toBe('12:30');
+  await page.goto('/eventos/5/datos');
+  await expect(page.getByLabel(/^Hora de inicio/)).toHaveValue('12:30');
+  await page.getByLabel(/^Hora de inicio/).fill('');
+  await page.getByRole('button', { name: 'Guardar datos del evento' }).click();
+  await expect(page).toHaveURL(/eventos\/5$/);
+  expect(guardados).toHaveLength(2);
+  expect(guardados[1].horaInicio).toBeNull();
+  expect(escriturasCalendar).toBe(0);
+});
+
 test('Calendar: pendiente, publicación, actualización, retirada y avisos en escritorio/móvil', async ({ page }, testInfo) => {
   const ficha = fichaDePrueba();
   let e = { eventoId: 5, codigo: ficha.codigo, salon: 'Avril', fecha: '2032-12-31', turno: 'Noche',

@@ -32,17 +32,27 @@ final class TransporteTokenCalendar extends HttpTransport {
                 var respuesta=pedido.execute();
                 // HttpResponse.getContent() ya descomprime gzip. El puente expone ese stream,
                 // no los bytes de red: no anunciar gzip ni su longitud comprimida otra vez.
-                boolean descomprimida=respuesta.getContentEncoding()!=null && respuesta.getContentEncoding().contains("gzip");
-                var nombres=new ArrayList<String>();var valores=new ArrayList<String>();
-                respuesta.getHeaders().forEach((nombre,valor)->{
-                    if(descomprimida && (nombre.equalsIgnoreCase("Content-Encoding") || nombre.equalsIgnoreCase("Content-Length"))) return;
-                    if(valor instanceof List<?> lista) for(var v:lista) { nombres.add(nombre);valores.add(String.valueOf(v)); }
-                    else if(valor!=null) { nombres.add(nombre);valores.add(String.valueOf(valor)); }
+                boolean descomprimida = respuesta.getContentEncoding() != null && respuesta.getContentEncoding().contains("gzip");
+                var nombres = new ArrayList<String>();
+                var valores = new ArrayList<String>();
+                respuesta.getHeaders().forEach((nombre, valor) -> {
+                    if (descomprimida && (nombre.equalsIgnoreCase("Content-Encoding") || nombre.equalsIgnoreCase("Content-Length"))) return;
+                    if (valor instanceof List<?> lista) {
+                        for (var v : lista) {
+                            nombres.add(nombre);
+                            valores.add(String.valueOf(v));
+                        }
+                    } else if (valor != null) {
+                        nombres.add(nombre);
+                        valores.add(String.valueOf(valor));
+                    }
                 });
                 return new LowLevelHttpResponse() {
                     @Override public InputStream getContent() throws IOException { return respuesta.getContent(); }
-                    @Override public String getContentEncoding() { return descomprimida?null:respuesta.getContentEncoding(); }
-                    @Override public long getContentLength() { return descomprimida || respuesta.getHeaders().getContentLength()==null?-1:respuesta.getHeaders().getContentLength(); }
+                    @Override public String getContentEncoding() { return descomprimida ? null : respuesta.getContentEncoding(); }
+                    @Override public long getContentLength() {
+                        return descomprimida || respuesta.getHeaders().getContentLength() == null ? -1 : respuesta.getHeaders().getContentLength();
+                    }
                     @Override public String getContentType() { return respuesta.getContentType(); }
                     @Override public String getStatusLine() { return respuesta.getStatusCode()+" "+respuesta.getStatusMessage(); }
                     @Override public int getStatusCode() { return respuesta.getStatusCode(); }

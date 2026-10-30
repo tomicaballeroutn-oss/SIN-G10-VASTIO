@@ -1,10 +1,14 @@
 # M-06 — Validación real en entorno aislado (29/10/2026)
 
+> Evidencia histórica del ciclo autorizado, complementaria al [diagnóstico OAuth](m-06-diagnostico-red-google.md).
+> Las referencias a PR, commits y pruebas pendientes describen cada momento del ensayo.
+> Para el estado de integración y seguimiento al 30/10/2026, ver [Observaciones finales](m-06-observaciones-finales.md).
+
 ## Entorno y corrección
 
 Base inicial `c50b4dc`. La versión de backend validada es `a35dbea`, en la rama de corrección `codex/m06-diagnostico-oauth`: incorpora `cc6acff` para evitar la doble descompresión gzip y corrige la instrumentación inicial de `ccdf920` manteniendo causas/fases sanitizadas. No cambia publicación, identidad ni recuperación. El JSON de la cuenta de servicio se usa únicamente desde su archivo privado, sin mostrar/copiar claves, tokens ni contraseñas.
 
-El worktree limpio `C:\Users\tomic\VASTIO-CALENDAR-TEST` pasó a una rama local independiente `codex/m06-validacion-real` en `ccdf920`. Se preservaron todas las variables del proceso anterior en memoria y sus argumentos de Spring/JVM. Se verificaron directorio, puerto, URL de base e instalación antes de detener exclusivamente el backend de pruebas. Se ejecutó `mvnw.cmd clean package -DskipTests` y se arrancó el jar con la configuración conservada. Salud UP en localhost:8080. Frontend 5173 y PostgreSQL 5433 conservaron sus procesos originales. El repositorio principal/main y su base no se modificaron.
+El worktree limpio `<worktree-de-validacion>` pasó a una rama local independiente `codex/m06-validacion-real` en `ccdf920`. Se preservaron todas las variables del proceso anterior en memoria y sus argumentos de Spring/JVM. Se verificaron directorio, puerto, URL de base e instalación antes de detener exclusivamente el backend de pruebas. Se ejecutó `mvnw.cmd clean package -DskipTests` y se arrancó el jar con la configuración conservada. Salud UP en localhost:8080. Frontend 5173 y PostgreSQL 5433 conservaron sus procesos originales. El repositorio principal/main y su base no se modificaron.
 
 ## Publicación previa y acceso real: comprobados
 

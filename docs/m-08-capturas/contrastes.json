@@ -167,20 +167,20 @@
       },
       {
         "hover": false,
-        "clase": "avisos__aviso avisos__aviso--calendar-pendiente",
-        "color": "rgb(133, 88, 27)",
-        "token": "#85581b",
-        "aplicaToken": true,
-        "contraste": 5.330117304964304,
-        "stroke": "rgb(133, 88, 27)"
-      },
-      {
-        "hover": false,
         "clase": "avisos__aviso avisos__aviso--calendar-pendiente is-nuevo",
         "color": "rgb(133, 88, 27)",
         "token": "#85581b",
         "aplicaToken": true,
         "contraste": 4.53791976907666,
+        "stroke": "rgb(133, 88, 27)"
+      },
+      {
+        "hover": false,
+        "clase": "avisos__aviso avisos__aviso--calendar-pendiente",
+        "color": "rgb(133, 88, 27)",
+        "token": "#85581b",
+        "aplicaToken": true,
+        "contraste": 5.330117304964304,
         "stroke": "rgb(133, 88, 27)"
       },
       {
@@ -347,20 +347,20 @@
       },
       {
         "hover": true,
-        "clase": "avisos__aviso avisos__aviso--calendar-pendiente",
-        "color": "rgb(133, 88, 27)",
-        "token": "#85581b",
-        "aplicaToken": true,
-        "contraste": 5.001444201426596,
-        "stroke": "rgb(133, 88, 27)"
-      },
-      {
-        "hover": true,
         "clase": "avisos__aviso avisos__aviso--calendar-pendiente is-nuevo",
         "color": "rgb(133, 88, 27)",
         "token": "#85581b",
         "aplicaToken": true,
         "contraste": 4.53791976907666,
+        "stroke": "rgb(133, 88, 27)"
+      },
+      {
+        "hover": true,
+        "clase": "avisos__aviso avisos__aviso--calendar-pendiente",
+        "color": "rgb(133, 88, 27)",
+        "token": "#85581b",
+        "aplicaToken": true,
+        "contraste": 5.001444201426596,
         "stroke": "rgb(133, 88, 27)"
       }
     ]
@@ -533,20 +533,20 @@
       },
       {
         "hover": false,
-        "clase": "avisos__aviso avisos__aviso--calendar-pendiente",
-        "color": "rgb(254, 192, 118)",
-        "token": "#fec076",
-        "aplicaToken": true,
-        "contraste": 9.718303058854222,
-        "stroke": "rgb(254, 192, 118)"
-      },
-      {
-        "hover": false,
         "clase": "avisos__aviso avisos__aviso--calendar-pendiente is-nuevo",
         "color": "rgb(254, 192, 118)",
         "token": "#fec076",
         "aplicaToken": true,
         "contraste": 5.626616476896493,
+        "stroke": "rgb(254, 192, 118)"
+      },
+      {
+        "hover": false,
+        "clase": "avisos__aviso avisos__aviso--calendar-pendiente",
+        "color": "rgb(254, 192, 118)",
+        "token": "#fec076",
+        "aplicaToken": true,
+        "contraste": 9.718303058854222,
         "stroke": "rgb(254, 192, 118)"
       },
       {
@@ -713,20 +713,20 @@
       },
       {
         "hover": true,
-        "clase": "avisos__aviso avisos__aviso--calendar-pendiente",
-        "color": "rgb(254, 192, 118)",
-        "token": "#fec076",
-        "aplicaToken": true,
-        "contraste": 10.957358197089288,
-        "stroke": "rgb(254, 192, 118)"
-      },
-      {
-        "hover": true,
         "clase": "avisos__aviso avisos__aviso--calendar-pendiente is-nuevo",
         "color": "rgb(254, 192, 118)",
         "token": "#fec076",
         "aplicaToken": true,
         "contraste": 5.626616476896493,
+        "stroke": "rgb(254, 192, 118)"
+      },
+      {
+        "hover": true,
+        "clase": "avisos__aviso avisos__aviso--calendar-pendiente",
+        "color": "rgb(254, 192, 118)",
+        "token": "#fec076",
+        "aplicaToken": true,
+        "contraste": 10.957358197089288,
         "stroke": "rgb(254, 192, 118)"
       }
     ]
@@ -899,20 +899,20 @@
       },
       {
         "hover": false,
-        "clase": "avisos__aviso avisos__aviso--calendar-pendiente",
-        "color": "rgb(254, 192, 118)",
-        "token": "#fec076",
-        "aplicaToken": true,
-        "contraste": 9.718303058854222,
-        "stroke": "rgb(254, 192, 118)"
-      },
-      {
-        "hover": false,
         "clase": "avisos__aviso avisos__aviso--calendar-pendiente is-nuevo",
         "color": "rgb(254, 192, 118)",
         "token": "#fec076",
         "aplicaToken": true,
         "contraste": 5.626616476896493,
+        "stroke": "rgb(254, 192, 118)"
+      },
+      {
+        "hover": false,
+        "clase": "avisos__aviso avisos__aviso--calendar-pendiente",
+        "color": "rgb(254, 192, 118)",
+        "token": "#fec076",
+        "aplicaToken": true,
+        "contraste": 9.718303058854222,
         "stroke": "rgb(254, 192, 118)"
       },
       {
@@ -1079,20 +1079,20 @@
       },
       {
         "hover": true,
-        "clase": "avisos__aviso avisos__aviso--calendar-pendiente",
-        "color": "rgb(254, 192, 118)",
-        "token": "#fec076",
-        "aplicaToken": true,
-        "contraste": 10.957358197089288,
-        "stroke": "rgb(254, 192, 118)"
-      },
-      {
-        "hover": true,
         "clase": "avisos__aviso avisos__aviso--calendar-pendiente is-nuevo",
         "color": "rgb(254, 192, 118)",
         "token": "#fec076",
         "aplicaToken": true,
         "contraste": 5.626616476896493,
+        "stroke": "rgb(254, 192, 118)"
+      },
+      {
+        "hover": true,
+        "clase": "avisos__aviso avisos__aviso--calendar-pendiente",
+        "color": "rgb(254, 192, 118)",
+        "token": "#fec076",
+        "aplicaToken": true,
+        "contraste": 10.957358197089288,
         "stroke": "rgb(254, 192, 118)"
       }
     ]
@@ -1265,20 +1265,20 @@
       },
       {
         "hover": false,
-        "clase": "avisos__aviso avisos__aviso--calendar-pendiente",
-        "color": "rgb(133, 88, 27)",
-        "token": "#85581b",
-        "aplicaToken": true,
-        "contraste": 5.330117304964304,
-        "stroke": "rgb(133, 88, 27)"
-      },
-      {
-        "hover": false,
         "clase": "avisos__aviso avisos__aviso--calendar-pendiente is-nuevo",
         "color": "rgb(133, 88, 27)",
         "token": "#85581b",
         "aplicaToken": true,
         "contraste": 4.53791976907666,
+        "stroke": "rgb(133, 88, 27)"
+      },
+      {
+        "hover": false,
+        "clase": "avisos__aviso avisos__aviso--calendar-pendiente",
+        "color": "rgb(133, 88, 27)",
+        "token": "#85581b",
+        "aplicaToken": true,
+        "contraste": 5.330117304964304,
         "stroke": "rgb(133, 88, 27)"
       },
       {
@@ -1445,20 +1445,20 @@
       },
       {
         "hover": true,
-        "clase": "avisos__aviso avisos__aviso--calendar-pendiente",
-        "color": "rgb(133, 88, 27)",
-        "token": "#85581b",
-        "aplicaToken": true,
-        "contraste": 5.001444201426596,
-        "stroke": "rgb(133, 88, 27)"
-      },
-      {
-        "hover": true,
         "clase": "avisos__aviso avisos__aviso--calendar-pendiente is-nuevo",
         "color": "rgb(133, 88, 27)",
         "token": "#85581b",
         "aplicaToken": true,
         "contraste": 4.53791976907666,
+        "stroke": "rgb(133, 88, 27)"
+      },
+      {
+        "hover": true,
+        "clase": "avisos__aviso avisos__aviso--calendar-pendiente",
+        "color": "rgb(133, 88, 27)",
+        "token": "#85581b",
+        "aplicaToken": true,
+        "contraste": 5.001444201426596,
         "stroke": "rgb(133, 88, 27)"
       }
     ]
@@ -1631,20 +1631,20 @@
       },
       {
         "hover": false,
-        "clase": "avisos__aviso avisos__aviso--calendar-pendiente",
-        "color": "rgb(254, 192, 118)",
-        "token": "#fec076",
-        "aplicaToken": true,
-        "contraste": 9.718303058854222,
-        "stroke": "rgb(254, 192, 118)"
-      },
-      {
-        "hover": false,
         "clase": "avisos__aviso avisos__aviso--calendar-pendiente is-nuevo",
         "color": "rgb(254, 192, 118)",
         "token": "#fec076",
         "aplicaToken": true,
         "contraste": 5.626616476896493,
+        "stroke": "rgb(254, 192, 118)"
+      },
+      {
+        "hover": false,
+        "clase": "avisos__aviso avisos__aviso--calendar-pendiente",
+        "color": "rgb(254, 192, 118)",
+        "token": "#fec076",
+        "aplicaToken": true,
+        "contraste": 9.718303058854222,
         "stroke": "rgb(254, 192, 118)"
       },
       {
@@ -1811,20 +1811,20 @@
       },
       {
         "hover": true,
-        "clase": "avisos__aviso avisos__aviso--calendar-pendiente",
-        "color": "rgb(254, 192, 118)",
-        "token": "#fec076",
-        "aplicaToken": true,
-        "contraste": 10.957358197089288,
-        "stroke": "rgb(254, 192, 118)"
-      },
-      {
-        "hover": true,
         "clase": "avisos__aviso avisos__aviso--calendar-pendiente is-nuevo",
         "color": "rgb(254, 192, 118)",
         "token": "#fec076",
         "aplicaToken": true,
         "contraste": 5.626616476896493,
+        "stroke": "rgb(254, 192, 118)"
+      },
+      {
+        "hover": true,
+        "clase": "avisos__aviso avisos__aviso--calendar-pendiente",
+        "color": "rgb(254, 192, 118)",
+        "token": "#fec076",
+        "aplicaToken": true,
+        "contraste": 10.957358197089288,
         "stroke": "rgb(254, 192, 118)"
       }
     ]
@@ -1997,20 +1997,20 @@
       },
       {
         "hover": false,
-        "clase": "avisos__aviso avisos__aviso--calendar-pendiente",
-        "color": "rgb(254, 192, 118)",
-        "token": "#fec076",
-        "aplicaToken": true,
-        "contraste": 9.718303058854222,
-        "stroke": "rgb(254, 192, 118)"
-      },
-      {
-        "hover": false,
         "clase": "avisos__aviso avisos__aviso--calendar-pendiente is-nuevo",
         "color": "rgb(254, 192, 118)",
         "token": "#fec076",
         "aplicaToken": true,
         "contraste": 5.626616476896493,
+        "stroke": "rgb(254, 192, 118)"
+      },
+      {
+        "hover": false,
+        "clase": "avisos__aviso avisos__aviso--calendar-pendiente",
+        "color": "rgb(254, 192, 118)",
+        "token": "#fec076",
+        "aplicaToken": true,
+        "contraste": 9.718303058854222,
         "stroke": "rgb(254, 192, 118)"
       },
       {
@@ -2177,20 +2177,20 @@
       },
       {
         "hover": true,
-        "clase": "avisos__aviso avisos__aviso--calendar-pendiente",
-        "color": "rgb(254, 192, 118)",
-        "token": "#fec076",
-        "aplicaToken": true,
-        "contraste": 10.957358197089288,
-        "stroke": "rgb(254, 192, 118)"
-      },
-      {
-        "hover": true,
         "clase": "avisos__aviso avisos__aviso--calendar-pendiente is-nuevo",
         "color": "rgb(254, 192, 118)",
         "token": "#fec076",
         "aplicaToken": true,
         "contraste": 5.626616476896493,
+        "stroke": "rgb(254, 192, 118)"
+      },
+      {
+        "hover": true,
+        "clase": "avisos__aviso avisos__aviso--calendar-pendiente",
+        "color": "rgb(254, 192, 118)",
+        "token": "#fec076",
+        "aplicaToken": true,
+        "contraste": 10.957358197089288,
         "stroke": "rgb(254, 192, 118)"
       }
     ]

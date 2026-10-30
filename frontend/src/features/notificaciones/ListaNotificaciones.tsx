@@ -20,11 +20,11 @@ const ICONO: Record<TipoNotificacion, IconName> = {
   CANCELACION: 'calendar-x',
   PLANNER_ASIGNADA: 'user-plus',
   ALERTA_STOCK: 'triangle-alert',
+  CALENDAR_PENDIENTE: 'calendar-clock',
 };
 
 /** Una identidad visual por tipo; el texto y el ícono siguen comunicando el aviso sin depender del color. */
-// Compatibilidad anticipada con M-06; no incorpora su API ni sus acciones.
-const COLOR: Record<TipoNotificacion | 'CALENDAR_PENDIENTE', string> = {
+const COLOR: Record<TipoNotificacion, string> = {
   EVENTO_NUEVO: 'evento-nuevo',
   SENA: 'sena',
   CONTRATO: 'contrato',

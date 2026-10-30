@@ -31,3 +31,9 @@ scripts/__pycache__/
 *.iml
 .DS_Store
 Thumbs.db
+
+# Credenciales M-06: siempre fuera del checkout/build context.
+secrets/
+**/secrets/
+**/*service-account*.json
+**/vastio-calendar.json

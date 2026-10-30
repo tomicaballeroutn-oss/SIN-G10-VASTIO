@@ -1,7 +1,7 @@
 import { expect, test } from '@playwright/test';
 
 test.use({ channel: process.env.E2E_BROWSER_CHANNEL });
-const tipos = ['EVENTO_NUEVO', 'SENA', 'CONTRATO', 'CONFIRMACION', 'MODIFICACION', 'REPROGRAMACION', 'CANCELACION', 'PLANNER_ASIGNADA', 'ALERTA_STOCK'];
+const tipos = ['EVENTO_NUEVO', 'SENA', 'CONTRATO', 'CONFIRMACION', 'MODIFICACION', 'REPROGRAMACION', 'CANCELACION', 'PLANNER_ASIGNADA', 'ALERTA_STOCK', 'CALENDAR_PENDIENTE'];
 
 for (const tema of ['claro', 'oscuro', 'sistema']) {
   test(`colores: ${tema}, contraste y estados con API simulada`, async ({ page }, info) => {
@@ -16,10 +16,10 @@ for (const tema of ['claro', 'oscuro', 'sistema']) {
         tokenAcceso: 'sintetico', tokenAccesoVence: '2099-01-01T00:00:00Z', minutosExpiracionSesion: 60, minutosAvisoExpiracion: 5,
         usuario: { id: 1, nombreCompleto: 'Prueba visual', nombreUsuario: 'prueba', roles: ['DIRECCION'], debeCambiarContrasena: false },
       } });
-      if (url.pathname.endsWith('/notificaciones/sin-leer')) return route.fulfill({ json: { cantidad: 9 } });
+      if (url.pathname.endsWith('/notificaciones/sin-leer')) return route.fulfill({ json: { cantidad: tipos.length } });
       if (url.pathname.endsWith('/notificaciones')) return route.fulfill({ json: {
         notificaciones: url.searchParams.get('soloSinLeer') === 'true' ? avisos.filter((a) => !a.leida) : avisos,
-        pagina: 0, hayMas: false, sinLeer: 9,
+        pagina: 0, hayMas: false, sinLeer: tipos.length,
       } });
       return route.fulfill({ json: [] });
     });
@@ -27,17 +27,10 @@ for (const tema of ['claro', 'oscuro', 'sistema']) {
     await expect(page.locator('html')).toHaveAttribute('data-theme', tema === 'claro' ? 'light' : 'dark');
     await page.getByRole('tab', { name: 'Todas', exact: true }).click();
     const botones = page.locator('.avisos__aviso');
-    await expect(botones).toHaveCount(18);
-    // También verifica el selector futuro de M-06 sin introducir esa funcionalidad.
-    await page.evaluate(() => {
-      for (const nuevo of [false, true]) {
-        const original = document.querySelector('.avisos__aviso')!;
-        const copia = original.cloneNode(true) as HTMLElement;
-        copia.className = `avisos__aviso avisos__aviso--calendar-pendiente${nuevo ? ' is-nuevo' : ''}`;
-        copia.querySelector('.body-sm')!.textContent = 'Compatibilidad CALENDAR_PENDIENTE (fixture CSS)';
-        original.parentElement!.parentElement!.append(copia);
-      }
-    });
+    await expect(botones).toHaveCount(tipos.length * 2);
+    const calendar = page.locator('.avisos__aviso--calendar-pendiente');
+    await expect(calendar).toHaveCount(2);
+    await expect(calendar.filter({ hasText: 'Sin leer:' })).toHaveCount(1);
     const contrastes: unknown[] = [];
     for (const hover of [false, true]) {
       for (const boton of await botones.all()) {
@@ -67,11 +60,11 @@ for (const tema of ['claro', 'oscuro', 'sistema']) {
         contrastes.push({ hover, ...resultado });
       }
     }
-    // Los tipos reales conservan nueve trazos distintos y mensajes explícitos sin color.
-    const trazos = await botones.locator('svg').evaluateAll((icons) => icons.slice(0, 18).filter((_, i) => i % 2 === 0).map((el) => el.innerHTML));
+    // Diez tipos reales, nueve trazos: Calendar y reprogramación comparten calendar-clock.
+    // El mensaje explícito conserva su distinción sin depender del color.
+    const trazos = await botones.locator('svg').evaluateAll((icons) => icons.filter((_, i) => i % 2 === 0).map((el) => el.innerHTML));
     expect(new Set(trazos).size).toBe(9);
     await expect(page.locator('.avisos__aviso.is-nuevo .v-sr').first()).toHaveText('Sin leer: ');
-    await page.locator('.avisos__aviso--calendar-pendiente').evaluateAll((fixtures) => fixtures.forEach((el) => el.remove()));
     await expect(page.locator('.avisos__aviso:not(.is-nuevo) .avisos__punto')).toHaveCount(0);
     await info.attach('contrastes', { body: JSON.stringify(contrastes, null, 2), contentType: 'application/json' });
     // Expande solo la lista del fixture para documentar todos los tipos en una captura.

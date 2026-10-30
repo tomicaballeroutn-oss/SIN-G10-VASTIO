@@ -70,3 +70,7 @@ E = ejecuta · P = ejecuta solo sobre sus propios eventos (vendedora: los que ve
 
 - Que la vendedora solo pueda reprogramar y registrar la seña de **sus** eventos (el equipo definió «vendedora o coordinación»).
 - La excepción de la vendedora a RNF-SEG-04 todavía no figura en el Plan de Proyecto.
+
+## M-06 — Google Calendar
+
+Publicar, actualizar, retirar y consultar Pendientes de Google Calendar: exclusivamente Dirección y Coordinación. Backend valida el rol. Consultar agenda/ficha con otro perfil no concede publicación externa. Leer avisos no resuelve publicaciones pendientes. Ver [M-06](m-06-google-calendar.md).

@@ -1,46 +1,42 @@
-# M-08: evidencia para revisión de Albert
+# M-08 — Notificaciones e integración con Google Calendar
 
-Base: #52 `0f5eb45`. Ese commit ya retiró `package-lock.json` de raíz y la auditoría; no se repiten las eliminaciones. `frontend/package-lock.json` no cambia. La auditoría histórica se recuperó sin BOM en #64, sobre main `f94fd73`; hallazgos Alta #61, #62 y #63, tras revisar los issues abiertos/cerrados.
+## Alcance y contrato
 
-## Accesibilidad
+M-08 aplica un color por tipo al ícono y al indicador sin leer. El mensaje, el trazo del ícono y el texto accesible «Sin leer» conservan el significado sin depender del color.
 
-Se conserva la paleta del HEAD de #52, que ya define variantes por tema. El navegador comprueba el color calculado del SVG contra el token, `stroke: currentColor`, fondo efectivo, hover y estados leído/sin leer. Se aplica luminancia relativa sRGB y `(Lmayor + 0.05)/(Lmenor + 0.05)`, mínimo 3:1, sin redondear antes de comparar.
+Después de incorporar main con M-06 (merge de #51: `18501bbd`), los diez tipos de la API frontend coinciden con el enum del backend. `ICONO` y `COLOR` son mapas exhaustivos de `TipoNotificacion`; `CALENDAR_PENDIENTE` ya es un tipo vigente, sin unión anticipada ni parche separado.
 
-| Tema | Mínimo medido por Chrome, escritorio y teléfono |
+Calendar usa `calendar-clock` y el token `--warning`, que tiene variantes clara y oscura. Comparte trazo con reprogramación: los mensajes distinguen ambos avisos. Abrir un aviso Calendar conserva la lectura local, el contador, el cierre del panel y la navegación a la ficha. Leerlo no publica ni actualiza Google y no equivale a resolver el pendiente de exportación. Se preservan los permisos, la deduplicación y la resolución de notificaciones de M-06.
+
+Los cambios de actualización no modifican el cliente Google, las migraciones ni la autorización de main. La auditoría histórica incorporada por #64 pertenece a main y no forma parte del diff de M-08.
+
+## Contraste e íconos
+
+Los colores por tipo tienen variantes en ambos temas. El selector de hijo directo `> .v-icon` alcanza el SVG real de `Icon`, cuyo stroke usa currentColor. El tema sistema con SO oscuro aplica `data-theme="dark"`.
+
+La medición usa luminancia relativa sRGB y `(Lmayor + 0.05)/(Lmenor + 0.05)`. Se exige contraste mínimo 3:1 sin redondear antes de comparar, sobre fondo efectivo, leído/sin leer y hover.
+
+| Tema | Mínimo medido en Chrome, escritorio y teléfono |
 |---|---:|
 | Claro | 3.513:1 |
 | Oscuro | 3.501:1 |
-| Automático con SO oscuro | 3.501:1 |
+| Sistema con SO oscuro | 3.501:1 |
 
-Los nueve tipos existentes conservan mensajes e íconos con trazos distintos. El estado sin leer tiene punto, negrita y texto accesible. No se afirma que los colores cálidos sean distinguibles por sí solos y no se ejecutó un simulador dedicado de daltonismo.
+El E2E recibe los **diez tipos reales desde su API simulada**, incluido Calendar, con veinte avisos (leído y sin leer por tipo). No clona HTML para anticipar tipos futuros. Las 240 mediciones están en [contrastes.json](m-08-capturas/contrastes.json).
 
-Pruebas: `frontend/src/features/notificaciones/contraste.test.ts` (22 casos sobre los tokens CSS reales y superficies canvas, surface, raised, sunken y mezcla sin leer) y `frontend/e2e/notificaciones-colores.spec.ts` (6 escenarios, API simulada). El selector de Calendar se verifica con un fixture CSS explícito, no con funcionalidad Calendar incorporada a esta rama.
-
-Capturas en `m-08-capturas/`: claro, oscuro y sistema, escritorio/teléfono. Solo para la captura se expande la lista del fixture, después de las aserciones, para mostrar todos los tipos; la aplicación conserva su scroll. Los valores individuales medidos están en [contrastes.json](m-08-capturas/contrastes.json).
+Capturas renovadas en `m-08-capturas/`: claro, oscuro y sistema, escritorio y teléfono. Solo para capturar se expande la lista del fixture después de las aserciones; la aplicación conserva su scroll.
 
 ![Claro](m-08-capturas/escritorio-claro.png)
 ![Oscuro](m-08-capturas/escritorio-oscuro.png)
 
-## Compatibilidad
+No se ejecutó un simulador dedicado de daltonismo y no se afirma que los tonos cálidos sean distinguibles por sí solos. El contenido y los indicadores adicionales conservan su significado sin usar el color como único canal.
 
-Se inspeccionó `docs/compatibilidad/m-06-pr52.patch` de #59. Se anticipan sus dos cambios mínimos: entrada `CALENDAR_PENDIENTE` en COLOR y selector con `--warning`, que tiene variante por tema. La unión `TipoNotificacion | 'CALENDAR_PENDIENTE'` permite compilar antes y después de M-06 sin importar su API. No cambia Google Calendar ni la navegación de avisos. No reaplicar el parche después de incorporar esta corrección.
+## Regresiones y validación
 
-| Referencia vigente al verificar | Árbol combinado con la corrección | TypeScript |
-|---|---|---|
-| main `f94fd73` | Sin conflictos | Correcto |
-| #51 `6185c08` | Sin conflictos | Correcto |
-| #59 `88bc0db` | Sin conflictos | Correcto |
-| #49 `d136cc6` | Sin conflictos | Correcto |
-| #60 `9bcff1a` | Sin conflictos | Correcto |
+- `PanelNotificaciones.test.tsx`: lectura, navegación, paginación, contador, perfiles combinados de Cocina y avisos Calendar de Dirección/Coordinación; abrir Calendar solo envía el POST de lectura y no realiza escrituras de exportación.
+- `contraste.test.ts`: 22 casos sobre tokens reales, superficies y mezclas sin leer.
+- `Calendar.test.tsx`: permisos, estados y operaciones manuales de M-06 con API simulada.
+- `e2e/notificaciones-colores.spec.ts`: seis escenarios en Chrome escritorio/teléfono, claro/oscuro/sistema oscuro, diez tipos, color calculado, SVG, mensajes y leído/sin leer.
+- La suite backend de main comprueba que leer avisos no resuelve pendientes Calendar y conserva deduplicación, roles e integración desactivada. Las pruebas externas de Google permanecen optativas y no se habilitan en este cierre.
 
-Son copias descartables de combinaciones por pares; no se incorporan sus commits ni se ejecutan suites completas en cada combinación. Repetir si cambia cualquier HEAD.
-
-## Validación y límites
-
-- Notificaciones: 18/18. Contraste: 22/22. E2E final Chrome: 6/6, cero omisiones, con API simulada. No sustituye aceptación contra backend desplegado.
-- ESLint, TypeScript y build de producción correctos; lockfile legítimo intacto y `git diff --check` correcto.
-- Suite frontend completa local: los primeros intentos con forks quedaron sin resumen y se interrumpieron; el intento con threads sigue pendiente al preparar este documento. No se contabilizan como aprobados. El resultado definitivo se registra en la descripción del PR.
-- Primeros E2E: fallo al iniciar Edge en sandbox y conexión inaccesible entre entornos; repetición con Chrome y Vite en el mismo entorno correcta. El test de contraste necesitó corregir su importación de CSS/Node para compilar; la versión final pasó.
-- CI: consultar las ejecuciones de los HEAD finales enlazadas en las descripciones de #64 y #65. Al preparar esta evidencia, Backend y Frontend estaban en cola sin runner asignado; no se consideran aprobados.
-
-Mantener ambos PR Draft. Propuesta: revisar e integrar primero #65 en la rama del #52 por el procedimiento humano del equipo, actualizar con main y repetir CI del HEAD resultante; coordinar M-06 sin reaplicar el parche. Solicitar nueva revisión de Albert cuando los checks estén verdes. Su CHANGES_REQUESTED no se resuelve automáticamente. #64 se revisa independientemente. No se modifica main ni se aprueba, fusiona o cierra ningún PR.
+Comandos: `npm ci`, `npm run lint`, `npm run build`, `npm test`; E2E de colores con API simulada y backend `mvnw verify` con PostgreSQL descartable. Los resultados completos, el HEAD exacto, las limitaciones locales y CI se registran en la descripción y conversación de #52. Los E2E simulados no sustituyen aceptación contra un despliegue real.

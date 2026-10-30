@@ -61,7 +61,8 @@ class CuentaJwtIT {
                 .contentType(MediaType.APPLICATION_JSON).content(CAMBIO)).andExpect(status().isNoContent());
     }
 
-    @Test void laMarcaFalsaPermiteRolesMultiplesSinConsultasDeAutorizacion() throws Exception {
+    @Test void laMarcaFalsaPermiteRolesMultiplesSinSentenciasHibernateEnLaSonda() throws Exception {
+        // Solo Hibernate: no cuenta JdbcTemplate ni JDBC directo, ni SQL de endpoints de negocio.
         var stats = emf.unwrap(SessionFactory.class).getStatistics();
         boolean anterior = stats.isStatisticsEnabled();
         stats.setStatisticsEnabled(true); stats.clear();
@@ -70,7 +71,7 @@ class CuentaJwtIT {
             for (int i=0; i<3; i++)
                 mvc.perform(get("/api/v1/_sonda/direccion").header(HttpHeaders.AUTHORIZATION, "Bearer " + token))
                         .andExpect(status().isOk());
-            System.out.println("CUENTA_JWT_SQL_TRES_SOLICITUDES=" + stats.getPrepareStatementCount());
+            System.out.println("CUENTA_JWT_HIBERNATE_STATEMENTS_TRES_SOLICITUDES=" + stats.getPrepareStatementCount());
             assertThat(stats.getPrepareStatementCount()).isZero();
         } finally { stats.setStatisticsEnabled(anterior); }
     }

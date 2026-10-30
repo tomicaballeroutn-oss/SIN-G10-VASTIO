@@ -61,7 +61,7 @@ Frontend: features/cuenta, api/cuenta, Layout y los componentes existentes de se
 
 CuentaIT conserva cada perfil, ingreso con la nueva y rechazo de la vieja, actual incorrecta, repetida, longitudes, Unicode, campos faltantes, usuario inactivo, identidad propia y cambio obligatorio. Verifica que el token inicial siga restringido y que el refresh permita operar.
 CuentaConcurrenciaIT comprueba la espera real y el rechazo del segundo cambio.
-CuentaJwtIT cubre claims, migración de tokens, sujetos inválidos, principales de prueba, roles múltiples y sentencias SQL del control.
+CuentaJwtIT cubre claims, migración de tokens, sujetos inválidos, principales de prueba y roles múltiples. Su medición en la sonda cuenta solo sentencias preparadas por Hibernate; no mide JdbcTemplate ni JDBC directo.
 ContrasenaEquivalenciaTest cubre el atajo y las equivalencias del codificador.
 PaginaMiCuenta.test.tsx y e2e/cuenta.spec.ts verifican el flujo, ausencia de menús/polling, errores de renovación, reingreso, navegación restaurada, tema y salida.
 

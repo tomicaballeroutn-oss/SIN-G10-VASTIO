@@ -120,7 +120,7 @@ export function PaginaEventos() {
                       variant="outline"
                       iconEnd={filtrosAbiertos ? 'chevron-up' : 'chevron-down'}
                       ariaExpanded={filtrosAbiertos}
-                      ariaControls="eventos-filtros-contenido"
+                      ariaControls={filtrosAbiertos ? 'eventos-filtros-contenido' : undefined}
                       onClick={() => setFiltrosAbiertos((abiertos) => !abiertos)}
                     >
                       {filtrosAbiertos ? 'Ocultar filtros' : 'Mostrar filtros'}

@@ -38,7 +38,7 @@ export function PaginaAgenda() {
   const pedido = busqueda.get('mes') ?? '';
   const mes = MES_VALIDO.test(pedido) ? pedido : hoy.slice(0, 7);
   const dia = busqueda.get('dia')?.startsWith(mes) ? busqueda.get('dia') : null;
-  const salones = [...new Set(busqueda.getAll('salon').filter((codigo): codigo is SalonId => codigo in SALONES))];
+  const salones = [...new Set(busqueda.getAll('salon').filter((codigo): codigo is SalonId => Object.hasOwn(SALONES, codigo)))];
   const estados = [...new Set(busqueda.getAll('estado').filter((valor): valor is EventStatus =>
     ESTADOS_FILTRABLES.includes(valor as EventStatus)))];
   const turnos = [...new Set(busqueda.getAll('turno').filter((valor): valor is TurnoId =>
@@ -86,7 +86,7 @@ export function PaginaAgenda() {
         </Alert>
       )}
       <Card
-        title="Filtros de búsqueda"
+        title="Resaltar unidades"
         actions={(
           <div className="agenda__filtros-acciones">
             <Button variant="outline" icon="calendar" onClick={() => cambiar({ mes: hoy.slice(0, 7), dia: hoy })}>Ir a hoy</Button>
@@ -94,7 +94,7 @@ export function PaginaAgenda() {
               variant="outline"
               iconEnd={filtrosAbiertos ? 'chevron-up' : 'chevron-down'}
               ariaExpanded={filtrosAbiertos}
-              ariaControls="agenda-filtros-contenido"
+              ariaControls={filtrosAbiertos ? 'agenda-filtros-contenido' : undefined}
               onClick={() => setFiltrosAbiertos((abiertos) => !abiertos)}
             >
               {filtrosAbiertos ? 'Ocultar filtros' : 'Mostrar filtros'}
@@ -111,7 +111,7 @@ export function PaginaAgenda() {
           alCambiar={(valores) => cambiarLista('salon', valores)}
         />
         <FiltroMultiple
-          label="Estados"
+          label="Resaltar estados"
           opciones={ESTADOS_FILTRABLES.map((e) => ({ value: e, label: ESTADOS[e].label }))}
           valores={estados}
           alCambiar={(valores) => cambiarLista('estado', valores)}
@@ -126,7 +126,7 @@ export function PaginaAgenda() {
           <Button variant="text" onClick={() => cambiar({ salon: null, estado: null, turno: null })}>Limpiar filtros</Button>
         )}
         <p className="caption v-muted agenda__filtros-ayuda">
-          Las unidades que coinciden se resaltan en el calendario.
+          Las unidades que coinciden se resaltan. Las demás se atenúan; ninguna se oculta ni se elimina del detalle.
         </p>
       </div>
       }

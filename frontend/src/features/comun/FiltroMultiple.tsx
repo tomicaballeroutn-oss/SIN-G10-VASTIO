@@ -20,6 +20,11 @@ export function FiltroMultiple({ label, opciones, valores, alCambiar }: {
   const raiz = useRef<HTMLDivElement>(null);
   const panel = useRef<HTMLDivElement>(null);
 
+  const cerrarPanel = useCallback(() => {
+    setAbierto(false);
+    raiz.current?.querySelector<HTMLButtonElement>('.filtro-multiple__trigger')?.focus();
+  }, []);
+
   function alternar(valor: string, seleccionado: boolean) {
     alCambiar(seleccionado ? [...valores, valor] : valores.filter((actual) => actual !== valor));
   }
@@ -49,8 +54,7 @@ export function FiltroMultiple({ label, opciones, valores, alCambiar }: {
     }
     function cerrarConEscape(evento: KeyboardEvent) {
       if (evento.key !== 'Escape') return;
-      setAbierto(false);
-      raiz.current?.querySelector<HTMLButtonElement>('.filtro-multiple__trigger')?.focus();
+      cerrarPanel();
     }
     function cerrarAlDesplazarse(evento: Event) {
       if (!raiz.current?.contains(evento.target as Node)) setAbierto(false);
@@ -68,7 +72,7 @@ export function FiltroMultiple({ label, opciones, valores, alCambiar }: {
       document.removeEventListener('focusin', cerrarAlPerderFoco);
       window.removeEventListener('scroll', cerrarAlDesplazarse, true);
     };
-  }, [abierto]);
+  }, [abierto, cerrarPanel]);
 
   useEffect(() => {
     if (!abierto) return undefined;
@@ -99,18 +103,16 @@ export function FiltroMultiple({ label, opciones, valores, alCambiar }: {
         iconEnd={abierto ? 'chevron-up' : 'chevron-down'}
         className={`filtro-multiple__trigger${valores.length > 0 ? ' is-activo' : ''}${abierto ? ' is-abierto' : ''}`}
         ariaExpanded={abierto}
-        ariaControls={id}
+        ariaControls={abierto ? id : undefined}
         onClick={alternarPanel}
       >
         <span className="filtro-multiple__nombre">{label}</span>
-        {valores.length > 0 && <Badge tone="accent">{valores.length}</Badge>}
+        {valores.length > 0 && <>{' '}<Badge tone="accent">{valores.length}</Badge></>}
       </Button>
       {abierto && (
         <div
           ref={panel}
           id={id}
-          role="group"
-          aria-label={label}
           className="filtro-multiple__panel"
           style={estiloPanel}
         >
@@ -119,7 +121,7 @@ export function FiltroMultiple({ label, opciones, valores, alCambiar }: {
               <p className="label">{label}</p>
               <p className="caption v-muted">Elegí una o más opciones</p>
             </div>
-            <IconButton icon="x" label={`Cerrar filtro de ${label.toLowerCase()}`} variant="text" size="sm" onClick={() => setAbierto(false)} />
+            <IconButton icon="x" label={`Cerrar filtro de ${label.toLowerCase()}`} variant="text" size="sm" onClick={cerrarPanel} />
           </header>
           <fieldset className="filtro-multiple__opciones">
             <legend className="v-sr">{label}</legend>
@@ -139,7 +141,7 @@ export function FiltroMultiple({ label, opciones, valores, alCambiar }: {
             {valores.length > 0
               ? <Button variant="text" size="sm" onClick={() => alCambiar([])}>Limpiar</Button>
               : <span className="caption v-muted">Sin filtros activos</span>}
-            <Button variant="solid" size="sm" onClick={() => setAbierto(false)}>Listo</Button>
+            <Button variant="solid" size="sm" onClick={cerrarPanel}>Listo</Button>
           </footer>
         </div>
       )}

@@ -74,6 +74,9 @@ for (const tema of ['claro', 'oscuro', 'sistema']) {
     await page.locator('.avisos__aviso--calendar-pendiente').evaluateAll((fixtures) => fixtures.forEach((el) => el.remove()));
     await expect(page.locator('.avisos__aviso:not(.is-nuevo) .avisos__punto')).toHaveCount(0);
     await info.attach('contrastes', { body: JSON.stringify(contrastes, null, 2), contentType: 'application/json' });
+    // Expande solo la lista del fixture para documentar todos los tipos en una captura.
+    await page.addStyleTag({ content: '.avisos__lista { max-height: none !important; overflow: visible !important; }' });
+    await page.mouse.move(0, 0);
     await page.screenshot({ path: info.outputPath(`${tema}.png`), fullPage: true });
     await info.attach(`${tema}`, { path: info.outputPath(`${tema}.png`), contentType: 'image/png' });
   });

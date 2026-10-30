@@ -1,0 +1,2198 @@
+[
+  {
+    "title": "colores: claro, contraste y estados con API simulada",
+    "project": "escritorio",
+    "data": [
+      {
+        "hover": false,
+        "clase": "avisos__aviso avisos__aviso--evento-nuevo is-nuevo",
+        "color": "rgb(49, 94, 181)",
+        "token": "#315eb5",
+        "aplicaToken": true,
+        "contraste": 4.546390660256828,
+        "stroke": "rgb(49, 94, 181)"
+      },
+      {
+        "hover": false,
+        "clase": "avisos__aviso avisos__aviso--evento-nuevo",
+        "color": "rgb(49, 94, 181)",
+        "token": "#315eb5",
+        "aplicaToken": true,
+        "contraste": 5.3459726739893645,
+        "stroke": "rgb(49, 94, 181)"
+      },
+      {
+        "hover": false,
+        "clase": "avisos__aviso avisos__aviso--sena is-nuevo",
+        "color": "rgb(59, 125, 63)",
+        "token": "#3b7d3f",
+        "aplicaToken": true,
+        "contraste": 3.7354800684996765,
+        "stroke": "rgb(59, 125, 63)"
+      },
+      {
+        "hover": false,
+        "clase": "avisos__aviso avisos__aviso--sena",
+        "color": "rgb(59, 125, 63)",
+        "token": "#3b7d3f",
+        "aplicaToken": true,
+        "contraste": 4.335410467101243,
+        "stroke": "rgb(59, 125, 63)"
+      },
+      {
+        "hover": false,
+        "clase": "avisos__aviso avisos__aviso--contrato is-nuevo",
+        "color": "rgb(118, 83, 166)",
+        "token": "#7653a6",
+        "aplicaToken": true,
+        "contraste": 4.349092772700035,
+        "stroke": "rgb(118, 83, 166)"
+      },
+      {
+        "hover": false,
+        "clase": "avisos__aviso avisos__aviso--contrato",
+        "color": "rgb(118, 83, 166)",
+        "token": "#7653a6",
+        "aplicaToken": true,
+        "contraste": 5.106587222673764,
+        "stroke": "rgb(118, 83, 166)"
+      },
+      {
+        "hover": false,
+        "clase": "avisos__aviso avisos__aviso--confirmacion is-nuevo",
+        "color": "rgb(143, 110, 14)",
+        "token": "#8f6e0e",
+        "aplicaToken": true,
+        "contraste": 3.589603441579615,
+        "stroke": "rgb(143, 110, 14)"
+      },
+      {
+        "hover": false,
+        "clase": "avisos__aviso avisos__aviso--confirmacion",
+        "color": "rgb(143, 110, 14)",
+        "token": "#8f6e0e",
+        "aplicaToken": true,
+        "contraste": 4.12530808863343,
+        "stroke": "rgb(143, 110, 14)"
+      },
+      {
+        "hover": false,
+        "clase": "avisos__aviso avisos__aviso--modificacion is-nuevo",
+        "color": "rgb(13, 113, 136)",
+        "token": "#0d7188",
+        "aplicaToken": true,
+        "contraste": 4.144385001231623,
+        "stroke": "rgb(13, 113, 136)"
+      },
+      {
+        "hover": false,
+        "clase": "avisos__aviso avisos__aviso--modificacion",
+        "color": "rgb(13, 113, 136)",
+        "token": "#0d7188",
+        "aplicaToken": true,
+        "contraste": 4.86534552853731,
+        "stroke": "rgb(13, 113, 136)"
+      },
+      {
+        "hover": false,
+        "clase": "avisos__aviso avisos__aviso--reprogramacion is-nuevo",
+        "color": "rgb(170, 98, 29)",
+        "token": "#aa621d",
+        "aplicaToken": true,
+        "contraste": 3.5131954515205166,
+        "stroke": "rgb(170, 98, 29)"
+      },
+      {
+        "hover": false,
+        "clase": "avisos__aviso avisos__aviso--reprogramacion",
+        "color": "rgb(170, 98, 29)",
+        "token": "#aa621d",
+        "aplicaToken": true,
+        "contraste": 4.061333060170623,
+        "stroke": "rgb(170, 98, 29)"
+      },
+      {
+        "hover": false,
+        "clase": "avisos__aviso avisos__aviso--cancelacion is-nuevo",
+        "color": "rgb(198, 40, 40)",
+        "token": "#c62828",
+        "aplicaToken": true,
+        "contraste": 4.053270164205671,
+        "stroke": "rgb(198, 40, 40)"
+      },
+      {
+        "hover": false,
+        "clase": "avisos__aviso avisos__aviso--cancelacion",
+        "color": "rgb(198, 40, 40)",
+        "token": "#c62828",
+        "aplicaToken": true,
+        "contraste": 4.864522884566524,
+        "stroke": "rgb(198, 40, 40)"
+      },
+      {
+        "hover": false,
+        "clase": "avisos__aviso avisos__aviso--planner-asignada is-nuevo",
+        "color": "rgb(163, 61, 116)",
+        "token": "#a33d74",
+        "aplicaToken": true,
+        "contraste": 4.429762944626904,
+        "stroke": "rgb(163, 61, 116)"
+      },
+      {
+        "hover": false,
+        "clase": "avisos__aviso avisos__aviso--planner-asignada",
+        "color": "rgb(163, 61, 116)",
+        "token": "#a33d74",
+        "aplicaToken": true,
+        "contraste": 5.225922434290968,
+        "stroke": "rgb(163, 61, 116)"
+      },
+      {
+        "hover": false,
+        "clase": "avisos__aviso avisos__aviso--alerta-stock is-nuevo",
+        "color": "rgb(161, 103, 0)",
+        "token": "#a16700",
+        "aplicaToken": true,
+        "contraste": 3.535305509748257,
+        "stroke": "rgb(161, 103, 0)"
+      },
+      {
+        "hover": false,
+        "clase": "avisos__aviso avisos__aviso--alerta-stock",
+        "color": "rgb(161, 103, 0)",
+        "token": "#a16700",
+        "aplicaToken": true,
+        "contraste": 4.078206980233023,
+        "stroke": "rgb(161, 103, 0)"
+      },
+      {
+        "hover": false,
+        "clase": "avisos__aviso avisos__aviso--calendar-pendiente",
+        "color": "rgb(133, 88, 27)",
+        "token": "#85581b",
+        "aplicaToken": true,
+        "contraste": 5.330117304964304,
+        "stroke": "rgb(133, 88, 27)"
+      },
+      {
+        "hover": false,
+        "clase": "avisos__aviso avisos__aviso--calendar-pendiente is-nuevo",
+        "color": "rgb(133, 88, 27)",
+        "token": "#85581b",
+        "aplicaToken": true,
+        "contraste": 4.53791976907666,
+        "stroke": "rgb(133, 88, 27)"
+      },
+      {
+        "hover": true,
+        "clase": "avisos__aviso avisos__aviso--evento-nuevo is-nuevo",
+        "color": "rgb(49, 94, 181)",
+        "token": "#315eb5",
+        "aplicaToken": true,
+        "contraste": 4.546390660256828,
+        "stroke": "rgb(49, 94, 181)"
+      },
+      {
+        "hover": true,
+        "clase": "avisos__aviso avisos__aviso--evento-nuevo",
+        "color": "rgb(49, 94, 181)",
+        "token": "#315eb5",
+        "aplicaToken": true,
+        "contraste": 5.0163218746436575,
+        "stroke": "rgb(49, 94, 181)"
+      },
+      {
+        "hover": true,
+        "clase": "avisos__aviso avisos__aviso--sena is-nuevo",
+        "color": "rgb(59, 125, 63)",
+        "token": "#3b7d3f",
+        "aplicaToken": true,
+        "contraste": 3.7354800684996765,
+        "stroke": "rgb(59, 125, 63)"
+      },
+      {
+        "hover": true,
+        "clase": "avisos__aviso avisos__aviso--sena",
+        "color": "rgb(59, 125, 63)",
+        "token": "#3b7d3f",
+        "aplicaToken": true,
+        "contraste": 4.0680743595065945,
+        "stroke": "rgb(59, 125, 63)"
+      },
+      {
+        "hover": true,
+        "clase": "avisos__aviso avisos__aviso--contrato is-nuevo",
+        "color": "rgb(118, 83, 166)",
+        "token": "#7653a6",
+        "aplicaToken": true,
+        "contraste": 4.349092772700035,
+        "stroke": "rgb(118, 83, 166)"
+      },
+      {
+        "hover": true,
+        "clase": "avisos__aviso avisos__aviso--contrato",
+        "color": "rgb(118, 83, 166)",
+        "token": "#7653a6",
+        "aplicaToken": true,
+        "contraste": 4.791697741836451,
+        "stroke": "rgb(118, 83, 166)"
+      },
+      {
+        "hover": true,
+        "clase": "avisos__aviso avisos__aviso--confirmacion is-nuevo",
+        "color": "rgb(143, 110, 14)",
+        "token": "#8f6e0e",
+        "aplicaToken": true,
+        "contraste": 3.589603441579615,
+        "stroke": "rgb(143, 110, 14)"
+      },
+      {
+        "hover": true,
+        "clase": "avisos__aviso avisos__aviso--confirmacion",
+        "color": "rgb(143, 110, 14)",
+        "token": "#8f6e0e",
+        "aplicaToken": true,
+        "contraste": 3.8709276059979842,
+        "stroke": "rgb(143, 110, 14)"
+      },
+      {
+        "hover": true,
+        "clase": "avisos__aviso avisos__aviso--modificacion is-nuevo",
+        "color": "rgb(13, 113, 136)",
+        "token": "#0d7188",
+        "aplicaToken": true,
+        "contraste": 4.144385001231623,
+        "stroke": "rgb(13, 113, 136)"
+      },
+      {
+        "hover": true,
+        "clase": "avisos__aviso avisos__aviso--modificacion",
+        "color": "rgb(13, 113, 136)",
+        "token": "#0d7188",
+        "aplicaToken": true,
+        "contraste": 4.565331828433879,
+        "stroke": "rgb(13, 113, 136)"
+      },
+      {
+        "hover": true,
+        "clase": "avisos__aviso avisos__aviso--reprogramacion is-nuevo",
+        "color": "rgb(170, 98, 29)",
+        "token": "#aa621d",
+        "aplicaToken": true,
+        "contraste": 3.5131954515205166,
+        "stroke": "rgb(170, 98, 29)"
+      },
+      {
+        "hover": true,
+        "clase": "avisos__aviso avisos__aviso--reprogramacion",
+        "color": "rgb(170, 98, 29)",
+        "token": "#aa621d",
+        "aplicaToken": true,
+        "contraste": 3.8108974946825347,
+        "stroke": "rgb(170, 98, 29)"
+      },
+      {
+        "hover": true,
+        "clase": "avisos__aviso avisos__aviso--cancelacion is-nuevo",
+        "color": "rgb(198, 40, 40)",
+        "token": "#c62828",
+        "aplicaToken": true,
+        "contraste": 4.053270164205671,
+        "stroke": "rgb(198, 40, 40)"
+      },
+      {
+        "hover": true,
+        "clase": "avisos__aviso avisos__aviso--cancelacion",
+        "color": "rgb(198, 40, 40)",
+        "token": "#c62828",
+        "aplicaToken": true,
+        "contraste": 4.564559911479313,
+        "stroke": "rgb(198, 40, 40)"
+      },
+      {
+        "hover": true,
+        "clase": "avisos__aviso avisos__aviso--planner-asignada is-nuevo",
+        "color": "rgb(163, 61, 116)",
+        "token": "#a33d74",
+        "aplicaToken": true,
+        "contraste": 4.429762944626904,
+        "stroke": "rgb(163, 61, 116)"
+      },
+      {
+        "hover": true,
+        "clase": "avisos__aviso avisos__aviso--planner-asignada",
+        "color": "rgb(163, 61, 116)",
+        "token": "#a33d74",
+        "aplicaToken": true,
+        "contraste": 4.903674339727269,
+        "stroke": "rgb(163, 61, 116)"
+      },
+      {
+        "hover": true,
+        "clase": "avisos__aviso avisos__aviso--alerta-stock is-nuevo",
+        "color": "rgb(161, 103, 0)",
+        "token": "#a16700",
+        "aplicaToken": true,
+        "contraste": 3.535305509748257,
+        "stroke": "rgb(161, 103, 0)"
+      },
+      {
+        "hover": true,
+        "clase": "avisos__aviso avisos__aviso--alerta-stock",
+        "color": "rgb(161, 103, 0)",
+        "token": "#a16700",
+        "aplicaToken": true,
+        "contraste": 3.8267309116268167,
+        "stroke": "rgb(161, 103, 0)"
+      },
+      {
+        "hover": true,
+        "clase": "avisos__aviso avisos__aviso--calendar-pendiente",
+        "color": "rgb(133, 88, 27)",
+        "token": "#85581b",
+        "aplicaToken": true,
+        "contraste": 5.001444201426596,
+        "stroke": "rgb(133, 88, 27)"
+      },
+      {
+        "hover": true,
+        "clase": "avisos__aviso avisos__aviso--calendar-pendiente is-nuevo",
+        "color": "rgb(133, 88, 27)",
+        "token": "#85581b",
+        "aplicaToken": true,
+        "contraste": 4.53791976907666,
+        "stroke": "rgb(133, 88, 27)"
+      }
+    ]
+  },
+  {
+    "title": "colores: oscuro, contraste y estados con API simulada",
+    "project": "escritorio",
+    "data": [
+      {
+        "hover": false,
+        "clase": "avisos__aviso avisos__aviso--evento-nuevo is-nuevo",
+        "color": "rgb(120, 149, 202)",
+        "token": "#7895ca",
+        "aplicaToken": true,
+        "contraste": 3.548626679854621,
+        "stroke": "rgb(120, 149, 202)"
+      },
+      {
+        "hover": false,
+        "clase": "avisos__aviso avisos__aviso--evento-nuevo",
+        "color": "rgb(120, 149, 202)",
+        "token": "#7895ca",
+        "aplicaToken": true,
+        "contraste": 5.189651332788835,
+        "stroke": "rgb(120, 149, 202)"
+      },
+      {
+        "hover": false,
+        "clase": "avisos__aviso avisos__aviso--sena is-nuevo",
+        "color": "rgb(113, 159, 116)",
+        "token": "#719f74",
+        "aplicaToken": true,
+        "contraste": 3.5361605509062777,
+        "stroke": "rgb(113, 159, 116)"
+      },
+      {
+        "hover": false,
+        "clase": "avisos__aviso avisos__aviso--sena",
+        "color": "rgb(113, 159, 116)",
+        "token": "#719f74",
+        "aplicaToken": true,
+        "contraste": 5.162130621868588,
+        "stroke": "rgb(113, 159, 116)"
+      },
+      {
+        "hover": false,
+        "clase": "avisos__aviso avisos__aviso--contrato is-nuevo",
+        "color": "rgb(161, 137, 193)",
+        "token": "#a189c1",
+        "aplicaToken": true,
+        "contraste": 3.5604747618621304,
+        "stroke": "rgb(161, 137, 193)"
+      },
+      {
+        "hover": false,
+        "clase": "avisos__aviso avisos__aviso--contrato",
+        "color": "rgb(161, 137, 193)",
+        "token": "#a189c1",
+        "aplicaToken": true,
+        "contraste": 5.124902587254939,
+        "stroke": "rgb(161, 137, 193)"
+      },
+      {
+        "hover": false,
+        "clase": "avisos__aviso avisos__aviso--confirmacion is-nuevo",
+        "color": "rgb(168, 141, 62)",
+        "token": "#a88d3e",
+        "aplicaToken": true,
+        "contraste": 3.5049567775715866,
+        "stroke": "rgb(168, 141, 62)"
+      },
+      {
+        "hover": false,
+        "clase": "avisos__aviso avisos__aviso--confirmacion",
+        "color": "rgb(168, 141, 62)",
+        "token": "#a88d3e",
+        "aplicaToken": true,
+        "contraste": 4.886528610008927,
+        "stroke": "rgb(168, 141, 62)"
+      },
+      {
+        "hover": false,
+        "clase": "avisos__aviso avisos__aviso--modificacion is-nuevo",
+        "color": "rgb(90, 157, 174)",
+        "token": "#5a9dae",
+        "aplicaToken": true,
+        "contraste": 3.5116186437662553,
+        "stroke": "rgb(90, 157, 174)"
+      },
+      {
+        "hover": false,
+        "clase": "avisos__aviso avisos__aviso--modificacion",
+        "color": "rgb(90, 157, 174)",
+        "token": "#5a9dae",
+        "aplicaToken": true,
+        "contraste": 5.128628494774142,
+        "stroke": "rgb(90, 157, 174)"
+      },
+      {
+        "hover": false,
+        "clase": "avisos__aviso avisos__aviso--reprogramacion is-nuevo",
+        "color": "rgb(188, 133, 75)",
+        "token": "#bc854b",
+        "aplicaToken": true,
+        "contraste": 3.54943028044415,
+        "stroke": "rgb(188, 133, 75)"
+      },
+      {
+        "hover": false,
+        "clase": "avisos__aviso avisos__aviso--reprogramacion",
+        "color": "rgb(188, 133, 75)",
+        "token": "#bc854b",
+        "aplicaToken": true,
+        "contraste": 4.924166373316014,
+        "stroke": "rgb(188, 133, 75)"
+      },
+      {
+        "hover": false,
+        "clase": "avisos__aviso avisos__aviso--cancelacion is-nuevo",
+        "color": "rgb(217, 108, 108)",
+        "token": "#d96c6c",
+        "aplicaToken": true,
+        "contraste": 3.500834318534165,
+        "stroke": "rgb(217, 108, 108)"
+      },
+      {
+        "hover": false,
+        "clase": "avisos__aviso avisos__aviso--cancelacion",
+        "color": "rgb(217, 108, 108)",
+        "token": "#d96c6c",
+        "aplicaToken": true,
+        "contraste": 4.71287881476705,
+        "stroke": "rgb(217, 108, 108)"
+      },
+      {
+        "hover": false,
+        "clase": "avisos__aviso avisos__aviso--planner-asignada is-nuevo",
+        "color": "rgb(192, 126, 161)",
+        "token": "#c07ea1",
+        "aplicaToken": true,
+        "contraste": 3.5480738528193263,
+        "stroke": "rgb(192, 126, 161)"
+      },
+      {
+        "hover": false,
+        "clase": "avisos__aviso avisos__aviso--planner-asignada",
+        "color": "rgb(192, 126, 161)",
+        "token": "#c07ea1",
+        "aplicaToken": true,
+        "contraste": 5.032725709670772,
+        "stroke": "rgb(192, 126, 161)"
+      },
+      {
+        "hover": false,
+        "clase": "avisos__aviso avisos__aviso--alerta-stock is-nuevo",
+        "color": "rgb(209, 132, 0)",
+        "token": "#d18400",
+        "aplicaToken": true,
+        "contraste": 3.79035575171339,
+        "stroke": "rgb(209, 132, 0)"
+      },
+      {
+        "hover": false,
+        "clase": "avisos__aviso avisos__aviso--alerta-stock",
+        "color": "rgb(209, 132, 0)",
+        "token": "#d18400",
+        "aplicaToken": true,
+        "contraste": 5.235288659990074,
+        "stroke": "rgb(209, 132, 0)"
+      },
+      {
+        "hover": false,
+        "clase": "avisos__aviso avisos__aviso--calendar-pendiente",
+        "color": "rgb(254, 192, 118)",
+        "token": "#fec076",
+        "aplicaToken": true,
+        "contraste": 9.718303058854222,
+        "stroke": "rgb(254, 192, 118)"
+      },
+      {
+        "hover": false,
+        "clase": "avisos__aviso avisos__aviso--calendar-pendiente is-nuevo",
+        "color": "rgb(254, 192, 118)",
+        "token": "#fec076",
+        "aplicaToken": true,
+        "contraste": 5.626616476896493,
+        "stroke": "rgb(254, 192, 118)"
+      },
+      {
+        "hover": true,
+        "clase": "avisos__aviso avisos__aviso--evento-nuevo is-nuevo",
+        "color": "rgb(120, 149, 202)",
+        "token": "#7895ca",
+        "aplicaToken": true,
+        "contraste": 3.548626679854621,
+        "stroke": "rgb(120, 149, 202)"
+      },
+      {
+        "hover": true,
+        "clase": "avisos__aviso avisos__aviso--evento-nuevo",
+        "color": "rgb(120, 149, 202)",
+        "token": "#7895ca",
+        "aplicaToken": true,
+        "contraste": 5.8513166575475575,
+        "stroke": "rgb(120, 149, 202)"
+      },
+      {
+        "hover": true,
+        "clase": "avisos__aviso avisos__aviso--sena is-nuevo",
+        "color": "rgb(113, 159, 116)",
+        "token": "#719f74",
+        "aplicaToken": true,
+        "contraste": 3.5361605509062777,
+        "stroke": "rgb(113, 159, 116)"
+      },
+      {
+        "hover": true,
+        "clase": "avisos__aviso avisos__aviso--sena",
+        "color": "rgb(113, 159, 116)",
+        "token": "#719f74",
+        "aplicaToken": true,
+        "contraste": 5.82028713669752,
+        "stroke": "rgb(113, 159, 116)"
+      },
+      {
+        "hover": true,
+        "clase": "avisos__aviso avisos__aviso--contrato is-nuevo",
+        "color": "rgb(161, 137, 193)",
+        "token": "#a189c1",
+        "aplicaToken": true,
+        "contraste": 3.5604747618621304,
+        "stroke": "rgb(161, 137, 193)"
+      },
+      {
+        "hover": true,
+        "clase": "avisos__aviso avisos__aviso--contrato",
+        "color": "rgb(161, 137, 193)",
+        "token": "#a189c1",
+        "aplicaToken": true,
+        "contraste": 5.778312636852743,
+        "stroke": "rgb(161, 137, 193)"
+      },
+      {
+        "hover": true,
+        "clase": "avisos__aviso avisos__aviso--confirmacion is-nuevo",
+        "color": "rgb(168, 141, 62)",
+        "token": "#a88d3e",
+        "aplicaToken": true,
+        "contraste": 3.5049567775715866,
+        "stroke": "rgb(168, 141, 62)"
+      },
+      {
+        "hover": true,
+        "clase": "avisos__aviso avisos__aviso--confirmacion",
+        "color": "rgb(168, 141, 62)",
+        "token": "#a88d3e",
+        "aplicaToken": true,
+        "contraste": 5.509546676609339,
+        "stroke": "rgb(168, 141, 62)"
+      },
+      {
+        "hover": true,
+        "clase": "avisos__aviso avisos__aviso--modificacion is-nuevo",
+        "color": "rgb(90, 157, 174)",
+        "token": "#5a9dae",
+        "aplicaToken": true,
+        "contraste": 3.5116186437662553,
+        "stroke": "rgb(90, 157, 174)"
+      },
+      {
+        "hover": true,
+        "clase": "avisos__aviso avisos__aviso--modificacion",
+        "color": "rgb(90, 157, 174)",
+        "token": "#5a9dae",
+        "aplicaToken": true,
+        "contraste": 5.782513586653328,
+        "stroke": "rgb(90, 157, 174)"
+      },
+      {
+        "hover": true,
+        "clase": "avisos__aviso avisos__aviso--reprogramacion is-nuevo",
+        "color": "rgb(188, 133, 75)",
+        "token": "#bc854b",
+        "aplicaToken": true,
+        "contraste": 3.54943028044415,
+        "stroke": "rgb(188, 133, 75)"
+      },
+      {
+        "hover": true,
+        "clase": "avisos__aviso avisos__aviso--reprogramacion",
+        "color": "rgb(188, 133, 75)",
+        "token": "#bc854b",
+        "aplicaToken": true,
+        "contraste": 5.5519831443543195,
+        "stroke": "rgb(188, 133, 75)"
+      },
+      {
+        "hover": true,
+        "clase": "avisos__aviso avisos__aviso--cancelacion is-nuevo",
+        "color": "rgb(217, 108, 108)",
+        "token": "#d96c6c",
+        "aplicaToken": true,
+        "contraste": 3.500834318534165,
+        "stroke": "rgb(217, 108, 108)"
+      },
+      {
+        "hover": true,
+        "clase": "avisos__aviso avisos__aviso--cancelacion",
+        "color": "rgb(217, 108, 108)",
+        "token": "#d96c6c",
+        "aplicaToken": true,
+        "contraste": 5.313757041752985,
+        "stroke": "rgb(217, 108, 108)"
+      },
+      {
+        "hover": true,
+        "clase": "avisos__aviso avisos__aviso--planner-asignada is-nuevo",
+        "color": "rgb(192, 126, 161)",
+        "token": "#c07ea1",
+        "aplicaToken": true,
+        "contraste": 3.5480738528193263,
+        "stroke": "rgb(192, 126, 161)"
+      },
+      {
+        "hover": true,
+        "clase": "avisos__aviso avisos__aviso--planner-asignada",
+        "color": "rgb(192, 126, 161)",
+        "token": "#c07ea1",
+        "aplicaToken": true,
+        "contraste": 5.674383477712273,
+        "stroke": "rgb(192, 126, 161)"
+      },
+      {
+        "hover": true,
+        "clase": "avisos__aviso avisos__aviso--alerta-stock is-nuevo",
+        "color": "rgb(209, 132, 0)",
+        "token": "#d18400",
+        "aplicaToken": true,
+        "contraste": 3.79035575171339,
+        "stroke": "rgb(209, 132, 0)"
+      },
+      {
+        "hover": true,
+        "clase": "avisos__aviso avisos__aviso--alerta-stock",
+        "color": "rgb(209, 132, 0)",
+        "token": "#d18400",
+        "aplicaToken": true,
+        "contraste": 5.902772610122132,
+        "stroke": "rgb(209, 132, 0)"
+      },
+      {
+        "hover": true,
+        "clase": "avisos__aviso avisos__aviso--calendar-pendiente",
+        "color": "rgb(254, 192, 118)",
+        "token": "#fec076",
+        "aplicaToken": true,
+        "contraste": 10.957358197089288,
+        "stroke": "rgb(254, 192, 118)"
+      },
+      {
+        "hover": true,
+        "clase": "avisos__aviso avisos__aviso--calendar-pendiente is-nuevo",
+        "color": "rgb(254, 192, 118)",
+        "token": "#fec076",
+        "aplicaToken": true,
+        "contraste": 5.626616476896493,
+        "stroke": "rgb(254, 192, 118)"
+      }
+    ]
+  },
+  {
+    "title": "colores: sistema, contraste y estados con API simulada",
+    "project": "escritorio",
+    "data": [
+      {
+        "hover": false,
+        "clase": "avisos__aviso avisos__aviso--evento-nuevo is-nuevo",
+        "color": "rgb(120, 149, 202)",
+        "token": "#7895ca",
+        "aplicaToken": true,
+        "contraste": 3.548626679854621,
+        "stroke": "rgb(120, 149, 202)"
+      },
+      {
+        "hover": false,
+        "clase": "avisos__aviso avisos__aviso--evento-nuevo",
+        "color": "rgb(120, 149, 202)",
+        "token": "#7895ca",
+        "aplicaToken": true,
+        "contraste": 5.189651332788835,
+        "stroke": "rgb(120, 149, 202)"
+      },
+      {
+        "hover": false,
+        "clase": "avisos__aviso avisos__aviso--sena is-nuevo",
+        "color": "rgb(113, 159, 116)",
+        "token": "#719f74",
+        "aplicaToken": true,
+        "contraste": 3.5361605509062777,
+        "stroke": "rgb(113, 159, 116)"
+      },
+      {
+        "hover": false,
+        "clase": "avisos__aviso avisos__aviso--sena",
+        "color": "rgb(113, 159, 116)",
+        "token": "#719f74",
+        "aplicaToken": true,
+        "contraste": 5.162130621868588,
+        "stroke": "rgb(113, 159, 116)"
+      },
+      {
+        "hover": false,
+        "clase": "avisos__aviso avisos__aviso--contrato is-nuevo",
+        "color": "rgb(161, 137, 193)",
+        "token": "#a189c1",
+        "aplicaToken": true,
+        "contraste": 3.5604747618621304,
+        "stroke": "rgb(161, 137, 193)"
+      },
+      {
+        "hover": false,
+        "clase": "avisos__aviso avisos__aviso--contrato",
+        "color": "rgb(161, 137, 193)",
+        "token": "#a189c1",
+        "aplicaToken": true,
+        "contraste": 5.124902587254939,
+        "stroke": "rgb(161, 137, 193)"
+      },
+      {
+        "hover": false,
+        "clase": "avisos__aviso avisos__aviso--confirmacion is-nuevo",
+        "color": "rgb(168, 141, 62)",
+        "token": "#a88d3e",
+        "aplicaToken": true,
+        "contraste": 3.5049567775715866,
+        "stroke": "rgb(168, 141, 62)"
+      },
+      {
+        "hover": false,
+        "clase": "avisos__aviso avisos__aviso--confirmacion",
+        "color": "rgb(168, 141, 62)",
+        "token": "#a88d3e",
+        "aplicaToken": true,
+        "contraste": 4.886528610008927,
+        "stroke": "rgb(168, 141, 62)"
+      },
+      {
+        "hover": false,
+        "clase": "avisos__aviso avisos__aviso--modificacion is-nuevo",
+        "color": "rgb(90, 157, 174)",
+        "token": "#5a9dae",
+        "aplicaToken": true,
+        "contraste": 3.5116186437662553,
+        "stroke": "rgb(90, 157, 174)"
+      },
+      {
+        "hover": false,
+        "clase": "avisos__aviso avisos__aviso--modificacion",
+        "color": "rgb(90, 157, 174)",
+        "token": "#5a9dae",
+        "aplicaToken": true,
+        "contraste": 5.128628494774142,
+        "stroke": "rgb(90, 157, 174)"
+      },
+      {
+        "hover": false,
+        "clase": "avisos__aviso avisos__aviso--reprogramacion is-nuevo",
+        "color": "rgb(188, 133, 75)",
+        "token": "#bc854b",
+        "aplicaToken": true,
+        "contraste": 3.54943028044415,
+        "stroke": "rgb(188, 133, 75)"
+      },
+      {
+        "hover": false,
+        "clase": "avisos__aviso avisos__aviso--reprogramacion",
+        "color": "rgb(188, 133, 75)",
+        "token": "#bc854b",
+        "aplicaToken": true,
+        "contraste": 4.924166373316014,
+        "stroke": "rgb(188, 133, 75)"
+      },
+      {
+        "hover": false,
+        "clase": "avisos__aviso avisos__aviso--cancelacion is-nuevo",
+        "color": "rgb(217, 108, 108)",
+        "token": "#d96c6c",
+        "aplicaToken": true,
+        "contraste": 3.500834318534165,
+        "stroke": "rgb(217, 108, 108)"
+      },
+      {
+        "hover": false,
+        "clase": "avisos__aviso avisos__aviso--cancelacion",
+        "color": "rgb(217, 108, 108)",
+        "token": "#d96c6c",
+        "aplicaToken": true,
+        "contraste": 4.71287881476705,
+        "stroke": "rgb(217, 108, 108)"
+      },
+      {
+        "hover": false,
+        "clase": "avisos__aviso avisos__aviso--planner-asignada is-nuevo",
+        "color": "rgb(192, 126, 161)",
+        "token": "#c07ea1",
+        "aplicaToken": true,
+        "contraste": 3.5480738528193263,
+        "stroke": "rgb(192, 126, 161)"
+      },
+      {
+        "hover": false,
+        "clase": "avisos__aviso avisos__aviso--planner-asignada",
+        "color": "rgb(192, 126, 161)",
+        "token": "#c07ea1",
+        "aplicaToken": true,
+        "contraste": 5.032725709670772,
+        "stroke": "rgb(192, 126, 161)"
+      },
+      {
+        "hover": false,
+        "clase": "avisos__aviso avisos__aviso--alerta-stock is-nuevo",
+        "color": "rgb(209, 132, 0)",
+        "token": "#d18400",
+        "aplicaToken": true,
+        "contraste": 3.79035575171339,
+        "stroke": "rgb(209, 132, 0)"
+      },
+      {
+        "hover": false,
+        "clase": "avisos__aviso avisos__aviso--alerta-stock",
+        "color": "rgb(209, 132, 0)",
+        "token": "#d18400",
+        "aplicaToken": true,
+        "contraste": 5.235288659990074,
+        "stroke": "rgb(209, 132, 0)"
+      },
+      {
+        "hover": false,
+        "clase": "avisos__aviso avisos__aviso--calendar-pendiente",
+        "color": "rgb(254, 192, 118)",
+        "token": "#fec076",
+        "aplicaToken": true,
+        "contraste": 9.718303058854222,
+        "stroke": "rgb(254, 192, 118)"
+      },
+      {
+        "hover": false,
+        "clase": "avisos__aviso avisos__aviso--calendar-pendiente is-nuevo",
+        "color": "rgb(254, 192, 118)",
+        "token": "#fec076",
+        "aplicaToken": true,
+        "contraste": 5.626616476896493,
+        "stroke": "rgb(254, 192, 118)"
+      },
+      {
+        "hover": true,
+        "clase": "avisos__aviso avisos__aviso--evento-nuevo is-nuevo",
+        "color": "rgb(120, 149, 202)",
+        "token": "#7895ca",
+        "aplicaToken": true,
+        "contraste": 3.548626679854621,
+        "stroke": "rgb(120, 149, 202)"
+      },
+      {
+        "hover": true,
+        "clase": "avisos__aviso avisos__aviso--evento-nuevo",
+        "color": "rgb(120, 149, 202)",
+        "token": "#7895ca",
+        "aplicaToken": true,
+        "contraste": 5.8513166575475575,
+        "stroke": "rgb(120, 149, 202)"
+      },
+      {
+        "hover": true,
+        "clase": "avisos__aviso avisos__aviso--sena is-nuevo",
+        "color": "rgb(113, 159, 116)",
+        "token": "#719f74",
+        "aplicaToken": true,
+        "contraste": 3.5361605509062777,
+        "stroke": "rgb(113, 159, 116)"
+      },
+      {
+        "hover": true,
+        "clase": "avisos__aviso avisos__aviso--sena",
+        "color": "rgb(113, 159, 116)",
+        "token": "#719f74",
+        "aplicaToken": true,
+        "contraste": 5.82028713669752,
+        "stroke": "rgb(113, 159, 116)"
+      },
+      {
+        "hover": true,
+        "clase": "avisos__aviso avisos__aviso--contrato is-nuevo",
+        "color": "rgb(161, 137, 193)",
+        "token": "#a189c1",
+        "aplicaToken": true,
+        "contraste": 3.5604747618621304,
+        "stroke": "rgb(161, 137, 193)"
+      },
+      {
+        "hover": true,
+        "clase": "avisos__aviso avisos__aviso--contrato",
+        "color": "rgb(161, 137, 193)",
+        "token": "#a189c1",
+        "aplicaToken": true,
+        "contraste": 5.778312636852743,
+        "stroke": "rgb(161, 137, 193)"
+      },
+      {
+        "hover": true,
+        "clase": "avisos__aviso avisos__aviso--confirmacion is-nuevo",
+        "color": "rgb(168, 141, 62)",
+        "token": "#a88d3e",
+        "aplicaToken": true,
+        "contraste": 3.5049567775715866,
+        "stroke": "rgb(168, 141, 62)"
+      },
+      {
+        "hover": true,
+        "clase": "avisos__aviso avisos__aviso--confirmacion",
+        "color": "rgb(168, 141, 62)",
+        "token": "#a88d3e",
+        "aplicaToken": true,
+        "contraste": 5.509546676609339,
+        "stroke": "rgb(168, 141, 62)"
+      },
+      {
+        "hover": true,
+        "clase": "avisos__aviso avisos__aviso--modificacion is-nuevo",
+        "color": "rgb(90, 157, 174)",
+        "token": "#5a9dae",
+        "aplicaToken": true,
+        "contraste": 3.5116186437662553,
+        "stroke": "rgb(90, 157, 174)"
+      },
+      {
+        "hover": true,
+        "clase": "avisos__aviso avisos__aviso--modificacion",
+        "color": "rgb(90, 157, 174)",
+        "token": "#5a9dae",
+        "aplicaToken": true,
+        "contraste": 5.782513586653328,
+        "stroke": "rgb(90, 157, 174)"
+      },
+      {
+        "hover": true,
+        "clase": "avisos__aviso avisos__aviso--reprogramacion is-nuevo",
+        "color": "rgb(188, 133, 75)",
+        "token": "#bc854b",
+        "aplicaToken": true,
+        "contraste": 3.54943028044415,
+        "stroke": "rgb(188, 133, 75)"
+      },
+      {
+        "hover": true,
+        "clase": "avisos__aviso avisos__aviso--reprogramacion",
+        "color": "rgb(188, 133, 75)",
+        "token": "#bc854b",
+        "aplicaToken": true,
+        "contraste": 5.5519831443543195,
+        "stroke": "rgb(188, 133, 75)"
+      },
+      {
+        "hover": true,
+        "clase": "avisos__aviso avisos__aviso--cancelacion is-nuevo",
+        "color": "rgb(217, 108, 108)",
+        "token": "#d96c6c",
+        "aplicaToken": true,
+        "contraste": 3.500834318534165,
+        "stroke": "rgb(217, 108, 108)"
+      },
+      {
+        "hover": true,
+        "clase": "avisos__aviso avisos__aviso--cancelacion",
+        "color": "rgb(217, 108, 108)",
+        "token": "#d96c6c",
+        "aplicaToken": true,
+        "contraste": 5.313757041752985,
+        "stroke": "rgb(217, 108, 108)"
+      },
+      {
+        "hover": true,
+        "clase": "avisos__aviso avisos__aviso--planner-asignada is-nuevo",
+        "color": "rgb(192, 126, 161)",
+        "token": "#c07ea1",
+        "aplicaToken": true,
+        "contraste": 3.5480738528193263,
+        "stroke": "rgb(192, 126, 161)"
+      },
+      {
+        "hover": true,
+        "clase": "avisos__aviso avisos__aviso--planner-asignada",
+        "color": "rgb(192, 126, 161)",
+        "token": "#c07ea1",
+        "aplicaToken": true,
+        "contraste": 5.674383477712273,
+        "stroke": "rgb(192, 126, 161)"
+      },
+      {
+        "hover": true,
+        "clase": "avisos__aviso avisos__aviso--alerta-stock is-nuevo",
+        "color": "rgb(209, 132, 0)",
+        "token": "#d18400",
+        "aplicaToken": true,
+        "contraste": 3.79035575171339,
+        "stroke": "rgb(209, 132, 0)"
+      },
+      {
+        "hover": true,
+        "clase": "avisos__aviso avisos__aviso--alerta-stock",
+        "color": "rgb(209, 132, 0)",
+        "token": "#d18400",
+        "aplicaToken": true,
+        "contraste": 5.902772610122132,
+        "stroke": "rgb(209, 132, 0)"
+      },
+      {
+        "hover": true,
+        "clase": "avisos__aviso avisos__aviso--calendar-pendiente",
+        "color": "rgb(254, 192, 118)",
+        "token": "#fec076",
+        "aplicaToken": true,
+        "contraste": 10.957358197089288,
+        "stroke": "rgb(254, 192, 118)"
+      },
+      {
+        "hover": true,
+        "clase": "avisos__aviso avisos__aviso--calendar-pendiente is-nuevo",
+        "color": "rgb(254, 192, 118)",
+        "token": "#fec076",
+        "aplicaToken": true,
+        "contraste": 5.626616476896493,
+        "stroke": "rgb(254, 192, 118)"
+      }
+    ]
+  },
+  {
+    "title": "colores: claro, contraste y estados con API simulada",
+    "project": "telefono",
+    "data": [
+      {
+        "hover": false,
+        "clase": "avisos__aviso avisos__aviso--evento-nuevo is-nuevo",
+        "color": "rgb(49, 94, 181)",
+        "token": "#315eb5",
+        "aplicaToken": true,
+        "contraste": 4.546390660256828,
+        "stroke": "rgb(49, 94, 181)"
+      },
+      {
+        "hover": false,
+        "clase": "avisos__aviso avisos__aviso--evento-nuevo",
+        "color": "rgb(49, 94, 181)",
+        "token": "#315eb5",
+        "aplicaToken": true,
+        "contraste": 5.3459726739893645,
+        "stroke": "rgb(49, 94, 181)"
+      },
+      {
+        "hover": false,
+        "clase": "avisos__aviso avisos__aviso--sena is-nuevo",
+        "color": "rgb(59, 125, 63)",
+        "token": "#3b7d3f",
+        "aplicaToken": true,
+        "contraste": 3.7354800684996765,
+        "stroke": "rgb(59, 125, 63)"
+      },
+      {
+        "hover": false,
+        "clase": "avisos__aviso avisos__aviso--sena",
+        "color": "rgb(59, 125, 63)",
+        "token": "#3b7d3f",
+        "aplicaToken": true,
+        "contraste": 4.335410467101243,
+        "stroke": "rgb(59, 125, 63)"
+      },
+      {
+        "hover": false,
+        "clase": "avisos__aviso avisos__aviso--contrato is-nuevo",
+        "color": "rgb(118, 83, 166)",
+        "token": "#7653a6",
+        "aplicaToken": true,
+        "contraste": 4.349092772700035,
+        "stroke": "rgb(118, 83, 166)"
+      },
+      {
+        "hover": false,
+        "clase": "avisos__aviso avisos__aviso--contrato",
+        "color": "rgb(118, 83, 166)",
+        "token": "#7653a6",
+        "aplicaToken": true,
+        "contraste": 5.106587222673764,
+        "stroke": "rgb(118, 83, 166)"
+      },
+      {
+        "hover": false,
+        "clase": "avisos__aviso avisos__aviso--confirmacion is-nuevo",
+        "color": "rgb(143, 110, 14)",
+        "token": "#8f6e0e",
+        "aplicaToken": true,
+        "contraste": 3.589603441579615,
+        "stroke": "rgb(143, 110, 14)"
+      },
+      {
+        "hover": false,
+        "clase": "avisos__aviso avisos__aviso--confirmacion",
+        "color": "rgb(143, 110, 14)",
+        "token": "#8f6e0e",
+        "aplicaToken": true,
+        "contraste": 4.12530808863343,
+        "stroke": "rgb(143, 110, 14)"
+      },
+      {
+        "hover": false,
+        "clase": "avisos__aviso avisos__aviso--modificacion is-nuevo",
+        "color": "rgb(13, 113, 136)",
+        "token": "#0d7188",
+        "aplicaToken": true,
+        "contraste": 4.144385001231623,
+        "stroke": "rgb(13, 113, 136)"
+      },
+      {
+        "hover": false,
+        "clase": "avisos__aviso avisos__aviso--modificacion",
+        "color": "rgb(13, 113, 136)",
+        "token": "#0d7188",
+        "aplicaToken": true,
+        "contraste": 4.86534552853731,
+        "stroke": "rgb(13, 113, 136)"
+      },
+      {
+        "hover": false,
+        "clase": "avisos__aviso avisos__aviso--reprogramacion is-nuevo",
+        "color": "rgb(170, 98, 29)",
+        "token": "#aa621d",
+        "aplicaToken": true,
+        "contraste": 3.5131954515205166,
+        "stroke": "rgb(170, 98, 29)"
+      },
+      {
+        "hover": false,
+        "clase": "avisos__aviso avisos__aviso--reprogramacion",
+        "color": "rgb(170, 98, 29)",
+        "token": "#aa621d",
+        "aplicaToken": true,
+        "contraste": 4.061333060170623,
+        "stroke": "rgb(170, 98, 29)"
+      },
+      {
+        "hover": false,
+        "clase": "avisos__aviso avisos__aviso--cancelacion is-nuevo",
+        "color": "rgb(198, 40, 40)",
+        "token": "#c62828",
+        "aplicaToken": true,
+        "contraste": 4.053270164205671,
+        "stroke": "rgb(198, 40, 40)"
+      },
+      {
+        "hover": false,
+        "clase": "avisos__aviso avisos__aviso--cancelacion",
+        "color": "rgb(198, 40, 40)",
+        "token": "#c62828",
+        "aplicaToken": true,
+        "contraste": 4.864522884566524,
+        "stroke": "rgb(198, 40, 40)"
+      },
+      {
+        "hover": false,
+        "clase": "avisos__aviso avisos__aviso--planner-asignada is-nuevo",
+        "color": "rgb(163, 61, 116)",
+        "token": "#a33d74",
+        "aplicaToken": true,
+        "contraste": 4.429762944626904,
+        "stroke": "rgb(163, 61, 116)"
+      },
+      {
+        "hover": false,
+        "clase": "avisos__aviso avisos__aviso--planner-asignada",
+        "color": "rgb(163, 61, 116)",
+        "token": "#a33d74",
+        "aplicaToken": true,
+        "contraste": 5.225922434290968,
+        "stroke": "rgb(163, 61, 116)"
+      },
+      {
+        "hover": false,
+        "clase": "avisos__aviso avisos__aviso--alerta-stock is-nuevo",
+        "color": "rgb(161, 103, 0)",
+        "token": "#a16700",
+        "aplicaToken": true,
+        "contraste": 3.535305509748257,
+        "stroke": "rgb(161, 103, 0)"
+      },
+      {
+        "hover": false,
+        "clase": "avisos__aviso avisos__aviso--alerta-stock",
+        "color": "rgb(161, 103, 0)",
+        "token": "#a16700",
+        "aplicaToken": true,
+        "contraste": 4.078206980233023,
+        "stroke": "rgb(161, 103, 0)"
+      },
+      {
+        "hover": false,
+        "clase": "avisos__aviso avisos__aviso--calendar-pendiente",
+        "color": "rgb(133, 88, 27)",
+        "token": "#85581b",
+        "aplicaToken": true,
+        "contraste": 5.330117304964304,
+        "stroke": "rgb(133, 88, 27)"
+      },
+      {
+        "hover": false,
+        "clase": "avisos__aviso avisos__aviso--calendar-pendiente is-nuevo",
+        "color": "rgb(133, 88, 27)",
+        "token": "#85581b",
+        "aplicaToken": true,
+        "contraste": 4.53791976907666,
+        "stroke": "rgb(133, 88, 27)"
+      },
+      {
+        "hover": true,
+        "clase": "avisos__aviso avisos__aviso--evento-nuevo is-nuevo",
+        "color": "rgb(49, 94, 181)",
+        "token": "#315eb5",
+        "aplicaToken": true,
+        "contraste": 4.546390660256828,
+        "stroke": "rgb(49, 94, 181)"
+      },
+      {
+        "hover": true,
+        "clase": "avisos__aviso avisos__aviso--evento-nuevo",
+        "color": "rgb(49, 94, 181)",
+        "token": "#315eb5",
+        "aplicaToken": true,
+        "contraste": 5.0163218746436575,
+        "stroke": "rgb(49, 94, 181)"
+      },
+      {
+        "hover": true,
+        "clase": "avisos__aviso avisos__aviso--sena is-nuevo",
+        "color": "rgb(59, 125, 63)",
+        "token": "#3b7d3f",
+        "aplicaToken": true,
+        "contraste": 3.7354800684996765,
+        "stroke": "rgb(59, 125, 63)"
+      },
+      {
+        "hover": true,
+        "clase": "avisos__aviso avisos__aviso--sena",
+        "color": "rgb(59, 125, 63)",
+        "token": "#3b7d3f",
+        "aplicaToken": true,
+        "contraste": 4.0680743595065945,
+        "stroke": "rgb(59, 125, 63)"
+      },
+      {
+        "hover": true,
+        "clase": "avisos__aviso avisos__aviso--contrato is-nuevo",
+        "color": "rgb(118, 83, 166)",
+        "token": "#7653a6",
+        "aplicaToken": true,
+        "contraste": 4.349092772700035,
+        "stroke": "rgb(118, 83, 166)"
+      },
+      {
+        "hover": true,
+        "clase": "avisos__aviso avisos__aviso--contrato",
+        "color": "rgb(118, 83, 166)",
+        "token": "#7653a6",
+        "aplicaToken": true,
+        "contraste": 4.791697741836451,
+        "stroke": "rgb(118, 83, 166)"
+      },
+      {
+        "hover": true,
+        "clase": "avisos__aviso avisos__aviso--confirmacion is-nuevo",
+        "color": "rgb(143, 110, 14)",
+        "token": "#8f6e0e",
+        "aplicaToken": true,
+        "contraste": 3.589603441579615,
+        "stroke": "rgb(143, 110, 14)"
+      },
+      {
+        "hover": true,
+        "clase": "avisos__aviso avisos__aviso--confirmacion",
+        "color": "rgb(143, 110, 14)",
+        "token": "#8f6e0e",
+        "aplicaToken": true,
+        "contraste": 3.8709276059979842,
+        "stroke": "rgb(143, 110, 14)"
+      },
+      {
+        "hover": true,
+        "clase": "avisos__aviso avisos__aviso--modificacion is-nuevo",
+        "color": "rgb(13, 113, 136)",
+        "token": "#0d7188",
+        "aplicaToken": true,
+        "contraste": 4.144385001231623,
+        "stroke": "rgb(13, 113, 136)"
+      },
+      {
+        "hover": true,
+        "clase": "avisos__aviso avisos__aviso--modificacion",
+        "color": "rgb(13, 113, 136)",
+        "token": "#0d7188",
+        "aplicaToken": true,
+        "contraste": 4.565331828433879,
+        "stroke": "rgb(13, 113, 136)"
+      },
+      {
+        "hover": true,
+        "clase": "avisos__aviso avisos__aviso--reprogramacion is-nuevo",
+        "color": "rgb(170, 98, 29)",
+        "token": "#aa621d",
+        "aplicaToken": true,
+        "contraste": 3.5131954515205166,
+        "stroke": "rgb(170, 98, 29)"
+      },
+      {
+        "hover": true,
+        "clase": "avisos__aviso avisos__aviso--reprogramacion",
+        "color": "rgb(170, 98, 29)",
+        "token": "#aa621d",
+        "aplicaToken": true,
+        "contraste": 3.8108974946825347,
+        "stroke": "rgb(170, 98, 29)"
+      },
+      {
+        "hover": true,
+        "clase": "avisos__aviso avisos__aviso--cancelacion is-nuevo",
+        "color": "rgb(198, 40, 40)",
+        "token": "#c62828",
+        "aplicaToken": true,
+        "contraste": 4.053270164205671,
+        "stroke": "rgb(198, 40, 40)"
+      },
+      {
+        "hover": true,
+        "clase": "avisos__aviso avisos__aviso--cancelacion",
+        "color": "rgb(198, 40, 40)",
+        "token": "#c62828",
+        "aplicaToken": true,
+        "contraste": 4.564559911479313,
+        "stroke": "rgb(198, 40, 40)"
+      },
+      {
+        "hover": true,
+        "clase": "avisos__aviso avisos__aviso--planner-asignada is-nuevo",
+        "color": "rgb(163, 61, 116)",
+        "token": "#a33d74",
+        "aplicaToken": true,
+        "contraste": 4.429762944626904,
+        "stroke": "rgb(163, 61, 116)"
+      },
+      {
+        "hover": true,
+        "clase": "avisos__aviso avisos__aviso--planner-asignada",
+        "color": "rgb(163, 61, 116)",
+        "token": "#a33d74",
+        "aplicaToken": true,
+        "contraste": 4.903674339727269,
+        "stroke": "rgb(163, 61, 116)"
+      },
+      {
+        "hover": true,
+        "clase": "avisos__aviso avisos__aviso--alerta-stock is-nuevo",
+        "color": "rgb(161, 103, 0)",
+        "token": "#a16700",
+        "aplicaToken": true,
+        "contraste": 3.535305509748257,
+        "stroke": "rgb(161, 103, 0)"
+      },
+      {
+        "hover": true,
+        "clase": "avisos__aviso avisos__aviso--alerta-stock",
+        "color": "rgb(161, 103, 0)",
+        "token": "#a16700",
+        "aplicaToken": true,
+        "contraste": 3.8267309116268167,
+        "stroke": "rgb(161, 103, 0)"
+      },
+      {
+        "hover": true,
+        "clase": "avisos__aviso avisos__aviso--calendar-pendiente",
+        "color": "rgb(133, 88, 27)",
+        "token": "#85581b",
+        "aplicaToken": true,
+        "contraste": 5.001444201426596,
+        "stroke": "rgb(133, 88, 27)"
+      },
+      {
+        "hover": true,
+        "clase": "avisos__aviso avisos__aviso--calendar-pendiente is-nuevo",
+        "color": "rgb(133, 88, 27)",
+        "token": "#85581b",
+        "aplicaToken": true,
+        "contraste": 4.53791976907666,
+        "stroke": "rgb(133, 88, 27)"
+      }
+    ]
+  },
+  {
+    "title": "colores: oscuro, contraste y estados con API simulada",
+    "project": "telefono",
+    "data": [
+      {
+        "hover": false,
+        "clase": "avisos__aviso avisos__aviso--evento-nuevo is-nuevo",
+        "color": "rgb(120, 149, 202)",
+        "token": "#7895ca",
+        "aplicaToken": true,
+        "contraste": 3.548626679854621,
+        "stroke": "rgb(120, 149, 202)"
+      },
+      {
+        "hover": false,
+        "clase": "avisos__aviso avisos__aviso--evento-nuevo",
+        "color": "rgb(120, 149, 202)",
+        "token": "#7895ca",
+        "aplicaToken": true,
+        "contraste": 5.189651332788835,
+        "stroke": "rgb(120, 149, 202)"
+      },
+      {
+        "hover": false,
+        "clase": "avisos__aviso avisos__aviso--sena is-nuevo",
+        "color": "rgb(113, 159, 116)",
+        "token": "#719f74",
+        "aplicaToken": true,
+        "contraste": 3.5361605509062777,
+        "stroke": "rgb(113, 159, 116)"
+      },
+      {
+        "hover": false,
+        "clase": "avisos__aviso avisos__aviso--sena",
+        "color": "rgb(113, 159, 116)",
+        "token": "#719f74",
+        "aplicaToken": true,
+        "contraste": 5.162130621868588,
+        "stroke": "rgb(113, 159, 116)"
+      },
+      {
+        "hover": false,
+        "clase": "avisos__aviso avisos__aviso--contrato is-nuevo",
+        "color": "rgb(161, 137, 193)",
+        "token": "#a189c1",
+        "aplicaToken": true,
+        "contraste": 3.5604747618621304,
+        "stroke": "rgb(161, 137, 193)"
+      },
+      {
+        "hover": false,
+        "clase": "avisos__aviso avisos__aviso--contrato",
+        "color": "rgb(161, 137, 193)",
+        "token": "#a189c1",
+        "aplicaToken": true,
+        "contraste": 5.124902587254939,
+        "stroke": "rgb(161, 137, 193)"
+      },
+      {
+        "hover": false,
+        "clase": "avisos__aviso avisos__aviso--confirmacion is-nuevo",
+        "color": "rgb(168, 141, 62)",
+        "token": "#a88d3e",
+        "aplicaToken": true,
+        "contraste": 3.5049567775715866,
+        "stroke": "rgb(168, 141, 62)"
+      },
+      {
+        "hover": false,
+        "clase": "avisos__aviso avisos__aviso--confirmacion",
+        "color": "rgb(168, 141, 62)",
+        "token": "#a88d3e",
+        "aplicaToken": true,
+        "contraste": 4.886528610008927,
+        "stroke": "rgb(168, 141, 62)"
+      },
+      {
+        "hover": false,
+        "clase": "avisos__aviso avisos__aviso--modificacion is-nuevo",
+        "color": "rgb(90, 157, 174)",
+        "token": "#5a9dae",
+        "aplicaToken": true,
+        "contraste": 3.5116186437662553,
+        "stroke": "rgb(90, 157, 174)"
+      },
+      {
+        "hover": false,
+        "clase": "avisos__aviso avisos__aviso--modificacion",
+        "color": "rgb(90, 157, 174)",
+        "token": "#5a9dae",
+        "aplicaToken": true,
+        "contraste": 5.128628494774142,
+        "stroke": "rgb(90, 157, 174)"
+      },
+      {
+        "hover": false,
+        "clase": "avisos__aviso avisos__aviso--reprogramacion is-nuevo",
+        "color": "rgb(188, 133, 75)",
+        "token": "#bc854b",
+        "aplicaToken": true,
+        "contraste": 3.54943028044415,
+        "stroke": "rgb(188, 133, 75)"
+      },
+      {
+        "hover": false,
+        "clase": "avisos__aviso avisos__aviso--reprogramacion",
+        "color": "rgb(188, 133, 75)",
+        "token": "#bc854b",
+        "aplicaToken": true,
+        "contraste": 4.924166373316014,
+        "stroke": "rgb(188, 133, 75)"
+      },
+      {
+        "hover": false,
+        "clase": "avisos__aviso avisos__aviso--cancelacion is-nuevo",
+        "color": "rgb(217, 108, 108)",
+        "token": "#d96c6c",
+        "aplicaToken": true,
+        "contraste": 3.500834318534165,
+        "stroke": "rgb(217, 108, 108)"
+      },
+      {
+        "hover": false,
+        "clase": "avisos__aviso avisos__aviso--cancelacion",
+        "color": "rgb(217, 108, 108)",
+        "token": "#d96c6c",
+        "aplicaToken": true,
+        "contraste": 4.71287881476705,
+        "stroke": "rgb(217, 108, 108)"
+      },
+      {
+        "hover": false,
+        "clase": "avisos__aviso avisos__aviso--planner-asignada is-nuevo",
+        "color": "rgb(192, 126, 161)",
+        "token": "#c07ea1",
+        "aplicaToken": true,
+        "contraste": 3.5480738528193263,
+        "stroke": "rgb(192, 126, 161)"
+      },
+      {
+        "hover": false,
+        "clase": "avisos__aviso avisos__aviso--planner-asignada",
+        "color": "rgb(192, 126, 161)",
+        "token": "#c07ea1",
+        "aplicaToken": true,
+        "contraste": 5.032725709670772,
+        "stroke": "rgb(192, 126, 161)"
+      },
+      {
+        "hover": false,
+        "clase": "avisos__aviso avisos__aviso--alerta-stock is-nuevo",
+        "color": "rgb(209, 132, 0)",
+        "token": "#d18400",
+        "aplicaToken": true,
+        "contraste": 3.79035575171339,
+        "stroke": "rgb(209, 132, 0)"
+      },
+      {
+        "hover": false,
+        "clase": "avisos__aviso avisos__aviso--alerta-stock",
+        "color": "rgb(209, 132, 0)",
+        "token": "#d18400",
+        "aplicaToken": true,
+        "contraste": 5.235288659990074,
+        "stroke": "rgb(209, 132, 0)"
+      },
+      {
+        "hover": false,
+        "clase": "avisos__aviso avisos__aviso--calendar-pendiente",
+        "color": "rgb(254, 192, 118)",
+        "token": "#fec076",
+        "aplicaToken": true,
+        "contraste": 9.718303058854222,
+        "stroke": "rgb(254, 192, 118)"
+      },
+      {
+        "hover": false,
+        "clase": "avisos__aviso avisos__aviso--calendar-pendiente is-nuevo",
+        "color": "rgb(254, 192, 118)",
+        "token": "#fec076",
+        "aplicaToken": true,
+        "contraste": 5.626616476896493,
+        "stroke": "rgb(254, 192, 118)"
+      },
+      {
+        "hover": true,
+        "clase": "avisos__aviso avisos__aviso--evento-nuevo is-nuevo",
+        "color": "rgb(120, 149, 202)",
+        "token": "#7895ca",
+        "aplicaToken": true,
+        "contraste": 3.548626679854621,
+        "stroke": "rgb(120, 149, 202)"
+      },
+      {
+        "hover": true,
+        "clase": "avisos__aviso avisos__aviso--evento-nuevo",
+        "color": "rgb(120, 149, 202)",
+        "token": "#7895ca",
+        "aplicaToken": true,
+        "contraste": 5.8513166575475575,
+        "stroke": "rgb(120, 149, 202)"
+      },
+      {
+        "hover": true,
+        "clase": "avisos__aviso avisos__aviso--sena is-nuevo",
+        "color": "rgb(113, 159, 116)",
+        "token": "#719f74",
+        "aplicaToken": true,
+        "contraste": 3.5361605509062777,
+        "stroke": "rgb(113, 159, 116)"
+      },
+      {
+        "hover": true,
+        "clase": "avisos__aviso avisos__aviso--sena",
+        "color": "rgb(113, 159, 116)",
+        "token": "#719f74",
+        "aplicaToken": true,
+        "contraste": 5.82028713669752,
+        "stroke": "rgb(113, 159, 116)"
+      },
+      {
+        "hover": true,
+        "clase": "avisos__aviso avisos__aviso--contrato is-nuevo",
+        "color": "rgb(161, 137, 193)",
+        "token": "#a189c1",
+        "aplicaToken": true,
+        "contraste": 3.5604747618621304,
+        "stroke": "rgb(161, 137, 193)"
+      },
+      {
+        "hover": true,
+        "clase": "avisos__aviso avisos__aviso--contrato",
+        "color": "rgb(161, 137, 193)",
+        "token": "#a189c1",
+        "aplicaToken": true,
+        "contraste": 5.778312636852743,
+        "stroke": "rgb(161, 137, 193)"
+      },
+      {
+        "hover": true,
+        "clase": "avisos__aviso avisos__aviso--confirmacion is-nuevo",
+        "color": "rgb(168, 141, 62)",
+        "token": "#a88d3e",
+        "aplicaToken": true,
+        "contraste": 3.5049567775715866,
+        "stroke": "rgb(168, 141, 62)"
+      },
+      {
+        "hover": true,
+        "clase": "avisos__aviso avisos__aviso--confirmacion",
+        "color": "rgb(168, 141, 62)",
+        "token": "#a88d3e",
+        "aplicaToken": true,
+        "contraste": 5.509546676609339,
+        "stroke": "rgb(168, 141, 62)"
+      },
+      {
+        "hover": true,
+        "clase": "avisos__aviso avisos__aviso--modificacion is-nuevo",
+        "color": "rgb(90, 157, 174)",
+        "token": "#5a9dae",
+        "aplicaToken": true,
+        "contraste": 3.5116186437662553,
+        "stroke": "rgb(90, 157, 174)"
+      },
+      {
+        "hover": true,
+        "clase": "avisos__aviso avisos__aviso--modificacion",
+        "color": "rgb(90, 157, 174)",
+        "token": "#5a9dae",
+        "aplicaToken": true,
+        "contraste": 5.782513586653328,
+        "stroke": "rgb(90, 157, 174)"
+      },
+      {
+        "hover": true,
+        "clase": "avisos__aviso avisos__aviso--reprogramacion is-nuevo",
+        "color": "rgb(188, 133, 75)",
+        "token": "#bc854b",
+        "aplicaToken": true,
+        "contraste": 3.54943028044415,
+        "stroke": "rgb(188, 133, 75)"
+      },
+      {
+        "hover": true,
+        "clase": "avisos__aviso avisos__aviso--reprogramacion",
+        "color": "rgb(188, 133, 75)",
+        "token": "#bc854b",
+        "aplicaToken": true,
+        "contraste": 5.5519831443543195,
+        "stroke": "rgb(188, 133, 75)"
+      },
+      {
+        "hover": true,
+        "clase": "avisos__aviso avisos__aviso--cancelacion is-nuevo",
+        "color": "rgb(217, 108, 108)",
+        "token": "#d96c6c",
+        "aplicaToken": true,
+        "contraste": 3.500834318534165,
+        "stroke": "rgb(217, 108, 108)"
+      },
+      {
+        "hover": true,
+        "clase": "avisos__aviso avisos__aviso--cancelacion",
+        "color": "rgb(217, 108, 108)",
+        "token": "#d96c6c",
+        "aplicaToken": true,
+        "contraste": 5.313757041752985,
+        "stroke": "rgb(217, 108, 108)"
+      },
+      {
+        "hover": true,
+        "clase": "avisos__aviso avisos__aviso--planner-asignada is-nuevo",
+        "color": "rgb(192, 126, 161)",
+        "token": "#c07ea1",
+        "aplicaToken": true,
+        "contraste": 3.5480738528193263,
+        "stroke": "rgb(192, 126, 161)"
+      },
+      {
+        "hover": true,
+        "clase": "avisos__aviso avisos__aviso--planner-asignada",
+        "color": "rgb(192, 126, 161)",
+        "token": "#c07ea1",
+        "aplicaToken": true,
+        "contraste": 5.674383477712273,
+        "stroke": "rgb(192, 126, 161)"
+      },
+      {
+        "hover": true,
+        "clase": "avisos__aviso avisos__aviso--alerta-stock is-nuevo",
+        "color": "rgb(209, 132, 0)",
+        "token": "#d18400",
+        "aplicaToken": true,
+        "contraste": 3.79035575171339,
+        "stroke": "rgb(209, 132, 0)"
+      },
+      {
+        "hover": true,
+        "clase": "avisos__aviso avisos__aviso--alerta-stock",
+        "color": "rgb(209, 132, 0)",
+        "token": "#d18400",
+        "aplicaToken": true,
+        "contraste": 5.902772610122132,
+        "stroke": "rgb(209, 132, 0)"
+      },
+      {
+        "hover": true,
+        "clase": "avisos__aviso avisos__aviso--calendar-pendiente",
+        "color": "rgb(254, 192, 118)",
+        "token": "#fec076",
+        "aplicaToken": true,
+        "contraste": 10.957358197089288,
+        "stroke": "rgb(254, 192, 118)"
+      },
+      {
+        "hover": true,
+        "clase": "avisos__aviso avisos__aviso--calendar-pendiente is-nuevo",
+        "color": "rgb(254, 192, 118)",
+        "token": "#fec076",
+        "aplicaToken": true,
+        "contraste": 5.626616476896493,
+        "stroke": "rgb(254, 192, 118)"
+      }
+    ]
+  },
+  {
+    "title": "colores: sistema, contraste y estados con API simulada",
+    "project": "telefono",
+    "data": [
+      {
+        "hover": false,
+        "clase": "avisos__aviso avisos__aviso--evento-nuevo is-nuevo",
+        "color": "rgb(120, 149, 202)",
+        "token": "#7895ca",
+        "aplicaToken": true,
+        "contraste": 3.548626679854621,
+        "stroke": "rgb(120, 149, 202)"
+      },
+      {
+        "hover": false,
+        "clase": "avisos__aviso avisos__aviso--evento-nuevo",
+        "color": "rgb(120, 149, 202)",
+        "token": "#7895ca",
+        "aplicaToken": true,
+        "contraste": 5.189651332788835,
+        "stroke": "rgb(120, 149, 202)"
+      },
+      {
+        "hover": false,
+        "clase": "avisos__aviso avisos__aviso--sena is-nuevo",
+        "color": "rgb(113, 159, 116)",
+        "token": "#719f74",
+        "aplicaToken": true,
+        "contraste": 3.5361605509062777,
+        "stroke": "rgb(113, 159, 116)"
+      },
+      {
+        "hover": false,
+        "clase": "avisos__aviso avisos__aviso--sena",
+        "color": "rgb(113, 159, 116)",
+        "token": "#719f74",
+        "aplicaToken": true,
+        "contraste": 5.162130621868588,
+        "stroke": "rgb(113, 159, 116)"
+      },
+      {
+        "hover": false,
+        "clase": "avisos__aviso avisos__aviso--contrato is-nuevo",
+        "color": "rgb(161, 137, 193)",
+        "token": "#a189c1",
+        "aplicaToken": true,
+        "contraste": 3.5604747618621304,
+        "stroke": "rgb(161, 137, 193)"
+      },
+      {
+        "hover": false,
+        "clase": "avisos__aviso avisos__aviso--contrato",
+        "color": "rgb(161, 137, 193)",
+        "token": "#a189c1",
+        "aplicaToken": true,
+        "contraste": 5.124902587254939,
+        "stroke": "rgb(161, 137, 193)"
+      },
+      {
+        "hover": false,
+        "clase": "avisos__aviso avisos__aviso--confirmacion is-nuevo",
+        "color": "rgb(168, 141, 62)",
+        "token": "#a88d3e",
+        "aplicaToken": true,
+        "contraste": 3.5049567775715866,
+        "stroke": "rgb(168, 141, 62)"
+      },
+      {
+        "hover": false,
+        "clase": "avisos__aviso avisos__aviso--confirmacion",
+        "color": "rgb(168, 141, 62)",
+        "token": "#a88d3e",
+        "aplicaToken": true,
+        "contraste": 4.886528610008927,
+        "stroke": "rgb(168, 141, 62)"
+      },
+      {
+        "hover": false,
+        "clase": "avisos__aviso avisos__aviso--modificacion is-nuevo",
+        "color": "rgb(90, 157, 174)",
+        "token": "#5a9dae",
+        "aplicaToken": true,
+        "contraste": 3.5116186437662553,
+        "stroke": "rgb(90, 157, 174)"
+      },
+      {
+        "hover": false,
+        "clase": "avisos__aviso avisos__aviso--modificacion",
+        "color": "rgb(90, 157, 174)",
+        "token": "#5a9dae",
+        "aplicaToken": true,
+        "contraste": 5.128628494774142,
+        "stroke": "rgb(90, 157, 174)"
+      },
+      {
+        "hover": false,
+        "clase": "avisos__aviso avisos__aviso--reprogramacion is-nuevo",
+        "color": "rgb(188, 133, 75)",
+        "token": "#bc854b",
+        "aplicaToken": true,
+        "contraste": 3.54943028044415,
+        "stroke": "rgb(188, 133, 75)"
+      },
+      {
+        "hover": false,
+        "clase": "avisos__aviso avisos__aviso--reprogramacion",
+        "color": "rgb(188, 133, 75)",
+        "token": "#bc854b",
+        "aplicaToken": true,
+        "contraste": 4.924166373316014,
+        "stroke": "rgb(188, 133, 75)"
+      },
+      {
+        "hover": false,
+        "clase": "avisos__aviso avisos__aviso--cancelacion is-nuevo",
+        "color": "rgb(217, 108, 108)",
+        "token": "#d96c6c",
+        "aplicaToken": true,
+        "contraste": 3.500834318534165,
+        "stroke": "rgb(217, 108, 108)"
+      },
+      {
+        "hover": false,
+        "clase": "avisos__aviso avisos__aviso--cancelacion",
+        "color": "rgb(217, 108, 108)",
+        "token": "#d96c6c",
+        "aplicaToken": true,
+        "contraste": 4.71287881476705,
+        "stroke": "rgb(217, 108, 108)"
+      },
+      {
+        "hover": false,
+        "clase": "avisos__aviso avisos__aviso--planner-asignada is-nuevo",
+        "color": "rgb(192, 126, 161)",
+        "token": "#c07ea1",
+        "aplicaToken": true,
+        "contraste": 3.5480738528193263,
+        "stroke": "rgb(192, 126, 161)"
+      },
+      {
+        "hover": false,
+        "clase": "avisos__aviso avisos__aviso--planner-asignada",
+        "color": "rgb(192, 126, 161)",
+        "token": "#c07ea1",
+        "aplicaToken": true,
+        "contraste": 5.032725709670772,
+        "stroke": "rgb(192, 126, 161)"
+      },
+      {
+        "hover": false,
+        "clase": "avisos__aviso avisos__aviso--alerta-stock is-nuevo",
+        "color": "rgb(209, 132, 0)",
+        "token": "#d18400",
+        "aplicaToken": true,
+        "contraste": 3.79035575171339,
+        "stroke": "rgb(209, 132, 0)"
+      },
+      {
+        "hover": false,
+        "clase": "avisos__aviso avisos__aviso--alerta-stock",
+        "color": "rgb(209, 132, 0)",
+        "token": "#d18400",
+        "aplicaToken": true,
+        "contraste": 5.235288659990074,
+        "stroke": "rgb(209, 132, 0)"
+      },
+      {
+        "hover": false,
+        "clase": "avisos__aviso avisos__aviso--calendar-pendiente",
+        "color": "rgb(254, 192, 118)",
+        "token": "#fec076",
+        "aplicaToken": true,
+        "contraste": 9.718303058854222,
+        "stroke": "rgb(254, 192, 118)"
+      },
+      {
+        "hover": false,
+        "clase": "avisos__aviso avisos__aviso--calendar-pendiente is-nuevo",
+        "color": "rgb(254, 192, 118)",
+        "token": "#fec076",
+        "aplicaToken": true,
+        "contraste": 5.626616476896493,
+        "stroke": "rgb(254, 192, 118)"
+      },
+      {
+        "hover": true,
+        "clase": "avisos__aviso avisos__aviso--evento-nuevo is-nuevo",
+        "color": "rgb(120, 149, 202)",
+        "token": "#7895ca",
+        "aplicaToken": true,
+        "contraste": 3.548626679854621,
+        "stroke": "rgb(120, 149, 202)"
+      },
+      {
+        "hover": true,
+        "clase": "avisos__aviso avisos__aviso--evento-nuevo",
+        "color": "rgb(120, 149, 202)",
+        "token": "#7895ca",
+        "aplicaToken": true,
+        "contraste": 5.8513166575475575,
+        "stroke": "rgb(120, 149, 202)"
+      },
+      {
+        "hover": true,
+        "clase": "avisos__aviso avisos__aviso--sena is-nuevo",
+        "color": "rgb(113, 159, 116)",
+        "token": "#719f74",
+        "aplicaToken": true,
+        "contraste": 3.5361605509062777,
+        "stroke": "rgb(113, 159, 116)"
+      },
+      {
+        "hover": true,
+        "clase": "avisos__aviso avisos__aviso--sena",
+        "color": "rgb(113, 159, 116)",
+        "token": "#719f74",
+        "aplicaToken": true,
+        "contraste": 5.82028713669752,
+        "stroke": "rgb(113, 159, 116)"
+      },
+      {
+        "hover": true,
+        "clase": "avisos__aviso avisos__aviso--contrato is-nuevo",
+        "color": "rgb(161, 137, 193)",
+        "token": "#a189c1",
+        "aplicaToken": true,
+        "contraste": 3.5604747618621304,
+        "stroke": "rgb(161, 137, 193)"
+      },
+      {
+        "hover": true,
+        "clase": "avisos__aviso avisos__aviso--contrato",
+        "color": "rgb(161, 137, 193)",
+        "token": "#a189c1",
+        "aplicaToken": true,
+        "contraste": 5.778312636852743,
+        "stroke": "rgb(161, 137, 193)"
+      },
+      {
+        "hover": true,
+        "clase": "avisos__aviso avisos__aviso--confirmacion is-nuevo",
+        "color": "rgb(168, 141, 62)",
+        "token": "#a88d3e",
+        "aplicaToken": true,
+        "contraste": 3.5049567775715866,
+        "stroke": "rgb(168, 141, 62)"
+      },
+      {
+        "hover": true,
+        "clase": "avisos__aviso avisos__aviso--confirmacion",
+        "color": "rgb(168, 141, 62)",
+        "token": "#a88d3e",
+        "aplicaToken": true,
+        "contraste": 5.509546676609339,
+        "stroke": "rgb(168, 141, 62)"
+      },
+      {
+        "hover": true,
+        "clase": "avisos__aviso avisos__aviso--modificacion is-nuevo",
+        "color": "rgb(90, 157, 174)",
+        "token": "#5a9dae",
+        "aplicaToken": true,
+        "contraste": 3.5116186437662553,
+        "stroke": "rgb(90, 157, 174)"
+      },
+      {
+        "hover": true,
+        "clase": "avisos__aviso avisos__aviso--modificacion",
+        "color": "rgb(90, 157, 174)",
+        "token": "#5a9dae",
+        "aplicaToken": true,
+        "contraste": 5.782513586653328,
+        "stroke": "rgb(90, 157, 174)"
+      },
+      {
+        "hover": true,
+        "clase": "avisos__aviso avisos__aviso--reprogramacion is-nuevo",
+        "color": "rgb(188, 133, 75)",
+        "token": "#bc854b",
+        "aplicaToken": true,
+        "contraste": 3.54943028044415,
+        "stroke": "rgb(188, 133, 75)"
+      },
+      {
+        "hover": true,
+        "clase": "avisos__aviso avisos__aviso--reprogramacion",
+        "color": "rgb(188, 133, 75)",
+        "token": "#bc854b",
+        "aplicaToken": true,
+        "contraste": 5.5519831443543195,
+        "stroke": "rgb(188, 133, 75)"
+      },
+      {
+        "hover": true,
+        "clase": "avisos__aviso avisos__aviso--cancelacion is-nuevo",
+        "color": "rgb(217, 108, 108)",
+        "token": "#d96c6c",
+        "aplicaToken": true,
+        "contraste": 3.500834318534165,
+        "stroke": "rgb(217, 108, 108)"
+      },
+      {
+        "hover": true,
+        "clase": "avisos__aviso avisos__aviso--cancelacion",
+        "color": "rgb(217, 108, 108)",
+        "token": "#d96c6c",
+        "aplicaToken": true,
+        "contraste": 5.313757041752985,
+        "stroke": "rgb(217, 108, 108)"
+      },
+      {
+        "hover": true,
+        "clase": "avisos__aviso avisos__aviso--planner-asignada is-nuevo",
+        "color": "rgb(192, 126, 161)",
+        "token": "#c07ea1",
+        "aplicaToken": true,
+        "contraste": 3.5480738528193263,
+        "stroke": "rgb(192, 126, 161)"
+      },
+      {
+        "hover": true,
+        "clase": "avisos__aviso avisos__aviso--planner-asignada",
+        "color": "rgb(192, 126, 161)",
+        "token": "#c07ea1",
+        "aplicaToken": true,
+        "contraste": 5.674383477712273,
+        "stroke": "rgb(192, 126, 161)"
+      },
+      {
+        "hover": true,
+        "clase": "avisos__aviso avisos__aviso--alerta-stock is-nuevo",
+        "color": "rgb(209, 132, 0)",
+        "token": "#d18400",
+        "aplicaToken": true,
+        "contraste": 3.79035575171339,
+        "stroke": "rgb(209, 132, 0)"
+      },
+      {
+        "hover": true,
+        "clase": "avisos__aviso avisos__aviso--alerta-stock",
+        "color": "rgb(209, 132, 0)",
+        "token": "#d18400",
+        "aplicaToken": true,
+        "contraste": 5.902772610122132,
+        "stroke": "rgb(209, 132, 0)"
+      },
+      {
+        "hover": true,
+        "clase": "avisos__aviso avisos__aviso--calendar-pendiente",
+        "color": "rgb(254, 192, 118)",
+        "token": "#fec076",
+        "aplicaToken": true,
+        "contraste": 10.957358197089288,
+        "stroke": "rgb(254, 192, 118)"
+      },
+      {
+        "hover": true,
+        "clase": "avisos__aviso avisos__aviso--calendar-pendiente is-nuevo",
+        "color": "rgb(254, 192, 118)",
+        "token": "#fec076",
+        "aplicaToken": true,
+        "contraste": 5.626616476896493,
+        "stroke": "rgb(254, 192, 118)"
+      }
+    ]
+  }
+]

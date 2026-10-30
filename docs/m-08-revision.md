@@ -12,7 +12,7 @@ Los cambios de actualización no modifican el cliente Google, las migraciones ni
 
 ## Contraste e íconos
 
-Los colores por tipo tienen variantes en ambos temas. El selector de hijo directo `> .v-icon` alcanza el SVG real de `Icon`, cuyo stroke usa currentColor. El tema sistema con SO oscuro aplica `data-theme="dark"`.
+Los colores por tipo tienen variantes en ambos temas. El selector de hijo directo `> .v-icon` alcanza el SVG real de `Icon`, cuyo stroke usa currentColor. El tema sistema sigue al SO: aplica `data-theme="dark"` con sistema oscuro y `data-theme="light"` con sistema claro. Los temas explícitos prevalecen aunque el SO tenga el tema opuesto.
 
 La medición usa luminancia relativa sRGB y `(Lmayor + 0.05)/(Lmenor + 0.05)`. Se exige contraste mínimo 3:1 sin redondear antes de comparar, sobre fondo efectivo, leído/sin leer y hover.
 
@@ -21,10 +21,11 @@ La medición usa luminancia relativa sRGB y `(Lmayor + 0.05)/(Lmenor + 0.05)`. S
 | Claro | 3.513:1 |
 | Oscuro | 3.501:1 |
 | Sistema con SO oscuro | 3.501:1 |
+| Sistema con SO claro | 3.513:1 |
 
-El E2E recibe los **diez tipos reales desde su API simulada**, incluido Calendar, con veinte avisos (leído y sin leer por tipo). No clona HTML para anticipar tipos futuros. Las 240 mediciones están en [contrastes.json](m-08-capturas/contrastes.json).
+El E2E recibe los **diez tipos reales desde su API simulada**, incluido Calendar, con veinte avisos (leído y sin leer por tipo). No clona HTML para anticipar tipos futuros. Las 320 mediciones están en [contrastes.json](m-08-capturas/contrastes.json).
 
-Capturas renovadas en `m-08-capturas/`: claro, oscuro y sistema, escritorio y teléfono. Solo para capturar se expande la lista del fixture después de las aserciones; la aplicación conserva su scroll.
+Capturas renovadas en `m-08-capturas/`: claro, oscuro y sistema con SO oscuro/claro (`sistema`/`sistema-claro`), escritorio y teléfono. Solo para capturar se expande la lista del fixture después de las aserciones; la aplicación conserva su scroll.
 
 ![Claro](m-08-capturas/escritorio-claro.png)
 ![Oscuro](m-08-capturas/escritorio-oscuro.png)
@@ -36,7 +37,8 @@ No se ejecutó un simulador dedicado de daltonismo y no se afirma que los tonos 
 - `PanelNotificaciones.test.tsx`: lectura, navegación, paginación, contador, perfiles combinados de Cocina y avisos Calendar de Dirección/Coordinación; abrir Calendar solo envía el POST de lectura y no realiza escrituras de exportación.
 - `contraste.test.ts`: 22 casos sobre tokens reales, superficies y mezclas sin leer.
 - `Calendar.test.tsx`: permisos, estados y operaciones manuales de M-06 con API simulada.
-- `e2e/notificaciones-colores.spec.ts`: seis escenarios en Chrome escritorio/teléfono, claro/oscuro/sistema oscuro, diez tipos, color calculado, SVG, mensajes y leído/sin leer.
+- `e2e/notificaciones-colores.spec.ts`: ocho escenarios en Chrome escritorio/teléfono, claro/oscuro y sistema oscuro/claro, diez tipos, color calculado, SVG, mensajes y leído/sin leer.
+- Tras incorporar UI-03 (#49), `Layout` no monta la campana mientras `debeCambiarContrasena` es verdadero. `PaginaMiCuenta.test.tsx` verifica ausencia de consultas de notificaciones después de avanzar 125 segundos; `e2e/cuenta.spec.ts` verifica el bloqueo, cambio obligatorio, renovación de sesión y recuperación de navegación/notificaciones. M-08 solo añade clases de color a la lista, sin alterar ese bloqueo ni sus intervalos.
 - La suite backend de main comprueba que leer avisos no resuelve pendientes Calendar y conserva deduplicación, roles e integración desactivada. Las pruebas externas de Google permanecen optativas y no se habilitan en este cierre.
 
 Comandos: `npm ci`, `npm run lint`, `npm run build`, `npm test`; E2E de colores con API simulada y backend `mvnw verify` con PostgreSQL descartable. Los resultados completos, el HEAD exacto, las limitaciones locales y CI se registran en la descripción y conversación de #52. Los E2E simulados no sustituyen aceptación contra un despliegue real.

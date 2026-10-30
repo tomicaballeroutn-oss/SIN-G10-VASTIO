@@ -112,6 +112,12 @@ public class Usuario {
         this.debeCambiarContrasena = debeCambiarContrasena;
     }
 
+    /** La persona eligió una contraseña propia (UI-03): guarda el hash nuevo y deja de pedirle que la cambie. */
+    public void cambiarContrasena(String nuevoHash) {
+        this.hashContrasena = nuevoHash;
+        this.debeCambiarContrasena = false;
+    }
+
     public Long getId() {
         return id;
     }

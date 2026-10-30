@@ -8,6 +8,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import ar.edu.utn.vastio.comun.errores.ProblemaException;
 import ar.edu.utn.vastio.comun.errores.SesionVencidaException;
 import ar.edu.utn.vastio.comun.seguridad.TokenService;
 import ar.edu.utn.vastio.comun.seguridad.TokenService.TokenEmitido;
@@ -67,11 +68,40 @@ public class AutenticacionService {
         return abrirSesion(usuario);
     }
 
+    /**
+     * Cambio de contraseña de la propia persona (UI-03). Pide la actual para que una pantalla abierta y olvidada no
+     * alcance para quedarse con la cuenta. No hay tabla de sesiones (JWT sin estado): las sesiones ya abiertas siguen
+     * valiendo hasta que venzan, y la renovación devuelve {@code debeCambiarContrasena = false}.
+     */
+    @Transactional
+    public void cambiarContrasena(long usuarioId, String actual, String nueva) {
+        Usuario usuario = usuarios.buscarParaCambiarContrasena(usuarioId)
+                .filter(Usuario::isActivo)
+                .orElseThrow(() -> ProblemaException.reglaDeNegocio("USUARIO_INACTIVO",
+                        "Tu usuario ya no está activo. Pedile a Dirección o a Coordinación que lo revise."));
+        if (!passwordEncoder.matches(actual, usuario.getHashContrasena())) {
+            throw ProblemaException.reglaDeNegocio("CONTRASENA_ACTUAL_INCORRECTA",
+                    "La contraseña actual no es correcta. Volvé a escribirla.");
+        }
+        // BCrypt limita bytes UTF-8; @Size limita caracteres. Evita un 500 con tildes o símbolos.
+        if (nueva.getBytes(java.nio.charset.StandardCharsets.UTF_8).length > 72) {
+            throw ProblemaException.reglaDeNegocio("CONTRASENA_DEMASIADO_LARGA",
+                    "La contraseña nueva es demasiado larga. Usá menos caracteres.");
+        }
+        // La igualdad textual permite un atajo, pero no reemplaza la equivalencia del codificador:
+        // BCrypt acepta una actual con sufijo posterior a sus primeros 72 bytes.
+        if (actual.equals(nueva) || passwordEncoder.matches(nueva, usuario.getHashContrasena())) {
+            throw ProblemaException.reglaDeNegocio("CONTRASENA_REPETIDA",
+                    "La contraseña nueva tiene que ser distinta de la actual. Elegí otra.");
+        }
+        usuario.cambiarContrasena(passwordEncoder.encode(nueva));
+    }
+
     private Sesion abrirSesion(Usuario usuario) {
         List<String> roles = usuario.codigosDeRol().stream().map(RolCodigo::name).sorted().toList();
         int minutosSesion = parametros.entero(ParametroClave.MINUTOS_EXPIRACION_SESION);
         int minutosAviso = parametros.entero(ParametroClave.MINUTOS_AVISO_EXPIRACION);
-        TokenEmitido acceso = tokens.emitirAcceso(usuario.getId(), usuario.getNombreUsuario(), roles);
+        TokenEmitido acceso = tokens.emitirAcceso(usuario.getId(), usuario.getNombreUsuario(), roles, usuario.isDebeCambiarContrasena());
         TokenEmitido refresco = tokens.emitirRefresco(usuario.getId(), Duration.ofMinutes(minutosSesion));
         return new Sesion(acceso, refresco, minutosSesion, minutosAviso,
                 new UsuarioSesion(usuario.getId(), usuario.getNombreCompleto(), usuario.getNombreUsuario(), roles,

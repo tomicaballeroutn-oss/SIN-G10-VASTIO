@@ -3,9 +3,14 @@ import { expect, test } from '@playwright/test';
 test.use({ channel: process.env.E2E_BROWSER_CHANNEL });
 const tipos = ['EVENTO_NUEVO', 'SENA', 'CONTRATO', 'CONFIRMACION', 'MODIFICACION', 'REPROGRAMACION', 'CANCELACION', 'PLANNER_ASIGNADA', 'ALERTA_STOCK', 'CALENDAR_PENDIENTE'];
 
-for (const tema of ['claro', 'oscuro', 'sistema']) {
-  test(`colores: ${tema}, contraste y estados con API simulada`, async ({ page }, info) => {
-    await page.emulateMedia({ colorScheme: 'dark' });
+for (const { tema, sistema } of [
+  { tema: 'claro', sistema: 'dark' },
+  { tema: 'oscuro', sistema: 'light' },
+  { tema: 'sistema', sistema: 'dark' },
+  { tema: 'sistema', sistema: 'light' },
+] as const) {
+  test(`colores: ${tema}, SO ${sistema}, contraste y estados con API simulada`, async ({ page }, info) => {
+    await page.emulateMedia({ colorScheme: sistema });
     await page.addInitScript((valor) => localStorage.setItem('vastio.tema', valor), tema);
     const avisos = tipos.flatMap((tipo, i) => [false, true].map((leida) => ({
       id: i * 2 + Number(leida), tipo, leida, mensaje: `Aviso ${tipo}`, eventoId: null, fechaHora: '2026-10-30T10:00:00-03:00',
@@ -24,7 +29,8 @@ for (const tema of ['claro', 'oscuro', 'sistema']) {
       return route.fulfill({ json: [] });
     });
     await page.goto('/notificaciones');
-    await expect(page.locator('html')).toHaveAttribute('data-theme', tema === 'claro' ? 'light' : 'dark');
+    const temaEfectivo = tema === 'sistema' ? sistema : tema === 'claro' ? 'light' : 'dark';
+    await expect(page.locator('html')).toHaveAttribute('data-theme', temaEfectivo);
     await page.getByRole('tab', { name: 'Todas', exact: true }).click();
     const botones = page.locator('.avisos__aviso');
     await expect(botones).toHaveCount(tipos.length * 2);

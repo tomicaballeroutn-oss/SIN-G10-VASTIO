@@ -47,6 +47,64 @@ class MigracionCalendarIT {
     private Flyway flyway(String url,String target) {
         return Flyway.configure().dataSource(url,POSTGRES.getUsername(),POSTGRES.getPassword()).locations("classpath:db/migration").target(target).load();
     }
+
+    @ParameterizedTest @ValueSource(strings = {"0", "13", "14", "15"})
+    void v16InstalaYActualizaSinCambiarDatosNiIdentidades(String version) throws Exception {
+        String nombre = "v16_" + UUID.randomUUID().toString().replace("-", "");
+        try (var c = DriverManager.getConnection(POSTGRES.getJdbcUrl(), POSTGRES.getUsername(), POSTGRES.getPassword());
+                var s = c.createStatement()) {
+            s.execute("CREATE DATABASE " + nombre);
+        }
+        String url = "jdbc:postgresql://" + POSTGRES.getHost() + ":" + POSTGRES.getMappedPort(5432) + "/" + nombre;
+        var jdbc = new JdbcTemplate(new DriverManagerDataSource(url, POSTGRES.getUsername(), POSTGRES.getPassword()));
+        var eventos = java.util.List.<java.util.Map<String, Object>>of();
+        var publicaciones = eventos;
+        var historial = eventos;
+        var cola = eventos;
+        var comerciales = new java.util.LinkedHashMap<String, java.util.List<java.util.Map<String, Object>>>();
+        if (!version.equals("0")) {
+            flyway(url, version).migrate();
+            jdbc.execute("""
+                INSERT INTO usuario(usuario_id,nombre_completo,nombre_usuario,hash_contrasena) VALUES(1,'Prueba','calendar','no-login');
+                INSERT INTO cliente(cliente_id,nombre) VALUES(1,'Privado');
+                INSERT INTO unidad_comercializable(unidad_id,salon_id,fecha,turno_id) VALUES(1,1,'2040-01-01',2);
+                INSERT INTO evento(evento_id,codigo,unidad_id,cliente_id,tipo_evento_id,vendedora_id,estado,nombre,invitados_definitivos,version)
+                VALUES(1,'EV-2040-00001',1,1,1,1,'PRE_RESERVA','Privado',false,0);
+                """);
+            eventos = jdbc.queryForList("SELECT * FROM evento");
+            if (!version.equals("13")) {
+                jdbc.execute("""
+                    INSERT INTO publicacion_calendar(evento_id,calendar_id,instalacion,google_id,estado,pendiente)
+                    VALUES(1,'aislado','prueba','id-conservado','INCIERTO','EXPORTAR');
+                    INSERT INTO operacion_calendar(evento_id,accion) VALUES(1,'INCIERTO');
+                    """);
+                publicaciones = jdbc.queryForList("SELECT * FROM publicacion_calendar");
+                historial = jdbc.queryForList("SELECT * FROM operacion_calendar");
+            }
+            if (version.equals("15")) cola = jdbc.queryForList("SELECT * FROM calendar_seguimiento");
+            for (String tabla : java.util.List.of("cliente", "usuario", "unidad_comercializable", "salon", "turno", "tipo_evento")) {
+                comerciales.put(tabla, jdbc.queryForList("SELECT * FROM " + tabla + " ORDER BY 1"));
+            }
+        }
+        var migrador = flyway(url, "16");
+        migrador.migrate();
+        migrador.validate();
+        assertThat(jdbc.queryForList("SELECT * FROM evento")).isEqualTo(eventos);
+        assertThat(jdbc.queryForList("SELECT * FROM operacion_calendar")).isEqualTo(historial);
+        if (!publicaciones.isEmpty()) assertThat(jdbc.queryForList("SELECT * FROM publicacion_calendar")).isEqualTo(publicaciones);
+        if (version.equals("15")) assertThat(jdbc.queryForList("SELECT * FROM calendar_seguimiento")).isEqualTo(cola);
+        comerciales.forEach((tabla, filas) -> assertThat(jdbc.queryForList("SELECT * FROM " + tabla + " ORDER BY 1"))
+                .as("conservación de %s desde V%s", tabla, version).isEqualTo(filas));
+        var publicacionesMigradas = jdbc.queryForList("SELECT * FROM publicacion_calendar");
+        var colaMigrada = jdbc.queryForList("SELECT * FROM calendar_seguimiento");
+        assertThat(migrador.migrate().migrationsExecuted).isZero();
+        migrador.validate();
+        assertThat(jdbc.queryForList("SELECT * FROM evento")).isEqualTo(eventos);
+        assertThat(jdbc.queryForList("SELECT * FROM operacion_calendar")).isEqualTo(historial);
+        assertThat(jdbc.queryForList("SELECT * FROM publicacion_calendar")).isEqualTo(publicacionesMigradas);
+        assertThat(jdbc.queryForList("SELECT * FROM calendar_seguimiento")).isEqualTo(colaMigrada);
+        assertThat(jdbc.queryForObject("SELECT count(*) FROM information_schema.tables WHERE table_schema='public' AND table_type='BASE TABLE' AND table_name <> 'flyway_schema_history'", Integer.class)).isEqualTo(45);
+    }
     @ParameterizedTest @ValueSource(booleans={false,true})
     void colaV15DesdeCeroODesdeV14PreservaHistorial(boolean actualizar) throws Exception {
         String nombre="cola_"+UUID.randomUUID().toString().replace("-","");

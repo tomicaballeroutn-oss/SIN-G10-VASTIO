@@ -32,9 +32,48 @@ class GoogleCalendarHttpTest {
         var config=new CalendarProperties(true,"prueba","instalacion","archivo-inexistente",1234,2345);
         var t=new Transporte();
         var api=new Calendar.Builder(t,GsonFactory.getDefaultInstance(),GoogleCalendarClient.inicializador(auth,config)).setApplicationName("prueba-sin-red").build();
-        assertThatThrownBy(()->new GoogleCalendarClient(config,api).comprobarDestino("prueba")).hasMessage("RED_GOOGLE").hasMessageNotContaining("secreto-no-imprimir");
+        assertThatThrownBy(()->new GoogleCalendarClient(config,api).comprobarDestino("prueba")).hasMessage("OAUTH_GOOGLE").hasMessageNotContaining("secreto-no-imprimir");
         assertThat(t.pedidos).isEmpty();
     }
+    @org.junit.jupiter.params.ParameterizedTest
+    @org.junit.jupiter.params.provider.ValueSource(strings = {"CREAR", "ACTUALIZAR", "RETIRAR"})
+    void oauthImpideCadaEscrituraAntesDeEnviar(String operacion) throws Exception {
+        var auth = org.mockito.Mockito.mock(com.google.auth.http.HttpCredentialsAdapter.class);
+        org.mockito.Mockito.doThrow(new IOException("dato privado")).when(auth).initialize(org.mockito.ArgumentMatchers.any());
+        var config = new CalendarProperties(true, "prueba", "instalacion", "no-utilizado", 1234, 2345);
+        var t = new Transporte();
+        var api = new Calendar.Builder(t, GsonFactory.getDefaultInstance(), GoogleCalendarClient.inicializador(auth, config))
+                .setApplicationName("sin-red").build();
+        var cliente = new GoogleCalendarClient(config, api);
+        var inicio = ZonedDateTime.parse("2032-01-01T20:00:00-03:00[America/Argentina/Cordoba]");
+        var contenido = new ContenidoCalendar.Contenido("EV", "Público", "Salón", inicio, inicio.plusHours(10), "huella");
+        var fallo = catchThrowableOfType(ar.edu.utn.vastio.agenda.aplicacion.ClienteCalendar.Fallo.class, () -> {
+            switch (operacion) {
+                case "CREAR" -> cliente.crear("prueba", "id123", contenido);
+                case "ACTUALIZAR" -> cliente.actualizar("prueba", "id123", contenido, "etag");
+                case "RETIRAR" -> cliente.retirar("prueba", "id123", "etag");
+                default -> throw new AssertionError(operacion);
+            }
+        });
+        assertThat(fallo.codigo()).isEqualTo("OAUTH_GOOGLE");
+        assertThat(fallo.incierto()).isFalse();
+        assertThat(t.pedidos).isEmpty();
+    }
+
+    @Test void runtimeEnAutenticacionTambienOcurreAntesDelEnvio() throws Exception {
+        var auth = org.mockito.Mockito.mock(com.google.auth.http.HttpCredentialsAdapter.class);
+        org.mockito.Mockito.doThrow(new IllegalStateException("dato privado")).when(auth).initialize(org.mockito.ArgumentMatchers.any());
+        var config = new CalendarProperties(true, "prueba", "instalacion", "no-utilizado", 1234, 2345);
+        var t = new Transporte();
+        var api = new Calendar.Builder(t, GsonFactory.getDefaultInstance(), GoogleCalendarClient.inicializador(auth, config))
+                .setApplicationName("sin-red").build();
+        var fallo = catchThrowableOfType(ar.edu.utn.vastio.agenda.aplicacion.ClienteCalendar.Fallo.class,
+                () -> new GoogleCalendarClient(config, api).retirar("prueba", "id123", "etag"));
+        assertThat(fallo.codigo()).isEqualTo("OAUTH_GOOGLE");
+        assertThat(fallo.incierto()).isFalse();
+        assertThat(t.pedidos).isEmpty();
+    }
+
     static class Transporte extends MockHttpTransport {
         final ArrayDeque<MockLowLevelHttpResponse> respuestas=new ArrayDeque<>();
         final List<MockLowLevelHttpRequest> pedidos=new ArrayList<>();
@@ -74,5 +113,21 @@ class GoogleCalendarHttpTest {
         assertThat(t.pedidos.getFirst().getFirstHeaderValue("If-Match")).isEqualTo("anterior");
         assertThat(t.pedidos.getFirst().getContentAsString()).contains("America/Argentina/Cordoba", "vastio-id")
                 .doesNotContain("attendees", "attachments", "importeSena");
+    }
+
+    @org.junit.jupiter.params.ParameterizedTest
+    @org.junit.jupiter.params.provider.CsvSource({"200,IDENTIDAD_REMOTA_AJENA", "204,EJECUCION_CALENDAR_FALLIDA"})
+    void falloAlInterpretarRespuestaDeEscrituraConservaIncertidumbre(int status, String codigo) {
+        var t = new Transporte();
+        var cliente = cliente(t);
+        var inicio = ZonedDateTime.parse("2032-01-01T20:00:00-03:00[America/Argentina/Cordoba]");
+        var c = new ContenidoCalendar.Contenido("EV", "Público", "Salón", inicio, inicio.plusHours(10), "huella");
+        // JSON null usa un sentinel de GenericJson; una respuesta sin cuerpo sí devuelve null Java.
+        t.respuesta(status, status == 204 ? "" : "null");
+        var fallo = catchThrowableOfType(ar.edu.utn.vastio.agenda.aplicacion.ClienteCalendar.Fallo.class,
+                () -> cliente.crear("prueba", "id123", c));
+        assertThat(fallo.codigo()).isEqualTo(codigo);
+        assertThat(fallo.incierto()).isTrue();
+        assertThat(t.pedidos).hasSize(1);
     }
 }

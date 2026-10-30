@@ -1,5 +1,11 @@
 # Diagnóstico RED_GOOGLE — Windows / commit c50b4dc
 
+> Registro histórico del diagnóstico inicial, no estado vigente de la aceptación. La corrección OAuth
+> se incorporó mediante #57. El ciclo autorizado posterior, incluida la detención y recuperación del
+> intento incierto, está en [Validación real](m-06-validacion-real.md). La clasificación actual de errores
+> y las verificaciones de integración están en [conversación del PR #59](https://github.com/tomicaballeroutn-oss/SIN-G10-VASTIO/pull/59#issuecomment-6530479112).
+> Las afirmaciones siguientes sobre pruebas o accesos aún pendientes corresponden a aquella etapa.
+
 ## Resultado demostrado
 
 El transporte OAuth contiene un defecto de doble descompresión. `TransporteTokenCalendar` usa internamente un `HttpResponse`, cuyo `getContent()` entrega el stream ya descomprimido cuando la respuesta es gzip. El puente devolvía ese stream con `Content-Encoding: gzip` y la longitud de los bytes comprimidos. La capa HTTP exterior intentaba descomprimir de nuevo el JSON y lanzaba:
@@ -48,8 +54,8 @@ Usar esta rama independiente `codex/m06-diagnostico-oauth`; no ejecutar la expor
 Pruebas focales sin Google:
 
 ```powershell
-cd C:\Users\tomic\OneDrive\Documentos\ChatGPT\Seminario\vastio-m06-diagnostico-oauth\backend
-$env:JAVA_HOME='C:\Program Files\Java\jdk-25.0.3'
+cd '<worktree-de-correccion>\backend'
+$env:JAVA_HOME='<ruta-local-del-JDK-25>'
 .\mvnw.cmd '-Dtest=TransporteTokenCalendarTest,DiagnosticoCalendarTest,GoogleCalendarHttpTest,GoogleCalendarClientTest,ContenidoCalendarTest' test
 ```
 

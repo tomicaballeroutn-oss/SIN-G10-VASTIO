@@ -23,6 +23,20 @@ import ar.edu.utn.vastio.comun.seguridad.UsuarioActual;
 /** Transacciones cortas antes/después de Google. El lock de sesión libera al morir el proceso. */
 @Service
 public class ExportacionCalendarService {
+    private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(ExportacionCalendarService.class);
+
+    /** Estado local del intento, nunca compartido entre solicitudes. No habilita reintentos. */
+    private static final class Progreso {
+        String fase = "LECTURA_REMOTA";
+        boolean incierto;
+
+        Progreso(boolean recuperar) { incierto = recuperar; }
+
+        void escritura() {
+            fase = "ESCRITURA_REMOTA";
+            incierto = true; // Hasta una respuesta válida, puede haberse aplicado.
+        }
+    }
     private final PublicacionCalendarRepository publicaciones;
     private final EventoRepository eventos;
     private final SeguimientoCalendar seguimiento;
@@ -128,27 +142,56 @@ public class ExportacionCalendarService {
         autorizar(quien);
         if (!cliente.configurado()) throw problema("CALENDAR_NO_CONFIGURADO");
         try (var lock = bloqueos.tomar(id)) {
-                Intento intento = tx.execute(t -> preparar(id, retirar, quien));
-                if (intento != null) {
-                    try {
-                        Remoto resultado = remoto(intento);
-                        if (!intento.retirar() && (resultado == null || resultado.eliminado() || resultado.etag() == null
-                                || !intento.contenido().huella().equals(resultado.huella()))) {
-                            throw new Fallo("RESPUESTA_GOOGLE_INCONSISTENTE", true);
-                        }
-                        tx.executeWithoutResult(t -> confirmar(intento, resultado, quien));
-                    } catch (Fallo fallo) {
-                        tx.executeWithoutResult(t -> fallar(id, fallo, quien));
-                        throw problema(fallo.codigo());
-                    } catch (RuntimeException falloLocal) {
-                        // También si la respuesta llegó pero no pudo persistirse: el próximo intento reconcilia.
-                        try { tx.executeWithoutResult(t -> fallar(id, new Fallo("RESULTADO_NO_PERSISTIDO", true), quien)); }
-                        catch (RuntimeException ignorada) { /* EN_PROCESO durable permite recuperar al volver la base. */ }
-                        throw problema("RESULTADO_NO_PERSISTIDO");
+            Intento intento = tx.execute(t -> preparar(id, retirar, quien));
+            if (intento != null) {
+                var progreso = new Progreso(intento.recuperar());
+                Remoto resultado;
+                try {
+                    resultado = remoto(intento, progreso);
+                    progreso.fase = "RESPUESTA_REMOTA";
+                    if (!intento.retirar() && (resultado == null || resultado.eliminado() || resultado.etag() == null
+                            || !intento.contenido().huella().equals(resultado.huella()))) {
+                        throw new Fallo("RESPUESTA_GOOGLE_INCONSISTENTE", true);
                     }
+                } catch (Fallo fallo) {
+                    // Un fallo cierto de este intento no resuelve una escritura anterior aún sin leer.
+                    boolean anteriorSinResolver = progreso.incierto && progreso.fase.equals("LECTURA_REMOTA");
+                    registrarFallo(id, new Fallo(fallo.codigo(), fallo.incierto() || anteriorSinResolver), quien);
+                    throw problema(fallo.codigo());
+                } catch (RuntimeException inesperado) {
+                    registrarInesperado(progreso.fase, inesperado);
+                    registrarFallo(id, new Fallo("EJECUCION_CALENDAR_FALLIDA", progreso.incierto), quien);
+                    throw problema("EJECUCION_CALENDAR_FALLIDA");
                 }
-                return tx.execute(t -> ver(id));
+                try {
+                    tx.executeWithoutResult(t -> confirmar(intento, resultado, quien));
+                } catch (RuntimeException falloLocal) {
+                    registrarInesperado("CONFIRMACION_LOCAL", falloLocal);
+                    // Spring puede traducir un IllegalStateException de programación en InvalidDataAccessApiUsageException.
+                    boolean persistencia = !(falloLocal instanceof org.springframework.dao.InvalidDataAccessApiUsageException)
+                            && (falloLocal instanceof org.springframework.dao.DataAccessException
+                            || falloLocal instanceof org.springframework.transaction.TransactionException
+                            || falloLocal instanceof jakarta.persistence.PersistenceException);
+                    String codigo = persistencia ? "RESULTADO_NO_PERSISTIDO" : "EJECUCION_CALENDAR_FALLIDA";
+                    registrarFallo(id, new Fallo(codigo, true), quien);
+                    throw problema(codigo);
+                }
+            }
+            return tx.execute(t -> ver(id));
         }
+    }
+
+    private void registrarFallo(long id, Fallo fallo, UsuarioActual quien) {
+        try {
+            tx.executeWithoutResult(t -> fallar(id, fallo, quien));
+        } catch (RuntimeException persistencia) {
+            // EN_PROCESO durable conserva la obligación de reconciliar si tampoco se guarda el error.
+            registrarInesperado("REGISTRO_FALLO_LOCAL", persistencia);
+        }
+    }
+
+    private static void registrarInesperado(String fase, RuntimeException error) {
+        log.warn("Calendar ejecución: fase={} excepcion={}", fase, error.getClass().getName());
     }
 
     private Intento preparar(long id, boolean retirar, UsuarioActual quien) {
@@ -185,19 +228,22 @@ public class ExportacionCalendarService {
                 SeguimientoCalendar.NUEVOS.contains(e.getEstado()));
     }
 
-    private Remoto remoto(Intento i) {
+    private Remoto remoto(Intento i, Progreso progreso) {
         // Verificar acceso al calendario explícito antes de interpretar ausencia de un evento.
         cliente.comprobarDestino(i.calendario());
         Remoto actual = cliente.consultar(i.calendario(), i.googleId());
+        progreso.incierto = false; // La lectura por identidad resuelve el intento anterior.
         if (i.retirar()) {
             if (actual == null || actual.eliminado()) return null;
             if (i.etag() != null && !Objects.equals(i.etag(), actual.etag())
                     && !(i.recuperar() && Objects.equals(i.huellaIntento(), actual.huella()))) throw new Fallo("CONFLICTO_REMOTO", false);
+            progreso.escritura();
             cliente.retirar(i.calendario(), i.googleId(), actual.etag());
             return null;
         }
         if (actual == null) {
             if (i.confirmado() || !i.crearPermitido()) throw new Fallo("EVENTO_REMOTO_AUSENTE", false);
+            progreso.escritura();
             try { return cliente.crear(i.calendario(), i.googleId(), i.contenido()); }
             catch (Fallo f) {
                 if (!f.codigo().equals("ID_EXISTENTE")) throw f;
@@ -211,6 +257,7 @@ public class ExportacionCalendarService {
         if (!i.recuperar() && (i.etag() == null || !Objects.equals(i.etag(), actual.etag()))) throw new Fallo("CONFLICTO_REMOTO", false);
         // Una recuperación solo puede sobrescribir si coincide con la última versión confirmada.
         if (i.recuperar() && !Objects.equals(i.huellaAnterior(), actual.huella()) && !Objects.equals(i.huellaIntento(), actual.huella())) throw new Fallo("CONFLICTO_REMOTO", false);
+        progreso.escritura();
         return cliente.actualizar(i.calendario(), i.googleId(), i.contenido(), actual.etag());
     }
 
@@ -257,6 +304,7 @@ public class ExportacionCalendarService {
             case "CUOTA_GOOGLE" -> "Esperá antes de reintentar: Google limitó las solicitudes.";
             case "AUTORIZACION_GOOGLE_REVOCADA", "PERMISO_GOOGLE_INSUFICIENTE" -> "Revisá las credenciales y el permiso de escritura del calendario. La sesión de Vastio sigue vigente.";
             case "CREDENCIALES_NO_DISPONIBLES" -> "Revisá el archivo y sus permisos; luego reiniciá el backend tras reemplazar las credenciales.";
+            case "OAUTH_GOOGLE" -> "Falló la autenticación antes de enviar esta solicitud a Calendar. Revisá el diagnóstico OAuth; un intento anterior incierto aún requiere verificación.";
             case "EVENTO_REMOTO_AUSENTE", "EVENTO_REMOTO_ELIMINADO" -> "La entrada externa no está disponible. Verificá el destino; no se recreó silenciosamente.";
             default -> "No confirmamos la operación. Consultá el pendiente y verificá el resultado antes de reintentar.";
         };

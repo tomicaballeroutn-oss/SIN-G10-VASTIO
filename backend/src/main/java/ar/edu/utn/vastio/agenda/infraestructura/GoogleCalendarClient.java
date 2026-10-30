@@ -27,7 +27,6 @@ import ar.edu.utn.vastio.agenda.aplicacion.ContenidoCalendar.Contenido;
 @Component
 @EnableConfigurationProperties(CalendarProperties.class)
 public class GoogleCalendarClient implements ClienteCalendar {
-    private static final org.slf4j.Logger log=org.slf4j.LoggerFactory.getLogger(GoogleCalendarClient.class);
     private final CalendarProperties config;
     private volatile Calendar api;
     @org.springframework.beans.factory.annotation.Autowired
@@ -41,15 +40,15 @@ public class GoogleCalendarClient implements ClienteCalendar {
             if (api == null) {
                 try (var archivo = Files.newInputStream(Path.of(config.credenciales()))) {
                     var credenciales = ServiceAccountCredentials.fromStream(archivo)
-                            .toBuilder().setHttpTransportFactory(()->new TransporteTokenCalendar(new NetHttpTransport(),config.conexionMs(),config.lecturaMs()))
+                            .toBuilder().setHttpTransportFactory(() -> new TransporteTokenCalendar(
+                                    new NetHttpTransport(), config.conexionMs(), config.lecturaMs()))
                             .setDefaultRetriesEnabled(false).build()
                             .createScoped(List.of("https://www.googleapis.com/auth/calendar.events"));
                     var auth = new HttpCredentialsAdapter(credenciales);
-                    api = new Calendar.Builder(new NetHttpTransport(), GsonFactory.getDefaultInstance(), inicializador(auth,config))
+                    api = new Calendar.Builder(new NetHttpTransport(), GsonFactory.getDefaultInstance(), inicializador(auth, config))
                             .setApplicationName("Vastio M-06").build();
                 } catch (IOException | RuntimeException e) {
-                    DiagnosticoCalendar.registrar(DiagnosticoCalendar.Fase.CREDENCIALES,e);
-                    log.warn("Calendar: carga de credenciales fallida ({}); revisar archivo y permisos y reiniciar tras rotación.",e.getClass().getSimpleName());
+                    DiagnosticoCalendar.registrar(DiagnosticoCalendar.Fase.CREDENCIALES, e);
                     throw new Fallo("CREDENCIALES_NO_DISPONIBLES", false);
                 }
             }
@@ -57,14 +56,16 @@ public class GoogleCalendarClient implements ClienteCalendar {
         return api;
     }
 
-    static com.google.api.client.http.HttpRequestInitializer inicializador(HttpCredentialsAdapter auth,CalendarProperties config) {
-        return request->{
+    static com.google.api.client.http.HttpRequestInitializer inicializador(HttpCredentialsAdapter auth, CalendarProperties config) {
+        return request -> {
             // El adaptador autentica en initialize(); no instala un HttpExecuteInterceptor.
             try { auth.initialize(request); }
-            catch(IOException e) { throw new DiagnosticoCalendar.FalloOAuth(e); }
-            request.setConnectTimeout(config.conexionMs());request.setReadTimeout(config.lecturaMs());
+            catch (IOException | RuntimeException e) { throw new DiagnosticoCalendar.FalloOAuth(e); }
+            request.setConnectTimeout(config.conexionMs());
+            request.setReadTimeout(config.lecturaMs());
             request.setNumberOfRetries(0); // Reconciliar antes de volver a escribir.
-            request.setLoggingEnabled(false);request.setCurlLoggingEnabled(false);
+            request.setLoggingEnabled(false);
+            request.setCurlLoggingEnabled(false);
         };
     }
 
@@ -80,14 +81,14 @@ public class GoogleCalendarClient implements ClienteCalendar {
         } catch (IOException e) { throw fallo(DiagnosticoCalendar.Fase.CALENDAR_CONSULTAR,e, false); }
     }
     public Remoto crear(String calendario, String id, Contenido contenido) {
-        try { return remoto(api().events().insert(calendario, evento(id, contenido)).execute(), id); }
+        try { return interpretarRespuesta(api().events().insert(calendario, evento(id, contenido)).execute(), id); }
         catch (IOException e) { throw fallo(DiagnosticoCalendar.Fase.CALENDAR_CREAR,e, true); }
     }
     public Remoto actualizar(String calendario, String id, Contenido contenido, String etag) {
         try {
             var pedido = api().events().update(calendario, id, evento(id, contenido));
             pedido.getRequestHeaders().setIfMatch(etag);
-            return remoto(pedido.execute(), id);
+            return interpretarRespuesta(pedido.execute(), id);
         } catch (IOException e) { throw fallo(DiagnosticoCalendar.Fase.CALENDAR_ACTUALIZAR,e, true); }
     }
     public void retirar(String calendario, String id, String etag) {
@@ -119,11 +120,25 @@ public class GoogleCalendarClient implements ClienteCalendar {
             return new Remoto(e.getEtag(), hash, false);
         } catch (RuntimeException ex) { throw new Fallo("CONTENIDO_REMOTO_MODIFICADO", false); }
     }
-    private static Fallo fallo(DiagnosticoCalendar.Fase fase,IOException e,boolean escritura) {
-        DiagnosticoCalendar.registrar(fase,e);
-        return traducir(e,escritura);
+
+    private static Remoto interpretarRespuesta(Event respuesta, String id) {
+        // execute() ya devolvió una respuesta de escritura. Un fallo al interpretarla no prueba ausencia.
+        try {
+            return remoto(respuesta, id);
+        } catch (Fallo fallo) {
+            throw new Fallo(fallo.codigo(), true);
+        } catch (RuntimeException inesperado) {
+            DiagnosticoCalendar.registrar(DiagnosticoCalendar.Fase.CALENDAR_RESPUESTA, inesperado);
+            throw new Fallo("EJECUCION_CALENDAR_FALLIDA", true);
+        }
+    }
+    private static Fallo fallo(DiagnosticoCalendar.Fase fase, IOException e, boolean escritura) {
+        DiagnosticoCalendar.registrar(fase, e);
+        return traducir(e, escritura);
     }
     static Fallo traducir(IOException e, boolean escritura) {
+        // initialize() autentica antes de que el transporte envíe la petición Calendar.
+        if (e instanceof DiagnosticoCalendar.FalloOAuth) return new Fallo("OAUTH_GOOGLE", false);
         if (e instanceof GoogleJsonResponseException g) {
             int status = g.getStatusCode();
             String reason = g.getDetails() != null && g.getDetails().getErrors() != null && !g.getDetails().getErrors().isEmpty()

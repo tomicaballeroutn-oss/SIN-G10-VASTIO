@@ -53,3 +53,6 @@
 [data-theme="dark"] .avisos__aviso.is-nuevo[class*="avisos__aviso--"] {
   background: color-mix(in srgb, var(--aviso-tipo) 24%, var(--surface));
 }
+
+/* M-06: advertencia con variante clara y oscura del sistema de diseño. */
+.avisos__aviso--calendar-pendiente { --aviso-tipo: var(--warning); }

@@ -23,7 +23,8 @@ const ICONO: Record<TipoNotificacion, IconName> = {
 };
 
 /** Una identidad visual por tipo; el texto y el ícono siguen comunicando el aviso sin depender del color. */
-const COLOR: Record<TipoNotificacion, string> = {
+// Compatibilidad anticipada con M-06; no incorpora su API ni sus acciones.
+const COLOR: Record<TipoNotificacion | 'CALENDAR_PENDIENTE', string> = {
   EVENTO_NUEVO: 'evento-nuevo',
   SENA: 'sena',
   CONTRATO: 'contrato',
@@ -33,6 +34,7 @@ const COLOR: Record<TipoNotificacion, string> = {
   CANCELACION: 'cancelacion',
   PLANNER_ASIGNADA: 'planner-asignada',
   ALERTA_STOCK: 'alerta-stock',
+  CALENDAR_PENDIENTE: 'calendar-pendiente',
 };
 
 /** Perfiles que abren la ficha del evento. Cocina no tiene ficha: su aviso abre la tarjeta en la vista de cocina (A7-02). */

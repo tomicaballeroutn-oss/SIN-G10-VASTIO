@@ -3,7 +3,7 @@
 > Registro histórico del diagnóstico inicial, no estado vigente de la aceptación. La corrección OAuth
 > se incorporó mediante #57. El ciclo autorizado posterior, incluida la detención y recuperación del
 > intento incierto, está en [Validación real](m-06-validacion-real.md). La clasificación actual de errores
-> y las verificaciones de integración están en [Observaciones finales](m-06-observaciones-finales.md).
+> y las verificaciones de integración están en [conversación del PR #59](https://github.com/tomicaballeroutn-oss/SIN-G10-VASTIO/pull/59#issuecomment-6530479112).
 > Las afirmaciones siguientes sobre pruebas o accesos aún pendientes corresponden a aquella etapa.
 
 ## Resultado demostrado

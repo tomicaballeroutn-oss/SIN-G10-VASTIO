@@ -2,7 +2,7 @@
 
 > Evidencia histórica del ciclo autorizado, complementaria al [diagnóstico OAuth](m-06-diagnostico-red-google.md).
 > Las referencias a PR, commits y pruebas pendientes describen cada momento del ensayo.
-> Para el estado de integración y seguimiento al 30/10/2026, ver [Observaciones finales](m-06-observaciones-finales.md).
+> Para el estado de integración y seguimiento al 30/10/2026, ver [conversación del PR #59](https://github.com/tomicaballeroutn-oss/SIN-G10-VASTIO/pull/59#issuecomment-6530479112).
 
 ## Entorno y corrección
 

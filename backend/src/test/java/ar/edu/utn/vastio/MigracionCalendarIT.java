@@ -61,6 +61,7 @@ class MigracionCalendarIT {
         var publicaciones = eventos;
         var historial = eventos;
         var cola = eventos;
+        var comerciales = new java.util.LinkedHashMap<String, java.util.List<java.util.Map<String, Object>>>();
         if (!version.equals("0")) {
             flyway(url, version).migrate();
             jdbc.execute("""
@@ -81,6 +82,9 @@ class MigracionCalendarIT {
                 historial = jdbc.queryForList("SELECT * FROM operacion_calendar");
             }
             if (version.equals("15")) cola = jdbc.queryForList("SELECT * FROM calendar_seguimiento");
+            for (String tabla : java.util.List.of("cliente", "usuario", "unidad_comercializable", "salon", "turno", "tipo_evento")) {
+                comerciales.put(tabla, jdbc.queryForList("SELECT * FROM " + tabla + " ORDER BY 1"));
+            }
         }
         var migrador = flyway(url, "16");
         migrador.migrate();
@@ -89,7 +93,16 @@ class MigracionCalendarIT {
         assertThat(jdbc.queryForList("SELECT * FROM operacion_calendar")).isEqualTo(historial);
         if (!publicaciones.isEmpty()) assertThat(jdbc.queryForList("SELECT * FROM publicacion_calendar")).isEqualTo(publicaciones);
         if (version.equals("15")) assertThat(jdbc.queryForList("SELECT * FROM calendar_seguimiento")).isEqualTo(cola);
+        comerciales.forEach((tabla, filas) -> assertThat(jdbc.queryForList("SELECT * FROM " + tabla + " ORDER BY 1"))
+                .as("conservación de %s desde V%s", tabla, version).isEqualTo(filas));
+        var publicacionesMigradas = jdbc.queryForList("SELECT * FROM publicacion_calendar");
+        var colaMigrada = jdbc.queryForList("SELECT * FROM calendar_seguimiento");
         assertThat(migrador.migrate().migrationsExecuted).isZero();
+        migrador.validate();
+        assertThat(jdbc.queryForList("SELECT * FROM evento")).isEqualTo(eventos);
+        assertThat(jdbc.queryForList("SELECT * FROM operacion_calendar")).isEqualTo(historial);
+        assertThat(jdbc.queryForList("SELECT * FROM publicacion_calendar")).isEqualTo(publicacionesMigradas);
+        assertThat(jdbc.queryForList("SELECT * FROM calendar_seguimiento")).isEqualTo(colaMigrada);
         assertThat(jdbc.queryForObject("SELECT count(*) FROM information_schema.tables WHERE table_schema='public' AND table_type='BASE TABLE' AND table_name <> 'flyway_schema_history'", Integer.class)).isEqualTo(45);
     }
     @ParameterizedTest @ValueSource(booleans={false,true})

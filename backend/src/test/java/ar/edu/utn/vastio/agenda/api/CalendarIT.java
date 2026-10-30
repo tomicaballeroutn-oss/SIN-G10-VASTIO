@@ -173,17 +173,24 @@ class CalendarIT {
         assertThat(servicio.operar(id,false,quien).estado()).isEqualTo("EXPORTADO");
         verify(google,times(1)).crear(anyString(),anyString(),any());
     }
-    @ParameterizedTest @ValueSource(strings = {"salon", "tipo_evento", "turno"})
-    void catalogoSoloEncolaCambiosRealesYNoLlamaAGoogle(String tabla) {
+    @ParameterizedTest @org.junit.jupiter.params.provider.CsvSource({
+        "salon,nombre,nombre || ' prueba'",
+        "tipo_evento,nombre,nombre || ' prueba'",
+        "turno,nombre,nombre || ' prueba'",
+        "turno,hora_inicio,hora_inicio + interval '1 minute'",
+        "turno,hora_fin,hora_fin + interval '1 minute'",
+        "turno,cruza_medianoche,NOT cruza_medianoche"
+    })
+    void catalogoSoloEncolaCambiosRealesYNoLlamaAGoogle(String tabla, String campo, String cambio) {
         long id = evento("SENADO");
         tx.executeWithoutResult(t -> {
             String columna = tabla.equals("tipo_evento") ? "tipo_evento_id" : tabla + "_id";
             String origen = tabla.equals("tipo_evento") ? "evento e" : "evento e JOIN unidad_comercializable u USING(unidad_id)";
             int catalogoId = jdbc.queryForObject("SELECT " + columna + " FROM " + origen + " WHERE evento_id=?", Integer.class, id);
             long antes = jdbc.queryForObject("SELECT revision FROM calendar_seguimiento WHERE evento_id=?", Long.class, id);
-            jdbc.update("UPDATE " + tabla + " SET nombre=nombre WHERE " + columna + "=?", catalogoId);
+            jdbc.update("UPDATE " + tabla + " SET " + campo + "=" + campo + " WHERE " + columna + "=?", catalogoId);
             assertThat(jdbc.queryForObject("SELECT revision FROM calendar_seguimiento WHERE evento_id=?", Long.class, id)).isEqualTo(antes);
-            jdbc.update("UPDATE " + tabla + " SET nombre=nombre || ' prueba' WHERE " + columna + "=?", catalogoId);
+            jdbc.update("UPDATE " + tabla + " SET " + campo + "=" + cambio + " WHERE " + columna + "=?", catalogoId);
             assertThat(jdbc.queryForObject("SELECT revision FROM calendar_seguimiento WHERE evento_id=?", Long.class, id)).isEqualTo(antes + 1);
             t.setRollbackOnly();
         });

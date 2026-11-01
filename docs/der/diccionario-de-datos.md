@@ -24,7 +24,7 @@ Motor: PostgreSQL. Convenciones: nombres en `snake_case` y en español; claves p
 | `ubicacion`: tipo y salón | Depósito de transición configurable y barra de cada salón. (V6 quitó los sectores y la ubicación padre.) |
 | `movimiento_stock`: fecha y hora, motivo, movimiento corregido, ingreso | Auditoría (RNF-SEG-03) y asiento de ajuste que referencia al original (UI-38). |
 | `asistencia_segmento`: cantidad prevista además de la real; PK simple | UI-19 pide la prevista por segmento. La PK triple del v1 era redundante. |
-| `tipo_segmento_asistencia.equivale_invitados` (V14, Sprint 4) | En egresados, la cantidad de invitados son los comensales de la cena: el segmento que la representa no se carga aparte y nadie se cuenta dos veces. |
+| `tipo_segmento_asistencia.equivale_invitados` (V17, Sprint 4) | En egresados, la cantidad de invitados son los comensales de la cena: el segmento que la representa no se carga aparte y nadie se cuenta dos veces. |
 | `turno`: horario | Sin horario el sistema no puede pasar el evento a En curso ni a Realizado. |
 | `orden_preparacion`: estado, origen y destino | Tiene su propia máquina de estados (§6.1). |
 | `salon.color_hex` → `salon.codigo`; `turno.codigo` | El color de cada salón ya está en los tokens del sistema de diseño, con variante clara y oscura; un solo hex en la base lo duplicaba y rompía el tema oscuro. El código estable (avril, club, santa-barbara; mediodia, noche) es el que usa el frontend. |
@@ -160,7 +160,7 @@ Segmento de asistencia.
 | `tipo_segmento_id` | smallint | PK | NO | Identificador. |
 | `nombre` | varchar(40) | UQ | NO | Comensales cena · Entradas anticipadas · Venta en puerta. |
 | `activo` | boolean |  | NO | Default true. |
-| `equivale_invitados` | boolean |  | NO | Default false (V14). Su asistencia prevista es `evento.cantidad_invitados` y no se carga aparte (en egresados, los comensales de la cena). Uno solo en true (`ux_segmento_equivale_invitados`); «Comensales cena» lo trae. |
+| `equivale_invitados` | boolean |  | NO | Default false (V17). Su asistencia prevista es `evento.cantidad_invitados` y no se carga aparte (en egresados, los comensales de la cena). Uno solo en true (`ux_segmento_equivale_invitados`); «Comensales cena» lo trae. |
 
 #### CATEGORIA_SERVICIO
 

@@ -1,0 +1,16 @@
+# Override optativo: nunca habilita Calendar ni monta secretos en el compose base.
+# Ver docs/m-06-google-calendar.md. El archivo HOST debe existir fuera del repositorio.
+services:
+  backend:
+    environment:
+      VASTIO_CALENDAR_HABILITADO: "true"
+      VASTIO_CALENDAR_ID: ${VASTIO_CALENDAR_ID:?Falta el calendario compartido de prueba o destino aprobado}
+      VASTIO_CALENDAR_INSTALACION: ${VASTIO_CALENDAR_INSTALACION:?Falta la identidad estable de instalación}
+      VASTIO_CALENDAR_CREDENCIALES: /run/secrets/vastio-calendar.json
+    volumes:
+      - type: bind
+        source: ${VASTIO_CALENDAR_CREDENCIALES_HOST:?Falta la ruta externa a las credenciales}
+        target: /run/secrets/vastio-calendar.json
+        read_only: true
+        bind:
+          create_host_path: false

@@ -16,8 +16,9 @@ import org.springframework.security.oauth2.jwt.Jwt;
 public record UsuarioActual(long id, Set<String> roles) {
 
     public static UsuarioActual de(Jwt jwt) {
+        long id = TokenService.usuarioId(jwt);
         List<String> roles = jwt.getClaimAsStringList(TokenService.CLAIM_ROLES);
-        return new UsuarioActual(Long.parseLong(jwt.getSubject()), roles == null ? Set.of() : Set.copyOf(roles));
+        return new UsuarioActual(id, roles == null ? Set.of() : Set.copyOf(roles));
     }
 
     public boolean tiene(String rol) {

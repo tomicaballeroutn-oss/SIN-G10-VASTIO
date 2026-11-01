@@ -19,6 +19,13 @@ spring:
       fail-on-null-for-primitives: false
 
 vastio:
+  calendar:
+    habilitado: ${VASTIO_CALENDAR_HABILITADO:false}
+    calendar-id: ${VASTIO_CALENDAR_ID:}
+    instalacion: ${VASTIO_CALENDAR_INSTALACION:}
+    credenciales: ${VASTIO_CALENDAR_CREDENCIALES:}
+    conexion-ms: 5000
+    lectura-ms: 10000
   seguridad:
     # Obligatoria fuera de dev: al menos 32 caracteres al azar.
     jwt-secreto: ${VASTIO_JWT_SECRETO:}

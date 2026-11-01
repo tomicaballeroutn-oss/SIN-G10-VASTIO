@@ -13,6 +13,7 @@ public enum TipoNotificacion {
     CANCELACION,
     PLANNER_ASIGNADA,
     ALERTA_STOCK,
+    CALENDAR_PENDIENTE,
     /** A la planner: cargar la asistencia real de cierre de un evento de egresados (Sprint 4). */
     ASISTENCIA_REAL,
     /** A Compras: se generó la orden de preparación sugerida de un evento confirmado (Sprint 4). */

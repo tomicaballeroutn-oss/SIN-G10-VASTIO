@@ -24,8 +24,8 @@ Motor: PostgreSQL. Convenciones: nombres en `snake_case` y en español; claves p
 | `ubicacion`: tipo y salón | Depósito de transición configurable y barra de cada salón. (V6 quitó los sectores y la ubicación padre.) |
 | `movimiento_stock`: fecha y hora, motivo, movimiento corregido, ingreso | Auditoría (RNF-SEG-03) y asiento de ajuste que referencia al original (UI-38). |
 | `asistencia_segmento`: cantidad prevista además de la real; PK simple | UI-19 pide la prevista por segmento. La PK triple del v1 era redundante. |
-| `orden_preparacion`: destino y responsable opcionales, fuente y base de la sugerencia, auditoría y versión (V16, Sprint 4) | Una orden por evento con los totales de todas sus barras; la que se genera al confirmar no tiene usuario. Ver docs/sprint-4.md, decisiones 11 a 25. |
-| `tipo_segmento_asistencia.equivale_invitados` (V14, Sprint 4) | En egresados, la cantidad de invitados son los comensales de la cena: el segmento que la representa no se carga aparte y nadie se cuenta dos veces. |
+| `orden_preparacion`: destino y responsable opcionales, fuente y base de la sugerencia, auditoría y versión (V19, Sprint 4) | Una orden por evento con los totales de todas sus barras; la que se genera al confirmar no tiene usuario. Ver docs/sprint-4.md, decisiones 11 a 25. |
+| `tipo_segmento_asistencia.equivale_invitados` (V17, Sprint 4) | En egresados, la cantidad de invitados son los comensales de la cena: el segmento que la representa no se carga aparte y nadie se cuenta dos veces. |
 | `turno`: horario | Sin horario el sistema no puede pasar el evento a En curso ni a Realizado. |
 | `orden_preparacion`: estado, origen y destino | Tiene su propia máquina de estados (§6.1). |
 | `salon.color_hex` → `salon.codigo`; `turno.codigo` | El color de cada salón ya está en los tokens del sistema de diseño, con variante clara y oscura; un solo hex en la base lo duplicaba y rompía el tema oscuro. El código estable (avril, club, santa-barbara; mediodia, noche) es el que usa el frontend. |
@@ -161,7 +161,7 @@ Segmento de asistencia.
 | `tipo_segmento_id` | smallint | PK | NO | Identificador. |
 | `nombre` | varchar(40) | UQ | NO | Comensales cena · Entradas anticipadas · Venta en puerta. |
 | `activo` | boolean |  | NO | Default true. |
-| `equivale_invitados` | boolean |  | NO | Default false (V14). Su asistencia prevista es `evento.cantidad_invitados` y no se carga aparte (en egresados, los comensales de la cena). Uno solo en true (`ux_segmento_equivale_invitados`); «Comensales cena» lo trae. |
+| `equivale_invitados` | boolean |  | NO | Default false (V17). Su asistencia prevista es `evento.cantidad_invitados` y no se carga aparte (en egresados, los comensales de la cena). Uno solo en true (`ux_segmento_equivale_invitados`); «Comensales cena» lo trae. |
 
 #### CATEGORIA_SERVICIO
 
@@ -531,19 +531,19 @@ Propuesta de bebida a retirar para un evento confirmado.
 | `evento_id` | bigint | FK | NO | → evento. |
 | `estado` | varchar(12) |  | NO | SUGERIDA · MODIFICADA · CONFIRMADA · DESCARTADA · CERRADA. |
 | `ubicacion_origen_id` | smallint | FK | NO | → ubicacion (depósito o transición). |
-| `ubicacion_destino_id` | smallint | FK | SÍ | → ubicacion. Sin uso desde V16: la orden es por evento, no por barra. |
+| `ubicacion_destino_id` | smallint | FK | SÍ | → ubicacion. Sin uso desde V19: la orden es por evento, no por barra. |
 | `responsable_id` | bigint | FK | SÍ | → usuario. Quién la generó; null si se generó sola al confirmar el evento (V16). |
 | `fecha_creacion` | timestamptz |  | NO | Default now(). |
 | `fecha_confirmacion` | timestamptz |  | SÍ |  |
-| `fuente` | varchar(20) |  | NO | V16. HISTORICO_TIPO · PROPORCIONES · HISTORICO_GENERAL · SIN_DATOS: de dónde salieron las botellas por asistente. |
-| `eventos_base` | integer |  | NO | V16. Eventos cerrados sobre los que se calculó (0 con proporciones o sin datos). |
-| `asistentes_base` | integer |  | SÍ | V16. Asistentes del evento al calcular; si cambian, la orden lo avisa. |
-| `margen_porcentaje` | smallint |  | NO | V16. El de `MARGEN_ORDEN_PORCENTAJE` al calcular. |
-| `fecha_calculo` | timestamptz |  | NO | V16. Última vez que se calculó la sugerencia. |
-| `usuario_modificacion_id`, `fecha_modificacion` | bigint, timestamptz | FK | SÍ | V16. Último ajuste o recálculo. |
-| `usuario_confirmacion_id` | bigint | FK | SÍ | V16. Quién la confirmó (con `fecha_confirmacion`). |
-| `usuario_reapertura_id`, `fecha_reapertura` | bigint, timestamptz | FK | SÍ | V16. Última reapertura. |
-| `version` | integer |  | NO | V16. Bloqueo optimista: no se pisan ajustes ajenos. |
+| `fuente` | varchar(20) |  | NO | V19. HISTORICO_TIPO · PROPORCIONES · HISTORICO_GENERAL · SIN_DATOS: de dónde salieron las botellas por asistente. |
+| `eventos_base` | integer |  | NO | V19. Eventos cerrados sobre los que se calculó (0 con proporciones o sin datos). |
+| `asistentes_base` | integer |  | SÍ | V19. Asistentes del evento al calcular; si cambian, la orden lo avisa. |
+| `margen_porcentaje` | smallint |  | NO | V19. El de `MARGEN_ORDEN_PORCENTAJE` al calcular. |
+| `fecha_calculo` | timestamptz |  | NO | V19. Última vez que se calculó la sugerencia. |
+| `usuario_modificacion_id`, `fecha_modificacion` | bigint, timestamptz | FK | SÍ | V19. Último ajuste o recálculo. |
+| `usuario_confirmacion_id` | bigint | FK | SÍ | V19. Quién la confirmó (con `fecha_confirmacion`). |
+| `usuario_reapertura_id`, `fecha_reapertura` | bigint, timestamptz | FK | SÍ | V19. Última reapertura. |
+| `version` | integer |  | NO | V19. Bloqueo optimista: no se pisan ajustes ajenos. |
 
 *Restricciones:* CREATE UNIQUE INDEX ux_orden_evento_vigente ON orden_preparacion(evento_id) WHERE estado <> 'DESCARTADA'.
 

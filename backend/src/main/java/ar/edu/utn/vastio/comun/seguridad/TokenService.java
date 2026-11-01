@@ -33,6 +33,7 @@ public class TokenService {
     static final String CLAIM_TIPO = "typ";
     static final String CLAIM_ROLES = "roles";
     static final String CLAIM_NOMBRE_USUARIO = "usuario";
+    static final String CLAIM_CAMBIO_OBLIGATORIO = "debeCambiarContrasena";
     static final String TIPO_ACCESO = "acceso";
     static final String TIPO_REFRESCO = "refresco";
 
@@ -47,11 +48,12 @@ public class TokenService {
         this.propiedades = propiedades;
     }
 
-    public TokenEmitido emitirAcceso(long usuarioId, String nombreUsuario, Collection<String> roles) {
+    public TokenEmitido emitirAcceso(long usuarioId, String nombreUsuario, Collection<String> roles, boolean debeCambiarContrasena) {
         Duration vida = Duration.ofMinutes(propiedades.minutosAcceso());
         return emitir(usuarioId, TIPO_ACCESO, vida, claims -> claims
                 .claim(CLAIM_NOMBRE_USUARIO, nombreUsuario)
-                .claim(CLAIM_ROLES, List.copyOf(roles)));
+                .claim(CLAIM_ROLES, List.copyOf(roles))
+                .claim(CLAIM_CAMBIO_OBLIGATORIO, debeCambiarContrasena));
     }
 
     public TokenEmitido emitirRefresco(long usuarioId, Duration vida) {
@@ -68,9 +70,21 @@ public class TokenService {
         }
         try {
             Jwt jwt = refrescoDecoder.decode(token);
-            return Long.parseLong(jwt.getSubject());
-        } catch (JwtException | NumberFormatException e) {
-            throw new SesionVencidaException("Token de refresco inválido: " + e.getMessage());
+            return usuarioId(jwt);
+        } catch (JwtException e) {
+            throw new SesionVencidaException("Token de refresco inválido");
+        }
+    }
+
+    /** Identidad de sesión: falla de forma controlada incluso fuera del decoder (p. ej. en pruebas). */
+    public static long usuarioId(Jwt jwt) {
+        if (jwt == null) throw new SesionVencidaException("Falta la identidad de la sesión");
+        try {
+            long id = Long.parseLong(jwt.getSubject());
+            if (id <= 0) throw new IllegalArgumentException("Identificador no positivo");
+            return id;
+        } catch (IllegalArgumentException e) {
+            throw new SesionVencidaException("Identidad de sesión inválida");
         }
     }
 

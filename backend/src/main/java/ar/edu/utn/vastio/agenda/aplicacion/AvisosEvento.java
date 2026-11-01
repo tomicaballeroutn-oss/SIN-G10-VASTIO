@@ -67,10 +67,12 @@ public class AvisosEvento {
     private final DescripcionEvento descripcion;
     private final UsuarioService usuarios;
     private final CatalogoService catalogos;
+    private final org.springframework.context.ApplicationEventPublisher cambios;
 
     public AvisosEvento(NotificacionService notificaciones, DescripcionEvento descripcion, UsuarioService usuarios,
-            CatalogoService catalogos) {
+            CatalogoService catalogos, org.springframework.context.ApplicationEventPublisher cambios) {
         this.catalogos = catalogos;
+        this.cambios = cambios;
         this.notificaciones = notificaciones;
         this.descripcion = descripcion;
         this.usuarios = usuarios;
@@ -84,6 +86,7 @@ public class AvisosEvento {
      * @param origenId null si la transición es automática.
      */
     public void cambioDeEstado(Evento evento, Long origenId) {
+        cambios.publishEvent(new CambioCalendar(evento.getId()));
         String autor = autor(origenId);
         switch (evento.getEstado()) {
             case PRE_RESERVA -> avisar(evento, TipoNotificacion.EVENTO_NUEVO, accion(autor, "cargó una pre-reserva"), "",
@@ -122,6 +125,7 @@ public class AvisosEvento {
         if (campos.isEmpty()) {
             return;
         }
+        cambios.publishEvent(new CambioCalendar(evento.getId()));
         Set<RolCodigo> perfiles = EnumSet.of(COORDINACION, ADMINISTRACION);
         if (evento.getEstado() == EstadoEvento.CONFIRMADO) {
             if (afectaCocina || campos.stream().anyMatch(CAMPOS_COCINA::contains)) {
@@ -143,6 +147,7 @@ public class AvisosEvento {
 
     /** Cambio de salón, fecha o turno. El evento ya tiene la unidad nueva. */
     public void reprogramacion(Evento evento, String antes, long origenId) {
+        cambios.publishEvent(new CambioCalendar(evento.getId()));
         String autor = autor(origenId);
         avisar(evento, TipoNotificacion.REPROGRAMACION, accion(autor, "reprogramó el evento"), " (antes " + antes + ")",
                 origenId, TODAS_LAS_AREAS, titularYPlanner(evento, accion(autor, "reprogramó tu evento")));

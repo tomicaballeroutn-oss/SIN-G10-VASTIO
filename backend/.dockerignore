@@ -1,2 +1,8 @@
 target/
 *.log
+
+# Credenciales M-06: siempre fuera del checkout/build context.
+secrets/
+**/secrets/
+**/*service-account*.json
+**/vastio-calendar.json

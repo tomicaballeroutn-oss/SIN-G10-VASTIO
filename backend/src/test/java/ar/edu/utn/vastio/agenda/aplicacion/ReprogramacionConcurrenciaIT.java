@@ -110,6 +110,8 @@ class ReprogramacionConcurrenciaIT {
             jdbc.update("DELETE FROM notificacion WHERE evento_id IN (" + eventos + ")");
             jdbc.update("DELETE FROM reprogramacion WHERE evento_id IN (" + eventos + ")");
             jdbc.update("DELETE FROM cambio_estado_evento WHERE evento_id IN (" + eventos + ")");
+            jdbc.update("DELETE FROM operacion_calendar WHERE evento_id IN (" + eventos + ")");
+            jdbc.update("DELETE FROM publicacion_calendar WHERE evento_id IN (" + eventos + ")");
             jdbc.update("DELETE FROM evento WHERE nombre IN ('Carrera A', 'Carrera B')");
             jdbc.update("DELETE FROM unidad_comercializable WHERE fecha IN (?, ?)", ORIGINAL, NUEVA);
             jdbc.update("DELETE FROM cliente WHERE nombre IN ('Cliente de Carrera A', 'Cliente de Carrera B')");

@@ -21,6 +21,7 @@ export const MENU: readonly ItemDeMenu[] = [
 
   { id: 'agenda', label: 'Agenda', icon: 'calendar', group: 'Agenda', ruta: '/agenda', roles: [...TOTAL, 'ADMINISTRACION', 'VENDEDORA', 'PLANNER', 'COMPRAS'] },
   { id: 'eventos', label: 'Eventos', icon: 'clipboard-list', group: 'Agenda', ruta: '/eventos', roles: [...TOTAL, 'ADMINISTRACION', 'VENDEDORA', 'PLANNER', 'COMPRAS'] },
+  { id: 'calendar-pendientes', label: 'Pendientes de Google Calendar', icon: 'calendar-clock', group: 'Agenda', ruta: '/calendar/pendientes', roles: TOTAL },
   { id: 'bloqueos', label: 'Bloqueos', icon: 'lock', group: 'Agenda', ruta: '/bloqueos', roles: [...TOTAL, 'ADMINISTRACION'] },
   { id: 'cocina', label: 'Vista de cocina', icon: 'utensils-crossed', group: 'Agenda', ruta: '/cocina', roles: [...TOTAL, 'PLANNER', 'COMPRAS', 'COCINA'] },
 

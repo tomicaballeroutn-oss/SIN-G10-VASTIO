@@ -69,9 +69,9 @@ Ramas: `mateo/S4-asistencia-prevista` → `mateo/S4-asistencia-real` → `mateo/
 
 ## Modelo
 
-- **V14** (asistencia prevista): `tipo_segmento_asistencia.equivale_invitados` (boolean, uno solo en true; «Comensales cena» lo trae).
-- **V15** (asistencia real): tipo de aviso `ASISTENCIA_REAL`.
-- **V16** (orden): `orden_preparacion` con destino y responsable opcionales, versión, fuente de la sugerencia, asistentes y eventos de base, quién la modificó, confirmó y reabrió; parámetro `MARGEN_ORDEN_PORCENTAJE`; tipo de aviso `ORDEN_PREPARACION`.
+- **V17** (asistencia prevista): `tipo_segmento_asistencia.equivale_invitados` (boolean, uno solo en true; «Comensales cena» lo trae).
+- **V18** (asistencia real): tipo de aviso `ASISTENCIA_REAL`.
+- **V19** (orden): `orden_preparacion` con destino y responsable opcionales, versión, fuente de la sugerencia, asistentes y eventos de base, quién la modificó, confirmó y reabrió; parámetro `MARGEN_ORDEN_PORCENTAJE`; tipo de aviso `ORDEN_PREPARACION`.
 
 ## Criterios de aceptación
 

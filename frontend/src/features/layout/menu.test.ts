@@ -6,7 +6,7 @@ const ids = (roles: Rol[]) => itemsPara(roles).map((it) => it.id);
 
 describe('menú por perfil', () => {
   it('Dirección y Coordinación ven todo', () => {
-    const todo = ['inicio', 'notificaciones', 'agenda', 'eventos', 'bloqueos', 'cocina', 'barra', 'existencias', 'ingreso', 'movimientos', 'ordenes', 'catalogo', 'estadisticas', 'reportes', 'usuarios', 'parametros'];
+    const todo = ['inicio', 'notificaciones', 'agenda', 'eventos', 'calendar-pendientes', 'bloqueos', 'cocina', 'barra', 'existencias', 'ingreso', 'movimientos', 'ordenes', 'catalogo', 'estadisticas', 'reportes', 'usuarios', 'parametros'];
     expect(ids(['DIRECCION'])).toEqual(todo);
     expect(ids(['COORDINACION'])).toEqual(todo);
   });

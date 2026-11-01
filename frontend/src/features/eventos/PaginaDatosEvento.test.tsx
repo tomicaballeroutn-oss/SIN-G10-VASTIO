@@ -1,4 +1,4 @@
-import { screen, within } from '@testing-library/react';
+import { fireEvent, screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { _reiniciarCliente } from '../../api/cliente';
@@ -66,6 +66,22 @@ afterEach(() => {
 });
 
 describe('Registrar evento', () => {
+  it.each([
+    { inicial: null, entrada: '12:30', esperado: '12:30' },
+    { inicial: '12:30:00', entrada: '', esperado: null },
+  ])('guarda la hora particular $entrada en el primer intento', async ({ inicial, entrada, esperado }) => {
+    const fetchMock = backend({ ...FICHA, horaInicio: inicial });
+    const usuario = userEvent.setup();
+    montar('/eventos/5/datos');
+    const hora = await screen.findByLabelText(/^Hora de inicio/);
+    fireEvent.change(hora, { target: { value: entrada } });
+    await usuario.tab();
+    await usuario.click(screen.getByRole('button', { name: 'Guardar datos del evento' }));
+    expect(await screen.findByText('Datos del evento guardados.')).toBeInTheDocument();
+    expect(pedidos(fetchMock).filter((p) => p.metodo === 'PUT')).toHaveLength(1);
+    expect(pedidos(fetchMock).find((p) => p.metodo === 'PUT')?.cuerpo).toMatchObject({ horaInicio: esperado });
+  });
+
   it('completa los datos desde la ficha y vuelve con el aviso', async () => {
     const fetchMock = backend();
     const usuario = userEvent.setup();

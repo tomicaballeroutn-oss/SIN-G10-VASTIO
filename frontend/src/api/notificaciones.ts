@@ -2,7 +2,7 @@ import { api } from './cliente';
 
 export type TipoNotificacion =
   | 'EVENTO_NUEVO' | 'SENA' | 'CONTRATO' | 'CONFIRMACION' | 'MODIFICACION' | 'REPROGRAMACION' | 'CANCELACION'
-  | 'PLANNER_ASIGNADA' | 'ALERTA_STOCK' | 'ASISTENCIA_REAL';
+  | 'PLANNER_ASIGNADA' | 'ALERTA_STOCK' | 'CALENDAR_PENDIENTE' | 'ASISTENCIA_REAL';
 
 export interface Notificacion {
   id: number;

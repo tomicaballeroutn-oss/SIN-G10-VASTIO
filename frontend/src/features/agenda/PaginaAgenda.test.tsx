@@ -119,11 +119,70 @@ describe('UI-07 · consultar agenda', () => {
     const pipsDel9 = () => screen.getByRole('button', { name: /^sábado 9 de marzo/ }).querySelectorAll('.v-pip');
 
     expect(screen.getByRole('button', { name: /^sábado 9 de marzo/ }).querySelectorAll('.is-dim')).toHaveLength(0);
-    await usuario.selectOptions(screen.getByLabelText('Estado'), 'disponible');
+    const dia = screen.getByRole('button', { name: /^sábado 9 de marzo/ });
+    const descripcion = dia.getAttribute('aria-label');
+    expect(pipsDel9()).toHaveLength(6);
+    expect(screen.queryByRole('button', { name: /^Resaltar estados/ })).not.toBeInTheDocument();
+    const mostrar = screen.getByRole('button', { name: 'Mostrar filtros' });
+    expect(mostrar).toHaveAttribute('aria-expanded', 'false');
+    await usuario.click(mostrar);
+    expect(screen.getByRole('button', { name: 'Ocultar filtros' })).toHaveAttribute('aria-expanded', 'true');
+    await usuario.click(screen.getByRole('button', { name: /^Resaltar estados/ }));
+    const estados = screen.getByRole('group', { name: 'Resaltar estados' });
+    await usuario.click(within(estados).getByRole('checkbox', { name: 'Disponible' }));
+    await usuario.click(screen.getByRole('button', { name: 'Listo' }));
 
     const atenuados = [...pipsDel9()].filter((p) => p.classList.contains('is-dim'));
     expect(atenuados).toHaveLength(3);
     expect(atenuados.every((p) => !p.classList.contains('v-pip--disponible'))).toBe(true);
+    expect(pipsDel9()).toHaveLength(6);
+    expect(dia.querySelectorAll('.is-match')).toHaveLength(3);
+    expect(dia).toHaveAccessibleName(descripcion!);
+    await usuario.click(dia);
+    // El resaltado visual no filtra el detalle ni oculta la ocupación.
+    expect(screen.getByRole('tabpanel', { name: 'Avril' })).toHaveTextContent('Quince de Delfina');
+    await usuario.click(screen.getByRole('tab', { name: /^Club de Campo/ }));
+    expect(screen.getByRole('tabpanel', { name: 'Club de Campo' })).toHaveTextContent('La tiene Melina Ruiz.');
+    expect(screen.getByRole('tabpanel', { name: 'Club de Campo' })).toHaveTextContent('Mantenimiento');
+    await usuario.click(screen.getByRole('button', { name: 'Limpiar filtros' }));
+    expect(dia.querySelectorAll('.is-dim, .is-match')).toHaveLength(0);
+  });
+
+  it('combina valores con OR dentro de cada grupo y AND entre grupos, conservando la URL al navegar', async () => {
+    backend();
+    const usuario = userEvent.setup();
+    const router = montar('/agenda?mes=2030-03&salon=avril&salon=club&estado=prereserva&estado=disponible&turno=noche');
+    const dia = await screen.findByRole('button', { name: /^sábado 9 de marzo/ });
+    expect(dia.querySelectorAll('.v-pip')).toHaveLength(6);
+    expect(dia.querySelectorAll('.is-match')).toHaveLength(1);
+    expect(dia.querySelector('.is-match')).toHaveClass('v-pip--avril', 'v-pip--prereserva');
+    await usuario.click(dia);
+    await usuario.click(screen.getByRole('button', { name: 'Mes siguiente' }));
+    await screen.findByRole('heading', { name: 'Abril 2030' });
+    const parametros = new URLSearchParams(router.state.location.search);
+    expect(parametros.getAll('salon')).toEqual(['avril', 'club']);
+    expect(parametros.getAll('estado')).toEqual(['prereserva', 'disponible']);
+    expect(parametros.getAll('turno')).toEqual(['noche']);
+    expect(parametros.has('dia')).toBe(false);
+  });
+
+  it('un resaltado sin coincidencias mantiene seis unidades y permite limpiar', async () => {
+    backend();
+    const usuario = userEvent.setup();
+    montar('/agenda?mes=2030-03&estado=confirmado');
+    const dia = await screen.findByRole('button', { name: /^sábado 9 de marzo/ });
+    expect(dia.querySelectorAll('.v-pip')).toHaveLength(6);
+    expect(dia.querySelectorAll('.is-dim')).toHaveLength(6);
+    await usuario.click(screen.getByRole('button', { name: 'Mostrar filtros' }));
+    await usuario.click(screen.getByRole('button', { name: 'Limpiar filtros' }));
+    expect(dia.querySelectorAll('.is-dim, .is-match')).toHaveLength(0);
+  });
+
+  it('ignora salones y estados de URL inválidos, incluidos nombres heredados de Object', async () => {
+    backend();
+    montar('/agenda?mes=2030-03&salon=toString&estado=inventado&turno=otro');
+    const dia = await screen.findByRole('button', { name: /^sábado 9 de marzo/ });
+    expect(dia.querySelectorAll('.is-dim, .is-match')).toHaveLength(0);
   });
 });
 

@@ -284,7 +284,8 @@ h2.h2, h3.h3, h3.h4 { margin: 0; color: var(--ink); }
 .v-pip--realizado { background: var(--s); border: 1.5px solid var(--s); box-shadow: inset 0 0 0 2px var(--surface); }
 .v-pip--bloqueado { border: 1.5px solid var(--line-strong); background: repeating-linear-gradient(135deg, var(--line-strong) 0 1.5px, transparent 1.5px 4px); }
 .v-pip--disponible { border: 1.5px solid var(--line); background: transparent; }
-.v-pip.is-dim { opacity: 0.18; }
+.v-pip.is-dim { opacity: 0.4; }
+.v-pip.is-match { transform: scale(1.22); filter: saturate(1.35) brightness(1.1); }
 .v-legend__item { display: inline-flex; align-items: center; gap: var(--space-2); }
 .v-legend__item .v-pip { --pip: 14px; flex: none; }
 /* Qué salón es cada columna de puntos: arriba de la grilla, en el orden de las columnas. */

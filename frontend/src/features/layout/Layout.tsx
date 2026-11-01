@@ -7,6 +7,8 @@ import { BloqueCuenta } from './BloqueCuenta';
 import { ITEM_MAS, itemsInferiores, itemsPara } from './menu';
 import './layout.css';
 
+const RUTA_MI_CUENTA = '/mi-cuenta';
+
 /**
  * Marco de las pantallas con sesión: riel flotante en escritorio (≥ 960 px) y barra inferior flotante en teléfono y tableta.
  * Cada perfil ve solo sus ítems; un grupo sin ítems no se dibuja. Arriba del contenido, la campana de notificaciones.
@@ -21,6 +23,11 @@ export function Layout() {
     return <Navigate to={`/login?volver=${encodeURIComponent(ubicacion.pathname)}`} replace />;
   }
 
+  // Entró con la contraseña inicial del alta: tiene que elegir una propia antes de usar el sistema (UI-03).
+  if (usuario.debeCambiarContrasena && ubicacion.pathname !== RUTA_MI_CUENTA) {
+    return <Navigate to={RUTA_MI_CUENTA} replace />;
+  }
+
   const items = itemsPara(usuario.roles);
   const inferiores = itemsInferiores(items);
   const todos = [...items, ITEM_MAS];
@@ -32,19 +39,25 @@ export function Layout() {
   };
 
   return (
-    <div className="app">
-      <div className="app__lateral">
-        <Nav layout="rail" label="Navegación principal" items={items} value={actual} onSelect={ir} logo={<Logo variant="marca" reverse />} footer={<BloqueCuenta />} />
-      </div>
-      <main className="app__contenido">
-        <div className="app__barra">
-          <Campana />
+    <div className={usuario.debeCambiarContrasena ? 'app app--cuenta-inicial' : 'app'}>
+      {!usuario.debeCambiarContrasena && (
+        <div className="app__lateral">
+          <Nav layout="rail" label="Navegación principal" items={items} value={actual} onSelect={ir} logo={<Logo variant="marca" reverse />} footer={<BloqueCuenta />} />
         </div>
+      )}
+      <main className="app__contenido">
+        {!usuario.debeCambiarContrasena && (
+          <div className="app__barra">
+            <Campana />
+          </div>
+        )}
         <Outlet />
       </main>
-      <div className="app__inferior">
-        <Nav layout="bottom" label="Navegación principal" items={inferiores} value={actualInferior} onSelect={ir} />
-      </div>
+      {!usuario.debeCambiarContrasena && (
+        <div className="app__inferior">
+          <Nav layout="bottom" label="Navegación principal" items={inferiores} value={actualInferior} onSelect={ir} />
+        </div>
+      )}
       <AvisosDeSesion />
     </div>
   );

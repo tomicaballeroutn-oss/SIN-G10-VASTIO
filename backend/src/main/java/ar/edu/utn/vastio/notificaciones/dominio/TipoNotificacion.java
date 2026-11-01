@@ -12,5 +12,6 @@ public enum TipoNotificacion {
     REPROGRAMACION,
     CANCELACION,
     PLANNER_ASIGNADA,
-    ALERTA_STOCK
+    ALERTA_STOCK,
+    CALENDAR_PENDIENTE
 }

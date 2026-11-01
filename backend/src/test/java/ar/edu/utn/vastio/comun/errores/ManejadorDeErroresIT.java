@@ -6,21 +6,25 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.test.context.support.WithMockUser;
+import org.springframework.http.HttpHeaders;
 import org.springframework.test.web.servlet.MockMvc;
 
 import ar.edu.utn.vastio.PruebaDeIntegracion;
+import ar.edu.utn.vastio.Personas;
+import ar.edu.utn.vastio.usuarios.dominio.RolCodigo;
 
 @PruebaDeIntegracion
-@WithMockUser(roles = "DIRECCION")
 class ManejadorDeErroresIT {
 
     @Autowired
     MockMvc mvc;
 
+    @Autowired
+    Personas personas;
+
     @Test
     void laFechaTomadaEsUn409ConElMensajeDelNegocio() throws Exception {
-        mvc.perform(get("/api/v1/_sonda/fecha-tomada"))
+        mvc.perform(get("/api/v1/_sonda/fecha-tomada").header(HttpHeaders.AUTHORIZATION, personas.bearer(RolCodigo.DIRECCION)))
                 .andExpect(status().isConflict())
                 .andExpect(jsonPath("$.codigo").value("FECHA_TOMADA"))
                 .andExpect(jsonPath("$.detail").value("Esa fecha ya está tomada. Elegí otro salón, otra fecha u otro turno."));
@@ -28,7 +32,7 @@ class ManejadorDeErroresIT {
 
     @Test
     void unaReglaDeNegocioEsUn422ConSuMensaje() throws Exception {
-        mvc.perform(get("/api/v1/_sonda/regla"))
+        mvc.perform(get("/api/v1/_sonda/regla").header(HttpHeaders.AUTHORIZATION, personas.bearer(RolCodigo.DIRECCION)))
                 .andExpect(status().isUnprocessableContent())
                 .andExpect(jsonPath("$.codigo").value("SIN_PLANNER"))
                 .andExpect(jsonPath("$.detail").value("Asigná una planner antes de confirmar el evento."));
@@ -36,7 +40,7 @@ class ManejadorDeErroresIT {
 
     @Test
     void unErrorInesperadoNoMuestraDetallesTecnicos() throws Exception {
-        mvc.perform(get("/api/v1/_sonda/inesperado"))
+        mvc.perform(get("/api/v1/_sonda/inesperado").header(HttpHeaders.AUTHORIZATION, personas.bearer(RolCodigo.DIRECCION)))
                 .andExpect(status().isInternalServerError())
                 .andExpect(jsonPath("$.codigo").value("ERROR_INTERNO"))
                 .andExpect(jsonPath("$.detail").value(Mensajes.ERROR_INTERNO));
@@ -44,7 +48,7 @@ class ManejadorDeErroresIT {
 
     @Test
     void unaRutaInexistenteDevuelve404EnCastellano() throws Exception {
-        mvc.perform(get("/api/v1/no-existe"))
+        mvc.perform(get("/api/v1/no-existe").header(HttpHeaders.AUTHORIZATION, personas.bearer(RolCodigo.DIRECCION)))
                 .andExpect(status().isNotFound())
                 .andExpect(jsonPath("$.detail").value(Mensajes.NO_ENCONTRADO));
     }

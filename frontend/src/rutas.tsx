@@ -1,7 +1,9 @@
+import { PaginaPendientesCalendar } from './features/eventos/PaginaPendientesCalendar';
 import type { ReactNode } from 'react';
 import type { RouteObject } from 'react-router';
 import { PaginaAgenda } from './features/agenda/PaginaAgenda';
 import { PaginaBarra } from './features/bebidas/PaginaBarra';
+import { PaginaBloqueos } from './features/bloqueos/PaginaBloqueos';
 import { PaginaCierre } from './features/bebidas/PaginaCierre';
 import { PaginaCocina } from './features/cocina/PaginaCocina';
 import { PaginaCatalogo } from './features/bebidas/PaginaCatalogo';
@@ -9,6 +11,7 @@ import { PaginaExistencias } from './features/bebidas/PaginaExistencias';
 import { PaginaEstadisticas } from './features/bebidas/PaginaEstadisticas';
 import { PaginaMovimientos } from './features/bebidas/PaginaMovimientos';
 import { PaginaIngresoBebida } from './features/bebidas/PaginaIngresoBebida';
+import { PaginaMiCuenta } from './features/cuenta/PaginaMiCuenta';
 import { PaginaDs } from './features/ds/PaginaDs';
 import { PaginaDatosEvento } from './features/eventos/PaginaDatosEvento';
 import { PaginaEvento } from './features/eventos/PaginaEvento';
@@ -17,7 +20,7 @@ import { PaginaReprogramar } from './features/eventos/PaginaReprogramar';
 import { PaginaInicio } from './features/inicio/PaginaInicio';
 import { Layout } from './features/layout/Layout';
 import { MENU } from './features/layout/menu';
-import { ConPermiso, IrAlInicio, PaginaMas, PaginaMiCuenta, PaginaPendiente } from './features/layout/paginas';
+import { ConPermiso, IrAlInicio, PaginaMas, PaginaPendiente } from './features/layout/paginas';
 import { PaginaNotificaciones } from './features/notificaciones/PaginaNotificaciones';
 import { PaginaParametros } from './features/parametros/PaginaParametros';
 import { PaginaReporteOcupacion } from './features/reportes/PaginaReporteOcupacion';
@@ -27,7 +30,9 @@ import { PaginaIngreso } from './features/sesion/PaginaIngreso';
 /** Pantallas ya construidas, por id del menú. El resto muestra PaginaPendiente hasta que llegue su historia. */
 const PANTALLAS: Partial<Record<string, ReactNode>> = {
   agenda: <PaginaAgenda />,
+  'calendar-pendientes': <PaginaPendientesCalendar />,
   barra: <PaginaBarra />,
+  bloqueos: <PaginaBloqueos />,
   catalogo: <PaginaCatalogo />,
   cocina: <PaginaCocina />,
   existencias: <PaginaExistencias />,

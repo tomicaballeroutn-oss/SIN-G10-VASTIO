@@ -28,7 +28,7 @@ class MigracionesIT {
     TransactionTemplate transacciones;
 
     @Test
-    void creaLas42Tablas() {
+    void creaLas45Tablas() {
         Integer tablas = jdbc.queryForObject("""
                 SELECT count(*) FROM information_schema.tables
                 WHERE table_schema = 'public'
@@ -36,7 +36,7 @@ class MigracionesIT {
                   AND table_name <> 'flyway_schema_history'
                 """, Integer.class);
 
-        assertThat(tablas).isEqualTo(42); // V10: servicio_renglon; V12: comprobante_sena y numerador_comprobante
+        assertThat(tablas).isEqualTo(45); // V15: cola durable calendar_seguimiento
     }
 
     @ParameterizedTest(name = "{0} tiene {1} filas")

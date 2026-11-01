@@ -1,6 +1,7 @@
 package ar.edu.utn.vastio.agenda.dominio;
 
 import java.time.OffsetDateTime;
+import java.util.Collection;
 import java.util.LinkedHashSet;
 import java.util.Set;
 
@@ -16,7 +17,8 @@ import jakarta.persistence.Table;
 
 /**
  * Bloqueo de unidades por motivos no comerciales (UI-21). No es un estado del evento.
- * En este sprint solo se lee para la agenda; el alta llega con «Registrar bloqueo de unidades».
+ * Se registra (A1-02) sobre un conjunto de unidades y se desbloquea: la fila no se borra, queda inactiva con quién
+ * y cuándo la desbloqueó.
  */
 @Entity
 @Table(name = "bloqueo")
@@ -58,6 +60,24 @@ public class Bloqueo {
     protected Bloqueo() {
     }
 
+    /** Bloqueo activo sobre esas unidades, que el servicio ya tomó con {@code FOR UPDATE}. */
+    public Bloqueo(short motivoId, String detalle, long usuarioId, OffsetDateTime fechaRegistro,
+            Collection<UnidadComercializable> unidades) {
+        this.motivoId = motivoId;
+        this.detalle = detalle;
+        this.usuarioId = usuarioId;
+        this.fechaRegistro = fechaRegistro;
+        this.activo = true;
+        this.unidades = new LinkedHashSet<>(unidades);
+    }
+
+    /** Las unidades vuelven a estar disponibles. El bloqueo queda en la base como historia. */
+    public void desbloquear(long usuarioId, OffsetDateTime cuando) {
+        this.activo = false;
+        this.usuarioDesbloqueoId = usuarioId;
+        this.fechaDesbloqueo = cuando;
+    }
+
     public Long getId() {
         return id;
     }
@@ -80,6 +100,14 @@ public class Bloqueo {
 
     public boolean isActivo() {
         return activo;
+    }
+
+    public Long getUsuarioDesbloqueoId() {
+        return usuarioDesbloqueoId;
+    }
+
+    public OffsetDateTime getFechaDesbloqueo() {
+        return fechaDesbloqueo;
     }
 
     public Set<UnidadComercializable> getUnidades() {

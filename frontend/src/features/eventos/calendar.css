@@ -1,0 +1,3 @@
+.calendar-evento { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; }
+.calendar-evento > p, .calendar-evento > .v-alert { flex-basis: 100%; }
+.calendar-evento__vigente { color: var(--success-ink); font-weight: 600; }

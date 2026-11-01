@@ -77,8 +77,8 @@ export function AgendaGrid({
       for (const salon of ORDEN_SALONES) {
         const ev = delDia.find((e) => e.salon === salon && e.turno === turno);
         const estado: EventStatus = ev ? (soloOcupacion ? 'confirmado' : ev.status) : 'disponible';
-        const atenuada = resaltar ? !resaltar({ salon, turno, status: estado }) : false;
-        pips.push(<span key={turno + salon} className={cx('v-pip', `v-pip--${salon}`, `v-pip--${estado}`, atenuada && 'is-dim')} />);
+        const coincide = resaltar ? resaltar({ salon, turno, status: estado }) : false;
+        pips.push(<span key={turno + salon} className={cx('v-pip', `v-pip--${salon}`, `v-pip--${estado}`, resaltar && (coincide ? 'is-match' : 'is-dim'))} />);
         if (ev && estado !== 'disponible') {
           descripcion.push(`${SALONES[salon]} ${turno === 'noche' ? 'noche' : 'mediodía'}: ${soloOcupacion ? 'con evento' : ESTADOS[estado]?.label ?? estado}`);
         }

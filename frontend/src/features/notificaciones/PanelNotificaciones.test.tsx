@@ -48,6 +48,32 @@ afterEach(() => {
 });
 
 describe('UI-22 · notificaciones', () => {
+  it.each(['DIRECCION', 'COORDINACION'] satisfies Rol[])('el aviso Calendar de %s conserva color, lectura y ficha sin escribir en Google', async (rol) => {
+    const aviso: Notificacion = {
+      id: 77, tipo: 'CALENDAR_PENDIENTE', mensaje: 'Google Calendar pendiente: Bruno y Martina',
+      eventoId: 5, fechaHora: '2026-10-30T10:00:00-03:00', leida: false,
+    };
+    const fetchMock = backendFalso(sesionDe([rol]), ({ metodo, ruta }) => {
+      if (ruta === '/notificaciones/sin-leer') return json(200, { cantidad: 1 });
+      if (ruta.startsWith('/notificaciones?')) return json(200, { notificaciones: [aviso], pagina: 0, hayMas: false, sinLeer: 1 });
+      if (metodo === 'POST' && ruta === '/notificaciones/77/lectura') return new Response(null, { status: 204 });
+      if (ruta === '/eventos') return json(200, []);
+      if (ruta === '/eventos/5') return json(200, fichaDePrueba());
+    });
+    const usuario = userEvent.setup();
+    const router = montar('/eventos');
+    await usuario.click(await screen.findByRole('button', { name: 'Notificaciones, 1 sin leer' }));
+    const panel = screen.getByRole('dialog', { name: 'Notificaciones' });
+    const boton = await within(panel).findByRole('button', { name: /Google Calendar pendiente/ });
+    expect(boton).toHaveClass('avisos__aviso--calendar-pendiente', 'is-nuevo');
+    expect(boton.querySelector(':scope > svg.v-icon')).not.toBeNull();
+    expect(boton).toHaveTextContent(/^Sin leer:/);
+    await usuario.click(boton);
+    expect(router.state.location.pathname).toBe('/eventos/5');
+    expect(screen.queryByRole('dialog', { name: 'Notificaciones' })).not.toBeInTheDocument();
+    expect(pedidos(fetchMock).filter((p) => p.metodo !== 'GET').map((p) => p.ruta)).toEqual(['/notificaciones/77/lectura']);
+  });
+
   it('la campana muestra cuántas hay sin leer', async () => {
     backend();
     montar('/eventos');

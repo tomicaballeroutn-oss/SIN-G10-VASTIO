@@ -27,6 +27,8 @@ import { DialogoLiberar } from './DialogoLiberar';
 import { PestanaServicios } from './PestanaServicios';
 import { DialogoSena } from './DialogoSena';
 import './eventos.css';
+import { ROLES_CALENDAR } from '../../api/calendar';
+import { EstadoGoogleCalendar } from './EstadoGoogleCalendar';
 
 /**
  * UI-09 · Ficha del evento: estado, datos y el historial de cambios en un solo lugar.
@@ -182,6 +184,8 @@ function ContenidoFicha({ ficha, alCambiar }: { ficha: Ficha; alCambiar: (ficha:
           alLiberar={(f) => hecho(f, 'Pre-reserva liberada. La fecha volvió a estar disponible en la agenda.')}
         />
       )}
+
+      {usuario?.roles.some(r => ROLES_CALENDAR.includes(r)) && <EstadoGoogleCalendar eventoId={ficha.id} version={ficha.version} />}
 
       <Tabs
         label="Secciones de la ficha"

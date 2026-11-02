@@ -2,7 +2,7 @@ package ar.edu.utn.vastio.agenda.api;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.containsString;
-import static org.mockito.ArgumentMatchers.anyShort;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -76,7 +76,7 @@ class ComprobanteSenaIT {
     @MockitoBean
     Clock reloj;
 
-    /** Sin configurar devuelve vacío: el salón no tiene logo (como hoy, hasta M-04). */
+    /** Sin configurar devuelve vacío: verifica también el diseño alternativo con el nombre del salón. */
     @MockitoBean
     LogoSalon logos;
 
@@ -146,7 +146,7 @@ class ComprobanteSenaIT {
 
     @Test
     void conLogoDelSalonLoUsaEnElEncabezado() throws Exception {
-        when(logos.de(anyShort())).thenReturn(Optional.of(png()));
+        when(logos.de(anyString())).thenReturn(Optional.of(png()));
 
         String pdf = new String(emitir(lucia, senado).andExpect(status().isCreated())
                 .andReturn().getResponse().getContentAsByteArray(), StandardCharsets.ISO_8859_1);
@@ -210,7 +210,7 @@ class ComprobanteSenaIT {
         jdbc.update("UPDATE unidad_comercializable SET fecha = '2033-12-20', salon_id = 2, turno_id = 1 WHERE unidad_id = (SELECT unidad_id FROM evento WHERE evento_id = ?)", senado);
         jdbc.update("UPDATE evento SET nombre = 'Evento cambiado', importe_sena = 2500.75, moneda_sena = 'USD', firmante_nombre = 'Otra persona', firmante_dni = '99888777' WHERE evento_id = ?", senado);
         jdbc.update("UPDATE usuario SET nombre_completo = 'Nombre cambiado' WHERE usuario_id = ?", lucia.getId());
-        when(logos.de(anyShort())).thenThrow(new IllegalStateException("El logo actual no debe consultarse"));
+        when(logos.de(anyString())).thenThrow(new IllegalStateException("El logo actual no debe consultarse"));
         reset(generador);
         assertThat(descargar(lucia, senado).andExpect(status().isOk()).andReturn().getResponse().getContentAsByteArray()).isEqualTo(original);
         assertThat(emitir(personas.de(RolCodigo.ADMINISTRACION), senado).andExpect(status().isOk()).andReturn().getResponse().getContentAsByteArray()).isEqualTo(original);

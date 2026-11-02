@@ -14,6 +14,7 @@ import { useSesion } from '../sesion/contexto';
 import { disponibilidad } from './disponibilidad';
 import { MacheteAgenda } from './MacheteAgenda';
 import { NombreTurno } from './NombreTurno';
+import { MarcaSalon } from '../comun/MarcaSalon';
 import { DialogoPreReserva, type UnidadElegida } from './DialogoPreReserva';
 import './agenda.css';
 
@@ -245,9 +246,21 @@ function DetalleDelDia({ agenda: ag, fecha, hoy, ver, alVer, alPreReservar }: {
               const estado: EventStatus = ocupada ? estadoDs(ocupada.estado) : 'disponible';
               return (
                 <div key={turno.id} className="agenda__caja">
-                  <div className="agenda__unidad-cabeza">
-                    <NombreTurno turno={turno} />
-                    <StatusChip status={estado} size="sm" />
+                  <div className={`agenda__unidad-cabeza${ocupada?.evento ? ' agenda__unidad-cabeza--con-logo' : ''}${ocupada?.evento && salon.codigo === 'santa-barbara' ? ' agenda__unidad-cabeza--santa' : ''}`}>
+                    {ocupada?.evento ? (
+                      <>
+                        <div className="agenda__unidad-info">
+                          <NombreTurno turno={turno} />
+                          <StatusChip status={estado} size="sm" />
+                        </div>
+                        <MarcaSalon salon={salon.codigo} className="agenda__logo-salon" />
+                      </>
+                    ) : (
+                      <>
+                        <NombreTurno turno={turno} />
+                        <StatusChip status={estado} size="sm" />
+                      </>
+                    )}
                   </div>
                   <Descripcion ocupada={ocupada} salonActivo={salon.activo} pasada={fecha < hoy} alAbrir={(id) => navegar(`/eventos/${id}`)} />
                   {!ocupada && salon.activo && fecha >= hoy && alPreReservar && (

@@ -1,0 +1,5 @@
+/* UI-37 · Movimientos de stock */
+.movimientos__filtros .v-card__body { display: flex; flex-direction: column; gap: var(--space-4); align-items: flex-start; }
+.movimientos__campos { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: var(--space-3); width: 100%; }
+.movimientos__lista { display: flex; flex-direction: column; gap: var(--space-3); align-items: stretch; }
+.movimientos__lista > .v-button { align-self: center; }

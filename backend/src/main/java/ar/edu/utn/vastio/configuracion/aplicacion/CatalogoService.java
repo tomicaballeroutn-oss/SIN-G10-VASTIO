@@ -150,7 +150,7 @@ public class CatalogoService {
     }
 
     /**
-     * @param equivaleInvitados marcarlo se la quita al segmento que la tenía (docs/sprint-4.md, decisión 2).
+     * @param equivaleInvitados marcarlo se la quita al segmento que la tenía (docs/sprints/sprint-4.md, decisión 2).
      */
     @Transactional
     public TipoSegmentoAsistencia actualizarSegmento(short id, String nombre, boolean activo, boolean equivaleInvitados) {

@@ -24,7 +24,7 @@ public class ConsultaHistoricaEventoService {
     }
 
     /**
-     * {@code invitados}: el divisor del consumo por asistente (docs/sprint-4.md, decisión 8): la asistencia real si el
+     * {@code invitados}: el divisor del consumo por asistente (docs/sprints/sprint-4.md, decisión 8): la asistencia real si el
      * tipo cuenta por segmento y está completa ({@code asistenciaReal} true); si no, la cantidad de invitados.
      */
     public record EventoHistorico(long id, short tipoEventoId, Integer invitados, boolean asistenciaReal) { }

@@ -7,7 +7,7 @@ import { fechaCorta, fechaHora } from '../comun/formato';
 import './ordenes.css';
 
 /**
- * UI-35 · Orden de preparación del evento (docs/sprint-4.md, decisiones 11 a 22): lo sugerido por el consumo histórico,
+ * UI-35 · Orden de preparación del evento (docs/sprints/sprint-4.md, decisiones 11 a 22): lo sugerido por el consumo histórico,
  * lo que se va a retirar y lo comprometido por otros eventos próximos, en cajas y botellas. Se genera sola al confirmar
  * el evento; Compras, Coordinación y Dirección la generan a mano o la recalculan.
  */

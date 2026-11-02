@@ -35,7 +35,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 
 /**
- * Orden de preparación (UI-35, docs/sprint-4.md, decisiones 11 a 22). La consultan Dirección, Coordinación,
+ * Orden de preparación (UI-35, docs/sprints/sprint-4.md, decisiones 11 a 22). La consultan Dirección, Coordinación,
  * Administración y Compras; la gestionan todos ellos menos Administración. La barra nunca la ve (operación a ciegas).
  */
 @RestController

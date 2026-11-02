@@ -7,7 +7,7 @@ import { fechaCorta } from '../comun/formato';
 import './ordenes.css';
 
 /**
- * Órdenes de preparación (docs/sprint-4.md, decisión 21): los eventos Confirmados y En curso, del más próximo al más
+ * Órdenes de preparación (docs/sprints/sprint-4.md, decisión 21): los eventos Confirmados y En curso, del más próximo al más
  * lejano, con el estado de su orden. Cada fila abre la orden en la ficha del evento.
  */
 export function PaginaOrdenes() {

@@ -2,7 +2,7 @@
 -- Vastio · V6 · Ubicaciones de stock (Sprint 3).
 -- =====================================================================
 
--- Tres tipos: depósito madre, depósito de transición y barra (docs/sprint-3.md, decisión 8). Las divisiones internas
+-- Tres tipos: depósito madre, depósito de transición y barra (docs/sprints/sprint-3.md, decisión 8). Las divisiones internas
 -- del depósito no se modelan: se quitan el tipo SECTOR y la ubicación padre. Ninguna ubicación los usa.
 ALTER TABLE ubicacion DROP CONSTRAINT ck_ubicacion_1;
 ALTER TABLE ubicacion DROP COLUMN ubicacion_padre_id;

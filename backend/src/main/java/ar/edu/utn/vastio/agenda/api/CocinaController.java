@@ -35,7 +35,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 
 /**
  * Consultar vista de cocina (A7-02, UI-23). La consultan Dirección, Coordinación, Planner, Compras y Cocina, según la
- * matriz de docs/perfiles-y-permisos.md. Las respuestas llevan solo lo gastronómico: ni estado, ni importes, ni
+ * matriz de docs/negocio/perfiles-y-permisos.md. Las respuestas llevan solo lo gastronómico: ni estado, ni importes, ni
  * observaciones internas, ni datos del cliente.
  */
 @RestController

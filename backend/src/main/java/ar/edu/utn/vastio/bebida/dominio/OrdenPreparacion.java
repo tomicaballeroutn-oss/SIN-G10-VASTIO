@@ -25,7 +25,7 @@ import jakarta.persistence.Table;
 import jakarta.persistence.Version;
 
 /**
- * Orden de preparación de un evento (UI-35, docs/sprint-4.md, decisiones 11 a 25): la bebida que se propone retirar
+ * Orden de preparación de un evento (UI-35, docs/sprints/sprint-4.md, decisiones 11 a 25): la bebida que se propone retirar
  * para todo el evento, sugerida a partir del consumo histórico y ajustada por Compras. Una sola vigente por evento
  * ({@code ux_orden_evento_vigente}). El evento es de otro módulo y se guarda por id.
  */

@@ -1,6 +1,6 @@
 -- Decisión 19/10/2026. V1–V8 se conservan intactas.
 -- El bloqueo y la comprobación ocurren en la misma transacción que el DDL.
--- Operación manual previa: scripts/resguardo_proveedores.py y docs/eliminacion-proveedores-despliegue.md.
+-- Operación manual previa: scripts/resguardo_proveedores.py y docs/historico/eliminacion-proveedores-despliegue.md.
 LOCK TABLE public.proveedor, public.bebida, public.ingreso IN ACCESS EXCLUSIVE MODE;
 
 DO $$

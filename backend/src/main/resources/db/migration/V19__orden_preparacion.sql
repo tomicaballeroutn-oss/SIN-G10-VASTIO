@@ -1,4 +1,4 @@
--- Generar y ajustar la orden de preparación (docs/sprint-4.md, decisiones 11 a 25).
+-- Generar y ajustar la orden de preparación (docs/sprints/sprint-4.md, decisiones 11 a 25).
 -- Una orden por evento con los totales de todas sus barras: el destino queda sin uso. La generada al confirmar el
 -- evento no tiene usuario (responsable null = sistema).
 ALTER TABLE orden_preparacion ALTER COLUMN ubicacion_destino_id DROP NOT NULL;

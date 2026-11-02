@@ -17,7 +17,7 @@ import ar.edu.utn.vastio.configuracion.dominio.Salon;
 /**
  * Configurar ubicaciones de stock (UI-26): depósito madre (uno solo activo), depósitos de transición y barras (una por
  * salón; Avril, hasta dos). Cada barra se abastece del depósito madre o de una transición, y en ese caso puede tener
- * habilitado el retiro directo del depósito madre como contingencia (docs/sprint-3.md, decisiones 8 a 11).
+ * habilitado el retiro directo del depósito madre como contingencia (docs/sprints/sprint-3.md, decisiones 8 a 11).
  */
 @Service
 @Transactional(readOnly = true)

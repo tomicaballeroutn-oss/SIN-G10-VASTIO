@@ -1,6 +1,6 @@
 # Ambiente de prueba: base + backend + frontend con Caddy (HTTPS automático) + respaldo diario.
 # Uso (en el servidor): docker compose -f docker-compose.prod.yml --env-file .env.prod up -d --build
-# Guía completa: docs/despliegue.md
+# Guía completa: docs/operacion/despliegue.md
 name: vastio-prueba
 
 services:
@@ -29,7 +29,7 @@ services:
       SPRING_DATASOURCE_USERNAME: ${DB_USER:-vastio}
       SPRING_DATASOURCE_PASSWORD: ${DB_PASSWORD}
       VASTIO_JWT_SECRETO: ${VASTIO_JWT_SECRETO:?Falta VASTIO_JWT_SECRETO en .env.prod}
-      # Solo en la primera puesta en marcha: crea el usuario inicial de Dirección (ver docs/despliegue.md).
+      # Solo en la primera puesta en marcha: crea el usuario inicial de Dirección (ver docs/operacion/despliegue.md).
       SPRING_PROFILES_ACTIVE: ${SPRING_PROFILES_ACTIVE:-}
       VASTIO_ADMIN_USUARIO: ${VASTIO_ADMIN_USUARIO:-direccion}
       VASTIO_ADMIN_CONTRASENA: ${VASTIO_ADMIN_CONTRASENA:-}
@@ -62,7 +62,7 @@ services:
   # Un pg_dump al iniciar y cada 86400 segundos. Retencion por antiguedad (>14 dias).
   # Cada entorno/base tiene su carpeta; solo los .dump estan terminados.
   # Espera al backend para respaldar la base ya migrada.
-  # Copiarlos fuera del servidor: ver docs/despliegue.md.
+  # Copiarlos fuera del servidor: ver docs/operacion/despliegue.md.
   respaldo:
     image: vastio-respaldo:local
     build:

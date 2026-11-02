@@ -12,7 +12,7 @@ import org.junit.jupiter.params.provider.EnumSource;
 import ar.edu.utn.vastio.agenda.dominio.EstadoEvento;
 
 /**
- * Tabla de transiciones de docs/maquina-de-estados.md.
+ * Tabla de transiciones de docs/negocio/maquina-de-estados.md.
  */
 class MaquinaDeEstadosTest {
 

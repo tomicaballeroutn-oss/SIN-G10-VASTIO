@@ -65,7 +65,7 @@ function ContenidoFicha({ ficha, alCambiar }: { ficha: Ficha; alCambiar: (ficha:
   const { usuario } = useSesion();
   const veConsumo = usuario?.roles.some((rol) => ROLES_CONSUMO.includes(rol)) ?? false;
   const vePreparacion = usuario?.roles.some((rol) => ROLES_PREPARACION.includes(rol)) ?? false;
-  // La orden existe desde que el evento se confirma (docs/sprint-4.md, decisión 11).
+  // La orden existe desde que el evento se confirma (docs/sprints/sprint-4.md, decisión 11).
   const veOrden = (usuario?.roles.some((rol) => ROLES_ORDEN.includes(rol)) ?? false)
     && ['CONFIRMADO', 'EN_CURSO', 'REALIZADO', 'CERRADO', 'CANCELADO'].includes(ficha.estado);
   const [busqueda, setBusqueda] = useSearchParams();

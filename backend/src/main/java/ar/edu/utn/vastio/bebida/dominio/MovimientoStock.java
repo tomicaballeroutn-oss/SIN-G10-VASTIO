@@ -166,7 +166,7 @@ public class MovimientoStock {
 
     /**
      * Lo que queda en la barra para el evento siguiente. Origen y destino son la barra: no cambia el saldo, deja la
-     * constancia de quién lo declaró y cuándo (docs/sprint-3-operacion.md, decisión 9).
+     * constancia de quién lo declaró y cuándo (docs/sprints/sprint-3-operacion.md, decisión 9).
      */
     public static MovimientoStock remanente(Bebida bebida, BigDecimal cantidad, Entrega entrega, long usuarioId,
             OffsetDateTime momento) {

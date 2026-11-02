@@ -34,7 +34,7 @@ public class ConsultaConsumoService {
     }
 
     /**
-     * {@code asistenciaReal}: el total real por segmento, si ya se cargó; entonces es el divisor (docs/sprint-4.md,
+     * {@code asistenciaReal}: el total real por segmento, si ya se cargó; entonces es el divisor (docs/sprints/sprint-4.md,
      * decisión 8). Si no, se divide por los invitados.
      */
     public record Consulta(Integer invitados, boolean usaSegmentos, Integer asistenciaReal, List<Renglon> renglones,

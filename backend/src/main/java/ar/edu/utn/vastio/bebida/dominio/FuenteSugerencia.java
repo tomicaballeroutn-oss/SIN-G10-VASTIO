@@ -1,7 +1,7 @@
 package ar.edu.utn.vastio.bebida.dominio;
 
 /**
- * De dónde salieron las botellas por asistente de la orden sugerida (docs/sprint-4.md, decisión 13), en el orden en que
+ * De dónde salieron las botellas por asistente de la orden sugerida (docs/sprints/sprint-4.md, decisión 13), en el orden en que
  * se prueban. Mismos valores que el CHECK {@code ck_orden_preparacion_fuente}.
  */
 public enum FuenteSugerencia {

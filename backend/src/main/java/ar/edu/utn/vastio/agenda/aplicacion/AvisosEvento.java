@@ -25,7 +25,7 @@ import ar.edu.utn.vastio.usuarios.aplicacion.UsuarioService;
 import ar.edu.utn.vastio.usuarios.dominio.RolCodigo;
 
 /**
- * Ruteo y textos de los avisos de la agenda (docs/sprint-2.md, decisión 10). Administración recibe todos los eventos
+ * Ruteo y textos de los avisos de la agenda (docs/sprints/sprint-2.md, decisión 10). Administración recibe todos los eventos
  * nuevos y cambios; el resto de las áreas, solo lo que las afecta. Nunca le llega el aviso a quien hizo el cambio
  * (lo descarta {@link NotificacionService}). Un solo aviso por guardado, no uno por dato.
  *
@@ -81,7 +81,7 @@ public class AvisosEvento {
     /**
      * Lo llama {@code MaquinaDeEstados} después de cada transición. Los estados sin aviso (Liberada, En curso,
      * Cerrado) no generan nada. Realizado avisa solo a la planner de un evento con asistencia por segmento, para que
-     * cargue la real (docs/sprint-4.md, decisión 9).
+     * cargue la real (docs/sprints/sprint-4.md, decisión 9).
      *
      * @param origenId null si la transición es automática.
      */

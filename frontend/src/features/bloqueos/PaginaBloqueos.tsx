@@ -110,7 +110,7 @@ export function PaginaBloqueos() {
       </Card>
       <Cargando datos={lista}>
         {(activos) => (
-          <Card flush title="Bloqueos activos">
+          <Card flush title="Bloqueos activos" className="bloqueos__activos">
             <Table caption="Bloqueos activos" columns={columnas} rows={activos} empty="No hay bloqueos activos." />
           </Card>
         )}

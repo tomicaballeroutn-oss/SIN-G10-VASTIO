@@ -141,6 +141,38 @@ describe('UI-06 · parámetros del sistema', () => {
     expect(pedidos(fetchMock).filter((p) => p.ruta === '/segmentos-asistencia' && p.metodo === 'GET')).toHaveLength(2);
   });
 
+  it('carga las proporciones de consumo de un tipo de evento', async () => {
+    const fernet = {
+      id: 10, nombre: 'Fernet Branca', presentacion: '750 ml', tipo: { id: 3, nombre: 'Destilado' },
+      unidad: { id: 1, nombre: 'Caja', esBotella: false }, unidadesPorBulto: 6, stockMinimo: null, codigos: [], activo: true, fechaBaja: null,
+    };
+    const guardada = { id: 1, tipoEventoId: 1, bebidaId: 10, nombre: 'Fernet Branca', presentacion: '750 ml', activa: true, botellasPorAsistente: 0.05 };
+    let cargadas: unknown[] = [];
+    const fetchMock = backendFalso(sesionDe(['ADMINISTRACION']), (p) => {
+      if (p.metodo === 'GET' && p.ruta === '/bebidas') return json(200, [fernet]);
+      if (p.metodo === 'GET' && p.ruta === '/proporciones-consumo?tipoEventoId=1') return json(200, cargadas);
+      if (p.metodo === 'PUT' && p.ruta === '/proporciones-consumo') {
+        cargadas = [guardada];
+        return json(200, guardada);
+      }
+      return catalogo(p);
+    });
+    const usuario = userEvent.setup();
+    montar('/parametros?seccion=proporciones');
+
+    expect(await screen.findByText('Sin proporciones cargadas para este tipo de evento.')).toBeInTheDocument();
+    await usuario.type(screen.getByLabelText('Bebida'), 'fer');
+    await usuario.click(await screen.findByRole('option', { name: /Fernet Branca 750 ml/ }));
+    await usuario.type(screen.getByLabelText('Botellas por asistente'), '0,05');
+    await usuario.click(screen.getByRole('button', { name: 'Guardar proporción' }));
+
+    const tabla = await screen.findByRole('table', { name: 'Proporciones del tipo de evento' });
+    expect(await within(tabla).findByText('0,05')).toBeInTheDocument();
+    expect(pedidos(fetchMock)).toContainEqual({
+      metodo: 'PUT', ruta: '/proporciones-consumo', cuerpo: { tipoEventoId: 1, bebidaId: 10, botellasPorAsistente: 0.05 },
+    });
+  });
+
   it('si el aviso de sesión sube, guarda primero la duración de la sesión', async () => {
     const fetchMock = backendFalso(sesionDe(['ADMINISTRACION']), catalogo);
     const usuario = userEvent.setup();

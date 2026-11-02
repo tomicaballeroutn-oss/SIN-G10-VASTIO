@@ -1,0 +1,17 @@
+/* UI-35 · Orden de preparación */
+.orden { display: flex; flex-direction: column; gap: var(--space-4); }
+.orden__cuerpo { display: flex; flex-direction: column; gap: var(--space-3); }
+.orden__cuerpo p { margin: 0; }
+.orden__auditoria { display: flex; flex-wrap: wrap; gap: var(--space-4); }
+.orden__acciones { display: flex; flex-wrap: wrap; gap: var(--space-2); }
+.orden__estado { display: inline-flex; flex-wrap: wrap; gap: var(--space-1); }
+
+/* Vista para imprimir: solo la orden, sin navegación ni acciones. */
+@media print {
+  @page { size: A4 portrait; margin: 13mm 14mm; }
+  html, body { background: #fff !important; color: #17212b; }
+  .app__lateral, .app__inferior, .app__barra, .ficha__acciones, .orden__acciones, .v-tabs,
+  .pantalla > div:first-child { display: none !important; }
+  .app__contenido { width: auto; max-width: none; margin: 0; padding: 0; }
+  .orden .v-card { box-shadow: none !important; border: 1px solid #cbd1d7; break-inside: avoid; }
+}

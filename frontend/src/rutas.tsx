@@ -22,6 +22,7 @@ import { Layout } from './features/layout/Layout';
 import { MENU } from './features/layout/menu';
 import { ConPermiso, IrAlInicio, PaginaMas, PaginaPendiente } from './features/layout/paginas';
 import { PaginaNotificaciones } from './features/notificaciones/PaginaNotificaciones';
+import { PaginaOrdenes } from './features/ordenes/PaginaOrdenes';
 import { PaginaParametros } from './features/parametros/PaginaParametros';
 import { PaginaReporteOcupacion } from './features/reportes/PaginaReporteOcupacion';
 import { PaginaUsuarios } from './features/usuarios/PaginaUsuarios';
@@ -42,6 +43,7 @@ const PANTALLAS: Partial<Record<string, ReactNode>> = {
   movimientos: <PaginaMovimientos />,
   eventos: <PaginaEventos />,
   notificaciones: <PaginaNotificaciones />,
+  ordenes: <PaginaOrdenes />,
   parametros: <PaginaParametros />,
   reportes: <PaginaReporteOcupacion />,
   usuarios: <PaginaUsuarios />,

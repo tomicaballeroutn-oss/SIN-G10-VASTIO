@@ -59,3 +59,4 @@
 
 /* Sprint 4: asistencia real de cierre (a la planner), con la marca del sistema de diseño en ambos temas. */
 .avisos__aviso--asistencia-real { --aviso-tipo: var(--brand); }
+.avisos__aviso--orden-preparacion { --aviso-tipo: var(--info); }

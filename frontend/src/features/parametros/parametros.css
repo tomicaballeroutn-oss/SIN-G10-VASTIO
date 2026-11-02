@@ -29,3 +29,8 @@
 @media (min-width: 400px) { .catalogo__par { grid-template-columns: 1fr 1fr; } }
 .catalogo__generales { max-width: 560px; }
 .ubicaciones__acciones { flex-wrap: wrap; gap: var(--space-2); }
+
+/* Proporciones de consumo (Sprint 4) */
+.proporciones { display: flex; flex-direction: column; gap: var(--space-4); }
+.proporciones__alta { display: grid; grid-template-columns: minmax(0, 2fr) minmax(0, 1fr) auto; gap: var(--space-3); align-items: start; }
+@media (max-width: 720px) { .proporciones__alta { grid-template-columns: 1fr; } }

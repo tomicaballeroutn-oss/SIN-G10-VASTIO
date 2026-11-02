@@ -411,12 +411,13 @@ function FormularioMotivo({ motivo, listo }: { motivo?: Motivo; listo: (m: Motiv
   );
 }
 
-// ---------- sesión y cocina ----------
+// ---------- generales: sesión, cocina y orden de preparación ----------
 
 const PARAMETROS: { clave: ClaveParametro; etiqueta: string; unidad: string }[] = [
   { clave: 'MINUTOS_EXPIRACION_SESION', etiqueta: 'Sesión sin uso antes de pedir volver a ingresar', unidad: 'minutos' },
   { clave: 'MINUTOS_AVISO_EXPIRACION', etiqueta: 'Aviso antes de que venza la sesión', unidad: 'minutos' },
   { clave: 'HORIZONTE_COCINA_DIAS', etiqueta: 'Días que muestra la vista de cocina', unidad: 'días' },
+  { clave: 'MARGEN_ORDEN_PORCENTAJE', etiqueta: 'Margen que se suma a la orden de preparación sugerida', unidad: '%' },
 ];
 
 export function SeccionGenerales() {
@@ -444,8 +445,8 @@ function FormularioGenerales({ parametros, alGuardar }: { parametros: Parametro[
   function orden(): ClaveParametro[] {
     const avisoSube = Number(valores.MINUTOS_AVISO_EXPIRACION) > Number(actual('MINUTOS_AVISO_EXPIRACION')?.valor);
     return avisoSube
-      ? ['MINUTOS_EXPIRACION_SESION', 'MINUTOS_AVISO_EXPIRACION', 'HORIZONTE_COCINA_DIAS']
-      : ['MINUTOS_AVISO_EXPIRACION', 'MINUTOS_EXPIRACION_SESION', 'HORIZONTE_COCINA_DIAS'];
+      ? ['MINUTOS_EXPIRACION_SESION', 'MINUTOS_AVISO_EXPIRACION', 'HORIZONTE_COCINA_DIAS', 'MARGEN_ORDEN_PORCENTAJE']
+      : ['MINUTOS_AVISO_EXPIRACION', 'MINUTOS_EXPIRACION_SESION', 'HORIZONTE_COCINA_DIAS', 'MARGEN_ORDEN_PORCENTAJE'];
   }
 
   async function guardar() {
@@ -470,7 +471,7 @@ function FormularioGenerales({ parametros, alGuardar }: { parametros: Parametro[
   }
 
   return (
-    <Card title="Sesión y cocina" className="catalogo__generales">
+    <Card title="Generales" className="catalogo__generales">
       {guardado && <Alert tone="success">Cambios guardados.</Alert>}
       <Formulario alEnviar={guardar} error={null} accion="Guardar cambios" guardando={guardando}>
         {PARAMETROS.map(({ clave, etiqueta, unidad }) => {

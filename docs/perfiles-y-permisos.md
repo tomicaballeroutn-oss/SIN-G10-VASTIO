@@ -48,7 +48,8 @@ E = ejecuta · P = ejecuta solo sobre sus propios eventos (vendedora: los que ve
 | Configurar ubicaciones de stock | E | — | — | — | — | — |
 | Carga inicial / ingreso de bebida | E | — | — | E | — | — |
 | Consultar stock | C | — | — | C | Solo su barra | — |
-| Orden de preparación | C | — | — | E | — | — |
+| Orden de preparación (generar, recalcular, ajustar, confirmar, reabrir) | C | — | — | E | — | — |
+| Proporciones de consumo (Parámetros) | E | — | — | — | — | — |
 | Registrar preparación / consultar sus traspasos (B5-04) | E | — | — | E | — | — |
 | Salida a barra, retiro adicional, devolución | — | — | — | E | E | — |
 | Cierre de evento | — | — | — | E | E | — |

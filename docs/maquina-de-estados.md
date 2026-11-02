@@ -51,5 +51,16 @@ Todo cambio de estado escribe una fila en `cambio_estado_evento` (usuario null =
 
 ## Orden de preparación
 
-`SUGERIDA` → (el responsable ajusta cantidades) → `MODIFICADA` → `CONFIRMADA` → `CERRADA` (al cerrar el evento).
-`SUGERIDA` / `MODIFICADA` / `CONFIRMADA` → `DESCARTADA` si el evento se cancela o se reprograma fuera del horizonte; una orden descartada permite generar otra.
+Se genera `SUGERIDA` al confirmar el evento (o a mano, con el evento Confirmado o En curso y sin orden vigente). Una por evento, con los totales de todas sus barras (docs/sprint-4.md, decisiones 11 a 25).
+
+| Desde → Hasta | Caso de uso | Quién | Efecto |
+|---|---|---|---|
+| — → SUGERIDA | Generar orden de preparación | Sistema al confirmar; Compras, Coordinación, Dirección a mano | Calcula la sugerencia y avisa a Compras (`ORDEN_PREPARACION`). |
+| SUGERIDA / MODIFICADA → SUGERIDA | Recalcular sugerencia | Compras, Coordinación, Dirección | Vuelve a calcular con los asistentes de hoy; pisa lo ajustado. |
+| SUGERIDA / MODIFICADA → MODIFICADA | Ajustar orden de preparación | Compras, Coordinación, Dirección | Cambia lo que se va a retirar. |
+| SUGERIDA / MODIFICADA → CONFIRMADA | Confirmar orden | Compras, Coordinación, Dirección | Ya no se edita; la salida a barra queda vinculada a ella. |
+| CONFIRMADA → MODIFICADA | Reabrir orden | Compras, Coordinación, Dirección | Si algo cambió sobre la marcha. |
+| SUGERIDA / MODIFICADA / CONFIRMADA → CERRADA | Registrar cierre de evento | (el cierre) | Queda como referencia. |
+| SUGERIDA / MODIFICADA / CONFIRMADA → DESCARTADA | Cancelar evento | (la cancelación) | Deja lugar para otra. |
+
+La reprogramación no descarta la orden. Si cambian los invitados o la asistencia prevista, la orden lo avisa y se puede recalcular.

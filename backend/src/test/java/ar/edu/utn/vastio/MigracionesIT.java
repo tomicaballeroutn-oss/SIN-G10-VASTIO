@@ -48,7 +48,7 @@ class MigracionesIT {
             "tipo_segmento_asistencia, 3",
             "categoria_servicio, 11",
             "motivo, 13",
-            "parametro, 3",
+            "parametro, 4",
             "tipo_bebida, 5",
             "unidad_manipulacion, 3",
             "ubicacion, 4"

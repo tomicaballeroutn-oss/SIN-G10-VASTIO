@@ -48,6 +48,9 @@ public class GeneradorComprobanteSena {
     private static final Color TINTA = new Color(0x02, 0x12, 0x26);
     private static final Color APOYO = new Color(0x40, 0x4b, 0x5a);
     private static final Color FILO = new Color(0xa0, 0x9a, 0x93);
+    private static final float LOGO_ANCHO = 160;
+    private static final float LOGO_ALTO = 64;
+    private static final float LOGO_CAJA_ALTO = 76;
 
     private static final Font TITULO = FontFactory.getFont(FontFactory.HELVETICA_BOLD, 18, MARCA);
     private static final Font SALON = FontFactory.getFont(FontFactory.HELVETICA_BOLD, 16, TINTA);
@@ -95,13 +98,17 @@ public class GeneradorComprobanteSena {
         PdfPCell salon;
         if (d.logo() != null) {
             Image logo = Image.getInstance(d.logo());
-            logo.scaleToFit(160, 64);
+            logo.scaleToFit(LOGO_ANCHO, LOGO_ALTO);
+            logo.setAlignment(Element.ALIGN_LEFT);
             salon = new PdfPCell(logo, false);
+            salon.setFixedHeight(LOGO_CAJA_ALTO);
         } else {
             salon = new PdfPCell(new Phrase(d.salon(), SALON));
         }
         salon.setBorder(Rectangle.NO_BORDER);
         salon.setVerticalAlignment(Element.ALIGN_MIDDLE);
+        salon.setHorizontalAlignment(Element.ALIGN_LEFT);
+        salon.setPadding(0);
         tabla.addCell(salon);
 
         Paragraph titulo = new Paragraph();
@@ -112,6 +119,7 @@ public class GeneradorComprobanteSena {
         derecha.addElement(titulo);
         derecha.setBorder(Rectangle.NO_BORDER);
         derecha.setHorizontalAlignment(Element.ALIGN_RIGHT);
+        derecha.setVerticalAlignment(Element.ALIGN_MIDDLE);
         titulo.setAlignment(Element.ALIGN_RIGHT);
         tabla.addCell(derecha);
         tabla.setSpacingAfter(16);

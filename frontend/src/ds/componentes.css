@@ -459,7 +459,7 @@ h2.h2, h3.h3, h3.h4 { margin: 0; color: var(--ink); }
 /* ---------- Nav · riel flotante (escritorio) ---------- */
 .v-rail { position: relative; width: var(--rail-w); height: 100%; min-height: 0; }
 .v-nav--rail { position: absolute; z-index: var(--z-nav); top: 0; left: 0; bottom: 0; width: var(--rail-w); display: flex; flex-direction: column;
-  padding: var(--space-4) 0; background: var(--deep); color: var(--on-deep); border-radius: var(--rail-radius); box-shadow: var(--shadow-sm);
+  padding: var(--space-4) 0; background: var(--deep); color: var(--on-deep); border-radius: var(--rail-radius);
   transition: width var(--motion-base) var(--ease), box-shadow var(--motion-base) var(--ease); }
 /* Abierto flota sobre el contenido: sombra corta, para que no deje una franja gris al costado.
    Se abre con el mouse encima o con foco de teclado (:focus-visible), no con :focus-within: un clic deja el foco en el ítem y lo dejaría fijo. */

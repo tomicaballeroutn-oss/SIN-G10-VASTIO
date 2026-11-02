@@ -1,4 +1,6 @@
 /* UI-21: el formulario en una grilla de dos columnas desde tableta; en teléfono, un campo debajo del otro. */
+.bloqueos__activos > .v-card__head { padding: var(--space-4); margin-bottom: var(--space-4); }
+@media (min-width: 640px) { .bloqueos__activos > .v-card__head { padding: var(--space-5); } }
 .bloqueos__form { display: flex; flex-direction: column; gap: var(--space-4); }
 .bloqueos__campos { display: grid; gap: var(--space-4); }
 @media (min-width: 640px) { .bloqueos__campos { grid-template-columns: repeat(2, minmax(0, 1fr)); } }

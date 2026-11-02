@@ -86,12 +86,21 @@ function Medidor({ name, cantidad, comprometido, estado, enUnidad }: {
   );
 }
 
+/** Un tipo por cada `movimiento_stock.tipo` (la consulta de movimientos, UI-37, los muestra todos). */
 const MOVIMIENTOS = {
   entrega: { label: 'Entrega a barra', icon: 'arrow-right-left', tone: 'info' },
   devolucion: { label: 'Devolución', icon: 'undo-2', tone: 'success' },
   'retiro-adicional': { label: 'Retiro adicional', icon: 'plus', tone: 'warning' },
   ingreso: { label: 'Ingreso al depósito', icon: 'truck', tone: 'brand' },
+  'inventario-inicial': { label: 'Inventario inicial', icon: 'boxes', tone: 'brand' },
+  preparacion: { label: 'Preparación', icon: 'warehouse', tone: 'info' },
+  remanente: { label: 'Remanente en barra', icon: 'archive', tone: 'neutral' },
+  consumo: { label: 'Consumo', icon: 'martini', tone: 'neutral' },
+  ajuste: { label: 'Ajuste por recuento', icon: 'repeat-2', tone: 'warning' },
+  merma: { label: 'Merma', icon: 'trash-2', tone: 'danger' },
 } as const;
+
+export type TipoMovimientoCard = keyof typeof MOVIMIENTOS;
 
 export interface MovementCardProps {
   tipo: keyof typeof MOVIMIENTOS;

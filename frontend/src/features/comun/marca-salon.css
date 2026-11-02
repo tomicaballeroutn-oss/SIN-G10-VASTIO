@@ -1,0 +1,8 @@
+.marca-salon { position: relative; display: block; flex: 0 0 auto; }
+.marca-salon__imagen,
+.marca-salon__texto-oscuro { position: absolute; inset: 0; display: block; width: 100%; height: 100%; object-fit: contain; object-position: right center; }
+.marca-salon__texto-oscuro { display: none; }
+
+[data-theme="dark"] .marca-salon--club .marca-salon__imagen,
+[data-theme="dark"] .marca-salon--santa-barbara .marca-salon__imagen { filter: brightness(0) invert(1); }
+[data-theme="dark"] .marca-salon__texto-oscuro { display: block; filter: brightness(0) invert(1); clip-path: inset(56% 0 0); }

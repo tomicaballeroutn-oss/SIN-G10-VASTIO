@@ -99,6 +99,21 @@ class AsistenciaRealIT {
     }
 
     @Test
+    void elTotalRealExcluyeSegmentosInactivosConDatosHistoricos() throws Exception {
+        registrar(ana, evento, COMPLETA).andExpect(status().isOk());
+        entityManager.flush();
+
+        // Venta en puerta conserva 14 asistentes históricos, pero deja de integrar el total vigente.
+        jdbc.update("UPDATE tipo_segmento_asistencia SET activo = false WHERE tipo_segmento_id = 3");
+        entityManager.clear();
+
+        ficha(ana, evento)
+                .andExpect(jsonPath("$.asistencia.totalReal").value(190))
+                .andExpect(jsonPath("$.asistencia.segmentos[2].activo").value(false))
+                .andExpect(jsonPath("$.asistencia.segmentos[2].real").value(14));
+    }
+
+    @Test
     void faltaUnSegmentoYNoSeGuarda() throws Exception {
         registrar(ana, evento, """
                 [{"segmentoId":1,"cantidad":132},{"segmentoId":2,"cantidad":58}]""")

@@ -13,6 +13,7 @@ export const SIN_ACCIONES: Acciones = {
   confirmar: false,
   cancelar: false,
   reprogramar: false,
+  registrarAsistenciaPrevista: false,
 };
 
 /** Las categorías de servicio activas desde V10 (con su id de la base), sin nada cargado. */
@@ -56,6 +57,7 @@ export function fichaDePrueba(cambios: Partial<Ficha> = {}): Ficha {
     cancelacion: null,
     documentos: null,
     servicios: SERVICIOS_VACIOS,
+    asistencia: null,
     requisitosConfirmacion: null,
     fechaCreacion: '2026-09-21T10:15:00-03:00',
     version: 1,

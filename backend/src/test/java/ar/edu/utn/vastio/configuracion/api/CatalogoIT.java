@@ -153,6 +153,20 @@ class CatalogoIT {
     }
 
     @Test
+    void marcarOtroSegmentoComoLosInvitadosSeLoQuitaAlAnterior() throws Exception {
+        leer("/segmentos-asistencia", personas.bearer(RolCodigo.DIRECCION))
+                .andExpect(jsonPath("$[?(@.id == 1)].equivaleInvitados").value(hasItem(true)));
+
+        escribir(put("/api/v1/segmentos-asistencia/2"), RolCodigo.ADMINISTRACION, """
+                {"nombre":"Entradas anticipadas","activo":true,"equivaleInvitados":true}""")
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.equivaleInvitados").value(true));
+        leer("/segmentos-asistencia", personas.bearer(RolCodigo.DIRECCION))
+                .andExpect(jsonPath("$[?(@.id == 1)].equivaleInvitados").value(hasItem(false)))
+                .andExpect(jsonPath("$[?(@.equivaleInvitados == true)].id").value(hasItem(2)));
+    }
+
+    @Test
     void seAgregaUnaCategoriaYSeCambiaSiEsRequeridaParaConfirmar() throws Exception {
         escribir(post("/api/v1/categorias-servicio"), RolCodigo.ADMINISTRACION, """
                 {"nombre":"Ambientación","orden":11,"visibleEnCocina":false,"requeridaParaConfirmar":false}""")

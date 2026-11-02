@@ -121,14 +121,17 @@ public class CatalogoController {
     @PreAuthorize(Permisos.CONFIGURAR)
     @Operation(summary = "Agregar un segmento de asistencia")
     public SegmentoResponse crearSegmento(@Valid @RequestBody SegmentoRequest pedido) {
-        return SegmentoResponse.de(catalogos.crearSegmento(pedido.nombre().trim()));
+        return SegmentoResponse.de(catalogos.crearSegmento(pedido.nombre().trim(), pedido.equivaleInvitados()));
     }
 
     @PutMapping("/segmentos-asistencia/{id}")
     @PreAuthorize(Permisos.CONFIGURAR)
-    @Operation(summary = "Editar o dar de baja un segmento de asistencia")
+    @Operation(summary = "Editar o dar de baja un segmento de asistencia", description = """
+            Con equivaleInvitados, su asistencia prevista es la cantidad de invitados del evento. Uno solo la tiene:
+            marcarla en otro se la quita al anterior.""")
     public SegmentoResponse actualizarSegmento(@PathVariable short id, @Valid @RequestBody SegmentoRequest pedido) {
-        return SegmentoResponse.de(catalogos.actualizarSegmento(id, pedido.nombre().trim(), activo(pedido.activo())));
+        return SegmentoResponse.de(catalogos.actualizarSegmento(id, pedido.nombre().trim(), activo(pedido.activo()),
+                pedido.equivaleInvitados()));
     }
 
     // ---------- categorías de servicio ----------

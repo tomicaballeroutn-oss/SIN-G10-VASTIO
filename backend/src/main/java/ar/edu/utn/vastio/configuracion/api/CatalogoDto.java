@@ -74,15 +74,17 @@ public final class CatalogoDto {
 
     // ---------- segmentos de asistencia ----------
 
-    public record SegmentoResponse(short id, String nombre, boolean activo) {
+    /** {@code equivaleInvitados}: su previsto es la cantidad de invitados del evento (en egresados, los comensales). */
+    public record SegmentoResponse(short id, String nombre, boolean activo, boolean equivaleInvitados) {
         static SegmentoResponse de(TipoSegmentoAsistencia s) {
-            return new SegmentoResponse(s.getId(), s.getNombre(), s.isActivo());
+            return new SegmentoResponse(s.getId(), s.getNombre(), s.isActivo(), s.isEquivaleInvitados());
         }
     }
 
     public record SegmentoRequest(
             @NotBlank(message = "Escribí el nombre del segmento.") @Size(max = 40, message = "Usá hasta 40 caracteres.") String nombre,
-            Boolean activo) {
+            Boolean activo,
+            boolean equivaleInvitados) {
     }
 
     // ---------- categorías de servicio ----------

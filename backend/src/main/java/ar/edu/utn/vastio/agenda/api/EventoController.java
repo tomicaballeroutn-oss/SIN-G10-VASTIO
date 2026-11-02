@@ -28,6 +28,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import ar.edu.utn.vastio.agenda.api.EventoDto.EventoResumen;
 import ar.edu.utn.vastio.agenda.api.EventoDto.FichaResponse;
+import ar.edu.utn.vastio.agenda.aplicacion.AsistenciaService;
 import ar.edu.utn.vastio.agenda.aplicacion.CancelacionService;
 import ar.edu.utn.vastio.agenda.aplicacion.ConfirmacionService;
 import ar.edu.utn.vastio.agenda.aplicacion.ConsultaEventoService;
@@ -67,12 +68,14 @@ public class EventoController {
     private final ConfirmacionService confirmaciones;
     private final CancelacionService cancelaciones;
     private final ReprogramacionService reprogramaciones;
+    private final AsistenciaService asistencias;
     private final EventoDto dto;
 
     public EventoController(PreReservaService preReservas, ConsultaEventoService consultas, DatosEventoService datos,
             SenaService senas, ContratoService contratos, ServiciosService servicios, InvitadosService invitados,
             PlannerService planners, ConfirmacionService confirmaciones, CancelacionService cancelaciones,
-            ReprogramacionService reprogramaciones, EventoDto dto) {
+            ReprogramacionService reprogramaciones, AsistenciaService asistencias, EventoDto dto) {
+        this.asistencias = asistencias;
         this.reprogramaciones = reprogramaciones;
         this.cancelaciones = cancelaciones;
         this.confirmaciones = confirmaciones;
@@ -203,6 +206,22 @@ public class EventoController {
             @AuthenticationPrincipal Jwt jwt) {
         UsuarioActual quien = UsuarioActual.de(jwt);
         invitados.registrar(id, pedido.version(), pedido.cantidad(), pedido.definitivos(), quien);
+        return dto.ficha(consultas.ficha(id, quien));
+    }
+
+    @PutMapping("/{id}/asistencia/prevista")
+    @PreAuthorize(Permisos.EDITAR_EVENTOS)
+    @Operation(summary = "Registrar asistencia prevista por segmento", description = """
+            Solo en los tipos de evento que la cuentan por segmento (egresados), entre Pre-reserva y Confirmado. La
+            registran la planner asignada, Coordinación y Dirección. El segmento que equivale a los invitados no se
+            carga: es la cantidad de invitados. Cantidad null deja el segmento sin previsto; los que no vienen no
+            cambian. Cada cambio queda en el historial. Devuelve la ficha.""")
+    @ApiResponse(responseCode = "409", description = "EVENTO_MODIFICADO: otra persona guardó cambios en el medio")
+    @ApiResponse(responseCode = "422", description = "SIN_SEGMENTOS, SEGMENTO_INVALIDO o estado que no lo permite")
+    public FichaResponse registrarAsistenciaPrevista(@PathVariable long id, @Valid @RequestBody AsistenciaRequest pedido,
+            @AuthenticationPrincipal Jwt jwt) {
+        UsuarioActual quien = UsuarioActual.de(jwt);
+        asistencias.registrarPrevista(id, pedido.version(), pedido.cantidades(), quien);
         return dto.ficha(consultas.ficha(id, quien));
     }
 

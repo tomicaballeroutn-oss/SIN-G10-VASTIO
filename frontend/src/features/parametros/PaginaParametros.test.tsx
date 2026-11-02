@@ -2,7 +2,7 @@ import { screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { _reiniciarCliente } from '../../api/cliente';
-import type { Parametro, Salon, TipoEvento, Turno } from '../../api/catalogos';
+import type { Parametro, Salon, Segmento, TipoEvento, Turno } from '../../api/catalogos';
 import { backendFalso, json, montar, pedidos, problema, sesionDe, type Pedido } from '../../test/backendFalso';
 
 const SALONES: Salon[] = [
@@ -21,6 +21,11 @@ const TIPOS: TipoEvento[] = [
   { id: 5, nombre: 'Cumpleaños', usaSegmentos: false, activo: false },
 ];
 
+const SEGMENTOS: Segmento[] = [
+  { id: 1, nombre: 'Comensales cena', activo: true, equivaleInvitados: true },
+  { id: 2, nombre: 'Entradas anticipadas', activo: true, equivaleInvitados: false },
+];
+
 const PARAMETROS: Parametro[] = [
   { clave: 'HORIZONTE_COCINA_DIAS', valor: '15', descripcion: null, minimo: 1, maximo: 90 },
   { clave: 'MINUTOS_AVISO_EXPIRACION', valor: '5', descripcion: null, minimo: 1, maximo: 60 },
@@ -32,6 +37,8 @@ function catalogo({ metodo, ruta, cuerpo }: Pedido) {
   if (metodo === 'GET' && ruta === '/turnos') return json(200, TURNOS);
   if (metodo === 'GET' && ruta === '/tipos-evento') return json(200, TIPOS);
   if (metodo === 'GET' && ruta === '/parametros') return json(200, PARAMETROS);
+  if (metodo === 'GET' && ruta === '/segmentos-asistencia') return json(200, SEGMENTOS);
+  if (metodo === 'PUT' && ruta === '/segmentos-asistencia/2') return json(200, { id: 2, ...(cuerpo as object) });
   if (metodo === 'PUT' && ruta === '/salones/1') return json(200, { ...SALONES[0], ...(cuerpo as object) });
   if (metodo === 'POST' && ruta === '/tipos-evento') return json(201, { id: 6, activo: true, ...(cuerpo as object) });
   if (metodo === 'PUT' && ruta.startsWith('/parametros/')) {
@@ -114,6 +121,24 @@ describe('UI-06 · parámetros del sistema', () => {
 
     expect(await screen.findByRole('button', { name: 'Editar Bautismo' })).toBeInTheDocument();
     expect(pedidos(fetchMock)).toContainEqual({ metodo: 'POST', ruta: '/tipos-evento', cuerpo: { nombre: 'Bautismo', usaSegmentos: false } });
+  });
+
+  it('marca qué segmento de asistencia equivale a los invitados del evento', async () => {
+    const fetchMock = backendFalso(sesionDe(['ADMINISTRACION']), catalogo);
+    const usuario = userEvent.setup();
+    montar('/parametros?seccion=segmentos');
+
+    expect(await screen.findByText('· los invitados del evento', { exact: false })).toBeInTheDocument();
+    await usuario.click(screen.getByRole('button', { name: 'Editar Entradas anticipadas' }));
+    await usuario.click(screen.getByLabelText(/Equivale a los invitados del evento/));
+    await usuario.click(screen.getByRole('button', { name: 'Guardar cambios' }));
+
+    expect(await screen.findByRole('button', { name: 'Editar Entradas anticipadas' })).toBeInTheDocument();
+    expect(pedidos(fetchMock)).toContainEqual({
+      metodo: 'PUT', ruta: '/segmentos-asistencia/2', cuerpo: { nombre: 'Entradas anticipadas', activo: true, equivaleInvitados: true },
+    });
+    // Se vuelve a pedir la lista: el anterior perdió la marca.
+    expect(pedidos(fetchMock).filter((p) => p.ruta === '/segmentos-asistencia' && p.metodo === 'GET')).toHaveLength(2);
   });
 
   it('si el aviso de sesión sube, guarda primero la duración de la sesión', async () => {

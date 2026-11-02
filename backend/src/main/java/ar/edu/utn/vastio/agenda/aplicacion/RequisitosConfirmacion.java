@@ -19,7 +19,8 @@ import ar.edu.utn.vastio.usuarios.aplicacion.UsuarioService;
 
 /**
  * Condiciones de «Confirmar evento» (docs/sprint-2.md, decisión 7): planner asignada, cantidad de invitados mayor a 0
- * y definitiva, servicios cargados en las categorías requeridas para confirmar y que la fecha no haya pasado.
+ * y definitiva, asistencia prevista por segmento si el tipo la cuenta así (docs/sprint-4.md, decisión 5), servicios
+ * cargados en las categorías requeridas para confirmar y que la fecha no haya pasado.
  * La ficha las muestra en el diálogo (UI-15) y el caso de uso las vuelve a verificar.
  */
 @Component
@@ -30,22 +31,44 @@ public class RequisitosConfirmacion {
     private final ServicioContratadoRepository servicios;
     private final CatalogoService catalogos;
     private final UsuarioService usuarios;
+    private final AsistenciaPorSegmento asistencias;
 
-    public RequisitosConfirmacion(ServicioContratadoRepository servicios, CatalogoService catalogos, UsuarioService usuarios) {
+    public RequisitosConfirmacion(ServicioContratadoRepository servicios, CatalogoService catalogos, UsuarioService usuarios,
+            AsistenciaPorSegmento asistencias) {
+        this.asistencias = asistencias;
         this.servicios = servicios;
         this.catalogos = catalogos;
         this.usuarios = usuarios;
     }
 
     /**
-     * @param codigo  PLANNER · INVITADOS · SERVICIOS · FECHA.
+     * @param codigo  PLANNER · INVITADOS · ASISTENCIA (solo en los tipos con segmentos) · SERVICIOS · FECHA.
      * @param detalle lo que hay («Ana Sosa», «180») o lo que falta («Falta cargar Tipo de barra.»).
      */
     public record Requisito(String codigo, String titulo, boolean cumplido, String detalle) {
     }
 
     public List<Requisito> de(Evento evento) {
-        return List.of(planner(evento), invitados(evento), servicios(evento), fecha(evento));
+        AsistenciaPorSegmento.Asistencia asistencia = asistencias.de(evento);
+        return asistencia == null
+                ? List.of(planner(evento), invitados(evento), servicios(evento), fecha(evento))
+                : List.of(planner(evento), invitados(evento), asistencia(asistencia), servicios(evento), fecha(evento));
+    }
+
+    /**
+     * Egresados (docs/sprint-4.md, decisión 5): además de los invitados, algún otro segmento previsto, el público de la
+     * fiesta posterior. Sobre el total se dimensiona la bebida.
+     */
+    private static Requisito asistencia(AsistenciaPorSegmento.Asistencia asistencia) {
+        List<AsistenciaPorSegmento.Segmento> otros = asistencia.segmentos().stream()
+                .filter(s -> s.activo() && !s.equivaleInvitados() && s.prevista() != null && s.prevista() > 0)
+                .toList();
+        if (otros.isEmpty()) {
+            return new Requisito("ASISTENCIA", "Asistencia prevista por segmento", false,
+                    "Falta cargar la asistencia prevista por segmento.");
+        }
+        return new Requisito("ASISTENCIA", "Asistencia prevista por segmento", true,
+                "%d en total".formatted(asistencia.totalPrevisto()));
     }
 
     private Requisito planner(Evento evento) {

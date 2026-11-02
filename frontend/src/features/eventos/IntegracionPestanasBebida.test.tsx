@@ -26,7 +26,7 @@ function backend(rol: Rol) {
   return backendFalso(sesionDe([rol]), ({ ruta }) => {
     if (ruta === '/eventos/5') return json(200, fichaDePrueba({ estado: 'CERRADO' }));
     if (ruta === '/eventos/5/consumo') return json(200, {
-      invitados: 180, denominador: 'INVITADOS', usaSegmentos: false, renglones: [], consumoTotal: 0, porInvitadoTotal: 0,
+      invitados: 180, asistenciaReal: null, denominador: 'INVITADOS', usaSegmentos: false, renglones: [], consumoTotal: 0, porInvitadoTotal: 0,
     });
     if (ruta === '/eventos/5/preparaciones') return json(200, {
       evento: { id: 5, nombre: 'Bruno y Martina', estado: 'CERRADO' }, madre: null, circuitos: [], historial: [],

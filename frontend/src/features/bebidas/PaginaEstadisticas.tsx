@@ -86,9 +86,9 @@ function Tabla({ titulo, filas }: { titulo: string; filas: Fila[] }) {
     { key: 'registros', header: 'Eventos con registro', numeric: true, render: (f) => numero(f.medidas.eventosConConsumoRegistrado) },
     { key: 'total', header: 'Consumo total (botellas)', numeric: true, render: (f) => numero(f.medidas.consumoTotal) },
     { key: 'porEvento', header: 'Botellas por evento', numeric: true, render: (f) => numero(f.medidas.promedioPorEvento) },
-    { key: 'porInvitado', header: 'Botellas por invitado registrado', numeric: true, render: (f) => numero(f.medidas.porInvitadoRegistrado) },
-    { key: 'validos', header: 'Eventos con invitados válidos', numeric: true, render: (f) => numero(f.medidas.eventosConInvitadosValidos) },
-    { key: 'invitados', header: 'Invitados registrados', numeric: true, render: (f) => numero(f.medidas.invitadosRegistrados) },
+    { key: 'porInvitado', header: 'Botellas por asistente', numeric: true, render: (f) => numero(f.medidas.porInvitadoRegistrado) },
+    { key: 'validos', header: 'Eventos con asistentes válidos', numeric: true, render: (f) => numero(f.medidas.eventosConInvitadosValidos) },
+    { key: 'invitados', header: 'Asistentes', numeric: true, render: (f) => numero(f.medidas.invitadosRegistrados) },
   ];
   return <Card title={titulo}>
     <p className="body-sm v-muted">Si no ves todas las columnas, desplazá la tabla hacia los costados.</p>
@@ -108,8 +108,9 @@ function Resultados({ filtros, lista }: { filtros: FiltrosEstadisticas; lista: C
   return <div className="pantalla" aria-label="Resultados de estadísticas" aria-busy={datos.cargando}>
     <p className="body-sm">Filtros aplicados: {seleccion}</p>
     <Cargando datos={datos}>{(r) => <>
-      <Alert tone="info" title="Consumo por invitado registrado">
-        Se usan invitados registrados, no asistencia real. Se excluyen del consumo y del denominador los eventos con invitados desconocidos o cero.
+      <Alert tone="info" title="Consumo por asistente">
+        En los eventos con asistencia por segmento (egresados) y la real cargada, se usa la asistencia real; en el resto, los invitados
+        registrados. Se excluyen del consumo y del denominador los eventos sin asistentes conocidos.
         Los eventos sin consumo cuentan en los promedios. Todas las cantidades se expresan en botellas.
       </Alert>
       {r.resumen.eventos === 0 ? <Alert tone="info" title="No hay eventos cerrados para estos filtros">Probá con otro período o combinación de filtros.</Alert>
@@ -121,10 +122,11 @@ function Resultados({ filtros, lista }: { filtros: FiltrosEstadisticas; lista: C
           <Stat label="Eventos cerrados incluidos" value={numero(r.resumen.eventos)} />
           <Stat label="Consumo total" value={numero(r.resumen.consumoTotal)} unit="botellas" />
           <Stat label="Promedio por evento" value={numero(r.resumen.promedioPorEvento)} unit="botellas" />
-          <Stat label="Consumo por invitado registrado" value={numero(r.resumen.porInvitadoRegistrado)} unit="botellas" />
+          <Stat label="Consumo por asistente" value={numero(r.resumen.porInvitadoRegistrado)} unit="botellas" />
         </div>
-        <p className="body-sm">El cálculo por invitado usa {numero(r.resumen.eventosConInvitadosValidos)} de {numero(r.resumen.eventos)} eventos,
-          {' '}{numero(r.resumen.invitadosRegistrados)} invitados registrados y {numero(r.resumen.consumoConInvitadosValidos)} botellas de esos mismos eventos.</p>
+        <p className="body-sm">El cálculo por asistente usa {numero(r.resumen.eventosConInvitadosValidos)} de {numero(r.resumen.eventos)} eventos,
+          {' '}{numero(r.resumen.invitadosRegistrados)} asistentes y {numero(r.resumen.consumoConInvitadosValidos)} botellas de esos mismos eventos.
+          {r.resumen.eventosConAsistenciaReal > 0 && ` ${numero(r.resumen.eventosConAsistenciaReal)} de esos eventos usan la asistencia real por segmento.`}</p>
       </Card>
       <Tabla titulo="Consumo por bebida" filas={r.porBebida.map((b) => ({ id: String(b.bebidaId), etiqueta: `${b.nombre} ${b.presentacion}${estado(b.activo)}`, medidas: b.medidas }))} />
       <Tabla titulo="Consumo por tipo de evento" filas={r.porTipoEvento.map((t) => ({ id: String(t.tipoEventoId), etiqueta: t.nombre + estado(t.activo), medidas: t.medidas }))} />

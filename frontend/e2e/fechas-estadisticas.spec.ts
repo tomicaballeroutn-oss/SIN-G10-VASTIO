@@ -18,9 +18,9 @@ test(`una fecha ${caso} se rechaza y una fecha vacía intencional permite consul
     else if (ruta.endsWith('/notificaciones/sin-leer')) cuerpo = { cantidad: 0 };
     else if (ruta.endsWith('/estadisticas/consumo')) {
       consultas.push(route.request().url());
-      cuerpo = { unidad: 'BOTELLAS', denominador: 'INVITADOS_REGISTRADOS', filtros: {},
+      cuerpo = { unidad: 'BOTELLAS', denominador: 'ASISTENTES', filtros: {},
         resumen: { eventos: 0, eventosConConsumoRegistrado: 0, consumoTotal: 0, promedioPorEvento: null,
-          eventosConInvitadosValidos: 0, invitadosRegistrados: 0, consumoConInvitadosValidos: 0, porInvitadoRegistrado: null },
+          eventosConInvitadosValidos: 0, invitadosRegistrados: 0, consumoConInvitadosValidos: 0, porInvitadoRegistrado: null, eventosConAsistenciaReal: 0 },
         porBebida: [], porTipoEvento: [], detalle: [] };
     } else cuerpo = [];
     await route.fulfill({ json: cuerpo });

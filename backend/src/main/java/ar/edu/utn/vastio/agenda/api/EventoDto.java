@@ -117,16 +117,20 @@ public class EventoDto {
      * Asistencia por segmento (UI-19). {@code equivaleInvitados}: su previsto es la cantidad de invitados y no se carga
      * aparte. {@code activo} falso: dado de baja con algo cargado (se ve, no se edita).
      */
-    public record SegmentoDto(short id, String nombre, boolean activo, boolean equivaleInvitados, Integer prevista) {
+    public record SegmentoDto(short id, String nombre, boolean activo, boolean equivaleInvitados, Integer prevista,
+            Integer real) {
     }
 
-    /** {@code totalPrevisto}: la suma de lo previsto (null si no hay nada); sobre eso se dimensiona la bebida. */
-    public record AsistenciaDto(List<SegmentoDto> segmentos, Integer totalPrevisto) {
+    /**
+     * {@code totalPrevisto}: la suma de lo previsto (null si no hay nada); sobre eso se dimensiona la bebida.
+     * {@code totalReal}: la suma de lo real, solo si todos los segmentos activos la tienen (UI-20).
+     */
+    public record AsistenciaDto(List<SegmentoDto> segmentos, Integer totalPrevisto, Integer totalReal) {
 
         static AsistenciaDto de(AsistenciaPorSegmento.Asistencia a) {
             return a == null ? null : new AsistenciaDto(a.segmentos().stream()
-                    .map(s -> new SegmentoDto(s.id(), s.nombre(), s.activo(), s.equivaleInvitados(), s.prevista()))
-                    .toList(), a.totalPrevisto());
+                    .map(s -> new SegmentoDto(s.id(), s.nombre(), s.activo(), s.equivaleInvitados(), s.prevista(), s.real()))
+                    .toList(), a.totalPrevisto(), a.totalReal());
         }
     }
 

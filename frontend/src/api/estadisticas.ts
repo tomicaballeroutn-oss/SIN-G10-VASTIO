@@ -17,10 +17,13 @@ export interface MedidasConsumo {
   invitadosRegistrados: number;
   consumoConInvitadosValidos: number;
   porInvitadoRegistrado: number | null;
+  /** De los eventos válidos, cuántos usan la asistencia real por segmento como divisor. */
+  eventosConAsistenciaReal: number;
 }
 export interface EstadisticasConsumo {
   unidad: 'BOTELLAS';
-  denominador: 'INVITADOS_REGISTRADOS';
+  /** Por evento: la asistencia real por segmento si está completa; si no, los invitados registrados. */
+  denominador: 'ASISTENTES';
   filtros: { [K in keyof FiltrosEstadisticas]: FiltrosEstadisticas[K] | null };
   resumen: MedidasConsumo;
   porBebida: { bebidaId: number; nombre: string; presentacion: string; activo: boolean; medidas: MedidasConsumo }[];

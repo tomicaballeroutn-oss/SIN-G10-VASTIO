@@ -41,21 +41,25 @@ export function PestanaConsumo({ eventoId }: { eventoId: number }) {
                 { key: 'devuelto', header: 'Devuelto', numeric: true, render: (r) => cantidadLegible(r.devuelto, r.unidadesPorBulto, r.unidad) },
                 { key: 'remanente', header: 'Remanente', numeric: true, render: (r) => cantidadLegible(r.remanente, r.unidadesPorBulto, r.unidad) },
                 { key: 'consumo', header: 'Consumido', numeric: true, render: (r) => cantidadLegible(r.consumo, r.unidadesPorBulto, r.unidad) },
-                { key: 'porInvitado', header: 'Por invitado', numeric: true, render: (r) => botellas(r.porInvitado) },
+                { key: 'porInvitado', header: 'Por asistente', numeric: true, render: (r) => botellas(r.porInvitado) },
               ]}
             />
           </Card>
           <Card title="Consumo total">
             <p className="numeral">{botellas(consumo.consumoTotal)}</p>
           </Card>
-          <Card title="Consumo por invitado">
+          <Card title="Consumo por asistente">
             <p className="numeral">{botellas(consumo.porInvitadoTotal)}</p>
             <p className="body-sm">
-              {consumo.invitados !== null && consumo.invitados > 0
-                ? `Calculado sobre ${consumo.invitados} invitados, no sobre asistencia real.`
-                : 'La cantidad de invitados es desconocida o cero: no se puede calcular el consumo por invitado.'}
+              {consumo.denominador === 'ASISTENCIA_REAL'
+                ? `Calculado sobre ${consumo.asistenciaReal} asistentes reales (asistencia por segmento).`
+                : consumo.invitados !== null && consumo.invitados > 0
+                  ? `Calculado sobre ${consumo.invitados} invitados, no sobre asistencia real.`
+                  : 'La cantidad de invitados es desconocida o cero: no se puede calcular el consumo por asistente.'}
             </p>
-            {consumo.usaSegmentos && <p className="body-sm v-muted">Este evento usa segmentos; el denominador disponible sigue siendo la cantidad de invitados.</p>}
+            {consumo.usaSegmentos && consumo.denominador === 'INVITADOS' && (
+              <p className="body-sm v-muted">Falta la asistencia real por segmento: cuando se cargue, el cálculo se hace sobre ella.</p>
+            )}
           </Card>
         </div>
       )}

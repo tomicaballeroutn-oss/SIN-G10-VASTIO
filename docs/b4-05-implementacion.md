@@ -103,7 +103,7 @@ La prueba de navegador utiliza `E2E_URL`, `E2E_DEMO_CONTRASENA` y `E2E_CONSUMO_E
 - **Concurrencia retiro–realización–cierre:** sigue pendiente investigar y probar la ventana entre la lectura del estado y las operaciones concurrentes de los productores del dato. B4-05 no cambia esos bloqueos ni sus reglas.
 - **Dependencias abiertas:** la rama depende de #26 → #27 → #28 → #29. Las correcciones de Berni o Albert pueden exigir actualizar esta rama y repetir las pruebas antes del PR.
 - **Datos de contexto vigentes:** las cantidades están congeladas; nombre/presentación/unidad de bebida y cantidad de invitados se leen de los registros vigentes. No se agrega una fotografía histórica del catálogo ni del denominador. Las vías normales de edición del evento cerrado continúan bloqueadas por las reglas existentes.
-- **Asistencia real:** no está implementada en la base de esta historia; la pantalla identifica explícitamente el cociente por invitados.
+- **Asistencia real:** no está implementada en la base de esta historia; la pantalla identifica explícitamente el cociente por invitados. Desde el Sprint 4 (docs/sprint-4.md, decisión 8), si el evento tiene la asistencia real por segmento completa, el divisor es esa suma y `denominador` vale `ASISTENCIA_REAL`.
 - **Prototipos anteriores:** UI-34 menciona costos y estadísticas; se aplicó el alcance vigente de cantidades y consulta desde la ficha.
 
 ## 7. Estado final de Git

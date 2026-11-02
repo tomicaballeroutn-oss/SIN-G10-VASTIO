@@ -72,8 +72,8 @@ public class CierreService {
      * cerrar). {@code cerrado}: los renglones son los congelados en {@code consumo_evento}.
      */
     public record PantallaCierre(EventoOperativo evento, Salon salon, Integer invitados, boolean usaSegmentos,
-            List<Ubicacion> pendientes, List<Renglon> renglones, BigDecimal consumoTotal, BigDecimal porAsistenteTotal,
-            boolean cerrado) {
+            Integer asistenciaReal, List<Ubicacion> pendientes, List<Renglon> renglones, BigDecimal consumoTotal,
+            BigDecimal porAsistenteTotal, boolean cerrado) {
     }
 
     /** Un evento realizado que espera su cierre. */
@@ -90,13 +90,13 @@ public class CierreService {
         if (evento.estado() == EstadoEvento.CERRADO) {
             List<Renglon> congelados = consumos.findByEventoId(eventoId).stream()
                     .map(c -> renglon(c.getBebida(), c.getCantidadEntregada(), c.getCantidadDevuelta(), c.getCantidadRemanente(),
-                            c.getCantidadConsumida(), datos.cantidadInvitados()))
+                            c.getCantidadConsumida(), datos.asistentes()))
                     .sorted(Comparator.comparing(Renglon::bebida, POR_NOMBRE)).toList();
             return pantalla(evento, datos, List.of(), congelados, true);
         }
         List<Entrega> lista = entregas.findByEventoIdOrderByIdAsc(eventoId);
         List<Ubicacion> pendientes = lista.stream().filter(Entrega::isAbierta).map(Entrega::getBarra).toList();
-        return pantalla(evento, datos, pendientes, conciliar(lista, datos.cantidadInvitados()), false);
+        return pantalla(evento, datos, pendientes, conciliar(lista, datos.asistentes()), false);
     }
 
     /**
@@ -117,7 +117,7 @@ public class CierreService {
                     "Falta registrar la devolución de %s. Registrala antes de cerrar el evento.".formatted(String.join(" y ", pendientes)));
         }
         DatosDeCierre datos = cierres.datos(eventoId);
-        for (Renglon r : conciliar(lista, datos.cantidadInvitados())) {
+        for (Renglon r : conciliar(lista, datos.asistentes())) {
             consumos.save(new ConsumoEvento(eventoId, r.bebida(), r.entregado(), r.devuelto(), r.remanente(), r.consumo()));
         }
         consumos.cerrarOrdenDePreparacion(eventoId);
@@ -128,7 +128,7 @@ public class CierreService {
      * Suma, por bebida, lo que registraron las devoluciones de las entregas cerradas: lo devuelto desde la barra, el
      * remanente y lo consumido. Lo entregado es la suma de las tres (el saldo de la barra antes de devolver).
      */
-    private List<Renglon> conciliar(List<Entrega> lista, Integer invitados) {
+    private List<Renglon> conciliar(List<Entrega> lista, Integer asistentes) {
         record Suma(Bebida bebida, BigDecimal[] valores) {
         }
         Map<Long, Suma> porBebida = new LinkedHashMap<>();
@@ -155,32 +155,33 @@ public class CierreService {
         List<Renglon> renglones = new ArrayList<>();
         for (Suma s : porBebida.values()) {
             BigDecimal[] v = s.valores();
-            renglones.add(renglon(s.bebida(), v[0].add(v[1]).add(v[2]), v[0], v[1], v[2], invitados));
+            renglones.add(renglon(s.bebida(), v[0].add(v[1]).add(v[2]), v[0], v[1], v[2], asistentes));
         }
         renglones.sort(Comparator.comparing(Renglon::bebida, POR_NOMBRE));
         return renglones;
     }
 
     private static Renglon renglon(Bebida bebida, BigDecimal entregado, BigDecimal devuelto, BigDecimal remanente,
-            BigDecimal consumo, Integer invitados) {
-        return new Renglon(bebida, entregado, devuelto, remanente, consumo, porAsistente(consumo, invitados));
+            BigDecimal consumo, Integer asistentes) {
+        return new Renglon(bebida, entregado, devuelto, remanente, consumo, porAsistente(consumo, asistentes));
     }
 
     private PantallaCierre pantalla(EventoOperativo evento, DatosDeCierre datos, List<Ubicacion> pendientes, List<Renglon> renglones,
             boolean cerrado) {
         BigDecimal total = renglones.stream().map(Renglon::consumo).reduce(BigDecimal.ZERO, BigDecimal::add);
         return new PantallaCierre(evento, catalogos.salon(evento.salonId()), datos.cantidadInvitados(), datos.usaSegmentos(),
-                pendientes, renglones, total, porAsistente(total, datos.cantidadInvitados()), cerrado);
+                datos.asistenciaReal(), pendientes, renglones, total, porAsistente(total, datos.asistentes()), cerrado);
     }
 
     /**
-     * Lo consumido dividido por la cantidad de invitados (decisión 14). Si el tipo usa segmentos, también, mientras no se
-     * registre la asistencia real por segmento (Sprint 4). Sin invitados cargados, no hay consumo por asistente.
+     * Lo consumido dividido por los asistentes (docs/sprint-3-operacion.md, decisión 14): la asistencia real por
+     * segmento si el tipo la cuenta así y ya se cargó (docs/sprint-4.md, decisión 8); si no, la cantidad de invitados.
+     * Sin ninguna de las dos, no hay consumo por asistente.
      */
-    private static BigDecimal porAsistente(BigDecimal consumo, Integer invitados) {
-        if (invitados == null || invitados <= 0) {
+    private static BigDecimal porAsistente(BigDecimal consumo, Integer asistentes) {
+        if (asistentes == null || asistentes <= 0) {
             return null;
         }
-        return consumo.divide(BigDecimal.valueOf(invitados), DECIMALES_POR_ASISTENTE, RoundingMode.HALF_UP);
+        return consumo.divide(BigDecimal.valueOf(asistentes), DECIMALES_POR_ASISTENTE, RoundingMode.HALF_UP);
     }
 }

@@ -56,3 +56,6 @@
 
 /* M-06: advertencia con variante clara y oscura del sistema de diseño. */
 .avisos__aviso--calendar-pendiente { --aviso-tipo: var(--warning); }
+
+/* Sprint 4: asistencia real de cierre (a la planner), con la marca del sistema de diseño en ambos temas. */
+.avisos__aviso--asistencia-real { --aviso-tipo: var(--brand); }

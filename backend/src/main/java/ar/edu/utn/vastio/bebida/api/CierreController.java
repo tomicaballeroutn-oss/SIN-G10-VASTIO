@@ -52,15 +52,16 @@ public class CierreController {
     }
 
     /**
-     * {@code pendientes}: barras sin devolución (no se puede cerrar). {@code usaSegmentos}: el tipo pide asistencia por
-     * segmento, que todavía no se registra: se divide por la cantidad de invitados. {@code cerrado}: lo congelado.
+     * {@code pendientes}: barras sin devolución (no se puede cerrar). {@code usaSegmentos}: el tipo cuenta la asistencia
+     * por segmento. {@code asistenciaReal}: su total si ya se cargó; el consumo por asistente se divide por ella y, si
+     * falta, por los invitados. {@code cerrado}: lo congelado.
      */
     public record CierreResponse(EventoResumen evento, SalonResumen salon, Integer invitados, boolean usaSegmentos,
-            List<UbicacionResumen> pendientes, List<RenglonCierre> renglones, BigDecimal consumoTotal, BigDecimal porAsistenteTotal,
-            boolean cerrado) {
+            Integer asistenciaReal, List<UbicacionResumen> pendientes, List<RenglonCierre> renglones,
+            BigDecimal consumoTotal, BigDecimal porAsistenteTotal, boolean cerrado) {
         static CierreResponse de(PantallaCierre p) {
             return new CierreResponse(EventoResumen.de(p.evento()), SalonResumen.de(p.salon()), p.invitados(), p.usaSegmentos(),
-                    p.pendientes().stream().map(UbicacionResumen::de).toList(),
+                    p.asistenciaReal(), p.pendientes().stream().map(UbicacionResumen::de).toList(),
                     p.renglones().stream().map(RenglonCierre::de).toList(), p.consumoTotal(), p.porAsistenteTotal(), p.cerrado());
         }
     }

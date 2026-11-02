@@ -43,7 +43,7 @@ class EstadisticaConsumoServiceTest {
     void consultaEnLotesSinNMasUnoYAunSinConsumoCuentaTodosLosEventos() {
         catalogo();
         when(agenda.cerrados(null, null, null, null)).thenReturn(LongStream.rangeClosed(1, 2001)
-                .mapToObj(id -> new EventoHistorico(id, (short) 2, Integer.MAX_VALUE)).toList());
+                .mapToObj(id -> new EventoHistorico(id, (short) 2, Integer.MAX_VALUE, false)).toList());
         when(consumos.historicos(anyList(), isNull())).thenReturn(List.of());
         var resultado = servicio.consultar(new Filtros(null, null, null, null, null));
         assertThat(resultado.resumen().eventos()).isEqualTo(2001);
@@ -58,8 +58,8 @@ class EstadisticaConsumoServiceTest {
     void redondeaHalfUpAlFinalYExcluyeConsumoDeInvitadosInvalidos() {
         catalogo();
         when(agenda.cerrados(null, null, null, null)).thenReturn(List.of(
-                new EventoHistorico(1, (short) 2, 200), new EventoHistorico(2, (short) 2, 0),
-                new EventoHistorico(3, (short) 2, null)));
+                new EventoHistorico(1, (short) 2, 200, false), new EventoHistorico(2, (short) 2, 0, false),
+                new EventoHistorico(3, (short) 2, null, false)));
         var fila = mock(ConsumoEventoRepository.Historico.class);
         when(fila.getEventoId()).thenReturn(1L);
         when(fila.getBebidaId()).thenReturn(1L);

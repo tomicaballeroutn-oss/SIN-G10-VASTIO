@@ -4,56 +4,88 @@ import { useEnvio } from '../../api/useDatos';
 import { Actor, Alert, Button, Card, Dialog, Input, Stat, Table } from '../../ds';
 import { fechaHora } from '../comun/formato';
 
-/** Prefijo del historial para los cambios de la asistencia prevista («asistencia_prevista.Entradas anticipadas»). */
+/** Prefijos del historial («asistencia_prevista.Entradas anticipadas», «asistencia_real.Venta en puerta»). */
 export const CAMPO_PREVISTA = 'asistencia_prevista.';
+export const CAMPO_REAL = 'asistencia_real.';
 
 /**
- * UI-19 · Asistencia por segmento de un evento de egresados (docs/sprint-4.md, decisiones 1 a 5). Los invitados son los
- * comensales de la cena; los demás segmentos suman el público de la fiesta posterior. Sobre el total se dimensiona la
- * bebida.
+ * UI-19 y UI-20 · Asistencia por segmento de un evento de egresados (docs/sprint-4.md, decisiones 1 a 8). Los invitados
+ * son los comensales de la cena; los demás segmentos suman el público de la fiesta posterior. Sobre el total previsto
+ * se dimensiona la bebida; con la real completa se calcula el consumo por asistente.
  */
 export function PestanaAsistencia({ ficha, asistencia, alGuardar }: {
   ficha: Ficha;
   asistencia: Asistencia;
   alGuardar: (ficha: Ficha) => void;
 }) {
-  const [dialogo, setDialogo] = useState(false);
+  const [dialogo, setDialogo] = useState<'prevista' | 'real' | null>(null);
   const [aviso, setAviso] = useState<string>();
-  const ultimo = ficha.historial
-    .filter((e): e is Modificacion => e.tipo === 'MODIFICACION' && e.campo.startsWith(CAMPO_PREVISTA))
+  const ultimo = (prefijo: string) => ficha.historial
+    .filter((e): e is Modificacion => e.tipo === 'MODIFICACION' && e.campo.startsWith(prefijo))
     .at(-1);
+  const ultimaPrevista = ultimo(CAMPO_PREVISTA);
+  const ultimaReal = ultimo(CAMPO_REAL);
+  const terminada = ficha.estado === 'REALIZADO' || ficha.estado === 'CERRADO';
+  const { acciones } = ficha;
+
+  function guardada(nueva: Ficha, mensaje: string) {
+    setDialogo(null);
+    setAviso(mensaje);
+    alGuardar(nueva);
+  }
 
   return (
     <Card
-      title="Asistencia prevista"
+      title="Asistencia por segmento"
       subtitle="Los invitados son los comensales de la cena; los demás segmentos, el público de la fiesta."
-      actions={ficha.acciones.registrarAsistenciaPrevista && (
-        <Button variant="outline" size="sm" icon="users" onClick={() => setDialogo(true)}>Registrar asistencia prevista</Button>
+      actions={(acciones.registrarAsistenciaPrevista || acciones.registrarAsistenciaReal) && (
+        <div className="asistencia__acciones">
+          {acciones.registrarAsistenciaPrevista && (
+            <Button variant="outline" size="sm" icon="users" onClick={() => setDialogo('prevista')}>Registrar asistencia prevista</Button>
+          )}
+          {acciones.registrarAsistenciaReal && (
+            <Button size="sm" icon="clipboard-check" onClick={() => setDialogo('real')}>Registrar asistencia real</Button>
+          )}
+        </div>
       )}
     >
       <div className="asistencia">
         {aviso && <Alert tone="success">{aviso}</Alert>}
+        {terminada && asistencia.totalReal == null && (
+          <Alert tone="warning" title="Falta la asistencia real">
+            Mientras no se cargue la de todos los segmentos, el consumo por asistente se calcula sobre los invitados.
+          </Alert>
+        )}
         <Table<SegmentoAsistencia>
-          caption="Asistencia prevista por segmento"
+          caption="Asistencia por segmento"
           columns={[
             { key: 'nombre', header: 'Segmento', render: (s) => nombreSegmento(s) },
             { key: 'prevista', header: 'Previsto', numeric: true, render: (s) => s.prevista ?? '—' },
+            { key: 'real', header: 'Real', numeric: true, render: (s) => s.real ?? '—' },
           ]}
           rows={asistencia.segmentos}
         />
-        <Stat label="Total previsto" value={asistencia.totalPrevisto ?? '—'} unit={asistencia.totalPrevisto != null ? 'personas' : undefined} />
-        {ultimo && <Actor name={ultimo.usuario.nombre} action="la cambió por última vez" at={fechaHora(ultimo.fechaHora)} size="sm" />}
+        <div className="asistencia__totales">
+          <Stat label="Total previsto" value={asistencia.totalPrevisto ?? '—'} unit={asistencia.totalPrevisto != null ? 'personas' : undefined} />
+          <Stat label="Total real" value={asistencia.totalReal ?? '—'} unit={asistencia.totalReal != null ? 'personas' : undefined} />
+        </div>
+        {ultimaPrevista && <Actor name={ultimaPrevista.usuario.nombre} action="cambió la prevista" at={fechaHora(ultimaPrevista.fechaHora)} size="sm" />}
+        {ultimaReal && <Actor name={ultimaReal.usuario.nombre} action="cargó la real" at={fechaHora(ultimaReal.fechaHora)} size="sm" />}
       </div>
-      {dialogo && (
+      {dialogo === 'prevista' && (
         <DialogoAsistenciaPrevista
           ficha={ficha}
           asistencia={asistencia}
-          alCerrar={() => setDialogo(false)}
-          alGuardar={(nueva) => {
-            setDialogo(false);
-            setAviso('Asistencia prevista guardada.');
-            alGuardar(nueva);
-          }}
+          alCerrar={() => setDialogo(null)}
+          alGuardar={(nueva) => guardada(nueva, 'Asistencia prevista guardada.')}
+        />
+      )}
+      {dialogo === 'real' && (
+        <DialogoAsistenciaReal
+          ficha={ficha}
+          asistencia={asistencia}
+          alCerrar={() => setDialogo(null)}
+          alGuardar={(nueva) => guardada(nueva, 'Asistencia real guardada. El consumo por asistente se calcula sobre ella.')}
         />
       )}
     </Card>
@@ -65,9 +97,18 @@ function nombreSegmento(s: SegmentoAsistencia): string {
   return s.equivaleInvitados ? `${s.nombre} (los invitados)` : s.nombre;
 }
 
-/** Entero de 0 a 5000, o vacío. */
-function valido(texto: string): boolean {
-  return texto === '' || (/^\d{1,4}$/.test(texto) && Number(texto) <= 5000);
+/** Entero de 0 a 5000. */
+function entero(texto: string): boolean {
+  return /^\d{1,4}$/.test(texto) && Number(texto) <= 5000;
+}
+
+/** Los valores en edición, por segmento. */
+function valoresDe(segmentos: SegmentoAsistencia[], de: (s: SegmentoAsistencia) => number | null): Record<number, string> {
+  return Object.fromEntries(segmentos.map((s) => [s.id, de(s) == null ? '' : String(de(s))]));
+}
+
+function sumar(segmentos: SegmentoAsistencia[], valores: Record<number, string>): number {
+  return segmentos.reduce((suma, s) => suma + (Number(valores[s.id]) || 0), 0);
 }
 
 function DialogoAsistenciaPrevista({ ficha, asistencia, alCerrar, alGuardar }: {
@@ -78,13 +119,10 @@ function DialogoAsistenciaPrevista({ ficha, asistencia, alCerrar, alGuardar }: {
 }) {
   const editables = asistencia.segmentos.filter((s) => s.activo && !s.equivaleInvitados);
   const comensales = asistencia.segmentos.find((s) => s.equivaleInvitados);
-  const [valores, setValores] = useState<Record<number, string>>(() =>
-    Object.fromEntries(editables.map((s) => [s.id, s.prevista == null ? '' : String(s.prevista)])),
-  );
+  const [valores, setValores] = useState(() => valoresDe(editables, (s) => s.prevista));
   const [revisar, setRevisar] = useState(false);
   const { guardando, error, enviar } = useEnvio();
-
-  const total = (comensales?.prevista ?? 0) + editables.reduce((suma, s) => suma + (Number(valores[s.id]) || 0), 0);
+  const valido = (texto: string) => texto === '' || entero(texto);
 
   async function guardar() {
     const invalidos = editables.some((s) => !valido(valores[s.id]));
@@ -126,7 +164,62 @@ function DialogoAsistenciaPrevista({ ficha, asistencia, alCerrar, alGuardar }: {
             error={revisar && !valido(valores[s.id]) ? 'Escribí un número entero de 0 a 5000, o dejalo vacío.' : undefined}
           />
         ))}
-        <Stat label="Total previsto" value={total} unit="personas" />
+        <Stat label="Total previsto" value={(comensales?.prevista ?? 0) + sumar(editables, valores)} unit="personas" />
+      </div>
+    </Dialog>
+  );
+}
+
+/** UI-20 · La real de todos los segmentos a la vez, del control de acceso y de la venta en puerta. */
+function DialogoAsistenciaReal({ ficha, asistencia, alCerrar, alGuardar }: {
+  ficha: Ficha;
+  asistencia: Asistencia;
+  alCerrar: () => void;
+  alGuardar: (ficha: Ficha) => void;
+}) {
+  const activos = asistencia.segmentos.filter((s) => s.activo);
+  const [valores, setValores] = useState(() => valoresDe(activos, (s) => s.real));
+  const [revisar, setRevisar] = useState(false);
+  const { guardando, error, enviar } = useEnvio();
+
+  async function guardar() {
+    const invalidos = activos.some((s) => !entero(valores[s.id]));
+    setRevisar(invalidos);
+    if (invalidos) return;
+    const segmentos = activos.map((s) => ({ segmentoId: s.id, cantidad: Number(valores[s.id]) }));
+    const nueva = await enviar(() => fichas.registrarAsistenciaReal(ficha.id, ficha.version, segmentos));
+    if (nueva) alGuardar(nueva);
+  }
+
+  return (
+    <Dialog
+      open
+      title="Asistencia real de cierre"
+      onClose={alCerrar}
+      actions={
+        <>
+          <Button variant="outline" onClick={alCerrar}>Cancelar</Button>
+          <Button icon="clipboard-check" loading={guardando} onClick={() => void guardar()}>Guardar asistencia real</Button>
+        </>
+      }
+    >
+      <div className="asistencia">
+        {error && <Alert tone="danger">{error.message}</Alert>}
+        <p className="body-sm v-muted">
+          Cargá lo que contó la plataforma de control de acceso y lo vendido en puerta. Todos los segmentos: 0 si no vino nadie.
+        </p>
+        {activos.map((s) => (
+          <Input
+            key={s.id}
+            label={s.nombre}
+            inputMode="numeric"
+            hint={s.prevista != null ? `Previsto: ${s.prevista}` : undefined}
+            value={valores[s.id]}
+            onChange={(e) => setValores((previos) => ({ ...previos, [s.id]: e.target.value.trim() }))}
+            error={revisar && !entero(valores[s.id]) ? 'Escribí un número entero de 0 a 5000.' : undefined}
+          />
+        ))}
+        <Stat label="Total real" value={sumar(activos, valores)} unit="personas" />
       </div>
     </Dialog>
   );

@@ -148,6 +148,7 @@ export interface Acciones {
   cancelar: boolean;
   reprogramar: boolean;
   registrarAsistenciaPrevista: boolean;
+  registrarAsistenciaReal: boolean;
 }
 
 /** Una condición de «Confirmar evento»: lo que hay («Ana Sosa», «180») o lo que falta. */
@@ -221,6 +222,8 @@ export interface SegmentoAsistencia {
   activo: boolean;
   equivaleInvitados: boolean;
   prevista: number | null;
+  /** Se carga con el evento Realizado o Cerrado (UI-20). */
+  real: number | null;
 }
 
 /** Asistencia por segmento de un evento de egresados. */
@@ -228,6 +231,8 @@ export interface Asistencia {
   segmentos: SegmentoAsistencia[];
   /** Suma de lo previsto; null si no hay nada. Sobre esto se dimensiona la bebida. */
   totalPrevisto: number | null;
+  /** Suma de lo real, solo si todos los segmentos activos lo tienen; entonces es el divisor del consumo por asistente. */
+  totalReal: number | null;
 }
 
 export interface Ficha {
@@ -322,6 +327,9 @@ export const fichas = {
   /** `cantidad` null deja el segmento sin previsto; los que no van no cambian. */
   registrarAsistenciaPrevista: (id: number, version: number, segmentos: { segmentoId: number; cantidad: number | null }[]) =>
     api<Ficha>(`/eventos/${id}/asistencia/prevista`, { metodo: 'PUT', cuerpo: { version, segmentos } }),
+  /** La real de todos los segmentos activos a la vez (0 si no vino nadie). */
+  registrarAsistenciaReal: (id: number, version: number, segmentos: { segmentoId: number; cantidad: number }[]) =>
+    api<Ficha>(`/eventos/${id}/asistencia/real`, { metodo: 'PUT', cuerpo: { version, segmentos } }),
   registrarServicios: (id: number, version: number, servicios: ServicioAGuardar[]) =>
     api<Ficha>(`/eventos/${id}/servicios`, { metodo: 'PUT', cuerpo: { version, servicios } }),
   descargarDocumento: (id: number, documentoId: number) => descargarArchivo(`/eventos/${id}/documentos/${documentoId}`),

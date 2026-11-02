@@ -32,6 +32,7 @@ const GUARDADA: Ficha = {
   asistencia: {
     segmentos: ASISTENCIA.segmentos.map((s) => (s.id === 2 ? { ...s, prevista: 60 } : s)),
     totalPrevisto: 200,
+    totalReal: null,
   },
   historial: [
     ...EGRESADOS.historial,

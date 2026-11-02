@@ -24,7 +24,7 @@ import ar.edu.utn.vastio.usuarios.aplicacion.UsuarioService;
 import ar.edu.utn.vastio.usuarios.dominio.RolCodigo;
 
 /**
- * Ruteo y textos de los avisos de la agenda (docs/sprint-2.md, decisión 10). Administración recibe todos los eventos
+ * Ruteo y textos de los avisos de la agenda (docs/sprints/sprint-2.md, decisión 10). Administración recibe todos los eventos
  * nuevos y cambios; el resto de las áreas, solo lo que las afecta. Nunca le llega el aviso a quien hizo el cambio
  * (lo descarta {@link NotificacionService}). Un solo aviso por guardado, no uno por dato.
  *

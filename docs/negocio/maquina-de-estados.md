@@ -45,7 +45,7 @@ Estados activos (ocupan la unidad): todos salvo `LIBERADA` y `CANCELADO`.
 
 > Corrección respecto de la Definición del Producto v1: **«Reprogramado» no es un estado**. Reprogramar le pasa al evento; si fuera un estado, se perdería si estaba Señado, Contratado o Confirmado.
 
-Todo cambio de estado escribe una fila en `cambio_estado_evento` (usuario null = sistema). Quién recibe cada aviso, incluidas las operaciones que no cambian el estado, está en `docs/sprint-2.md` (decisión 10) y en `AvisosEvento`.
+Todo cambio de estado escribe una fila en `cambio_estado_evento` (usuario null = sistema). Quién recibe cada aviso, incluidas las operaciones que no cambian el estado, está en `docs/sprints/sprint-2.md` (decisión 10) y en `AvisosEvento`.
 
 ## Orden de preparación
 

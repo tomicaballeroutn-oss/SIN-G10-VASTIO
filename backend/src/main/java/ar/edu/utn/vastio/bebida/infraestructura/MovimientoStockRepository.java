@@ -101,7 +101,7 @@ public interface MovimientoStockRepository extends JpaRepository<MovimientoStock
 
     /**
      * Si la ubicación ya tiene un movimiento que no es de su carga inicial (un ingreso, una entrega, un recuento): desde
-     * ahí la carga inicial queda cerrada (docs/sprint-3.md, decisión 12).
+     * ahí la carga inicial queda cerrada (docs/sprints/sprint-3.md, decisión 12).
      */
     @Query("""
             SELECT count(m) > 0 FROM MovimientoStock m

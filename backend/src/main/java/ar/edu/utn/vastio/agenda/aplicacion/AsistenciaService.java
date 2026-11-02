@@ -25,7 +25,7 @@ import ar.edu.utn.vastio.configuracion.aplicacion.CatalogoService;
 import ar.edu.utn.vastio.configuracion.dominio.TipoSegmentoAsistencia;
 
 /**
- * Registrar tipo de asistencia (UI-19, docs/sprint-4.md, decisiones 1 a 5): la asistencia prevista por segmento de un
+ * Registrar tipo de asistencia (UI-19, docs/sprints/sprint-4.md, decisiones 1 a 5): la asistencia prevista por segmento de un
  * evento de egresados. La registran la planner asignada, Coordinación y Dirección, entre Pre-reserva y Confirmado.
  * Cada segmento que cambia queda en {@code modificacion_evento} como {@code asistencia_prevista.<segmento>}; en un
  * evento confirmado avisa a Compras, porque cambia la bebida a preparar.

@@ -102,12 +102,12 @@ No hubo coincidencias directas en `frontend/e2e`. Los E2E `objetivo-sprint-3.spe
 
 ### Documentación y diseño
 
-- Adaptar `docs/sprint-3.md`: historia, recorrido, decisiones 5/13/14/19 y UI-28; registrar la decisión del 19/10/2026 y que reemplaza el criterio anterior, sin borrar el historial del proyecto.
-- Adaptar `docs/perfiles-y-permisos.md`: fila «Catálogo de bebidas y proveedores» pasa a bebidas; conservar perfiles.
+- Adaptar `docs/sprints/sprint-3.md`: historia, recorrido, decisiones 5/13/14/19 y UI-28; registrar la decisión del 19/10/2026 y que reemplaza el criterio anterior, sin borrar el historial del proyecto.
+- Adaptar `docs/negocio/perfiles-y-permisos.md`: fila «Catálogo de bebidas y proveedores» pasa a bebidas; conservar perfiles.
 - Adaptar `docs/der/diccionario-de-datos.md`: entidad proveedor y columnas de bebida/ingreso salen del modelo vigente; conservar entrada histórica con referencia a V9/decisión.
 - `docs/der/DER_3_bebida.png`: inspección visual confirma entidad PROVEEDOR y ambos vínculos. Actualizar el modelo vigente o identificar claramente como DER histórico y proporcionar un DER vigente; no dejarlo como documentación actual.
 - `design/pantallas/UI28-CargaInicial.dc.html`: retirar paso de proveedores y adaptar flujo. Otros prototipos sin coincidencias directas no requieren cambios automáticos.
-- `docs/b5-04-implementacion.md`: conservar registro histórico de alcance y enlazar la nueva decisión para evitar interpretarlo como regla vigente.
+- `docs/historias/b5-04-implementacion.md`: conservar registro histórico de alcance y enlazar la nueva decisión para evitar interpretarlo como regla vigente.
 - Ningún documento externo de Google Drive fue consultado o editado.
 
 ## Evaluación de datos y decisión pendiente
@@ -183,6 +183,6 @@ Riesgos pendientes: cantidad real de datos desconocida, política de custodia no
 
 ## Archivos y estado final de esta entrega
 
-Solo se agregaron este informe y dos anexos de auditoría: `docs/eliminacion-proveedores-referencias.txt` y `docs/eliminacion-proveedores-migraciones-sha256.txt`. Ningún archivo de aplicación fue eliminado o modificado. Diff funcional contra `origin/main`: vacío. Los archivos nuevos quedan sin commit; no hubo push ni creación de PR. El diff documental se entrega también fuera del worktree para facilitar revisión.
+Solo se agregaron este informe y dos anexos de auditoría: `docs/historico/eliminacion-proveedores-referencias.txt` y `docs/historico/eliminacion-proveedores-migraciones-sha256.txt`. Ningún archivo de aplicación fue eliminado o modificado. Diff funcional contra `origin/main`: vacío. Los archivos nuevos quedan sin commit; no hubo push ni creación de PR. El diff documental se entrega también fuera del worktree para facilitar revisión.
 
 **Autorización requerida:** confirmar si se aprueba conservar el maestro y las dos relaciones en un archivo externo verificable y luego eliminarlos del esquema operativo. Si se exige otra conservación, definirla antes de implementar V9. Esta pausa responde a la restricción expresa de la solicitud ante pérdida irreversible de información histórica.

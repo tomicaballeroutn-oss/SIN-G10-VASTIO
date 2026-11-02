@@ -1,7 +1,7 @@
 import { expect, request, test, type APIRequestContext, type Browser, type Page } from '@playwright/test';
 
 /**
- * Objetivo del Sprint 3, la noche del evento (docs/sprint-3-operacion.md): el evento confirmado de hoy entra solo en
+ * Objetivo del Sprint 3, la noche del evento (docs/sprints/sprint-3-operacion.md): el evento confirmado de hoy entra solo en
  * curso, la barra retira (salida y retiro adicional), registra la devolución y el remanente, el evento pasa solo a
  * Realizado y al cerrarlo se ve el consumo real y por asistente. El remanente queda en la barra para el evento siguiente.
  *

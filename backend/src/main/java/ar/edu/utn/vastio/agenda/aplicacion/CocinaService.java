@@ -25,7 +25,7 @@ import ar.edu.utn.vastio.configuracion.dominio.ParametroClave;
  * Consultar vista de cocina (A7-02, UI-23): los eventos que cocina tiene que preparar, con lo gastronómico. Solo
  * Confirmados y En curso: un evento cancelado o todavía sin confirmar no aparece, y el estado no se muestra.
  * <p>
- * El perfil Cocina ve desde hoy hasta {@code HORIZONTE_COCINA_DIAS} adelante (docs/perfiles-y-permisos.md). Los demás
+ * El perfil Cocina ve desde hoy hasta {@code HORIZONTE_COCINA_DIAS} adelante (docs/negocio/perfiles-y-permisos.md). Los demás
  * perfiles con acceso (Dirección, Coordinación, Planner, Compras) ven el mes entero: un usuario con varios perfiles
  * suma permisos. Un evento En curso se ve siempre, aunque su jornada haya empezado ayer: es lo que se cocina ahora.
  */

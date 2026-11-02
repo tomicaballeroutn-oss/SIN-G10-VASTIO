@@ -31,7 +31,7 @@ import ar.edu.utn.vastio.usuarios.dominio.RolCodigo;
 import ar.edu.utn.vastio.usuarios.dominio.Usuario;
 
 /**
- * Consultar movimientos de stock (UI-37, docs/sprint-4.md, decisiones 26 a 28). Las bebidas son propias de la prueba:
+ * Consultar movimientos de stock (UI-37, docs/sprints/sprint-4.md, decisiones 26 a 28). Las bebidas son propias de la prueba:
  * filtrar por ellas aísla los asientos de otros datos de la base.
  */
 @PruebaDeIntegracion

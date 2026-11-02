@@ -36,7 +36,7 @@ import ar.edu.utn.vastio.usuarios.dominio.RolCodigo;
 import ar.edu.utn.vastio.usuarios.dominio.Usuario;
 
 /**
- * Registrar realización de evento (docs/sprint-3-operacion.md, decisión 1). El reloj está fijo: los eventos del test
+ * Registrar realización de evento (docs/sprints/sprint-3-operacion.md, decisión 1). El reloj está fijo: los eventos del test
  * son del 14/05/2031 (mediodía 12:00 a 18:00, noche 20:00 a 06:00 del día siguiente). Cada test deshace sus cambios.
  */
 @PruebaDeIntegracion

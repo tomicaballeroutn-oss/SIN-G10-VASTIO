@@ -83,11 +83,11 @@ El servicio `respaldo` ejecuta `scripts/respaldo_local.sh` con PostgreSQL 17: un
 
 La retención elimina únicamente archivos regulares `vastio-*.dump` de esa carpeta con `-mtime +14` (días completos, no exactamente las últimas 14 copias), después de publicar una copia nueva. No recorre subdirectorios ni elimina respaldos históricos de la raíz, otras bases o entornos. Los `.partial` se conservan para diagnóstico y no son respaldos terminados.
 
-El legajo se copia a `./respaldos/<entorno>/<base>/legajo/`: la base guarda rutas, por lo que **el dump solo no recupera los contratos**. La copia incremental sigue sin ser una instantánea atómica con la base. La [transferencia M-10](m-10-transferencia.md) agrega paquetes verificables y rclone opcional mediante `docker-compose.respaldo-externo.yml`; sin ese override todo sigue local. La integración real con Google Drive fue validada exclusivamente con datos sintéticos y configuración de pruebas; ver [resultados](m-10-drive-resultados.md). Esa cuenta y carpeta no son un destino productivo aprobado. No se acredita un despliegue productivo.
+El legajo se copia a `./respaldos/<entorno>/<base>/legajo/`: la base guarda rutas, por lo que **el dump solo no recupera los contratos**. La copia incremental sigue sin ser una instantánea atómica con la base. La [transferencia M-10](../mejoras/m-10-transferencia.md) agrega paquetes verificables y rclone opcional mediante `docker-compose.respaldo-externo.yml`; sin ese override todo sigue local. La integración real con Google Drive fue validada exclusivamente con datos sintéticos y configuración de pruebas; ver [resultados](../mejoras/m-10-drive-resultados.md). Esa cuenta y carpeta no son un destino productivo aprobado. No se acredita un despliegue productivo.
 
-Para identificar pendientes, revisar `transferencias/*.listo` sin confirmación `.enviado` para el destino actual y los registros `ERROR transferencia paquete=<id> etapa=<etapa> codigo=<n>`. Un paquete fallido no bloquea los siguientes; el ciclo conserva un resultado de error. Los `.partial` no se envían. El procedimiento de inspección y reintento está en [operación de transferencia](m-10-transferencia.md).
+Para identificar pendientes, revisar `transferencias/*.listo` sin confirmación `.enviado` para el destino actual y los registros `ERROR transferencia paquete=<id> etapa=<etapa> codigo=<n>`. Un paquete fallido no bloquea los siguientes; el ciclo conserva un resultado de error. Los `.partial` no se envían. El procedimiento de inspección y reintento está en [operación de transferencia](../mejoras/m-10-transferencia.md).
 
-Ver [M-10: cambios locales, pruebas y limitaciones](m-10-respaldo-local.md). La antigua receta de restauración sobre la base activa se retira: la recuperación debe diseñarse y verificarse primero en un destino vacío y aislado, con una versión de aplicación compatible con su historia Flyway.
+Ver [M-10: cambios locales, pruebas y limitaciones](../mejoras/m-10-respaldo-local.md). La antigua receta de restauración sobre la base activa se retira: la recuperación debe diseñarse y verificarse primero en un destino vacío y aislado, con una versión de aplicación compatible con su historia Flyway.
 
 ## 6. GitHub: proteger `main`
 
@@ -113,11 +113,11 @@ No correrlo en la misma máquina donde ya hay algo escuchando en los puertos 80 
 
 ## Actualización V9: operación previa obligatoria
 
-Antes de arrancar una versión que incluya V9 sobre una instalación existente, seguir el [resguardo, restauración verificada y aprobación manual](eliminacion-proveedores-despliegue.md). Flyway migra al iniciar: no arrancar el backend nuevo contra una base real antes de esa aprobación. V9 bloquea bases con datos de proveedores sin constancia válida para su estado actual.
+Antes de arrancar una versión que incluya V9 sobre una instalación existente, seguir el [resguardo, restauración verificada y aprobación manual](../historico/eliminacion-proveedores-despliegue.md). Flyway migra al iniciar: no arrancar el backend nuevo contra una base real antes de esa aprobación. V9 bloquea bases con datos de proveedores sin constancia válida para su estado actual.
 
 ## Recrear la base de desarrollo descartable
 
-El seed anterior cargaba dos proveedores: una base local V8 con ese seed bloquea V9. **Recrear elimina todos los datos del volumen, no solo los proveedores**, incluidos usuarios, eventos, ingresos y movimientos. Solo corresponde si el responsable confirma que son datos sintéticos descartables. Si hay datos históricos, trabajo que conservar o dudas, detenerse y seguir el [resguardo completo, restauración y autorización de V9](eliminacion-proveedores-despliegue.md); ser una base «local» no la exime. No borrar la tabla ni falsear el recibo para evitar la protección.
+El seed anterior cargaba dos proveedores: una base local V8 con ese seed bloquea V9. **Recrear elimina todos los datos del volumen, no solo los proveedores**, incluidos usuarios, eventos, ingresos y movimientos. Solo corresponde si el responsable confirma que son datos sintéticos descartables. Si hay datos históricos, trabajo que conservar o dudas, detenerse y seguir el [resguardo completo, restauración y autorización de V9](../historico/eliminacion-proveedores-despliegue.md); ser una base «local» no la exime. No borrar la tabla ni falsear el recibo para evitar la protección.
 
 Estos son pasos **manuales**, no un script para ejecutar en bloque. No se ejecutan desde CI ni durante el arranque. Antes de borrar, cerrar backend, IDE con arranque automático y cualquier otro escritor conectado a esa base. No usar este procedimiento con `docker-compose.prod.yml`, bases compartidas o remotas.
 

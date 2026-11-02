@@ -32,7 +32,7 @@ vastio:
     minutos-acceso: 15
     cookie-segura: true
   legajo:
-    # Archivos del legajo (contratos). En el ambiente de prueba, un volumen de Docker (docs/despliegue.md).
+    # Archivos del legajo (contratos). En el ambiente de prueba, un volumen de Docker (docs/operacion/despliegue.md).
     directorio: ${VASTIO_LEGAJO_DIRECTORIO:datos/legajo}
   realizacion:
     # Pasa los eventos a En curso y a Realizado según el turno, al arrancar y cada minuto (RealizacionProgramada).

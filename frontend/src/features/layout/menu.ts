@@ -3,7 +3,7 @@ import type { NavItem } from '../../ds';
 import { ROLES_ESTADISTICAS } from '../../api/estadisticas';
 
 /**
- * Menú por perfil. Sale de la matriz de docs/perfiles-y-permisos.md y de la arquitectura de información
+ * Menú por perfil. Sale de la matriz de docs/negocio/perfiles-y-permisos.md y de la arquitectura de información
  * de design/design-system/guidelines/20-ux-y-arquitectura.md (grupos Agenda, Bebidas y Gestión).
  * Un usuario con varios perfiles ve la unión. Esto solo decide qué se dibuja: la autorización real está en el backend.
  */

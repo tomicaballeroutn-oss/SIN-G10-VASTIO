@@ -48,7 +48,7 @@ import ar.edu.utn.vastio.notificaciones.dominio.TipoNotificacion;
 import ar.edu.utn.vastio.usuarios.dominio.RolCodigo;
 
 /**
- * Registrar salida a barra (UI-31), con el retiro adicional (docs/sprint-3-operacion.md, decisiones 3 a 7). El primer
+ * Registrar salida a barra (UI-31), con el retiro adicional (docs/sprints/sprint-3-operacion.md, decisiones 3 a 7). El primer
  * retiro de un evento hacia una barra abre la entrega (SALIDA_BARRA); los siguientes son RETIRO_ADICIONAL sobre la misma.
  * Sale de la ubicación de abastecimiento de la barra o, como contingencia, del depósito madre. Opera a ciegas: nunca
  * devuelve el saldo del origen; si queda negativo, se acepta y se avisa a Compras y Administración.

@@ -16,7 +16,7 @@ import ar.edu.utn.vastio.configuracion.aplicacion.CatalogoService;
 import ar.edu.utn.vastio.configuracion.dominio.TipoSegmentoAsistencia;
 
 /**
- * Lectura de la asistencia por segmento de un evento (docs/sprint-4.md, decisiones 1 a 4). Solo los tipos de evento
+ * Lectura de la asistencia por segmento de un evento (docs/sprints/sprint-4.md, decisiones 1 a 4). Solo los tipos de evento
  * que la cuentan por partes (egresados) la tienen. El segmento que equivale a los invitados toma como previsto la
  * cantidad de invitados del evento: en egresados, los comensales de la cena.
  */

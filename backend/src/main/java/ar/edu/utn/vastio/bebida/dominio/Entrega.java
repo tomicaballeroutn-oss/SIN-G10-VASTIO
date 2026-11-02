@@ -16,7 +16,7 @@ import jakarta.persistence.Table;
 
 /**
  * Entrega de un evento hacia una barra: agrupa la salida inicial y los retiros adicionales. La abre el primer retiro y
- * la cierra la devolución (docs/sprint-3-operacion.md, decisiones 4 y 9). Una por evento y barra. El evento es de otro
+ * la cierra la devolución (docs/sprints/sprint-3-operacion.md, decisiones 4 y 9). Una por evento y barra. El evento es de otro
  * módulo y se guarda por id.
  */
 @Entity

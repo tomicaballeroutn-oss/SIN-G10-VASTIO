@@ -8,7 +8,7 @@ import { fechaHora } from '../comun/formato';
 export const CAMPO_PREVISTA = 'asistencia_prevista.';
 
 /**
- * UI-19 · Asistencia por segmento de un evento de egresados (docs/sprint-4.md, decisiones 1 a 5). Los invitados son los
+ * UI-19 · Asistencia por segmento de un evento de egresados (docs/sprints/sprint-4.md, decisiones 1 a 5). Los invitados son los
  * comensales de la cena; los demás segmentos suman el público de la fiesta posterior. Sobre el total se dimensiona la
  * bebida.
  */

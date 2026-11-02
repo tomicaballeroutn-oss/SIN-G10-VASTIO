@@ -42,7 +42,7 @@ import ar.edu.utn.vastio.usuarios.dominio.RolCodigo;
 import ar.edu.utn.vastio.usuarios.dominio.Usuario;
 
 /**
- * Registrar cierre de evento (UI-33, docs/sprint-3-operacion.md, decisiones 12 a 14). Reloj fijo: jornada del 12/03/2031.
+ * Registrar cierre de evento (UI-33, docs/sprints/sprint-3-operacion.md, decisiones 12 a 14). Reloj fijo: jornada del 12/03/2031.
  * El evento (150 invitados) ya retiró 12 botellas de ron y 6 de gin a la Barra Avril (id 2); en la devolución vuelven 6
  * de ron y quedan 2, y del gin no queda nada: se consumieron 4 de ron y 6 de gin. Cada test deshace sus cambios.
  */

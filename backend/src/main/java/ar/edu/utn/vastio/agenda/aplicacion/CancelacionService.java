@@ -25,7 +25,7 @@ import ar.edu.utn.vastio.configuracion.dominio.Motivo;
 @Service
 public class CancelacionService {
 
-    /** Desde dónde se cancela (docs/maquina-de-estados.md). */
+    /** Desde dónde se cancela (docs/negocio/maquina-de-estados.md). */
     public static final Set<EstadoEvento> ESTADOS = EnumSet.of(EstadoEvento.SENADO, EstadoEvento.CONTRATADO,
             EstadoEvento.CONFIRMADO);
 

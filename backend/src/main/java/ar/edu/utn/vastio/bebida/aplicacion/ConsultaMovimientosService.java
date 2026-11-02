@@ -28,7 +28,7 @@ import ar.edu.utn.vastio.bebida.infraestructura.MovimientoStockRepository.Operac
 import ar.edu.utn.vastio.comun.errores.ProblemaException;
 
 /**
- * Consultar movimientos de stock (UI-37, docs/sprint-4.md, decisiones 26 a 28): el historial para auditar una
+ * Consultar movimientos de stock (UI-37, docs/sprints/sprint-4.md, decisiones 26 a 28): el historial para auditar una
  * ubicación, una bebida o un evento. Cada operación agrupa los asientos de un mismo ingreso, preparación, salida a barra
  * o devolución (ver {@link Operacion}). Solo lectura: los movimientos no se editan, se corrigen con un ajuste.
  */

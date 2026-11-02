@@ -2,7 +2,7 @@
 
 **Objetivo:** un evento confirmado entra solo en curso, la barra retira bebida imputada al evento, al terminar se registra lo que vuelve y lo que queda, y el cierre fija el consumo real por asistente.
 
-Continúa `docs/sprint-3.md`, que cubrió la entrada de la mercadería (catálogo, ubicaciones, ingreso, inventario inicial, consulta y ajuste de stock). Estas son las historias que ahí quedaron «Pendientes del sprint» y que construye Bernardita.
+Continúa `docs/sprints/sprint-3.md`, que cubrió la entrada de la mercadería (catálogo, ubicaciones, ingreso, inventario inicial, consulta y ajuste de stock). Estas son las historias que ahí quedaron «Pendientes del sprint» y que construye Bernardita.
 
 ## Historias
 

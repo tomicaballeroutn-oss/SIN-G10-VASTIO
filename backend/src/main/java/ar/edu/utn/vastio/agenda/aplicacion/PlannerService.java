@@ -32,7 +32,7 @@ import ar.edu.utn.vastio.usuarios.dominio.Usuario;
 @Service
 public class PlannerService {
 
-    /** Estados en los que se asigna planner (docs/maquina-de-estados.md). */
+    /** Estados en los que se asigna planner (docs/negocio/maquina-de-estados.md). */
     public static final Set<EstadoEvento> ESTADOS = EnumSet.of(EstadoEvento.CONTRATADO, EstadoEvento.CONFIRMADO);
 
     private final ConsultaEventoService consultas;

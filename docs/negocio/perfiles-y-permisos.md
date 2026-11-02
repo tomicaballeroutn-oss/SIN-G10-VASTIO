@@ -73,4 +73,4 @@ E = ejecuta · P = ejecuta solo sobre sus propios eventos (vendedora: los que ve
 
 ## M-06 — Google Calendar
 
-Publicar, actualizar, retirar y consultar Pendientes de Google Calendar: exclusivamente Dirección y Coordinación. Backend valida el rol. Consultar agenda/ficha con otro perfil no concede publicación externa. Leer avisos no resuelve publicaciones pendientes. Ver [M-06](m-06-google-calendar.md).
+Publicar, actualizar, retirar y consultar Pendientes de Google Calendar: exclusivamente Dirección y Coordinación. Backend valida el rol. Consultar agenda/ficha con otro perfil no concede publicación externa. Leer avisos no resuelve publicaciones pendientes. Ver [M-06](../mejoras/m-06-google-calendar.md).

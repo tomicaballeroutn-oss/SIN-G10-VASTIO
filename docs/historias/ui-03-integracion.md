@@ -1,6 +1,6 @@
 # UI-03 — Integración de pruebas y política JWT
 
-La funcionalidad y el contrato de cuenta están en [Mi cuenta](sprint-4-mi-cuenta.md).
+La funcionalidad y el contrato de cuenta están en [Mi cuenta](../sprints/sprint-4-mi-cuenta.md).
 
 ## Pruebas con @WithMockUser
 

@@ -129,7 +129,7 @@ Frontend y documentación:
 - `frontend/src/features/bebidas/PaginaEstadisticas.test.tsx`.
 - `frontend/e2e/estadisticas-consumo.spec.ts`.
 - `frontend/e2e/fixtures/estadisticas-consumo.sql`.
-- `docs/b5-01-estadisticas-consumo.md`.
+- `docs/historias/b5-01-estadisticas-consumo.md`.
 
 ## Archivos modificados
 

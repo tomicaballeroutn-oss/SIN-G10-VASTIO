@@ -18,8 +18,8 @@ import ar.edu.utn.vastio.configuracion.dominio.CategoriaServicio;
 import ar.edu.utn.vastio.usuarios.aplicacion.UsuarioService;
 
 /**
- * Condiciones de «Confirmar evento» (docs/sprint-2.md, decisión 7): planner asignada, cantidad de invitados mayor a 0
- * y definitiva, asistencia prevista por segmento si el tipo la cuenta así (docs/sprint-4.md, decisión 5), servicios
+ * Condiciones de «Confirmar evento» (docs/sprints/sprint-2.md, decisión 7): planner asignada, cantidad de invitados mayor a 0
+ * y definitiva, asistencia prevista por segmento si el tipo la cuenta así (docs/sprints/sprint-4.md, decisión 5), servicios
  * cargados en las categorías requeridas para confirmar y que la fecha no haya pasado.
  * La ficha las muestra en el diálogo (UI-15) y el caso de uso las vuelve a verificar.
  */
@@ -56,7 +56,7 @@ public class RequisitosConfirmacion {
     }
 
     /**
-     * Egresados (docs/sprint-4.md, decisión 5): además de los invitados, algún otro segmento previsto, el público de la
+     * Egresados (docs/sprints/sprint-4.md, decisión 5): además de los invitados, algún otro segmento previsto, el público de la
      * fiesta posterior. Sobre el total se dimensiona la bebida.
      */
     private static Requisito asistencia(AsistenciaPorSegmento.Asistencia asistencia) {

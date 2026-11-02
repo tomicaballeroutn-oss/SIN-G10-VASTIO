@@ -29,7 +29,7 @@ import ar.edu.utn.vastio.comun.errores.ProblemaException;
 
 /**
  * Único lugar que cambia {@code evento.estado} (regla 4 de CLAUDE.md): valida la transición contra
- * docs/maquina-de-estados.md, escribe {@code cambio_estado_evento} y genera los avisos ({@link AvisosEvento}).
+ * docs/negocio/maquina-de-estados.md, escribe {@code cambio_estado_evento} y genera los avisos ({@link AvisosEvento}).
  * Quién puede disparar cada transición y sus condiciones de datos las valida el caso de uso que la llama.
  */
 @Service

@@ -103,8 +103,7 @@ public class AsistenciaPorSegmento {
                 || cargada.get(s.getId()).getCantidadReal() == null)) {
             return null;
         }
-        return cargada.values().stream().map(AsistenciaSegmento::getCantidadReal).filter(Objects::nonNull)
-                .mapToInt(Integer::intValue).sum();
+        return activos.stream().mapToInt(s -> cargada.get(s.getId()).getCantidadReal()).sum();
     }
 
     /** El segmento activo cuyo previsto es la cantidad de invitados, si hay uno. */

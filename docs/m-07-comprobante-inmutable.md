@@ -6,6 +6,8 @@ La decisión de incorporar M-07 sigue siendo humana. No altera las reglas de reg
 
 Se guarda el PDF original en PostgreSQL (pdf_original, bytea). Es más simple que una instantánea estructurada: conserva exactamente texto, formato, logo y metadatos incluso si cambian evento, catálogos, fuentes o generador. Las descargas posteriores devuelven los mismos bytes. Número, fecha y usuario emisor permanecen en la fila original. El costo es almacenamiento y tamaño de respaldos; no se agrega otro almacenamiento ni librería.
 
+Desde M-04, la primera emisión agrega la marca que corresponde al código estable del salón. Los comprobantes emitidos antes de ese cambio mantienen su PDF original sin logo; no se regeneran.
+
 V12 permanece intacta. V13 agrega la columna y protege nuevas filas y la inmutabilidad con un trigger. Una instalación anterior con V12 pudo emitir sin conservar el PDF: no es posible recuperar el documento original desde los datos actuales. V13 conserva esos registros y su numeración; GET y POST devuelven 409 COMPROBANTE_SIN_ORIGINAL, sin regenerar ni renumerar. La recuperación de originales, si existieran fuera del sistema, requiere una decisión y procedimiento humanos; no se implementa una reemisión que invente historia.
 
 ## API y pantalla

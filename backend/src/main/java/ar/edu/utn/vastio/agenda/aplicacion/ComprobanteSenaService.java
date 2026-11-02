@@ -8,7 +8,6 @@ import java.util.Map;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.LockModeType;
 
-import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.stereotype.Service;
 import org.springframework.http.HttpStatus;
 import org.springframework.transaction.annotation.Transactional;
@@ -35,13 +34,13 @@ public class ComprobanteSenaService {
     private final GeneradorComprobanteSena generador;
     private final CatalogoService catalogos;
     private final UsuarioService usuarios;
-    private final ObjectProvider<LogoSalon> logos;
+    private final LogoSalon logos;
     private final EntityManager entityManager;
     private final Clock reloj;
 
     public ComprobanteSenaService(ConsultaEventoService consultas, ComprobanteSenaRepository comprobantes,
             NumeradorComprobante numerador, GeneradorComprobanteSena generador, CatalogoService catalogos,
-            UsuarioService usuarios, ObjectProvider<LogoSalon> logos, EntityManager entityManager, Clock reloj) {
+            UsuarioService usuarios, LogoSalon logos, EntityManager entityManager, Clock reloj) {
         this.consultas = consultas;
         this.comprobantes = comprobantes;
         this.numerador = numerador;
@@ -103,10 +102,10 @@ public class ComprobanteSenaService {
 
     private Datos datos(Evento e, String numero, OffsetDateTime emision) {
         short salonId = e.getUnidad().getSalonId();
-        LogoSalon logo = logos.getIfAvailable();
+        var salon = catalogos.salon(salonId);
         Map<Long, String> nombres = usuarios.nombres(List.of(e.getVendedoraId()));
-        return new Datos(numero, emision, catalogos.salon(salonId).getNombre(),
-                logo == null ? null : logo.de(salonId).orElse(null), e.getCliente().getNombre(), e.getCliente().getDocumento(),
+        return new Datos(numero, emision, salon.getNombre(),
+                logos.de(salon.getCodigo()).orElse(null), e.getCliente().getNombre(), e.getCliente().getDocumento(),
                 e.getFirmanteNombre(), e.getFirmanteDni(), catalogos.tipoEvento(e.getTipoEventoId()).getNombre(), e.getNombre(),
                 e.getUnidad().getFecha(), catalogos.turno(e.getUnidad().getTurnoId()).getNombre(), e.getImporteSena(),
                 e.getMonedaSena(), e.getFechaSena(), nombres.get(e.getVendedoraId()));

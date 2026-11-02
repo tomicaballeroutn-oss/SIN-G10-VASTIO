@@ -1,7 +1,8 @@
 import { useCallback, useRef, useState } from 'react';
 import { consultarReporteOcupacion, type FiltroReporteOcupacion } from '../../api/reportes';
 import { useDatos } from '../../api/useDatos';
-import { Alert, Button, Card, EmptyState, Input, Select, Table, type SelectOption } from '../../ds';
+import { Alert, Button, Card, EmptyState, Input, Select, Table, type SalonId, type SelectOption } from '../../ds';
+import { MarcaSalon } from '../comun/MarcaSalon';
 import { Encabezado } from '../layout/paginas';
 import './reportes.css';
 
@@ -36,6 +37,7 @@ export function PaginaReporteOcupacion() {
   const filtrosDelResultado = datos.datos?.consulta ?? filtros;
   const resultadoVigente = !!datos.datos && JSON.stringify(datos.datos.consulta) === JSON.stringify(filtros);
   const salonElegido = datos.datos?.filtros.salones.find((s) => String(s.id) === filtrosDelResultado.salonId)?.nombre ?? 'Todos';
+  const codigoSalonElegido = datos.datos?.porSalon.find((s) => String(s.salonId) === filtrosDelResultado.salonId)?.codigo as SalonId | undefined;
   const tipoElegido = datos.datos?.filtros.tiposEvento.find((t) => String(t.id) === filtrosDelResultado.tipoEventoId)?.nombre ?? 'Todos';
   const vendedoraElegida = datos.datos?.filtros.vendedoras.find((v) => String(v.id) === filtrosDelResultado.vendedoraId)?.nombre ?? 'Todas';
   const temporadaElegida = filtrosDelResultado.regimen === 'ALTA' ? 'Alta' : filtrosDelResultado.regimen === 'BAJA' ? 'Baja' : 'Ambas';
@@ -47,6 +49,7 @@ export function PaginaReporteOcupacion() {
     <section className="pantalla reporte-ocupacion">
       <Encabezado titulo="Reporte de ocupación" antetitulo="Gestión comercial" />
       <div className="reporte-ocupacion__impresion">
+        {codigoSalonElegido && <MarcaSalon salon={codigoSalonElegido} className="reporte-ocupacion__marca" />}
         <p><strong>Período:</strong> {fecha(filtrosDelResultado.desde)} al {fecha(filtrosDelResultado.hasta)}</p>
         <p><strong>Salón:</strong> {salonElegido} <strong>· Tipo:</strong> {tipoElegido} <strong>· Vendedora:</strong> {vendedoraElegida} <strong>· Temporada:</strong> {temporadaElegida}</p>
         <p className="reporte-ocupacion__impresion-nota">Incluye eventos señados, contratados, confirmados, en curso, realizados y cerrados. Excluye pre-reservas, cancelados y liberados.</p>

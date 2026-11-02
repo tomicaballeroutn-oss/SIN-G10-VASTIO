@@ -29,7 +29,14 @@
 .agenda__accion { margin-top: var(--space-1); }
 
 .agenda__unidad-cabeza { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: var(--space-2); }
+.agenda__unidad-cabeza--con-logo { display: grid; grid-template-columns: minmax(0, 1fr) 82px; align-items: start; justify-content: initial; }
+.agenda__unidad-info { display: flex; min-width: 0; flex-direction: column; align-items: flex-start; gap: var(--space-1); }
+.agenda__logo-salon { width: 82px; height: 30px; margin-left: 0; }
 .agenda__evento { display: flex; flex-direction: column; }
+@media (min-width: 1200px) {
+  .agenda__unidad-cabeza--santa { grid-template-columns: minmax(0, 1fr) 94px; }
+  .agenda__unidad-cabeza--santa .agenda__logo-salon { width: 94px; }
+}
 
 /* UI-08: diálogo de pre-reserva */
 .prereserva { display: flex; flex-direction: column; gap: var(--space-4); }

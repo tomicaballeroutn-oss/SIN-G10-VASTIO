@@ -19,6 +19,7 @@ import {
   tamanoLegible, type TimelineItem, type TimelineTone,
 } from '../../ds';
 import { Cargando } from '../comun/Cargando';
+import { MarcaSalon } from '../comun/MarcaSalon';
 import { guardarArchivo } from '../comun/archivos';
 import { dinero, fechaCorta, fechaHora } from '../comun/formato';
 import { DialogoCancelar } from './DialogoCancelar';
@@ -93,11 +94,14 @@ function ContenidoFicha({ ficha, alCambiar }: { ficha: Ficha; alCambiar: (ficha:
       {aviso && <Alert tone="success">{aviso}</Alert>}
       <header className="ficha__cabecera">
         <div className="ficha__etiquetas">
-          <StatusChip status={ESTADO_POR_CODIGO[ficha.estado]} />
-          <SalonTag salon={ficha.salon.codigo} label={ficha.salon.nombre} variant="dot" />
-          <span className="body">
-            {fechaCorta(ficha.fecha, true)} · {ficha.turno.nombre} ({hora(ficha.turno.horaInicio)} a {hora(ficha.turno.horaFin)})
+          <div className="ficha__etiquetas-principales">
+            <StatusChip status={ESTADO_POR_CODIGO[ficha.estado]} />
+            <SalonTag salon={ficha.salon.codigo} label={ficha.salon.nombre} variant="dot" />
+          </div>
+          <span className="body ficha__fecha-turno">
+            {fechaCorta(ficha.fecha, true)} {'\u00b7'} {ficha.turno.nombre} ({hora(ficha.turno.horaInicio)} a {hora(ficha.turno.horaFin)})
           </span>
+          <MarcaSalon salon={ficha.salon.codigo} className="ficha__logo-salon" />
         </div>
         <h1>{ficha.nombre}</h1>
         <p className="body-sm v-muted">

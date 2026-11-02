@@ -5,14 +5,75 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 
+import java.time.OffsetDateTime;
+
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Slice;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import ar.edu.utn.vastio.bebida.dominio.MovimientoStock;
+import ar.edu.utn.vastio.bebida.dominio.TipoMovimiento;
 
 public interface MovimientoStockRepository extends JpaRepository<MovimientoStock, Long> {
+
+    /**
+     * Una operación de la consulta de movimientos (UI-37): los asientos del mismo ingreso o preparación, o, si no son de
+     * uno, del mismo momento; y además del mismo tipo, entrega, usuario, evento, origen, destino, motivo y observación.
+     * {@code fechaHora}: la del último asiento. {@code primero} y {@code ultimo}: su id más bajo y más alto.
+     */
+    interface Operacion {
+        TipoMovimiento getTipo();
+        OffsetDateTime getFechaHora();
+        Long getIngresoId();
+        Long getPreparacionId();
+        Long getEntregaId();
+        Long getUsuarioId();
+        Long getEventoId();
+        Short getOrigenId();
+        Short getDestinoId();
+        Short getMotivoId();
+        String getObservacion();
+        Long getPrimero();
+        Long getUltimo();
+    }
+
+    /** Una página de operaciones, de la más nueva a la más vieja. Los filtros null no filtran. */
+    @Query("""
+            SELECT m.tipo AS tipo, max(m.fechaHora) AS fechaHora, m.ingresoId AS ingresoId, m.preparacionId AS preparacionId,
+                   m.entregaId AS entregaId, m.usuarioId AS usuarioId, m.eventoId AS eventoId, o.id AS origenId,
+                   d.id AS destinoId, m.motivoId AS motivoId, m.observacion AS observacion, min(m.id) AS primero,
+                   max(m.id) AS ultimo
+            FROM MovimientoStock m LEFT JOIN m.origen o LEFT JOIN m.destino d
+            WHERE (:ubicacionId IS NULL OR o.id = :ubicacionId OR d.id = :ubicacionId)
+              AND (:bebidaId IS NULL OR m.bebida.id = :bebidaId)
+              AND (:eventoId IS NULL OR m.eventoId = :eventoId)
+              AND (:tipo IS NULL OR m.tipo = :tipo)
+              AND m.fechaHora >= :desde AND m.fechaHora < :hasta
+            GROUP BY m.tipo, m.ingresoId, m.preparacionId, m.entregaId, m.usuarioId, m.eventoId, o.id, d.id, m.motivoId,
+                     m.observacion, CASE WHEN m.ingresoId IS NULL AND m.preparacionId IS NULL THEN m.fechaHora END
+            ORDER BY max(m.fechaHora) DESC, max(m.id) DESC""")
+    Slice<Operacion> operaciones(Short ubicacionId, Long bebidaId, Long eventoId, TipoMovimiento tipo, OffsetDateTime desde,
+            OffsetDateTime hasta, Pageable pagina);
+
+    /** Los asientos con esos filtros entre dos ids (inclusive), con bebida y ubicaciones. */
+    @Query("""
+            SELECT m FROM MovimientoStock m JOIN FETCH m.bebida b JOIN FETCH b.unidad
+              LEFT JOIN FETCH m.origen o LEFT JOIN FETCH m.destino d
+            WHERE (:ubicacionId IS NULL OR o.id = :ubicacionId OR d.id = :ubicacionId)
+              AND (:bebidaId IS NULL OR b.id = :bebidaId)
+              AND (:eventoId IS NULL OR m.eventoId = :eventoId)
+              AND (:tipo IS NULL OR m.tipo = :tipo)
+              AND m.id BETWEEN :desdeId AND :hastaId
+            ORDER BY m.id""")
+    List<MovimientoStock> asientos(Short ubicacionId, Long bebidaId, Long eventoId, TipoMovimiento tipo, long desdeId,
+            long hastaId);
+
+    /** Los eventos con algún movimiento, para el filtro de la consulta. */
+    @Query("SELECT DISTINCT m.eventoId FROM MovimientoStock m WHERE m.eventoId IS NOT NULL")
+    List<Long> eventosConMovimientos();
 
     @Query("SELECT m FROM MovimientoStock m JOIN FETCH m.bebida b JOIN FETCH b.unidad WHERE m.preparacionId = :id ORDER BY m.id")
     List<MovimientoStock> dePreparacion(long id);

@@ -26,10 +26,14 @@
     --info: #245d9e; --on-info: #fff; --info-tint: #f1f7ff; --info-ink: #0d2e54;
     --success: #036961; --on-success: #fff; --success-tint: #e7faf7; --success-ink: #013c37;
     --salon-avril: #a9244e; --salon-club: #764d2d; --salon-santa-barbara: #1b7da6;
-    display: flex; padding: 0; gap: 10px; color: #17212b;
+    position: relative; display: flex; padding: 0; gap: 10px; color: #17212b;
   }
   .reporte-ocupacion__filtros, .app__lateral, .app__inferior, .app__barra, .reporte-ocupacion [role="status"] { display: none !important; }
   .reporte-ocupacion__impresion { display: block; padding: 8px 11px; border-left: 4px solid var(--brand); background: #f5f6f8; color: #17212b; font-size: 9pt; }
+  .reporte-ocupacion__marca { position: absolute; top: 0; right: 0; width: 140px; height: 44px; }
+  .reporte-ocupacion__marca .marca-salon__texto-oscuro { display: none !important; }
+  [data-theme="dark"] .reporte-ocupacion__marca.marca-salon--club .marca-salon__imagen,
+  [data-theme="dark"] .reporte-ocupacion__marca.marca-salon--santa-barbara .marca-salon__imagen { filter: none !important; }
   .reporte-ocupacion__impresion p { margin: 0 0 4px; }
   .reporte-ocupacion__impresion p:last-child { margin-bottom: 0; }
   .reporte-ocupacion__impresion-nota { color: #52606d; font-size: 8pt; }

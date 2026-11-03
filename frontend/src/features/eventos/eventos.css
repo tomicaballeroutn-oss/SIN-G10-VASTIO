@@ -29,10 +29,22 @@
 .ficha__acciones { display: flex; flex-wrap: wrap; gap: var(--space-2); }
 
 @media (max-width: 480px) {
-  .ficha__etiquetas { display: grid; grid-template-columns: minmax(0, 1fr) 104px; align-items: start; column-gap: var(--space-2); row-gap: var(--space-1); }
+  .ficha__cabecera { position: relative; }
+  .ficha__cabecera h1 { font-size: 25px; line-height: 31px; }
+  .ficha__etiquetas { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: start; column-gap: var(--space-2); row-gap: var(--space-1); }
   .ficha__etiquetas-principales { grid-column: 1; display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-2); }
-  .ficha__fecha-turno { grid-column: 1; grid-row: 2; }
-  .ficha__logo-salon { grid-column: 2; grid-row: 1 / span 2; align-self: center; width: 104px; height: 36px; margin-left: 0; }
+  .ficha__fecha-turno { grid-column: 1; grid-row: 2; font-size: 14px; line-height: 20px; }
+  /* El logo sube a la altura de «Volver» (alto del botón + separación de la pantalla), salvo que haya un aviso en el medio. */
+  .ficha__logo-salon { position: absolute; right: 0; top: calc(-1 * (var(--space-6) + var(--control-md)) + 4px); width: 104px; height: 36px; margin-left: 0; }
+  .v-alert + .ficha__cabecera .ficha__logo-salon { position: static; grid-column: 2; grid-row: 3; justify-self: end; }
+  /* Acciones compactas: la principal a lo ancho y las demás de a dos. */
+  .ficha__acciones { display: grid; grid-template-columns: 1fr 1fr; }
+  .ficha__acciones .v-btn { width: 100%; height: auto; min-height: var(--control-sm); padding: var(--space-2) var(--space-3); white-space: normal; font-size: .875rem; line-height: 1.2; }
+  .ficha__acciones .v-btn--solid { grid-column: 1 / -1; }
+  /* Pestañas de la ficha en una sola fila que se desliza de costado. */
+  .ficha__cabecera ~ .v-tabs { flex-wrap: nowrap; overflow-x: auto; scrollbar-width: none; margin-inline: calc(-1 * var(--space-4)); padding: 2px var(--space-4) 0; scroll-padding-inline: var(--space-4); }
+  .ficha__cabecera ~ .v-tabs::-webkit-scrollbar { display: none; }
+  .ficha__cabecera ~ .v-tabs .v-tab { flex: 0 0 auto; padding: 0 var(--space-3); }
 }
 
 .ficha__datos { display: grid; gap: var(--space-4); align-items: start; }
@@ -67,24 +79,27 @@
 .sena__firmante { display: flex; flex-direction: column; gap: var(--space-3); margin: 0; padding: 0; border: 0; }
 .sena__firmante legend { padding: 0; margin-bottom: var(--space-1); }
 
-/* UI-13 · Servicios contratados */
-.servicios { display: flex; flex-direction: column; gap: var(--space-5); }
-.servicios__categoria { display: flex; flex-direction: column; gap: var(--space-3); min-width: 0; margin: 0; padding: 0; border: 0; }
+/* UI-13 · Servicios contratados: una caja por categoría, como las tarjetas de Datos; sin la tarjeta de afuera. */
+.v-card.servicios__tarjeta { padding: 0; background: none; border: 0; border-radius: 0; box-shadow: none; }
+.servicios__tarjeta > .v-card__head { display: none; }
+.servicios { display: grid; gap: var(--space-4); align-items: start; }
+@media (min-width: 960px) { .servicios { grid-template-columns: 1fr 1fr; } }
+.servicios > .v-alert, .servicios__acciones { grid-column: 1 / -1; }
+.servicios__categoria {
+  display: flex; flex-direction: column; gap: var(--space-3); min-width: 0; margin: 0; padding: var(--space-4);
+  background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius-lg);
+}
 .servicios__titulo { display: flex; align-items: center; flex-wrap: wrap; gap: var(--space-2); }
-.servicios__leyenda { padding: 0; }
+.servicios__categoria .h4 { font: 600 20px/28px var(--font-sans); }
+/* La leyenda de un fieldset se dibuja sobre el borde: flotada queda adentro de la caja. */
+.servicios__leyenda { float: left; width: 100%; padding: 0; margin-bottom: var(--space-1); }
+.servicios__leyenda + * { clear: both; }
 .servicios__texto { margin: 0; white-space: pre-line; }
 /* M-09: renglones libres. El texto ocupa lo que sobra; la cantidad, un ancho fijo; al final, quitar. */
 .servicios__renglones { display: flex; flex-direction: column; gap: var(--space-2); }
 .servicios__encabezado, .servicios__renglon { display: grid; grid-template-columns: minmax(0, 1fr) 88px var(--control-md); gap: var(--space-2); align-items: start; }
 .servicios__lista { margin: 0; padding-left: var(--space-5); }
-/* Solo lectura: categoría a la izquierda y lo cargado a la derecha, como los datos de la ficha. */
-div.servicios__categoria + div.servicios__categoria { padding-top: var(--space-4); border-top: 1px solid var(--line); }
-@media (min-width: 640px) {
-  div.servicios__categoria { display: grid; grid-template-columns: 200px minmax(0, 1fr); column-gap: var(--space-5); row-gap: var(--space-2); }
-  div.servicios__categoria > .servicios__titulo { grid-row: span 2; align-self: start; }
-  div.servicios__categoria > :not(.servicios__titulo) { grid-column: 2; }
-}
-.servicios__acciones { display: flex; justify-content: flex-end; padding-top: var(--space-4); border-top: 1px solid var(--line); }
+.servicios__acciones { display: flex; justify-content: flex-end; }
 
 /* UI-14 · Cantidad de invitados */
 .invitados { display: flex; flex-direction: column; gap: var(--space-4); min-width: min(400px, 100%); }

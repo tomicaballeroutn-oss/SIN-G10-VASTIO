@@ -89,6 +89,24 @@ describe('A7-02 · vista de cocina', () => {
     expect(await screen.findByText('No hay eventos para cocinar este día.')).toBeInTheDocument();
   });
 
+  it('tocar fuera del calendario y de las tarjetas suelta el día elegido, aunque sea hoy', async () => {
+    backend();
+    const usuario = userEvent.setup();
+    const router = montar('/cocina?mes=2030-03');
+    const tarjetas = await screen.findAllByRole('article');
+
+    await usuario.click(within(tarjetas[0]).getByRole('heading'));
+    expect(screen.getAllByRole('article')).toHaveLength(2);
+
+    await usuario.click(screen.getByRole('heading', { name: 'Vista de cocina', level: 1 }));
+    expect(router.state.location.search).toContain('dia=ninguno');
+    expect(screen.queryByRole('article')).not.toBeInTheDocument();
+    expect(screen.getByText('Tocá un día para ver los eventos que hay que preparar.')).toBeInTheDocument();
+
+    await usuario.click(screen.getByRole('button', { name: /^miércoles 20 de marzo/ }));
+    expect(await screen.findByRole('heading', { name: 'Egresados' })).toBeInTheDocument();
+  });
+
   it('desde un aviso abre el día del evento y resalta su tarjeta', async () => {
     const fetchMock = backend();
     const router = montar('/cocina?evento=5');

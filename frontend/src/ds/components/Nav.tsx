@@ -69,7 +69,15 @@ export function Nav({ items, value, onSelect, layout = 'sidebar', open, logo, fo
     // Cerrado, el texto sigue en el DOM para los lectores de pantalla.
     return (
       <div className={cx('v-rail', open && 'is-open', className)}>
-        <nav aria-label={label} className="v-nav v-nav--rail">
+        <nav
+          aria-label={label}
+          className="v-nav v-nav--rail"
+          // Al cerrarse, si quedó scrolleado, acomoda la pestaña activa para que se vea entera con sus curvas.
+          onTransitionEnd={(e) => {
+            if (e.target !== e.currentTarget || e.propertyName !== 'width') return;
+            e.currentTarget.querySelector('.v-nav__item.is-on')?.scrollIntoView({ block: 'nearest' });
+          }}
+        >
           {logo && <div className="v-nav__logo">{logo}</div>}
           <div className="v-nav__scroll">
             {grupos.map((g) => (

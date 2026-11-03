@@ -1,0 +1,40 @@
+/* Agenda más legible (prueba). Afecta también la vista de cocina, que usa AgendaGrid.
+   Para volver atrás: quitar el @import en ds.css. */
+
+/* Puntos más grandes y con borde más firme. */
+.v-day__pips { --pip: 13px; gap: 5px; }
+@media (min-width: 960px) { .v-day__pips { --pip: 17px; gap: 7px; } }
+.v-pip, .v-pip--prereserva, .v-pip--senado, .v-pip--confirmado, .v-pip--realizado,
+.v-pip--bloqueado, .v-pip--contratado, .v-pip--en-curso, .v-pip--cerrado { border-width: 2px; }
+.v-pip--realizado { box-shadow: inset 0 0 0 3px var(--surface); }
+.v-pip--en-curso { background: radial-gradient(circle at center, var(--surface) 0 3px, var(--s) 3.5px); }
+
+/* Filtro: lo que no coincide vuelve al tamaño anterior y se apaga; lo que coincide queda grande. */
+.v-day__pips .v-pip { place-self: center; }
+.v-day__pips .v-pip.is-dim { width: 9px; height: 9px; border-width: 1.5px; opacity: 0.35; filter: grayscale(1); }
+@media (min-width: 960px) { .v-day__pips .v-pip.is-dim { width: 11px; height: 11px; } }
+.v-pip.is-match { transform: none; filter: none; }
+.v-day.is-sin-coincidencias { background: var(--surface-sunken); border-color: transparent; }
+.v-day.is-sin-coincidencias .v-day__num { color: var(--ink-muted); }
+
+/* Botón de filtro prendido: relleno, no solo borde. */
+.v-filtro-toggle[aria-pressed="true"] { background: var(--brand-tint); border-color: var(--brand); color: var(--brand-ink); }
+
+/* Sin filtro, los turnos libres quedan más claritos para que resalte lo ocupado. Con filtro se ven normales. */
+.v-day__pips .v-pip--disponible:not(.is-match, .is-dim), .v-day__pips .v-pip--liberada:not(.is-match, .is-dim) { opacity: 0.45; }
+
+/* Sin filtro, los libres: chiquitos, de borde fino y claritos. */
+.v-day__pips .v-pip--disponible:not(.is-match, .is-dim), .v-day__pips .v-pip--liberada:not(.is-match, .is-dim) {
+  width: 7px; height: 7px; border-width: 1px; opacity: 0.4; }
+@media (min-width: 960px) {
+  .v-day__pips .v-pip--disponible:not(.is-match, .is-dim), .v-day__pips .v-pip--liberada:not(.is-match, .is-dim) { width: 10px; height: 10px; }
+}
+
+/* Celular: celdas compactas pero con su borde; puntos que entran en la celda. */
+@media (max-width: 639.98px) {
+  .v-agenda__grid { gap: 3px; }
+  .v-day { min-height: 0; justify-content: flex-start; gap: 3px; padding: 4px 1px 6px; border-radius: var(--radius-sm, 6px); }
+  .v-day__num { min-width: 22px; height: 22px; font-size: 0.875rem; }
+  .v-day__pips { --pip: 11px; gap: 2px; }
+  .v-day__pips .v-pip.is-dim { width: 7px; height: 7px; }
+}

@@ -1,3 +1,4 @@
+import type { ReactNode } from 'react';
 import { ESTADOS, ORDEN_SALONES, SALONES } from '../estados';
 import type { EventStatus, SalonId, TurnoId } from '../tipos';
 import { cx } from '../util';
@@ -50,6 +51,11 @@ export interface AgendaGridProps {
    * «con evento».
    */
   soloOcupacion?: boolean;
+  /** Si se pasa, cada salón de la cabecera es un botón que filtra; se pueden elegir varios. */
+  salonesElegidos?: SalonId[];
+  onCambiarSalones?: (salones: SalonId[]) => void;
+  /** Algo más al lado de los salones, por ejemplo el desplegable de estados en el teléfono. */
+  filtroExtra?: ReactNode;
   className?: string;
 }
 
@@ -58,7 +64,7 @@ export interface AgendaGridProps {
  * Arriba, qué salón es cada columna. Qué significa cada relleno va aparte, en AgendaLeyenda.
  */
 export function AgendaGrid({
-  year, month, events = [], today, selected, onSelectDay, onPrev, onNext, salones, resaltar, soloOcupacion, className,
+  year, month, events = [], today, selected, onSelectDay, onPrev, onNext, salones, resaltar, soloOcupacion, salonesElegidos, onCambiarSalones, filtroExtra, className,
 }: AgendaGridProps) {
   const primero = new Date(year, month, 1);
   const blancos = (primero.getDay() + 6) % 7;
@@ -72,12 +78,14 @@ export function AgendaGrid({
     const iso = `${year}-${dosDigitos(month + 1)}-${dosDigitos(d)}`;
     const delDia = porFecha.get(iso) ?? [];
     const pips = [];
+    let hayCoincidencia = false;
     const descripcion: string[] = [];
     for (const turno of TURNOS) {
       for (const salon of ORDEN_SALONES) {
         const ev = delDia.find((e) => e.salon === salon && e.turno === turno);
         const estado: EventStatus = ev ? (soloOcupacion ? 'confirmado' : ev.status) : 'disponible';
         const coincide = resaltar ? resaltar({ salon, turno, status: estado }) : false;
+        if (coincide) hayCoincidencia = true;
         pips.push(<span key={turno + salon} className={cx('v-pip', `v-pip--${salon}`, `v-pip--${estado}`, resaltar && (coincide ? 'is-match' : 'is-dim'))} />);
         if (ev && estado !== 'disponible') {
           descripcion.push(`${SALONES[salon]} ${turno === 'noche' ? 'noche' : 'mediodía'}: ${soloOcupacion ? 'con evento' : ESTADOS[estado]?.label ?? estado}`);
@@ -89,7 +97,7 @@ export function AgendaGrid({
       <button
         key={iso}
         type="button"
-        className={cx('v-day', selected === iso && 'is-selected', today === iso && 'is-today')}
+        className={cx('v-day', selected === iso && 'is-selected', today === iso && 'is-today', resaltar && !hayCoincidencia && 'is-sin-coincidencias')}
         aria-pressed={selected === iso}
         aria-label={`${diaSemana} ${d} de ${MESES[month].toLowerCase()}${descripcion.length ? '. ' + descripcion.join('; ') : '. Todo disponible'}`}
         onClick={() => onSelectDay?.(iso)}
@@ -111,10 +119,23 @@ export function AgendaGrid({
       </div>
       {/* Qué salón es cada columna de puntos, en el mismo orden en que aparecen en cada día. */}
       <div className="v-agenda__salons">
-        <span className="caption v-muted">Cada día, de izquierda a derecha</span>
         <ol className="v-agenda__salons-lista">
-          {ORDEN_SALONES.map((s) => <li key={s}><SalonTag salon={s} label={nombre(s)} /></li>)}
+          {ORDEN_SALONES.map((s) => (
+            <li key={s}>
+              {onCambiarSalones ? (
+                <button
+                  type="button"
+                  className="v-filtro-toggle"
+                  aria-pressed={!!salonesElegidos?.includes(s)}
+                  onClick={() => onCambiarSalones(alternar(salonesElegidos ?? [], s))}
+                >
+                  <SalonTag salon={s} label={nombre(s)} />
+                </button>
+              ) : <SalonTag salon={s} label={nombre(s)} />}
+            </li>
+          ))}
         </ol>
+        {filtroExtra}
       </div>
       <div className="v-agenda__weekdays label" aria-hidden>
         {DIAS.map((n) => <span key={n}>{n}</span>)}
@@ -127,26 +148,45 @@ export function AgendaGrid({
 export interface AgendaLeyendaProps {
   /** Abierta al cargar. Conviene abierta en escritorio y cerrada en el teléfono. */
   defaultOpen?: boolean;
+  /** Si se pasa, cada estado es un botón que filtra; se pueden elegir varios. */
+  elegidos?: EventStatus[];
+  onCambiar?: (estados: EventStatus[]) => void;
+  /** Texto del encabezado que abre y cierra. */
+  titulo?: string;
   className?: string;
 }
 
+function alternar<T>(lista: T[], valor: T): T[] {
+  return lista.includes(valor) ? lista.filter((v) => v !== valor) : [...lista, valor];
+}
+
 /** Machete de la agenda: qué estado significa cada relleno de punto. Se abre y se cierra. */
-export function AgendaLeyenda({ defaultOpen = false, className }: AgendaLeyendaProps) {
+export function AgendaLeyenda({ defaultOpen = false, elegidos, onCambiar, titulo = 'Qué significa cada punto', className }: AgendaLeyendaProps) {
   return (
     <details className={cx('v-agenda-leyenda', className)} open={defaultOpen}>
       <summary className="v-agenda-leyenda__resumen">
-        <span className="h4">Qué significa cada punto</span>
+        <span className="h4">{titulo}</span>
         <Icon name="chevron-down" size={20} className="v-agenda-leyenda__chevron" />
       </summary>
       <ul className="v-agenda-leyenda__lista body-sm">
-        {LEYENDA.map((s) => (
-          <li key={s} className="v-legend__item">
-            <span className={`v-pip v-pip--club v-pip--${s}`} aria-hidden />
-            {ESTADOS[s].label}
-          </li>
-        ))}
+        {LEYENDA.map((s) => {
+          const contenido = <><span className={`v-pip v-pip--club v-pip--${s}`} aria-hidden />{ESTADOS[s].label}</>;
+          return (
+            <li key={s} className="v-legend__item">
+              {onCambiar ? (
+                <button
+                  type="button"
+                  className="v-filtro-toggle v-legend__item"
+                  aria-pressed={!!elegidos?.includes(s)}
+                  onClick={() => onCambiar(alternar(elegidos ?? [], s))}
+                >
+                  {contenido}
+                </button>
+              ) : contenido}
+            </li>
+          );
+        })}
       </ul>
-      <p className="caption v-muted">Una fecha cancelada o liberada vuelve a verse disponible.</p>
     </details>
   );
 }

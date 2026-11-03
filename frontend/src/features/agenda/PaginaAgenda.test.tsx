@@ -161,6 +161,25 @@ describe('UI-07 · consultar agenda', () => {
     expect(parametros.has('dia')).toBe(false);
   });
 
+  it('permite editar y limpiar un filtro de turno cargado desde la URL', async () => {
+    backend();
+    const usuario = userEvent.setup();
+    const router = montar('/agenda?mes=2030-03&turno=noche');
+    const dia = await screen.findByRole('button', { name: /^sábado 9 de marzo/ });
+    expect(dia.querySelectorAll('.is-match')).toHaveLength(3);
+
+    await usuario.click(screen.getByRole('button', { name: /^Turnos/ }));
+    const turnos = screen.getByRole('group', { name: 'Turnos' });
+    const opciones = within(turnos).getAllByRole('checkbox');
+    expect(opciones[1]).toBeChecked();
+    await usuario.click(opciones[0]);
+    expect(new URLSearchParams(router.state.location.search).getAll('turno')).toEqual(['noche', 'mediodia']);
+    await usuario.click(screen.getByRole('button', { name: 'Listo' }));
+    await usuario.click(screen.getByRole('button', { name: 'Limpiar filtros' }));
+    expect(new URLSearchParams(router.state.location.search).has('turno')).toBe(false);
+    expect(dia.querySelectorAll('.is-dim, .is-match')).toHaveLength(0);
+  });
+
   it('un resaltado sin coincidencias mantiene seis unidades y permite limpiar', async () => {
     backend();
     const usuario = userEvent.setup();

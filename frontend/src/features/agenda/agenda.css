@@ -53,7 +53,7 @@
    el machete de abajo queda solo para pantallas anchas. Para volver atrás, borrar este bloque y el filtroExtra de PaginaAgenda. */
 .v-agenda-leyenda.agenda__estados-movil { display: none; }
 @media (max-width: 639.98px) {
-  .agenda__machete { display: none; }
+  .v-card.agenda__machete { display: none; }
   .v-agenda-leyenda.agenda__estados-movil { display: block; position: relative; }
   .agenda__estados-movil > .v-agenda-leyenda__resumen { min-height: 44px; gap: var(--space-2); padding: 0 var(--space-3); border: 1px solid var(--line-strong); border-radius: var(--radius-pill); }
   .agenda__estados-movil > .v-agenda-leyenda__resumen .h4 { font-size: 0.875rem; }

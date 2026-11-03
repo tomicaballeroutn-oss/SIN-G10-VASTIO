@@ -8,6 +8,7 @@ import {
   type AgendaEvent, type EventStatus, type SalonId, type TurnoId,
 } from '../../ds';
 import { Cargando } from '../comun/Cargando';
+import { FiltroMultiple } from '../comun/FiltroMultiple';
 import { Encabezado } from '../layout/paginas';
 import { useSesion } from '../sesion/contexto';
 import { disponibilidad } from './disponibilidad';
@@ -86,7 +87,13 @@ export function PaginaAgenda() {
       )}
       <div className="agenda__filtros-acciones">
         <Button variant="outline" icon="calendar" onClick={() => cambiar({ mes: hoy.slice(0, 7), dia: hoy })}>Ir a hoy</Button>
-        {(salones.length > 0 || estados.length > 0) && (
+        <FiltroMultiple
+          label="Turnos"
+          opciones={(datos.datos?.turnos ?? []).map((t) => ({ value: t.codigo, label: t.nombre }))}
+          valores={turnos}
+          alCambiar={(valores) => cambiarLista('turno', valores)}
+        />
+        {(salones.length > 0 || estados.length > 0 || turnos.length > 0) && (
           <Button variant="text" onClick={() => cambiar({ salon: null, estado: null, turno: null })}>Limpiar filtros</Button>
         )}
       </div>

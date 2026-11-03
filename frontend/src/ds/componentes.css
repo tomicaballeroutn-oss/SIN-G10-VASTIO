@@ -192,7 +192,7 @@ h2.h2, h3.h3, h3.h4 { margin: 0; color: var(--ink); }
 .v-table__empty { text-align: center; padding: var(--space-8) !important; }
 
 /* ---------- Tabs ---------- */
-.v-tabs { display: flex; gap: var(--space-1); overflow-x: auto; }
+.v-tabs { display: flex; flex-wrap: wrap; gap: var(--space-1); }
 .v-tab { display: inline-flex; align-items: center; gap: var(--space-2); height: var(--control-md); padding: 0 var(--space-4); border: 0; background: none; color: var(--ink-muted); cursor: pointer; white-space: nowrap; -webkit-tap-highlight-color: transparent;
   transition: color var(--motion-fast) var(--ease), background-color var(--motion-fast) var(--ease); }
 .v-tab:hover { color: var(--ink); }
@@ -428,11 +428,11 @@ h2.h2, h3.h3, h3.h4 { margin: 0; color: var(--ink); }
 .v-card--notched { isolation: isolate; background: none; border-color: transparent; }
 .v-card--notched::before { content: ""; position: absolute; z-index: -1; inset: 0; border-radius: inherit; background: var(--card-bg);
   -webkit-mask: var(--round-notch) top right / var(--notch-size) var(--notch-size) no-repeat,
-    linear-gradient(#000 0 0) left top / calc(100% - var(--notch-size)) 100% no-repeat,
-    linear-gradient(#000 0 0) left bottom / 100% calc(100% - var(--notch-size)) no-repeat;
+    linear-gradient(#000 0 0) left top / calc(100% - var(--notch-size) + 1px) 100% no-repeat,
+    linear-gradient(#000 0 0) left bottom / 100% calc(100% - var(--notch-size) + 1px) no-repeat;
           mask: var(--round-notch) top right / var(--notch-size) var(--notch-size) no-repeat,
-    linear-gradient(#000 0 0) left top / calc(100% - var(--notch-size)) 100% no-repeat,
-    linear-gradient(#000 0 0) left bottom / 100% calc(100% - var(--notch-size)) no-repeat; }
+    linear-gradient(#000 0 0) left top / calc(100% - var(--notch-size) + 1px) 100% no-repeat,
+    linear-gradient(#000 0 0) left bottom / 100% calc(100% - var(--notch-size) + 1px) no-repeat; }
 .v-card--notched > .v-card__head { padding-right: calc(var(--notch-size) - var(--space-4)); }
 .v-card__notch { position: absolute; z-index: 1; top: 8px; right: 8px; }
 .v-card__notch .v-iconbtn { border-radius: var(--radius-pill); }
@@ -464,12 +464,18 @@ h2.h2, h3.h3, h3.h4 { margin: 0; color: var(--ink); }
 /* Abierto flota sobre el contenido: sombra corta, para que no deje una franja gris al costado.
    Se abre con el mouse encima o con foco de teclado (:focus-visible), no con :focus-within: un clic deja el foco en el ítem y lo dejaría fijo. */
 .v-rail:hover .v-nav--rail, .v-rail:has(:focus-visible) .v-nav--rail, .v-rail.is-open .v-nav--rail { width: var(--rail-w-open); box-shadow: var(--shadow-md); }
-.v-nav--rail .v-nav__logo { display: flex; align-items: center; height: 48px; padding: 0 0 0 20px; margin-bottom: var(--space-3); overflow: hidden; }
+.v-nav--rail .v-nav__logo { display: flex; position: relative; z-index: 2; background: linear-gradient(to top, var(--deep) var(--space-4), transparent var(--space-4)); align-items: center; height: 48px; padding: 0 0 0 20px; margin-bottom: var(--space-3); overflow: hidden; }
 /* El Logo fija el ancho y la imagen conserva su proporción. */
 .v-nav--rail .v-nav__logo .v-brand--marca { width: 40px; }
 .v-nav--rail .v-nav__scroll { flex: 1; min-height: 0; display: flex; flex-direction: column; gap: var(--space-3);
   /* El área de scroll se extiende por fuera del riel para no recortar las pestañas que sobresalen. */
-  margin-right: calc(-1 * var(--tab-protrude)); padding: 0 var(--tab-protrude) 0 0; overflow-x: hidden; overflow-y: auto; scrollbar-width: none; }
+  margin-right: calc(-1 * var(--tab-protrude)); padding: 0 var(--tab-protrude) 0 0; overflow-x: hidden; overflow-y: auto; scrollbar-width: none;
+  /* Lugar para las esquinas invertidas de la pestaña activa (si no, la primera y la última se recortan). */
+  padding-block: calc(var(--fillet) + var(--space-3)); margin-block: calc(-1 * var(--fillet)); }
+/* Al scrollear con el riel abierto, las pestañas se desvanecen en los bordes en lugar de cortarse en seco.
+   Con el riel cerrado no hay difuminado: la pestaña activa se ve entera. */
+.v-rail:hover .v-nav__scroll, .v-rail:has(:focus-visible) .v-nav__scroll, .v-rail.is-open .v-nav__scroll {
+  -webkit-mask: linear-gradient(transparent, #000 var(--space-4), #000 calc(100% - var(--space-4)), transparent); mask: linear-gradient(transparent, #000 var(--space-4), #000 calc(100% - var(--space-4)), transparent); }
 .v-nav--rail .v-nav__scroll::-webkit-scrollbar { display: none; }
 .v-nav--rail .v-nav__group { position: relative; display: flex; flex-direction: column; gap: 2px; }
 .v-nav--rail .v-nav__title { height: 0; margin: 0 !important; padding: 0 0 0 26px; overflow: hidden; opacity: 0; color: var(--on-deep-muted);
@@ -488,12 +494,12 @@ h2.h2, h3.h3, h3.h4 { margin: 0; color: var(--ink); }
 .v-rail:hover .v-nav__count, .v-rail:has(:focus-visible) .v-nav__count, .v-rail.is-open .v-nav__count { opacity: 1; }
 /* Ítem activo: el fondo de la pantalla entra en el riel, como en un fichero.
    Arriba y abajo, esquinas invertidas redondas para que el riel "abrace" la pestaña. */
-.v-nav--rail .v-nav__item.is-on { z-index: 1; width: calc(100% - 12px + var(--tab-protrude)); background: var(--tab); color: var(--on-tab); font-weight: 600;
+.v-nav--rail .v-nav__item.is-on { z-index: 1; scroll-margin-block: calc(var(--fillet) + var(--space-2)); width: calc(100% - 12px + var(--tab-protrude)); background: var(--tab); color: var(--on-tab); font-weight: 600;
   border-radius: var(--radius-lg) 0 0 var(--radius-lg); }
 .v-nav--rail .v-nav__item.is-on::before, .v-nav--rail .v-nav__item.is-on::after { content: ""; position: absolute; right: var(--tab-protrude);
   width: var(--fillet); height: var(--fillet); background: var(--tab); pointer-events: none; }
-.v-nav--rail .v-nav__item.is-on::before { bottom: 100%; -webkit-mask: radial-gradient(circle at 0 0, transparent calc(var(--fillet) - 0.5px), #000 var(--fillet)); mask: radial-gradient(circle at 0 0, transparent calc(var(--fillet) - 0.5px), #000 var(--fillet)); }
-.v-nav--rail .v-nav__item.is-on::after { top: 100%; -webkit-mask: radial-gradient(circle at 0 100%, transparent calc(var(--fillet) - 0.5px), #000 var(--fillet)); mask: radial-gradient(circle at 0 100%, transparent calc(var(--fillet) - 0.5px), #000 var(--fillet)); }
+.v-nav--rail .v-nav__item.is-on::before { bottom: calc(100% - 1px); margin-right: -1px; -webkit-mask: radial-gradient(circle at 0 0, transparent calc(var(--fillet) - 1.5px), #000 calc(var(--fillet) + 0.5px)); mask: radial-gradient(circle at 0 0, transparent calc(var(--fillet) - 1.5px), #000 calc(var(--fillet) + 0.5px)); }
+.v-nav--rail .v-nav__item.is-on::after { top: calc(100% - 1px); margin-right: -1px; -webkit-mask: radial-gradient(circle at 0 100%, transparent calc(var(--fillet) - 1.5px), #000 calc(var(--fillet) + 0.5px)); mask: radial-gradient(circle at 0 100%, transparent calc(var(--fillet) - 1.5px), #000 calc(var(--fillet) + 0.5px)); }
 .v-nav--rail .v-nav__item.is-on:hover { background: var(--tab); }
 .v-nav--rail .v-nav__item.is-on .v-nav__dot { box-shadow: 0 0 0 2px var(--tab); }
 /* Con el riel abierto (encima del contenido) el activo deja de ser pestaña: es un recuadro simple con los mismos
@@ -563,3 +569,8 @@ h2.h2, h3.h3, h3.h4 { margin: 0; color: var(--ink); }
 .v-minibarras { display: inline-flex; align-items: flex-end; gap: 4px; height: 32px; }
 .v-minibarras__riel { position: relative; display: block; width: 8px; height: 100%; border-radius: var(--radius-pill); background: var(--deep-raised); overflow: hidden; }
 .v-minibarras__relleno { position: absolute; left: 0; right: 0; bottom: 0; border-radius: var(--radius-pill); background: var(--on-deep); }
+
+/* Salones y estados de la agenda usados como filtro: se pueden elegir varios. */
+.v-filtro-toggle { display: inline-flex; align-items: center; gap: var(--space-2, 8px); min-height: 44px; padding: 2px 6px; border: 2px solid transparent; border-radius: var(--radius-pill, 999px); background: none; font: inherit; color: inherit; cursor: pointer; }
+.v-filtro-toggle[aria-pressed="true"] { border-color: currentColor; font-weight: 600; }
+.v-filtro-toggle:focus-visible { outline: 2px solid var(--color-focus, currentColor); outline-offset: 2px; }

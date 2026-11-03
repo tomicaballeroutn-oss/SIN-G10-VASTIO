@@ -26,10 +26,9 @@
 .ficha__etiquetas { display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-2) var(--space-3); }
 .ficha__etiquetas-principales { display: contents; }
 .ficha__logo-salon { width: 184px; height: 56px; margin-left: auto; }
-/* Imprimir: en escritorio a la derecha, junto al logo; en celular, arriba a la derecha. */
-.ficha__imprimir { display: inline-flex; margin-left: auto; }
-.ficha__imprimir + .ficha__logo-salon { margin-left: 0; }
 .ficha__acciones { display: flex; flex-wrap: wrap; gap: var(--space-2); }
+/* Imprimir: cuadradito al final de las acciones. */
+.ficha__imprimir { display: contents; }
 
 @media (max-width: 480px) {
   .ficha__cabecera { position: relative; }
@@ -40,11 +39,13 @@
   /* El logo sube a la altura de «Volver» (alto del botón + separación de la pantalla), salvo que haya un aviso en el medio. */
   .ficha__logo-salon { position: absolute; right: 0; top: calc(-1 * (var(--space-6) + var(--control-md)) + 4px); width: 104px; height: 36px; margin-left: 0; }
   .v-alert + .ficha__cabecera .ficha__logo-salon { position: static; grid-column: 2; grid-row: 3; justify-self: end; }
-  .ficha__imprimir { grid-column: 2; grid-row: 1; justify-self: end; margin-left: 0; }
   /* Acciones compactas: la principal a lo ancho y las demás de a dos. */
   .ficha__acciones { display: grid; grid-template-columns: 1fr 1fr; }
   .ficha__acciones .v-btn { width: 100%; height: auto; min-height: var(--control-sm); padding: var(--space-2) var(--space-3); white-space: normal; font-size: .875rem; line-height: 1.2; }
+  /* La acción principal a lo ancho, con el cuadradito de imprimir a su derecha. */
   .ficha__acciones .v-btn--solid { grid-column: 1 / -1; }
+  .ficha__acciones > .v-btn--solid:first-child { grid-row: 1; width: calc(100% - var(--control-md) - var(--space-2)); }
+  .ficha__acciones .v-iconbtn { grid-column: 2; grid-row: 1; justify-self: end; align-self: stretch; height: auto; min-height: var(--control-sm); }
   /* Pestañas de la ficha en una sola fila que se desliza de costado. */
   .ficha__cabecera ~ .v-tabs { flex-wrap: nowrap; overflow-x: auto; scrollbar-width: none; margin-inline: calc(-1 * var(--space-4)); padding: 2px var(--space-4) 0; scroll-padding-inline: var(--space-4); }
   .ficha__cabecera ~ .v-tabs::-webkit-scrollbar { display: none; }

@@ -49,7 +49,7 @@ export function ImprimirFicha({ ficha }: { ficha: Ficha }) {
 
   return (
     <>
-      <IconButton icon="printer" label="Imprimir ficha" variant="text" size="sm" onClick={() => setEligiendo(true)} />
+      <IconButton icon="printer" label="Imprimir ficha" variant="outline" onClick={() => setEligiendo(true)} />
       {eligiendo && (
         <DialogoImprimir
           ficha={ficha}

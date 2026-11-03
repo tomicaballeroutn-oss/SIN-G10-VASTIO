@@ -1,0 +1,35 @@
+.imprimir-ficha__opciones { display: flex; flex-direction: column; gap: var(--space-3); }
+
+/* La hoja impresa: no se ve en pantalla. Blanco y negro, legible en láser; el estado va en palabra. */
+.ficha-impresa { display: none; }
+
+@media print {
+  @page { size: A4 portrait; margin: 14mm; }
+  body.ficha-imprimiendo { background: #fff !important; }
+  body.ficha-imprimiendo > :not(.ficha-impresa) { display: none !important; }
+  body.ficha-imprimiendo > .ficha-impresa { display: block; }
+
+  .ficha-impresa { color: #17212b; font-family: var(--font-sans, sans-serif); font-size: 10.5pt; line-height: 1.4; }
+  .ficha-impresa h1 { margin: 2pt 0 4pt; font-size: 18pt; line-height: 1.2; }
+  .ficha-impresa h2 { margin: 0 0 6pt; padding-bottom: 3pt; border-bottom: 1px solid #aeb7c0; font-size: 11pt; text-transform: uppercase; letter-spacing: .04em; }
+  .ficha-impresa h3 { margin: 0 0 2pt; font-size: 10.5pt; }
+  .ficha-impresa p { margin: 0; }
+
+  .ficha-impresa__cabecera { display: flex; justify-content: space-between; align-items: center; gap: 12pt; padding-bottom: 10pt; margin-bottom: 12pt; border-bottom: 2px solid #17212b; }
+  .ficha-impresa__codigo { font-size: 9.5pt; color: #52606d; }
+  /* Misma caja que el comprobante de seña (M-04): 172 × 76 pt, conserva la proporción. */
+  .ficha-impresa__logo { width: 172pt; height: 76pt; object-fit: contain; object-position: right center; flex: 0 0 auto; }
+
+  .ficha-impresa__columnas { display: grid; grid-template-columns: 1fr 1fr; gap: 14pt; }
+  .ficha-impresa__bloque { margin-bottom: 12pt; break-inside: avoid; }
+  .ficha-impresa dl { margin: 0; }
+  .ficha-impresa__fila { display: grid; grid-template-columns: 34% 1fr; gap: 6pt; padding: 2pt 0; }
+  .ficha-impresa__fila dt { color: #52606d; }
+  .ficha-impresa__fila dd { margin: 0; }
+  .ficha-impresa__servicio { margin-bottom: 6pt; break-inside: avoid; }
+  .ficha-impresa__servicio ul { margin: 0; padding-left: 14pt; }
+  .ficha-impresa__observaciones { white-space: pre-wrap; }
+
+  .ficha-impresa__pie { display: flex; justify-content: space-between; align-items: center; margin-top: 16pt; padding-top: 6pt; border-top: 1px solid #aeb7c0; font-size: 8.5pt; color: #52606d; }
+  .ficha-impresa__pie img { height: 16pt; }
+}

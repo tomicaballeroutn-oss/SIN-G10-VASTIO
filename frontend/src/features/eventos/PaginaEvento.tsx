@@ -30,6 +30,7 @@ import { DialogoPlanner } from './DialogoPlanner';
 import { DialogoLiberar } from './DialogoLiberar';
 import { PestanaServicios } from './PestanaServicios';
 import { DialogoSena } from './DialogoSena';
+import { ImprimirFicha } from './ImprimirFicha';
 import './eventos.css';
 import { ROLES_CALENDAR } from '../../api/calendar';
 import { EstadoGoogleCalendar } from './EstadoGoogleCalendar';
@@ -101,6 +102,7 @@ function ContenidoFicha({ ficha, alCambiar }: { ficha: Ficha; alCambiar: (ficha:
           <span className="body ficha__fecha-turno">
             {fechaCorta(ficha.fecha, true)} {'\u00b7'} {ficha.turno.nombre} ({hora(ficha.turno.horaInicio)} a {hora(ficha.turno.horaFin)})
           </span>
+          <span className="ficha__imprimir"><ImprimirFicha ficha={ficha} /></span>
           <MarcaSalon salon={ficha.salon.codigo} className="ficha__logo-salon" />
         </div>
         <h1>{ficha.nombre}</h1>

@@ -7,9 +7,13 @@ import { ProblemaApi } from '../../api/problema';
 import { useDatos } from '../../api/useDatos';
 import { AgendaGrid, Alert, Button, Card, SalonTag, type AgendaEvent, type SalonId } from '../../ds';
 import { Cargando } from '../comun/Cargando';
+import { useTocarAfuera } from '../comun/useTocarAfuera';
 import { Encabezado } from '../layout/paginas';
 import '../agenda/agenda.css';
 import './cocina.css';
+
+/** En la dirección, «ningún día elegido»: sin `dia`, la vista abre en hoy. */
+const NINGUNO = 'ninguno';
 
 const MES_VALIDO = /^\d{4}-(0[1-9]|1[0-2])$/;
 
@@ -30,6 +34,10 @@ export function PaginaCocina() {
 
   const cargar = useCallback(() => cocina.mes(mes), [mes]);
   const datos = useDatos(cargar);
+  const calendario = useRef<HTMLDivElement>(null);
+  const lateral = useRef<HTMLDivElement>(null);
+  // Tocar fuera del calendario y de las tarjetas suelta el día elegido.
+  useTocarAfuera([calendario, lateral], diaPedido !== NINGUNO && !!datos.datos, () => cambiar({ dia: NINGUNO, evento: null }));
 
   function cambiar(valores: Record<string, string | null>) {
     const siguiente = new URLSearchParams(busqueda);
@@ -78,12 +86,12 @@ export function PaginaCocina() {
       </Alert>}
       <Cargando datos={datos}>
         {(c) => {
-          const dia = diaPedido?.startsWith(mes) ? diaPedido : c.hoy.startsWith(mes) ? c.hoy : null;
+          const dia = diaPedido === NINGUNO ? null : diaPedido?.startsWith(mes) ? diaPedido : c.hoy.startsWith(mes) ? c.hoy : null;
           return (
             <>
               {c.hasta && <p className="body-sm v-muted">Ves los eventos confirmados desde hoy hasta el {fechaLarga(c.hasta)}.</p>}
               <div className="agenda">
-                <Card className="agenda__mes">
+                <div ref={calendario} className="agenda__zona"><Card className="agenda__mes">
                   <AgendaGrid
                     year={anio}
                     month={numeroMes - 1}
@@ -100,8 +108,8 @@ export function PaginaCocina() {
                     resaltar={salones.length > 0 ? (u) => salones.includes(u.salon) : undefined}
                   />
                   <p className="caption v-muted">Cada punto lleno es un evento para cocinar.</p>
-                </Card>
-                <div className="agenda__lateral">
+                </Card></div>
+                <div ref={lateral} className="agenda__lateral">
                   {c.jornadasAnteriores.length > 0 && <div className="cocina__dia">
                     <h2 className="h3">Jornadas anteriores</h2>
                     {c.jornadasAnteriores.map((e) => <div key={e.id}>

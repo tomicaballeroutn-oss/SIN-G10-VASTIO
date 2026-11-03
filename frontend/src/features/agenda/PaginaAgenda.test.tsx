@@ -90,6 +90,21 @@ describe('UI-07 · consultar agenda', () => {
     expect(screen.getByRole('tabpanel', { name: 'Club de Campo' })).toHaveTextContent('La tiene Melina Ruiz.');
   });
 
+  it('tocar fuera del calendario y del detalle suelta el día elegido; tocar adentro no', async () => {
+    backend();
+    const usuario = userEvent.setup();
+    const router = montar('/agenda?mes=2030-03&dia=2030-03-09');
+
+    const titulo = await screen.findByRole('heading', { name: 'sábado 9 de marzo' });
+    await usuario.click(titulo);
+    await usuario.click(screen.getByRole('heading', { name: 'Marzo 2030' }));
+    expect(router.state.location.search).toContain('dia=2030-03-09');
+
+    await usuario.click(screen.getByRole('heading', { name: 'Agenda', level: 1 }));
+    expect(router.state.location.search).not.toContain('dia=');
+    expect(screen.getByText(/Tocá un día para ver qué turnos/)).toBeInTheDocument();
+  });
+
   it('en un día pasado no cuenta turnos libres ni ofrece pre-reservar', async () => {
     backendFalso(sesionDe(['VENDEDORA']), ({ ruta }) => (ruta === '/agenda?mes=2020-03' ? json(200, { ...MARZO, mes: '2020-03', unidades: [] }) : undefined));
     montar('/agenda?mes=2020-03&dia=2020-03-09');

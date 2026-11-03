@@ -307,7 +307,7 @@ function Datos({ ficha }: { ficha: Ficha }) {
           </dl>
         </Card>
       )}
-      <Card title="Observaciones internas" subtitle="No se muestran en la vista de cocina.">
+      <Card title="Observaciones internas">
         <p className="body ficha__observaciones">{ficha.observacionesInternas || 'Sin observaciones.'}</p>
       </Card>
     </div>

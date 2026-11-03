@@ -54,7 +54,7 @@ public class UsuarioInicial implements ApplicationRunner {
             log.warn("No se creó el usuario inicial '{}': definí VASTIO_ADMIN_CONTRASENA.", nombreUsuario);
             return;
         }
-        Usuario direccion = new Usuario("Dirección (usuario inicial)", nombreUsuario, passwordEncoder.encode(contrasena));
+        Usuario direccion = new Usuario("Dirección", nombreUsuario, passwordEncoder.encode(contrasena));
         direccion.asignarRol(roles.findByCodigo(RolCodigo.DIRECCION).orElseThrow());
         direccion.setDebeCambiarContrasena(false);
         usuarios.save(direccion);

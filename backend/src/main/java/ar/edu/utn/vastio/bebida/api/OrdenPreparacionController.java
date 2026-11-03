@@ -1,13 +1,22 @@
 package ar.edu.utn.vastio.bebida.api;
 
+import java.math.BigDecimal;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Stream;
 
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.AssertTrue;
+import jakarta.validation.constraints.DecimalMax;
+import jakarta.validation.constraints.DecimalMin;
+import jakarta.validation.constraints.Digits;
+import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -16,6 +25,7 @@ import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseStatus;
@@ -56,6 +66,32 @@ public class OrdenPreparacionController {
 
     /** {@code version}: la de la orden que se estaba viendo. */
     public record VersionRequest(@NotNull(message = "Falta la versión de la orden. Volvé a abrirla.") Integer version) {
+    }
+
+    /** Botellas enteras a retirar de una bebida; 0 la «saca». */
+    public record AjusteRenglon(
+            @NotNull(message = "Falta la bebida.") Long bebidaId,
+            @NotNull(message = "Indicá la cantidad a retirar.")
+            @DecimalMin(value = "0", message = "La cantidad no puede ser negativa.")
+            @DecimalMax(value = "99999999", message = "Revisá la cantidad: es demasiado grande.")
+            @Digits(integer = 8, fraction = 0, message = "La cantidad va en botellas enteras.") BigDecimal cantidad) {
+    }
+
+    public record AjusteRequest(
+            @NotNull(message = "Falta la versión de la orden. Volvé a abrirla.") Integer version,
+            @NotEmpty(message = "Indicá al menos una bebida.") @Size(max = 200, message = "Hasta 200 bebidas por ajuste.")
+            List<@Valid @NotNull AjusteRenglon> renglones) {
+
+        @AssertTrue(message = "Hay una bebida repetida.")
+        public boolean isSinRepetidos() {
+            return renglones == null || renglones.stream().map(AjusteRenglon::bebidaId).distinct().count() == renglones.size();
+        }
+
+        Map<Long, BigDecimal> retirar() {
+            Map<Long, BigDecimal> retirar = new LinkedHashMap<>();
+            renglones.forEach(r -> retirar.put(r.bebidaId(), r.cantidad()));
+            return retirar;
+        }
     }
 
     @GetMapping("/ordenes-preparacion")
@@ -101,6 +137,48 @@ public class OrdenPreparacionController {
             @AuthenticationPrincipal Jwt jwt) {
         UsuarioActual quien = UsuarioActual.de(jwt);
         ordenes.recalcular(eventoId, pedido.version(), quien);
+        return respuesta(ordenes.consultar(eventoId), quien);
+    }
+
+    @PutMapping("/eventos/{eventoId}/orden-preparacion/renglones")
+    @PreAuthorize(Permisos.GESTIONAR_ORDEN)
+    @Operation(summary = "Ajustar orden de preparación", description = """
+            Lo que se va a retirar de cada bebida, en botellas enteras (la pantalla carga cajas y botellas sueltas). Se
+            pueden agregar bebidas activas que no estaban (sugerida 0) y «sacar» una dejándola en 0; las que no vienen no
+            cambian. La orden pasa a Modificada. Confirmada, primero hay que reabrirla.""")
+    @ApiResponse(responseCode = "409", description = "ORDEN_MODIFICADA: otra persona la cambió en el medio")
+    @ApiResponse(responseCode = "422", description = "ORDEN_CONFIRMADA, BEBIDA_INVALIDA o estado del evento que no lo permite")
+    public OrdenResponse ajustar(@PathVariable long eventoId, @Valid @RequestBody AjusteRequest pedido,
+            @AuthenticationPrincipal Jwt jwt) {
+        UsuarioActual quien = UsuarioActual.de(jwt);
+        ordenes.ajustar(eventoId, pedido.version(), pedido.retirar(), quien);
+        return respuesta(ordenes.consultar(eventoId), quien);
+    }
+
+    @PostMapping("/eventos/{eventoId}/orden-preparacion/confirmacion")
+    @PreAuthorize(Permisos.GESTIONAR_ORDEN)
+    @Operation(summary = "Confirmar orden de preparación", description = """
+            La orden Sugerida o Modificada queda Confirmada: ya no se edita y la salida a barra se vincula a ella.""")
+    @ApiResponse(responseCode = "409", description = "ORDEN_MODIFICADA: otra persona la cambió en el medio")
+    @ApiResponse(responseCode = "422", description = "ORDEN_CONFIRMADA o estado del evento que no lo permite")
+    public OrdenResponse confirmar(@PathVariable long eventoId, @Valid @RequestBody VersionRequest pedido,
+            @AuthenticationPrincipal Jwt jwt) {
+        UsuarioActual quien = UsuarioActual.de(jwt);
+        ordenes.confirmar(eventoId, pedido.version(), quien);
+        return respuesta(ordenes.consultar(eventoId), quien);
+    }
+
+    @PostMapping("/eventos/{eventoId}/orden-preparacion/reapertura")
+    @PreAuthorize(Permisos.GESTIONAR_ORDEN)
+    @Operation(summary = "Reabrir orden de preparación", description = """
+            La orden Confirmada vuelve a Modificada para ajustarla, si algo cambió sobre la marcha. Con el evento
+            Confirmado o En curso.""")
+    @ApiResponse(responseCode = "409", description = "ORDEN_MODIFICADA: otra persona la cambió en el medio")
+    @ApiResponse(responseCode = "422", description = "ORDEN_NO_CONFIRMADA o estado del evento que no lo permite")
+    public OrdenResponse reabrir(@PathVariable long eventoId, @Valid @RequestBody VersionRequest pedido,
+            @AuthenticationPrincipal Jwt jwt) {
+        UsuarioActual quien = UsuarioActual.de(jwt);
+        ordenes.reabrir(eventoId, pedido.version(), quien);
         return respuesta(ordenes.consultar(eventoId), quien);
     }
 

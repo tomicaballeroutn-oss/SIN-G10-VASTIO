@@ -15,3 +15,13 @@
   .app__contenido { width: auto; max-width: none; margin: 0; padding: 0; }
   .orden .v-card { box-shadow: none !important; border: 1px solid #cbd1d7; break-inside: avoid; }
 }
+
+/* Ajustar orden: una fila por bebida con cajas y botellas sueltas. */
+.orden__ajuste { display: flex; flex-direction: column; gap: var(--space-4); }
+.orden__renglones { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: var(--space-3); }
+.orden__renglon {
+  display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: var(--space-3); align-items: center;
+  padding-bottom: var(--space-3); border-bottom: 1px solid var(--line);
+}
+.orden__renglon p { margin: 0; }
+@media (max-width: 720px) { .orden__renglon { grid-template-columns: 1fr; } }

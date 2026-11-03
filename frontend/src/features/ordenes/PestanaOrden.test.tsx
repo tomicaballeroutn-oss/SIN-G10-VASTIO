@@ -23,8 +23,10 @@ const ORDEN: Orden = {
   ],
 };
 
-const CON_ORDEN: OrdenDelEvento = { evento: EVENTO, orden: ORDEN, asistentesCambiaron: false, acciones: { generar: false, recalcular: true } };
-const SIN_ORDEN: OrdenDelEvento = { evento: EVENTO, orden: null, asistentesCambiaron: false, acciones: { generar: true, recalcular: false } };
+const NINGUNA = { generar: false, recalcular: false, ajustar: false, confirmar: false, reabrir: false };
+const EDITABLE = { ...NINGUNA, recalcular: true, ajustar: true, confirmar: true };
+const CON_ORDEN: OrdenDelEvento = { evento: EVENTO, orden: ORDEN, asistentesCambiaron: false, acciones: EDITABLE };
+const SIN_ORDEN: OrdenDelEvento = { evento: EVENTO, orden: null, asistentesCambiaron: false, acciones: { ...NINGUNA, generar: true } };
 
 function backend(consulta: OrdenDelEvento, roles: Rol[] = ['COMPRAS'], otro: (p: Pedido) => Response | undefined = () => undefined) {
   return backendFalso(sesionDe(roles), (p) => {
@@ -88,12 +90,74 @@ describe('UI-35 · orden de preparación', () => {
   });
 
   it('Administración la ve sin acciones', async () => {
-    backend({ ...CON_ORDEN, acciones: { generar: false, recalcular: false } }, ['ADMINISTRACION']);
+    backend({ ...CON_ORDEN, acciones: NINGUNA }, ['ADMINISTRACION']);
     montar('/eventos/5?pestana=orden');
 
     expect(await screen.findByRole('table', { name: 'Bebida de la orden de preparación' })).toBeInTheDocument();
     expect(screen.queryByRole('button', { name: 'Recalcular sugerencia' })).not.toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: 'Ajustar cantidades' })).not.toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'Vista para imprimir' })).toBeInTheDocument();
+  });
+
+  it('Compras ajusta en cajas y botellas, agrega una bebida y manda solo lo que cambió', async () => {
+    const gin = {
+      id: 7, nombre: 'Gin Bombay', presentacion: '750 ml', tipo: { id: 3, nombre: 'Destilado' },
+      unidad: { id: 1, nombre: 'Caja', esBotella: false }, unidadesPorBulto: 6, stockMinimo: null, codigos: [], activo: true, fechaBaja: null,
+    };
+    const AJUSTADA: OrdenDelEvento = { ...CON_ORDEN, orden: { ...ORDEN, estado: 'MODIFICADA', version: 1 } };
+    const fetchMock = backend(CON_ORDEN, ['COMPRAS'], (p) => {
+      if (p.metodo === 'GET' && p.ruta === '/bebidas') return json(200, [gin]);
+      if (p.metodo === 'PUT' && p.ruta === '/eventos/5/orden-preparacion/renglones') return json(200, AJUSTADA);
+      return undefined;
+    });
+    const usuario = userEvent.setup();
+    montar('/eventos/5?pestana=orden');
+
+    await usuario.click(await screen.findByRole('button', { name: 'Ajustar cantidades' }));
+    const fernet = screen.getByRole('group', { name: 'A retirar de Fernet Branca' });
+    await usuario.click(within(fernet).getAllByRole('button', { name: /Sumar/ })[0]);
+    await usuario.type(screen.getByLabelText('Agregar bebida'), 'gin');
+    await usuario.click(await screen.findByRole('option', { name: /Gin Bombay 750 ml/ }));
+    const nuevo = screen.getByRole('group', { name: 'A retirar de Gin Bombay' });
+    await usuario.click(within(nuevo).getAllByRole('button', { name: /Sumar/ })[0]);
+    await usuario.click(screen.getByRole('button', { name: 'Guardar ajustes' }));
+
+    expect(await screen.findByText('Ajustes guardados. La orden quedó Modificada.')).toBeInTheDocument();
+    expect(pedidos(fetchMock).find((p) => p.metodo === 'PUT')?.cuerpo).toEqual({
+      version: 0, renglones: [{ bebidaId: 1, cantidad: 54 }, { bebidaId: 7, cantidad: 6 }],
+    });
+  });
+
+  it('confirma la orden y después la reabre', async () => {
+    const CONFIRMADA: OrdenDelEvento = {
+      ...CON_ORDEN,
+      orden: { ...ORDEN, estado: 'CONFIRMADA', version: 1, confirmacion: { usuario: { id: 4, nombre: 'Tomás Caballero' }, fechaHora: '2026-10-21T09:00:00-03:00' } },
+      acciones: { ...NINGUNA, reabrir: true },
+    };
+    let actual = CON_ORDEN;
+    const fetchMock = backendFalso(sesionDe(['COMPRAS']), (p) => {
+      if (p.metodo === 'GET' && p.ruta === '/eventos/5') return json(200, fichaDePrueba({ estado: 'CONFIRMADO' }));
+      if (p.metodo === 'GET' && p.ruta === '/eventos/5/orden-preparacion') return json(200, actual);
+      if (p.ruta === '/eventos/5/orden-preparacion/confirmacion') {
+        actual = CONFIRMADA;
+        return json(200, CONFIRMADA);
+      }
+      if (p.ruta === '/eventos/5/orden-preparacion/reapertura') return json(200, { ...CON_ORDEN, orden: { ...ORDEN, estado: 'MODIFICADA', version: 2 } });
+      return undefined;
+    });
+    const usuario = userEvent.setup();
+    montar('/eventos/5?pestana=orden');
+
+    await usuario.click(await screen.findByRole('button', { name: 'Confirmar orden' }));
+    await usuario.click(within(screen.getByRole('dialog', { name: 'Confirmar orden' })).getByRole('button', { name: 'Confirmar orden' }));
+    expect(await screen.findByText(/Orden confirmada/)).toBeInTheDocument();
+    expect(screen.getByText('la confirmó', { exact: false })).toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: 'Ajustar cantidades' })).not.toBeInTheDocument();
+
+    await usuario.click(screen.getByRole('button', { name: 'Reabrir orden' }));
+    await usuario.click(within(screen.getByRole('dialog', { name: 'Reabrir orden' })).getByRole('button', { name: 'Reabrir orden' }));
+    expect(await screen.findByText('Orden reabierta: ya podés ajustarla.')).toBeInTheDocument();
+    expect(pedidos(fetchMock).filter((p) => p.metodo === 'POST').map((p) => p.cuerpo)).toEqual([{ version: 0 }, { version: 1 }]);
   });
 
   it('sin datos explica que se carga a mano', async () => {

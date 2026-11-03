@@ -132,6 +132,18 @@ class SalidaBarraIT {
     }
 
     @Test
+    void conLaOrdenConfirmadaLaEntregaQuedaVinculadaAElla() throws Exception {
+        long orden = jdbc.queryForObject("""
+                INSERT INTO orden_preparacion (evento_id, estado, ubicacion_origen_id, fuente) VALUES (?, 'CONFIRMADA', 1, 'SIN_DATOS')
+                RETURNING orden_id""", Long.class, evento);
+
+        retirar(RolCodigo.BARRA, evento, BARRA_AVRIL, renglon(ron, 6)).andExpect(status().isCreated());
+        entityManager.flush();
+
+        assertThat(jdbc.queryForObject("SELECT orden_id FROM entrega WHERE evento_id = ?", Long.class, evento)).isEqualTo(orden);
+    }
+
+    @Test
     void losSiguientesSonRetirosAdicionalesEnLaMismaEntrega() throws Exception {
         retirar(RolCodigo.BARRA, evento, BARRA_AVRIL, renglon(ron, 12)).andExpect(status().isCreated());
 

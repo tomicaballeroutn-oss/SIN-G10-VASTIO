@@ -2,7 +2,7 @@
 -- Vastio · V5 · Catálogo de bebidas (Sprint 3).
 -- =====================================================================
 
--- Sin precios ni dinero (docs/sprints/sprint-3.md, decisión 1): el sistema maneja cantidades. La única excepción es la seña.
+-- Sin precios ni dinero (docs/sprint-3.md, decisión 1): el sistema maneja cantidades. La única excepción es la seña.
 ALTER TABLE bebida DROP COLUMN precio_referencia;
 ALTER TABLE consumo_evento DROP COLUMN precio_referencia_aplicado;
 ALTER TABLE consumo_evento DROP COLUMN costo_total;

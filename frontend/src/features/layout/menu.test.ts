@@ -23,8 +23,8 @@ describe('menú por perfil', () => {
     expect(items.find((it) => it.id === 'eventos')?.label).toBe('Mis eventos');
   });
 
-  it('la planner ve agenda, todos los eventos', () => {
-    expect(ids(['PLANNER'])).toEqual(['inicio', 'notificaciones', 'agenda', 'eventos']);
+  it('la planner ve agenda, todos los eventos y la vista de cocina', () => {
+    expect(ids(['PLANNER'])).toEqual(['inicio', 'notificaciones', 'agenda', 'eventos', 'cocina']);
     expect(itemsPara(['PLANNER']).find((it) => it.id === 'eventos')?.label).toBe('Eventos');
   });
 
@@ -33,7 +33,7 @@ describe('menú por perfil', () => {
   });
 
   it('Compras ve bebidas y la agenda en consulta, pero no reportes', () => {
-    expect(ids(['COMPRAS'])).toEqual(['inicio', 'notificaciones', 'agenda', 'eventos', 'barra', 'existencias', 'ingreso', 'movimientos', 'ordenes', 'catalogo', 'estadisticas']);
+    expect(ids(['COMPRAS'])).toEqual(['inicio', 'notificaciones', 'agenda', 'eventos', 'cocina', 'barra', 'existencias', 'ingreso', 'movimientos', 'ordenes', 'catalogo', 'estadisticas']);
     expect(ids(['COMPRAS'])).not.toContain('reportes');
     expect(ids(['COMPRAS'])).toContain('estadisticas');
     expect(itemsPara(['COMPRAS']).find((it) => it.id === 'eventos')?.label).toBe('Eventos');
@@ -48,13 +48,13 @@ describe('menú por perfil', () => {
   });
 
   it('con dos perfiles se ve la unión', () => {
-    expect(ids(['VENDEDORA', 'PLANNER'])).toEqual(['inicio', 'notificaciones', 'agenda', 'eventos']);
+    expect(ids(['VENDEDORA', 'PLANNER'])).toEqual(['inicio', 'notificaciones', 'agenda', 'eventos', 'cocina']);
   });
 });
 
 describe('navegación inferior', () => {
   it('si entran, muestra todos los ítems', () => {
-    expect(itemsInferiores(itemsPara(['PLANNER'])).map((it) => it.id)).toEqual(['inicio', 'notificaciones', 'agenda', 'eventos']);
+    expect(itemsInferiores(itemsPara(['PLANNER'])).map((it) => it.id)).toEqual(['inicio', 'notificaciones', 'agenda', 'eventos', 'cocina']);
   });
 
   it('si no entran, muestra cuatro por prioridad y «Más»', () => {

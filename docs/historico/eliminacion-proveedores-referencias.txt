@@ -3,7 +3,7 @@ Referencias de la auditoría de proveedores (resumen histórico)
 Base auditada: 02c35649a156c2eea073106a9b9f8a2d28c53860.
 La auditoría de dependencias y sus decisiones están en eliminacion-proveedores-auditoria.md.
 La lista original de 625 coincidencias es recuperable sin duplicarla en la documentación vigente:
-  git show 18dd3d8:docs/historico/eliminacion-proveedores-referencias.txt
+  git show 18dd3d8:docs/eliminacion-proveedores-referencias.txt
 Para repetir la búsqueda sobre la base auditada (puede terminar con salida 1 si no hay coincidencias):
   git grep -n -i -E 'proveedor|supplier|cuit' 02c35649a156c2eea073106a9b9f8a2d28c53860 -- .
 

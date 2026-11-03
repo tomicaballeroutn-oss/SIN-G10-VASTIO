@@ -48,7 +48,7 @@ import ar.edu.utn.vastio.usuarios.dominio.RolCodigo;
 import ar.edu.utn.vastio.usuarios.dominio.Usuario;
 
 /**
- * Registrar salida a barra (UI-31) y retiro adicional (docs/sprint-3-operacion.md, decisiones 3 a 7). El reloj está
+ * Registrar salida a barra (UI-31) y retiro adicional (docs/sprints/sprint-3-operacion.md, decisiones 3 a 7). El reloj está
  * fijo: la jornada del test es el 12/03/2031 a las 22:00, con un evento en curso en Avril (Barra Avril, id 2, se
  * abastece del depósito madre, id 1). Cada test deshace sus cambios.
  */

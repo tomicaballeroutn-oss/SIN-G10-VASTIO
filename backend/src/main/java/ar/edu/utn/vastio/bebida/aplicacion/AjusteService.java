@@ -24,7 +24,7 @@ import ar.edu.utn.vastio.usuarios.dominio.RolCodigo;
  * Registrar ajuste de stock (UI-38): un recuento físico registra un AJUSTE por la diferencia con el saldo teórico, y
  * una rotura declarada, una MERMA que sale de la ubicación. Ninguno edita movimientos: agregan un asiento. Declarar una
  * rotura es simple y sin castigo. Si el saldo queda negativo se acepta y se avisa a Compras y Administración
- * (docs/sprint-3.md, decisiones 17 y 18).
+ * (docs/sprints/sprint-3.md, decisiones 17 y 18).
  */
 @Service
 @Transactional(readOnly = true)

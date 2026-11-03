@@ -29,7 +29,7 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 
 /**
- * Proporciones de consumo (Parámetros, docs/sprint-4.md, decisión 14). Las configuran Administración, Coordinación y
+ * Proporciones de consumo (Parámetros, docs/sprints/sprint-4.md, decisión 14). Las configuran Administración, Coordinación y
  * Dirección.
  */
 @RestController

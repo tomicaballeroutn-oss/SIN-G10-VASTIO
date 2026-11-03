@@ -17,7 +17,7 @@ function decimal(texto: string): number | null {
 }
 
 /**
- * Proporciones de consumo (docs/sprint-4.md, decisión 14): por tipo de evento, las botellas por asistente de cada bebida
+ * Proporciones de consumo (docs/sprints/sprint-4.md, decisión 14): por tipo de evento, las botellas por asistente de cada bebida
  * con que arranca la orden sugerida mientras no hay suficientes eventos cerrados del tipo.
  */
 export function SeccionProporciones() {

@@ -6,7 +6,7 @@ Revisión del 26/10/2026. No se realizaron pruebas con cámaras físicas durante
 
 - [Definición del Producto, sección 4, B4-02 / UI-30](https://docs.google.com/document/d/1ZU7B_aJO2UCm450wMsh8IxC8qaC7bXYJtvxsS1cfV4U/edit): cámara de celular/tablet Android e iOS; catálogo, ingreso y salida a barra; identificación sin contar unidades; ingreso manual siempre visible; código desconocido informado.
 - [Tablero, PRODUCT BACKLOG y SPRINT ACTUAL](https://docs.google.com/spreadsheets/d/1TpSxwIanEqn-N-CXVGyU7tKKPrcnENybjTIe3FhqqqI/edit): B4-02 En prueba / Parcial, integrada por #24 y #27. Un compromiso de validación física figura Cumplido y una decisión del 23/10 dice que Tomi lo probó; no incluye dispositivo, versión ni evidencia de los escenarios. Se conserva esa información como antecedente, sin convertirla en resultado de esta revisión ni modificar el tablero.
-- `docs/sprint-3.md`, `contexto-del-negocio.md`, `perfiles-y-permisos.md`, `der/diccionario-de-datos.md`, `maquina-de-estados.md`; diseño UI-30 y sistema de diseño.
+- `docs/sprints/sprint-3.md`, `contexto-del-negocio.md`, `perfiles-y-permisos.md`, `der/diccionario-de-datos.md`, `maquina-de-estados.md`; diseño UI-30 y sistema de diseño.
 
 Los códigos del catálogo son dígitos de 8 a 14 caracteres. El lector conserva EAN-13, EAN-8, UPC-A, ITF y CODE-128; no se agregan formatos ni verificación adicional de dígito de control al negocio. Las lecturas parciales o que no decodifican no se emiten como resultados. Las pantallas buscan en el catálogo ya cargado; no hay un GET de búsqueda por cada fotograma. El endpoint de consulta por código existente conserva sus permisos y 404.
 

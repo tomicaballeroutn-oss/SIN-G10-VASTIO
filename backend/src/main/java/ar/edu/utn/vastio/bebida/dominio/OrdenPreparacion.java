@@ -25,7 +25,7 @@ import jakarta.persistence.Table;
 import jakarta.persistence.Version;
 
 /**
- * Orden de preparación de un evento (UI-35, docs/sprint-4.md, decisiones 11 a 25): la bebida que se propone retirar
+ * Orden de preparación de un evento (UI-35, docs/sprints/sprint-4.md, decisiones 11 a 25): la bebida que se propone retirar
  * para todo el evento, sugerida a partir del consumo histórico y ajustada por Compras. Una sola vigente por evento
  * ({@code ux_orden_evento_vigente}). El evento es de otro módulo y se guarda por id.
  */
@@ -161,7 +161,7 @@ public class OrdenPreparacion {
     }
 
     /**
-     * Ajustar orden (docs/sprint-4.md, decisión 23): lo que se va a retirar de cada bebida, en botellas. Una bebida que
+     * Ajustar orden (docs/sprints/sprint-4.md, decisión 23): lo que se va a retirar de cada bebida, en botellas. Una bebida que
      * no estaba se agrega con sugerida 0; para «sacarla» se deja en 0. Las que no vienen no cambian. Pasa a Modificada.
      */
     public void ajustar(Map<Bebida, BigDecimal> retirar, long usuarioId, OffsetDateTime momento) {

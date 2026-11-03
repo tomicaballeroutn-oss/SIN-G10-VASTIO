@@ -1,7 +1,7 @@
 package ar.edu.utn.vastio.comun.seguridad;
 
 /**
- * Expresiones de {@code @PreAuthorize} por grupo de perfiles, según la matriz de docs/perfiles-y-permisos.md.
+ * Expresiones de {@code @PreAuthorize} por grupo de perfiles, según la matriz de docs/negocio/perfiles-y-permisos.md.
  * Dirección y Coordinación tienen acceso total. Las reglas «solo sus eventos» se verifican en el servicio.
  */
 public final class Permisos {
@@ -15,7 +15,7 @@ public final class Permisos {
     /** A7-01: reporte comercial de ocupación, reservado a Dirección y Coordinación. */
     public static final String CONSULTAR_REPORTE_OCUPACION = "hasAnyRole('DIRECCION', 'COORDINACION')";
 
-    /** Orden de preparación (docs/sprint-4.md, decisión 22): Administración consulta; la barra nunca la ve. */
+    /** Orden de preparación (docs/sprints/sprint-4.md, decisión 22): Administración consulta; la barra nunca la ve. */
     public static final String CONSULTAR_ORDEN = "hasAnyRole('DIRECCION', 'COORDINACION', 'ADMINISTRACION', 'COMPRAS')";
 
     /** Generar, recalcular, ajustar, confirmar y reabrir la orden de preparación: Compras, además del acceso total. */
@@ -67,7 +67,7 @@ public final class Permisos {
 
     /**
      * Consultar movimientos de stock (UI-37): Administración y Compras, además del acceso total. La barra no, por la
-     * operación a ciegas (docs/sprint-4.md, decisión 26).
+     * operación a ciegas (docs/sprints/sprint-4.md, decisión 26).
      */
     public static final String CONSULTAR_MOVIMIENTOS = "hasAnyRole('DIRECCION', 'COORDINACION', 'ADMINISTRACION', 'COMPRAS')";
 
@@ -76,7 +76,7 @@ public final class Permisos {
 
     /**
      * Salida a barra, retiro adicional, devolución y cierre: la encargada de barra y Compras, además del acceso total
-     * (docs/sprint-3-operacion.md, decisiones 3, 9 y 12). La barra, solo los eventos de la jornada (en el servicio).
+     * (docs/sprints/sprint-3-operacion.md, decisiones 3, 9 y 12). La barra, solo los eventos de la jornada (en el servicio).
      */
     public static final String OPERAR_BARRA = "hasAnyRole('DIRECCION', 'COORDINACION', 'COMPRAS', 'BARRA')";
 

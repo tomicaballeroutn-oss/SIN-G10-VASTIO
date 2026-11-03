@@ -47,7 +47,7 @@ import ar.edu.utn.vastio.usuarios.dominio.RolCodigo;
 import ar.edu.utn.vastio.usuarios.dominio.Usuario;
 
 /**
- * Registrar devolución de bebida (UI-32, docs/sprint-3-operacion.md, decisiones 8 a 11). El reloj está fijo: la jornada
+ * Registrar devolución de bebida (UI-32, docs/sprints/sprint-3-operacion.md, decisiones 8 a 11). El reloj está fijo: la jornada
  * del test es el 12/03/2031 a las 22:00, con un evento en curso en Avril al que ya se le entregaron 12 botellas de ron
  * (2 cajas) y 6 de gin (1 caja) a la Barra Avril (id 2), que se abastece del depósito madre (id 1). Cada test deshace
  * sus cambios.

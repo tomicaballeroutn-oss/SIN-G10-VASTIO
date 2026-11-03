@@ -29,7 +29,7 @@ const cargarOpciones = () => Promise.all([ubicaciones.listar(), bebidas.listar()
   .then(([lugares, catalogo, eventos]) => ({ lugares, catalogo, eventos }));
 
 /**
- * UI-37 · Movimientos de stock (docs/sprint-4.md, decisiones 26 a 28): el historial para auditar una ubicación, una
+ * UI-37 · Movimientos de stock (docs/sprints/sprint-4.md, decisiones 26 a 28): el historial para auditar una ubicación, una
  * bebida o un evento. Cada tarjeta es una operación (un ingreso, una salida a barra, una devolución) con sus bebidas en
  * cajas y botellas. Los movimientos no se editan: se corrigen con un ajuste.
  */

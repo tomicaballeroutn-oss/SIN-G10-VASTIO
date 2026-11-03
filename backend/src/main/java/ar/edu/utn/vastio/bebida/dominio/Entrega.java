@@ -16,7 +16,7 @@ import jakarta.persistence.Table;
 
 /**
  * Entrega de un evento hacia una barra: agrupa la salida inicial y los retiros adicionales. La abre el primer retiro y
- * la cierra la devolución (docs/sprint-3-operacion.md, decisiones 4 y 9). Una por evento y barra. El evento es de otro
+ * la cierra la devolución (docs/sprints/sprint-3-operacion.md, decisiones 4 y 9). Una por evento y barra. El evento es de otro
  * módulo y se guarda por id.
  */
 @Entity
@@ -35,7 +35,7 @@ public class Entrega {
     @JoinColumn(name = "ubicacion_destino_id", nullable = false)
     private Ubicacion barra;
 
-    /** La orden de preparación confirmada del evento al abrir la entrega, si había (docs/sprint-4.md, decisión 25). */
+    /** La orden de preparación confirmada del evento al abrir la entrega, si había (docs/sprints/sprint-4.md, decisión 25). */
     @Column(name = "orden_id")
     private Long ordenId;
 

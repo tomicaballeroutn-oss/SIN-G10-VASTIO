@@ -32,7 +32,7 @@ import ar.edu.utn.vastio.configuracion.dominio.Turno;
  * Consultar stock (UI-27). Dirección, Coordinación, Administración y Compras ven cualquier ubicación y el total
  * («Todas»), con estado y stock mínimo. La encargada de barra ve solo las barras de los salones con un evento en la
  * jornada actual, y solo su saldo: ni estado, ni stock mínimo, ni otras ubicaciones (operación a ciegas, regla 6).
- * Ver docs/sprint-3.md, decisiones 15 y 16.
+ * Ver docs/sprints/sprint-3.md, decisiones 15 y 16.
  */
 @Service
 @Transactional(readOnly = true)

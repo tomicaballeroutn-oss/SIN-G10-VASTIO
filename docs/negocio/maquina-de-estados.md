@@ -29,7 +29,7 @@ Estados activos (ocupan la unidad): todos salvo `LIBERADA` y `CANCELADO`.
 | CONTRATADO → CONFIRMADO | Confirmar evento | Planner asignada, Coordinación | Planner asignada, invitados definitivos, servicios en las categorías requeridas | Habilita la orden de preparación. Notifica a compras, cocina, administración y la vendedora titular. |
 | CONFIRMADO → EN_CURSO | Automático | Sistema | Llega la hora de inicio del turno | Bloquea la edición comercial. Habilita salidas a barra. |
 | EN_CURSO → REALIZADO | Automático | Sistema | Termina el turno (hora_fin, día siguiente si cruza medianoche) | — |
-| REALIZADO → CERRADO | Registrar cierre de evento | Encargada de barra, Compras, Coordinación, Dirección | Entregas cerradas (todas las devoluciones registradas). La asistencia real por segmento no se exige (docs/sprint-4.md, decisión 7): la planner la carga con el evento Realizado o Cerrado y, mientras falte, el consumo por asistente se divide por la cantidad de invitados | Escribe `consumo_evento` (cantidades por artículo, congeladas) y deja CERRADA la orden de preparación. No mueve stock: lo consumido salió con la devolución. |
+| REALIZADO → CERRADO | Registrar cierre de evento | Encargada de barra, Compras, Coordinación, Dirección | Entregas cerradas (todas las devoluciones registradas). La asistencia real por segmento no se exige (docs/sprints/sprint-4.md, decisión 7): la planner la carga con el evento Realizado o Cerrado y, mientras falte, el consumo por asistente se divide por la cantidad de invitados | Escribe `consumo_evento` (cantidades por artículo, congeladas) y deja CERRADA la orden de preparación. No mueve stock: lo consumido salió con la devolución. |
 | SENADO / CONTRATADO / CONFIRMADO → CANCELADO | Cancelar evento | Coordinación | Motivo obligatorio | Libera la unidad. Descarta la orden de preparación. Notifica a todas las áreas (salvo barra), la vendedora titular y la planner. |
 
 ### Operaciones que no cambian el estado
@@ -47,11 +47,11 @@ Estados activos (ocupan la unidad): todos salvo `LIBERADA` y `CANCELADO`.
 
 > Corrección respecto de la Definición del Producto v1: **«Reprogramado» no es un estado**. Reprogramar le pasa al evento; si fuera un estado, se perdería si estaba Señado, Contratado o Confirmado.
 
-Todo cambio de estado escribe una fila en `cambio_estado_evento` (usuario null = sistema). Quién recibe cada aviso, incluidas las operaciones que no cambian el estado, está en `docs/sprint-2.md` (decisión 10) y en `AvisosEvento`.
+Todo cambio de estado escribe una fila en `cambio_estado_evento` (usuario null = sistema). Quién recibe cada aviso, incluidas las operaciones que no cambian el estado, está en `docs/sprints/sprint-2.md` (decisión 10) y en `AvisosEvento`.
 
 ## Orden de preparación
 
-Se genera `SUGERIDA` al confirmar el evento (o a mano, con el evento Confirmado o En curso y sin orden vigente). Una por evento, con los totales de todas sus barras (docs/sprint-4.md, decisiones 11 a 25).
+Se genera `SUGERIDA` al confirmar el evento (o a mano, con el evento Confirmado o En curso y sin orden vigente). Una por evento, con los totales de todas sus barras (docs/sprints/sprint-4.md, decisiones 11 a 25).
 
 | Desde → Hasta | Caso de uso | Quién | Efecto |
 |---|---|---|---|

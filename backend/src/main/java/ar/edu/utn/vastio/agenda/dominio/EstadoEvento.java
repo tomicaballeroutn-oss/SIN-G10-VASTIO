@@ -4,7 +4,7 @@ import java.util.EnumSet;
 import java.util.Set;
 
 /**
- * Estados del evento (docs/maquina-de-estados.md). Mismos valores que el CHECK {@code ck_evento_estado}.
+ * Estados del evento (docs/negocio/maquina-de-estados.md). Mismos valores que el CHECK {@code ck_evento_estado}.
  * Las transiciones las decide {@code MaquinaDeEstados}; acá solo está qué estados ocupan la unidad.
  */
 public enum EstadoEvento {

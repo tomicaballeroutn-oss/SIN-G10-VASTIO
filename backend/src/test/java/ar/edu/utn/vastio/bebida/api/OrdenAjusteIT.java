@@ -30,7 +30,7 @@ import ar.edu.utn.vastio.usuarios.dominio.RolCodigo;
 import ar.edu.utn.vastio.usuarios.dominio.Usuario;
 
 /**
- * Ajustar orden de preparación (docs/sprint-4.md, decisiones 23 a 25): cantidades, bebidas agregadas, confirmación,
+ * Ajustar orden de preparación (docs/sprints/sprint-4.md, decisiones 23 a 25): cantidades, bebidas agregadas, confirmación,
  * reapertura y la referencia en la pestaña Preparación.
  */
 @PruebaDeIntegracion

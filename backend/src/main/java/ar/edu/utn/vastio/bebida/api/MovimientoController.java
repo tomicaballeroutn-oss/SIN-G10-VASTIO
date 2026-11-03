@@ -31,7 +31,7 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 
 /**
- * Consultar movimientos de stock (UI-37, docs/sprint-4.md, decisiones 26 a 28). Dirección, Coordinación,
+ * Consultar movimientos de stock (UI-37, docs/sprints/sprint-4.md, decisiones 26 a 28). Dirección, Coordinación,
  * Administración y Compras; la barra no (operación a ciegas). Cantidades en botellas.
  */
 @RestController

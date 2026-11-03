@@ -1,7 +1,7 @@
 import { api, type Rol } from './cliente';
 import type { TipoUbicacion } from './ubicaciones';
 
-/** Consultan los movimientos de stock (docs/sprint-4.md, decisión 26). La barra no: operación a ciegas. */
+/** Consultan los movimientos de stock (docs/sprints/sprint-4.md, decisión 26). La barra no: operación a ciegas. */
 export const ROLES_MOVIMIENTOS: Rol[] = ['DIRECCION', 'COORDINACION', 'ADMINISTRACION', 'COMPRAS'];
 
 export type TipoMovimiento = 'INGRESO' | 'INVENTARIO_INICIAL' | 'PREPARACION' | 'SALIDA_BARRA' | 'RETIRO_ADICIONAL'

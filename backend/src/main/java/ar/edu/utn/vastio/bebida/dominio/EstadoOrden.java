@@ -4,7 +4,7 @@ import java.util.EnumSet;
 import java.util.Set;
 
 /**
- * Estados de la orden de preparación (docs/maquina-de-estados.md). Mismos valores que el CHECK
+ * Estados de la orden de preparación (docs/negocio/maquina-de-estados.md). Mismos valores que el CHECK
  * {@code ck_orden_preparacion_estado}.
  */
 public enum EstadoOrden {

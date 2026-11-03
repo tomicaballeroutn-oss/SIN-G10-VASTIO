@@ -1,6 +1,6 @@
 # Build y tests en cada PR y en cada push a main.
 # Para que un PR no se pueda fusionar en rojo, marcar «Backend» y «Frontend» como checks obligatorios
-# en la protección de main (ver docs/despliegue.md).
+# en la protección de main (ver docs/operacion/despliegue.md).
 name: CI
 
 on:

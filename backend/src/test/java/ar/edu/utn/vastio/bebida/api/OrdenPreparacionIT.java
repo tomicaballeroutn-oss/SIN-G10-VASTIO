@@ -35,7 +35,7 @@ import ar.edu.utn.vastio.usuarios.dominio.RolCodigo;
 import ar.edu.utn.vastio.usuarios.dominio.Usuario;
 
 /**
- * Generar orden de preparación (UI-35, docs/sprint-4.md, decisiones 11 a 22). Cada prueba usa un tipo de evento propio,
+ * Generar orden de preparación (UI-35, docs/sprints/sprint-4.md, decisiones 11 a 22). Cada prueba usa un tipo de evento propio,
  * así el consumo histórico no se mezcla con otros datos de la base de pruebas.
  */
 @PruebaDeIntegracion

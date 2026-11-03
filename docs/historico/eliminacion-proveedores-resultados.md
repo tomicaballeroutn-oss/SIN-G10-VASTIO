@@ -78,7 +78,7 @@ El detalle de las suites completas y E2E de arriba corresponde a la implementaci
 
 ## Correcciones de la revisión de Albert
 
-Se agregó en `docs/despliegue.md` una receta manual de recreación solo para bases de desarrollo descartables, con identificación de contexto/proyecto, contenedor, montaje, base y usuario reales; pausa por pérdida completa de datos y comprobación de Flyway V9. Las bases con información histórica mantienen el respaldo y autorización obligatorios. No se ejecutaron borrados de bases o volúmenes existentes.
+Se agregó en `docs/operacion/despliegue.md` una receta manual de recreación solo para bases de desarrollo descartables, con identificación de contexto/proyecto, contenedor, montaje, base y usuario reales; pausa por pérdida completa de datos y comprobación de Flyway V9. Las bases con información histórica mantienen el respaldo y autorización obligatorios. No se ejecutaron borrados de bases o volúmenes existentes.
 
 Se regeneró `DER_3_bebida.png` y se incorporó su fuente DOT desde metadatos de PostgreSQL descartable migrado con el backend: 14 tablas, 90 columnas y 39 FK del módulo, más cinco referencias externas. Se preservaron V1–V9 y todo el código operativo. El anexo de 625 coincidencias se redujo a búsqueda reproducible, síntesis y pendientes de Drive; el original permanece en Git. Auditoría, hashes y procedimiento de respaldo/restauración se conservan por su función de seguridad.
 

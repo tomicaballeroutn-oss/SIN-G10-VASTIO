@@ -18,7 +18,7 @@ import ar.edu.utn.vastio.usuarios.infraestructura.UsuarioRepository;
 
 /**
  * Crea el primer usuario de Dirección si todavía no existe. Corre solo en los perfiles
- * {@code dev} y {@code puesta-en-marcha} (primer arranque del ambiente de prueba, ver docs/despliegue.md).
+ * {@code dev} y {@code puesta-en-marcha} (primer arranque del ambiente de prueba, ver docs/operacion/despliegue.md).
  * La contraseña sale de {@code VASTIO_ADMIN_CONTRASENA}; sin ella no se crea nada. V2 no versiona hashes a propósito.
  */
 @Component

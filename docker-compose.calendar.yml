@@ -1,5 +1,5 @@
 # Override optativo: nunca habilita Calendar ni monta secretos en el compose base.
-# Ver docs/m-06-google-calendar.md. El archivo HOST debe existir fuera del repositorio.
+# Ver docs/mejoras/m-06-google-calendar.md. El archivo HOST debe existir fuera del repositorio.
 services:
   backend:
     environment:

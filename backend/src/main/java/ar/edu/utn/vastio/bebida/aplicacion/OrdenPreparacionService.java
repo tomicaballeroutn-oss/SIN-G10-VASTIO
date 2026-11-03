@@ -35,7 +35,7 @@ import ar.edu.utn.vastio.notificaciones.dominio.TipoNotificacion;
 import ar.edu.utn.vastio.usuarios.dominio.RolCodigo;
 
 /**
- * Generar y ajustar la orden de preparación (UI-35, docs/sprint-4.md, decisiones 11 a 25). Se genera sola al confirmar
+ * Generar y ajustar la orden de preparación (UI-35, docs/sprints/sprint-4.md, decisiones 11 a 25). Se genera sola al confirmar
  * el evento y, si no tiene una vigente, a mano con el evento Confirmado o En curso. Una por evento, con los totales de
  * todas sus barras, desde el depósito madre. Compras la ajusta, la confirma y, si algo cambia, la reabre. La cancelación
  * la descarta; el cierre la cierra. Compras, Coordinación y Dirección la gestionan; Administración la consulta (la
@@ -200,7 +200,7 @@ public class OrdenPreparacionService {
         return ordenes.vigente(eventoId).filter(o -> o.getEstado() == EstadoOrden.CONFIRMADA);
     }
 
-    /** Al cancelar el evento: la orden vigente queda Descartada (docs/maquina-de-estados.md). */
+    /** Al cancelar el evento: la orden vigente queda Descartada (docs/negocio/maquina-de-estados.md). */
     @Transactional
     public void descartarAlCancelar(long eventoId) {
         ordenes.vigente(eventoId).ifPresent(OrdenPreparacion::descartar);

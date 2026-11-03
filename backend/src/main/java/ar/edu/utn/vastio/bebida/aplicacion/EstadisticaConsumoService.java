@@ -43,7 +43,7 @@ public class EstadisticaConsumoService {
 
     public record Filtros(LocalDate desde, LocalDate hasta, Short tipoEventoId, Short salonId, Long bebidaId) { }
     /**
-     * Los «invitados» de cada evento son sus asistentes (docs/sprint-4.md, decisión 8): la asistencia real si el tipo la
+     * Los «invitados» de cada evento son sus asistentes (docs/sprints/sprint-4.md, decisión 8): la asistencia real si el tipo la
      * cuenta por segmento y está completa; si no, la cantidad de invitados. {@code eventosConAsistenciaReal}: cuántos de
      * los válidos usan la real.
      */

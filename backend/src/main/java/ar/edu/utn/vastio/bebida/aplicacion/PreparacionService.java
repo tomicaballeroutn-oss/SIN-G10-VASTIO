@@ -61,7 +61,7 @@ public class PreparacionService {
     public record Registrada(PreparacionEvento preparacion, List<MovimientoStock> renglones) { }
     public record Resultado(Registrada registrada, boolean repetida) { }
     public record Circuito(Ubicacion barra, Ubicacion abastecimiento) { }
-    /** {@code orden}: la orden de preparación vigente, como referencia (docs/sprint-4.md, decisión 25); null si no hay. */
+    /** {@code orden}: la orden de preparación vigente, como referencia (docs/sprints/sprint-4.md, decisión 25); null si no hay. */
     public record Pantalla(EventoOperativo evento, Ubicacion madre, List<Circuito> circuitos, List<Registrada> historial,
             OrdenPreparacion orden) { }
 

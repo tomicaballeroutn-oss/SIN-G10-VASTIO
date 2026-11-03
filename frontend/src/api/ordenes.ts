@@ -1,6 +1,6 @@
 import { api, type Rol } from './cliente';
 
-/** Consultan la orden de preparación (docs/sprint-4.md, decisión 22). La barra nunca la ve: operación a ciegas. */
+/** Consultan la orden de preparación (docs/sprints/sprint-4.md, decisión 22). La barra nunca la ve: operación a ciegas. */
 export const ROLES_ORDEN: Rol[] = ['DIRECCION', 'COORDINACION', 'ADMINISTRACION', 'COMPRAS'];
 
 export type EstadoOrden = 'SUGERIDA' | 'MODIFICADA' | 'CONFIRMADA' | 'DESCARTADA' | 'CERRADA';

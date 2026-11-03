@@ -114,7 +114,7 @@ export interface Tarea {
   eventoId: number;
 }
 
-/** ¿Tiene recordatorios? Solo quien puede hacer alguna de las tareas (docs/perfiles-y-permisos.md). */
+/** ¿Tiene recordatorios? Solo quien puede hacer alguna de las tareas (docs/negocio/perfiles-y-permisos.md). */
 export function tieneTareas(roles: readonly Rol[]): boolean {
   return roles.some((r) => [...ACCESO_TOTAL, 'VENDEDORA', 'PLANNER'].includes(r));
 }

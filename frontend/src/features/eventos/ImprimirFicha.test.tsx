@@ -1,4 +1,4 @@
-import { act, screen, within } from '@testing-library/react';
+import { act, screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { _reiniciarCliente, type Rol } from '../../api/cliente';
@@ -51,7 +51,7 @@ describe('Imprimir ficha', () => {
     montar('/eventos/5');
     await abrirEImprimir();
 
-    expect(imprimir).toHaveBeenCalledTimes(1);
+    await waitFor(() => expect(imprimir).toHaveBeenCalledTimes(1));
     const ficha = within(hoja());
     expect(ficha.getByRole('heading', { level: 1, name: 'Bruno y Martina' })).toBeInTheDocument();
     expect(ficha.getByText('EV-2026-00005 · Señado')).toBeInTheDocument();

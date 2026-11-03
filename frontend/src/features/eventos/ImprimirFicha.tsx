@@ -22,7 +22,18 @@ const LOGO_IMPRESO: Record<SalonId, string> = {
   'santa-barbara': '/brand/salones/santa-barbara-positivo.png',
 };
 
+const LOGO_VASTIO = '/brand/vastio-logo.png';
+
 const CLASE_BODY = 'ficha-imprimiendo';
+
+/** Espera a que carguen (o fallen) las imágenes de la hoja; a los 3 segundos imprime igual. */
+function esperarImagenes(imagenes: Iterable<HTMLImageElement>): Promise<unknown> {
+  const cargas = Array.from(imagenes, (img) => (img.complete ? Promise.resolve() : new Promise<void>((listo) => {
+    img.addEventListener('load', () => listo(), { once: true });
+    img.addEventListener('error', () => listo(), { once: true });
+  })));
+  return Promise.race([Promise.all(cargas), new Promise((listo) => setTimeout(listo, 3000))]);
+}
 
 /**
  * «Imprimir ficha»: elige qué partes llevar y abre el diálogo de impresión del navegador
@@ -38,10 +49,15 @@ export function ImprimirFicha({ ficha }: { ficha: Ficha }) {
       document.body.classList.remove(CLASE_BODY);
       setImpresion(null);
     };
+    let vigente = true;
     document.body.classList.add(CLASE_BODY);
     window.addEventListener('afterprint', terminar);
-    window.print();
+    // Sin esperar, el navegador puede imprimir antes de que carguen los logos.
+    void esperarImagenes(document.querySelectorAll<HTMLImageElement>('.ficha-impresa img')).then(() => {
+      if (vigente) window.print();
+    });
     return () => {
+      vigente = false;
       window.removeEventListener('afterprint', terminar);
       document.body.classList.remove(CLASE_BODY);
     };
@@ -70,6 +86,10 @@ function DialogoImprimir({ ficha, alCerrar, alImprimir }: {
   alCerrar: () => void;
   alImprimir: (opciones: OpcionesImpresion) => void;
 }) {
+  // Precarga los logos mientras se eligen las opciones.
+  useEffect(() => {
+    for (const src of [LOGO_IMPRESO[ficha.salon.codigo], LOGO_VASTIO]) new Image().src = src;
+  }, [ficha.salon.codigo]);
   const [opciones, setOpciones] = useState<OpcionesImpresion>({ servicios: true, contactos: true, sena: false, observaciones: false });
   const cambiar = (clave: keyof OpcionesImpresion) => setOpciones((o) => ({ ...o, [clave]: !o[clave] }));
 
@@ -224,7 +244,7 @@ export function FichaImpresa({ ficha, opciones, momento }: { ficha: Ficha; opcio
 
       <footer className="ficha-impresa__pie">
         <span>Impreso por {usuario?.nombreCompleto ?? SIN_DATO} el {fechaHora(momento)}</span>
-        <img src="/brand/vastio-logo.png" alt="Vastio" />
+        <img src={LOGO_VASTIO} alt="Vastio" />
       </footer>
     </article>
   );

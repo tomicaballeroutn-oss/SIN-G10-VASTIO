@@ -30,6 +30,7 @@ import ar.edu.utn.vastio.agenda.aplicacion.ConsultaEventoService.EventoOperativo
 import ar.edu.utn.vastio.agenda.dominio.EstadoEvento;
 import ar.edu.utn.vastio.bebida.dominio.Bebida;
 import ar.edu.utn.vastio.bebida.dominio.Entrega;
+import ar.edu.utn.vastio.bebida.dominio.EstadoOrden;
 import ar.edu.utn.vastio.bebida.dominio.MovimientoStock;
 import ar.edu.utn.vastio.bebida.dominio.TipoMovimiento;
 import ar.edu.utn.vastio.bebida.dominio.TipoUbicacion;
@@ -38,6 +39,7 @@ import ar.edu.utn.vastio.bebida.infraestructura.BebidaRepository;
 import ar.edu.utn.vastio.bebida.infraestructura.BebidaRepository.SaldoBebida;
 import ar.edu.utn.vastio.bebida.infraestructura.EntregaRepository;
 import ar.edu.utn.vastio.bebida.infraestructura.MovimientoStockRepository;
+import ar.edu.utn.vastio.bebida.infraestructura.OrdenPreparacionRepository;
 import ar.edu.utn.vastio.bebida.infraestructura.UbicacionRepository;
 import ar.edu.utn.vastio.comun.errores.ProblemaException;
 import ar.edu.utn.vastio.comun.seguridad.UsuarioActual;
@@ -75,13 +77,15 @@ public class EntregaService {
     private final StockService stock;
     private final CatalogoService catalogos;
     private final NotificacionService notificaciones;
+    private final OrdenPreparacionRepository ordenes;
     private final EntityManager entityManager;
     private final Clock reloj;
 
     public EntregaService(EntregaRepository entregas, UbicacionRepository ubicaciones, BebidaRepository bebidas,
             MovimientoStockRepository movimientos, MovimientoService movimientoService, ConsultaEventoService eventos,
-            StockService stock, CatalogoService catalogos, NotificacionService notificaciones, EntityManager entityManager,
-            Clock reloj) {
+            StockService stock, CatalogoService catalogos, NotificacionService notificaciones, OrdenPreparacionRepository ordenes,
+            EntityManager entityManager, Clock reloj) {
+        this.ordenes = ordenes;
         this.entityManager = entityManager;
         this.entregas = entregas;
         this.ubicaciones = ubicaciones;
@@ -186,7 +190,11 @@ public class EntregaService {
         Entrega entrega = entregas.findByEventoIdAndBarraId(eventoId, barraId).orElse(null);
         TipoMovimiento tipo;
         if (entrega == null) {
-            entrega = entregas.save(Entrega.abrir(eventoId, barra, quien.id(), momento));
+            Entrega nueva = Entrega.abrir(eventoId, barra, quien.id(), momento);
+            // La salida se hace según la orden confirmada, si hay (docs/sprint-4.md, decisión 25).
+            ordenes.vigente(eventoId).filter(o -> o.getEstado() == EstadoOrden.CONFIRMADA)
+                    .ifPresent(o -> nueva.vincularOrden(o.getId()));
+            entrega = entregas.save(nueva);
             tipo = TipoMovimiento.SALIDA_BARRA;
         } else if (!entrega.isAbierta()) {
             throw ProblemaException.conflicto("ENTREGA_CERRADA",

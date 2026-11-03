@@ -33,13 +33,25 @@ public final class PreparacionDto {
                     p.getFechaHora(), r.renglones().stream().map(RenglonResponse::de).toList());
         }
     }
+    /** Lo que dice la orden de preparación vigente de una bebida, en botellas: referencia, no se precarga. */
+    public record SegunOrden(long bebidaId, String nombre, String presentacion, String unidad, short unidadesPorBulto,
+            BigDecimal aRetirar) { }
+    public record OrdenReferencia(ar.edu.utn.vastio.bebida.dominio.EstadoOrden estado, List<SegunOrden> renglones) {
+        static OrdenReferencia de(ar.edu.utn.vastio.bebida.dominio.OrdenPreparacion o) {
+            return o == null ? null : new OrdenReferencia(o.getEstado(), o.getRenglones().stream()
+                    .filter(r -> r.getCantidadARetirar().signum() > 0)
+                    .map(r -> new SegunOrden(r.getBebida().getId(), r.getBebida().getNombre(), r.getBebida().getPresentacion(),
+                            r.getBebida().getUnidad().getNombre(), r.getBebida().getUnidadesPorBulto(), r.getCantidadARetirar()))
+                    .toList());
+        }
+    }
     public record PantallaResponse(EventoResumen evento, UbicacionResumen madre, List<CircuitoResponse> circuitos,
-            List<Response> historial) {
+            List<Response> historial, OrdenReferencia orden) {
         static PantallaResponse de(Pantalla p, Map<Long, String> nombres) {
             return new PantallaResponse(EventoResumen.de(p.evento()), p.madre() == null ? null : UbicacionResumen.de(p.madre()),
                     p.circuitos().stream().map(c -> new CircuitoResponse(UbicacionResumen.de(c.barra()), UbicacionResumen.de(c.abastecimiento()),
                             c.abastecimiento().isActivo() && c.abastecimiento().getTipo() == ar.edu.utn.vastio.bebida.dominio.TipoUbicacion.TRANSICION)).toList(),
-                    p.historial().stream().map(r -> Response.de(r, nombres)).toList());
+                    p.historial().stream().map(r -> Response.de(r, nombres)).toList(), OrdenReferencia.de(p.orden()));
         }
     }
 }

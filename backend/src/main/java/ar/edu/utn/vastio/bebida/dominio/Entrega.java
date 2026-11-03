@@ -35,7 +35,7 @@ public class Entrega {
     @JoinColumn(name = "ubicacion_destino_id", nullable = false)
     private Ubicacion barra;
 
-    /** La orden de preparación, si existía. Todavía no la usa nadie: es de «Registrar preparación del evento». */
+    /** La orden de preparación confirmada del evento al abrir la entrega, si había (docs/sprint-4.md, decisión 25). */
     @Column(name = "orden_id")
     private Long ordenId;
 
@@ -56,6 +56,11 @@ public class Entrega {
     private OffsetDateTime fechaCierre;
 
     protected Entrega() {
+    }
+
+    /** La entrega se hizo según esa orden. */
+    public void vincularOrden(long ordenId) {
+        this.ordenId = ordenId;
     }
 
     public static Entrega abrir(long eventoId, Ubicacion barra, long usuarioId, OffsetDateTime momento) {

@@ -69,6 +69,9 @@ export interface Orden {
 export interface AccionesOrden {
   generar: boolean;
   recalcular: boolean;
+  ajustar: boolean;
+  confirmar: boolean;
+  reabrir: boolean;
 }
 
 export interface OrdenDelEvento {
@@ -105,6 +108,13 @@ export const ordenes = {
   generar: (eventoId: number) => api<OrdenDelEvento>(`/eventos/${eventoId}/orden-preparacion`, { metodo: 'POST' }),
   recalcular: (eventoId: number, version: number) =>
     api<OrdenDelEvento>(`/eventos/${eventoId}/orden-preparacion/recalculo`, { metodo: 'POST', cuerpo: { version } }),
+  /** Botellas enteras a retirar por bebida; una bebida nueva entra con sugerida 0 y 0 la «saca». */
+  ajustar: (eventoId: number, version: number, renglones: { bebidaId: number; cantidad: number }[]) =>
+    api<OrdenDelEvento>(`/eventos/${eventoId}/orden-preparacion/renglones`, { metodo: 'PUT', cuerpo: { version, renglones } }),
+  confirmar: (eventoId: number, version: number) =>
+    api<OrdenDelEvento>(`/eventos/${eventoId}/orden-preparacion/confirmacion`, { metodo: 'POST', cuerpo: { version } }),
+  reabrir: (eventoId: number, version: number) =>
+    api<OrdenDelEvento>(`/eventos/${eventoId}/orden-preparacion/reapertura`, { metodo: 'POST', cuerpo: { version } }),
 };
 
 export const proporciones = {

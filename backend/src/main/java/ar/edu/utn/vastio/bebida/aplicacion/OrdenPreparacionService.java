@@ -5,6 +5,7 @@ import java.time.LocalDate;
 import java.time.OffsetDateTime;
 import java.time.ZoneId;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -18,11 +19,13 @@ import org.springframework.transaction.annotation.Transactional;
 import ar.edu.utn.vastio.VastioApplication;
 import ar.edu.utn.vastio.agenda.aplicacion.ConsultaEventoService;
 import ar.edu.utn.vastio.agenda.aplicacion.ConsultaEventoService.EventoParaOrden;
+import ar.edu.utn.vastio.bebida.dominio.Bebida;
 import ar.edu.utn.vastio.bebida.dominio.DetalleOrden;
 import ar.edu.utn.vastio.bebida.dominio.EstadoOrden;
 import ar.edu.utn.vastio.bebida.dominio.OrdenPreparacion;
 import ar.edu.utn.vastio.bebida.dominio.TipoUbicacion;
 import ar.edu.utn.vastio.bebida.dominio.Ubicacion;
+import ar.edu.utn.vastio.bebida.infraestructura.BebidaRepository;
 import ar.edu.utn.vastio.bebida.infraestructura.OrdenPreparacionRepository;
 import ar.edu.utn.vastio.bebida.infraestructura.UbicacionRepository;
 import ar.edu.utn.vastio.comun.errores.ProblemaException;
@@ -32,10 +35,11 @@ import ar.edu.utn.vastio.notificaciones.dominio.TipoNotificacion;
 import ar.edu.utn.vastio.usuarios.dominio.RolCodigo;
 
 /**
- * Generar orden de preparación (UI-35, docs/sprint-4.md, decisiones 11 a 22). Se genera sola al confirmar el evento y,
- * si no tiene una vigente, a mano con el evento Confirmado o En curso. Una por evento, con los totales de todas sus
- * barras, desde el depósito madre. La cancelación la descarta; el cierre la cierra. Compras, Coordinación y Dirección
- * la gestionan; Administración la consulta (la autorización por perfil está en el controller).
+ * Generar y ajustar la orden de preparación (UI-35, docs/sprint-4.md, decisiones 11 a 25). Se genera sola al confirmar
+ * el evento y, si no tiene una vigente, a mano con el evento Confirmado o En curso. Una por evento, con los totales de
+ * todas sus barras, desde el depósito madre. Compras la ajusta, la confirma y, si algo cambia, la reabre. La cancelación
+ * la descarta; el cierre la cierra. Compras, Coordinación y Dirección la gestionan; Administración la consulta (la
+ * autorización por perfil está en el controller).
  */
 @Service
 @Transactional(readOnly = true)
@@ -51,9 +55,12 @@ public class OrdenPreparacionService {
     private final SugerenciaOrden sugerencias;
     private final UbicacionRepository ubicaciones;
     private final NotificacionService notificaciones;
+    private final BebidaRepository bebidas;
 
     public OrdenPreparacionService(OrdenPreparacionRepository ordenes, ConsultaEventoService eventos,
-            SugerenciaOrden sugerencias, UbicacionRepository ubicaciones, NotificacionService notificaciones) {
+            SugerenciaOrden sugerencias, UbicacionRepository ubicaciones, NotificacionService notificaciones,
+            BebidaRepository bebidas) {
+        this.bebidas = bebidas;
         this.ordenes = ordenes;
         this.eventos = eventos;
         this.sugerencias = sugerencias;
@@ -142,6 +149,55 @@ public class OrdenPreparacionService {
         orden.recalcular(sugerencias.calcular(evento.tipoEventoId(), evento.asistentesPrevistos()), quien.id(),
                 OffsetDateTime.now());
         return ordenes.saveAndFlush(orden);
+    }
+
+    /**
+     * Ajustar orden (decisión 23): botellas enteras a retirar por bebida. Una bebida nueva tiene que estar activa.
+     *
+     * @param retirar por id de bebida; las que no vienen no cambian.
+     */
+    @Transactional
+    public OrdenPreparacion ajustar(long eventoId, int version, Map<Long, BigDecimal> retirar, UsuarioActual quien) {
+        EventoParaOrden evento = eventos.paraOrden(eventoId);
+        OrdenPreparacion orden = editable(eventoId, version, evento, "ajustar");
+        Map<Long, Bebida> enLaOrden = new HashMap<>();
+        orden.getRenglones().forEach(r -> enLaOrden.put(r.getBebida().getId(), r.getBebida()));
+        Map<Bebida, BigDecimal> cantidades = new LinkedHashMap<>();
+        retirar.forEach((bebidaId, cantidad) -> cantidades.put(enLaOrden.containsKey(bebidaId) ? enLaOrden.get(bebidaId)
+                : bebidas.findById(bebidaId).filter(Bebida::isActivo).orElseThrow(() -> ProblemaException.reglaDeNegocio(
+                        "BEBIDA_INVALIDA", "Una de las bebidas no existe o está dada de baja. Volvé a elegirla.")), cantidad));
+        orden.ajustar(cantidades, quien.id(), OffsetDateTime.now());
+        return ordenes.saveAndFlush(orden);
+    }
+
+    /** Confirmar orden (decisión 24): Sugerida o Modificada, con el evento Confirmado o En curso. */
+    @Transactional
+    public OrdenPreparacion confirmar(long eventoId, int version, UsuarioActual quien) {
+        EventoParaOrden evento = eventos.paraOrden(eventoId);
+        OrdenPreparacion orden = editable(eventoId, version, evento, "confirmar");
+        orden.confirmar(quien.id(), OffsetDateTime.now());
+        return ordenes.saveAndFlush(orden);
+    }
+
+    /** Reabrir orden (decisión 24): la confirmada vuelve a Modificada, con el evento Confirmado o En curso. */
+    @Transactional
+    public OrdenPreparacion reabrir(long eventoId, int version, UsuarioActual quien) {
+        EventoParaOrden evento = eventos.paraOrden(eventoId);
+        if (!ConsultaEventoService.CON_ORDEN.contains(evento.evento().estado())) {
+            throw ProblemaException.reglaDeNegocio("ESTADO_NO_PERMITE", "El evento está en %s: no se puede reabrir la orden."
+                    .formatted(evento.evento().nombreDelEstado()));
+        }
+        OrdenPreparacion orden = vigente(eventoId, version);
+        if (orden.getEstado() != EstadoOrden.CONFIRMADA) {
+            throw ProblemaException.reglaDeNegocio("ORDEN_NO_CONFIRMADA", "La orden no está confirmada: se puede ajustar directamente.");
+        }
+        orden.reabrir(quien.id(), OffsetDateTime.now());
+        return ordenes.saveAndFlush(orden);
+    }
+
+    /** La orden confirmada del evento, si tiene: la salida a barra se vincula a ella (decisión 25). */
+    public Optional<OrdenPreparacion> confirmada(long eventoId) {
+        return ordenes.vigente(eventoId).filter(o -> o.getEstado() == EstadoOrden.CONFIRMADA);
     }
 
     /** Al cancelar el evento: la orden vigente queda Descartada (docs/maquina-de-estados.md). */

@@ -90,12 +90,14 @@ public final class OrdenDto {
     }
 
     /** Lo que puede hacer quien consulta, según su perfil, el estado del evento y el de la orden. */
-    public record Acciones(boolean generar, boolean recalcular) {
+    public record Acciones(boolean generar, boolean recalcular, boolean ajustar, boolean confirmar, boolean reabrir) {
         static Acciones de(Consulta c, UsuarioActual quien) {
             boolean gestiona = quien.tieneAlguno(GESTIONAN)
                     && ConsultaEventoService.CON_ORDEN.contains(c.evento().evento().estado());
             boolean vigente = c.orden() != null && c.orden().isVigente();
-            return new Acciones(gestiona && !vigente, gestiona && vigente && EstadoOrden.EDITABLES.contains(c.orden().getEstado()));
+            boolean editable = gestiona && vigente && EstadoOrden.EDITABLES.contains(c.orden().getEstado());
+            return new Acciones(gestiona && !vigente, editable, editable, editable,
+                    gestiona && vigente && c.orden().getEstado() == EstadoOrden.CONFIRMADA);
         }
     }
 

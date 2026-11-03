@@ -31,7 +31,7 @@ import ar.edu.utn.vastio.comun.errores.ProblemaException;
  * Registrar inventario inicial (UI-28): la carga de puesta en marcha de cada ubicación. Se puede guardar varias veces
  * para retomarla: una bebida nueva se registra como INVENTARIO_INICIAL y una ya cargada que cambia, como AJUSTE por la
  * diferencia que referencia al original, con el motivo «Error de carga». Cuando la ubicación tiene un movimiento de
- * otro tipo, la carga queda cerrada y se corrige con un recuento (docs/sprint-3.md, decisión 12).
+ * otro tipo, la carga queda cerrada y se corrige con un recuento (docs/sprints/sprint-3.md, decisión 12).
  */
 @Service
 @Transactional(readOnly = true)

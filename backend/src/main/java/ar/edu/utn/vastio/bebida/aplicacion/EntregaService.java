@@ -50,7 +50,7 @@ import ar.edu.utn.vastio.notificaciones.dominio.TipoNotificacion;
 import ar.edu.utn.vastio.usuarios.dominio.RolCodigo;
 
 /**
- * Registrar salida a barra (UI-31), con el retiro adicional (docs/sprint-3-operacion.md, decisiones 3 a 7). El primer
+ * Registrar salida a barra (UI-31), con el retiro adicional (docs/sprints/sprint-3-operacion.md, decisiones 3 a 7). El primer
  * retiro de un evento hacia una barra abre la entrega (SALIDA_BARRA); los siguientes son RETIRO_ADICIONAL sobre la misma.
  * Sale de la ubicación de abastecimiento de la barra o, como contingencia, del depósito madre. Opera a ciegas: nunca
  * devuelve el saldo del origen; si queda negativo, se acepta y se avisa a Compras y Administración.
@@ -191,7 +191,7 @@ public class EntregaService {
         TipoMovimiento tipo;
         if (entrega == null) {
             Entrega nueva = Entrega.abrir(eventoId, barra, quien.id(), momento);
-            // La salida se hace según la orden confirmada, si hay (docs/sprint-4.md, decisión 25).
+            // La salida se hace según la orden confirmada, si hay (docs/sprints/sprint-4.md, decisión 25).
             ordenes.vigente(eventoId).filter(o -> o.getEstado() == EstadoOrden.CONFIRMADA)
                     .ifPresent(o -> nueva.vincularOrden(o.getId()));
             entrega = entregas.save(nueva);

@@ -32,7 +32,7 @@ import ar.edu.utn.vastio.usuarios.dominio.RolCodigo;
 import ar.edu.utn.vastio.usuarios.dominio.Usuario;
 
 /**
- * Registrar tipo de asistencia: la asistencia prevista por segmento de un evento de egresados (UI-19, docs/sprint-4.md,
+ * Registrar tipo de asistencia: la asistencia prevista por segmento de un evento de egresados (UI-19, docs/sprints/sprint-4.md,
  * decisiones 1 a 5). Segmentos de V2: 1 Comensales cena (equivale a los invitados), 2 Entradas anticipadas, 3 Venta en
  * puerta. Tipo de evento 4: Egresados.
  */

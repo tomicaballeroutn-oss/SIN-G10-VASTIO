@@ -231,7 +231,7 @@ public class ConsultaEventoService {
     }
 
     /**
-     * Lo que necesita la orden de preparación (docs/sprint-4.md, decisiones 12 y 18): tipo, fecha de jornada y
+     * Lo que necesita la orden de preparación (docs/sprints/sprint-4.md, decisiones 12 y 18): tipo, fecha de jornada y
      * asistentes previstos (el total por segmento si el tipo lo cuenta así; si no, los invitados).
      */
     public record EventoParaOrden(EventoOperativo evento, short tipoEventoId, LocalDate fecha, Integer asistentesPrevistos) {

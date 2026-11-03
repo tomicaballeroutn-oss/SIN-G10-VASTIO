@@ -24,7 +24,7 @@ import ar.edu.utn.vastio.configuracion.aplicacion.ParametroService;
 import ar.edu.utn.vastio.configuracion.dominio.ParametroClave;
 
 /**
- * Cálculo de la orden sugerida (docs/sprint-4.md, decisiones 12 a 15). Por bebida: botellas por asistente × asistentes
+ * Cálculo de la orden sugerida (docs/sprints/sprint-4.md, decisiones 12 a 15). Por bebida: botellas por asistente × asistentes
  * del evento, más el margen, redondeado hacia arriba a cajas completas. Las botellas por asistente salen, en este
  * orden, de los eventos cerrados del tipo (si son al menos {@link #MINIMO_EVENTOS_DEL_TIPO}), de las proporciones
  * cargadas para el tipo, o de los eventos cerrados de todos los tipos; si no hay nada, la orden sale vacía. Usa la misma

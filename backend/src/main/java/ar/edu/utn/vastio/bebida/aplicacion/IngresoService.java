@@ -30,7 +30,7 @@ import ar.edu.utn.vastio.comun.errores.ProblemaException;
 /**
  * Registrar ingreso de bebida (UI-29): la mercadería comprada entra al depósito madre, con una cabecera (fecha y remito)
  * y un movimiento INGRESO por bebida que suma al saldo. No se edita ni se anula: un error se corrige con un recuento
- * (docs/sprint-3.md, decisión 14).
+ * (docs/sprints/sprint-3.md, decisión 14).
  */
 @Service
 @Transactional(readOnly = true)

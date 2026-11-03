@@ -16,7 +16,7 @@ import ar.edu.utn.vastio.comun.errores.ProblemaException;
 import ar.edu.utn.vastio.configuracion.aplicacion.CatalogoService;
 
 /**
- * Registrar cierre de evento, del lado de la agenda (docs/sprint-3-operacion.md, decisión 12): el evento Realizado pasa
+ * Registrar cierre de evento, del lado de la agenda (docs/sprints/sprint-3-operacion.md, decisión 12): el evento Realizado pasa
  * a Cerrado por la máquina de estados. Lo que se congela del consumo lo escribe bebida, en la misma transacción.
  * Quién puede cerrar lo valida el caso de uso de bebida.
  */
@@ -42,7 +42,7 @@ public class CierreEventoService {
     }
 
     /**
-     * Para el consumo por asistente (docs/sprint-3-operacion.md, decisión 14, y docs/sprint-4.md, decisión 8).
+     * Para el consumo por asistente (docs/sprints/sprint-3-operacion.md, decisión 14, y docs/sprints/sprint-4.md, decisión 8).
      * {@code usaSegmentos}: el tipo de evento cuenta la asistencia por segmento. {@code asistenciaReal}: su total, si ya
      * se cargó la de todos los segmentos; si no, null y se divide por la cantidad de invitados.
      */

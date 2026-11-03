@@ -152,7 +152,7 @@ El ajuste de esperas asíncronas no cambia aserciones ni reglas funcionales.
 - `frontend/src/features/eventos/PestanaPreparacion.test.tsx`
 - `frontend/src/features/eventos/preparacion.css`
 - `frontend/e2e/preparacion-evento.spec.ts`
-- `docs/b5-04-implementacion.md`
+- `docs/historias/b5-04-implementacion.md`
 
 13 archivos modificados:
 
@@ -167,8 +167,8 @@ El ajuste de esperas asíncronas no cambia aserciones ni reglas funcionales.
 - `frontend/src/features/eventos/PaginaEvento.tsx`
 - `frontend/src/test/setup.ts`
 - `docs/der/diccionario-de-datos.md`
-- `docs/perfiles-y-permisos.md`
-- `docs/maquina-de-estados.md`
+- `docs/negocio/perfiles-y-permisos.md`
+- `docs/negocio/maquina-de-estados.md`
 
 ## Estado previo a la publicación original (histórico)
 
@@ -257,4 +257,4 @@ Esta etapa termina localmente: no publica ramas ni cambia la base o el contenido
 Para usar esta reconstrucción en el head existente habrá que autorizar expresamente la actualización remota,
 comprobar que siga en `d03d510`, usar una protección de lease y cambiar el destino del PR a main.
 
-Actualización de alcance del 19/10/2026: la observación histórica sobre proveedores queda reemplazada por la eliminación completa documentada en [eliminacion-proveedores-despliegue.md](eliminacion-proveedores-despliegue.md). B5-04 mantiene sus reglas de preparación.
+Actualización de alcance del 19/10/2026: la observación histórica sobre proveedores queda reemplazada por la eliminación completa documentada en [eliminacion-proveedores-despliegue.md](../historico/eliminacion-proveedores-despliegue.md). B5-04 mantiene sus reglas de preparación.

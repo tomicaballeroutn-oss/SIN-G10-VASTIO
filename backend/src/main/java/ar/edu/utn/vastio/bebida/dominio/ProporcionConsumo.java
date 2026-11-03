@@ -13,7 +13,7 @@ import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 
 /**
- * Botellas por asistente de una bebida en un tipo de evento (docs/sprint-4.md, decisión 14). Alimenta la orden sugerida
+ * Botellas por asistente de una bebida en un tipo de evento (docs/sprints/sprint-4.md, decisión 14). Alimenta la orden sugerida
  * mientras no hay suficientes eventos cerrados del tipo; sirve para arrancar con datos de eventos anteriores al sistema.
  * El tipo de evento es de configuración y se guarda por id.
  */

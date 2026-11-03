@@ -163,7 +163,7 @@ preexistentes quedaron idénticos. Se eliminaron también el directorio temporal
 orquestador temporal `m10_drive_check.py` después de registrar las evidencias aquí.
 El paquete remoto permanece conservado. No se crearon commits, push ni PR.
 
-En esta etapa solo se modificó `docs/m-10-drive-resultados.md` dentro del clon;
+En esta etapa solo se modificó `docs/mejoras/m-10-drive-resultados.md` dentro del clon;
 se conservaron los cambios pendientes de las etapas anteriores. `git diff --check`
 sin errores. La rama y el commit base permanecen sin cambios.
 

@@ -11,10 +11,10 @@ Los une la entidad **Evento**. El objetivo del negocio es **conocer qué consume
 
 | Documento | Para qué |
 |---|---|
-| `docs/contexto-del-negocio.md` | Qué problema resolvemos y reglas del circuito |
+| `docs/negocio/contexto-del-negocio.md` | Qué problema resolvemos y reglas del circuito |
 | `docs/der/diccionario-de-datos.md` | Modelo de datos, reglas de integridad (sección 2) |
-| `docs/maquina-de-estados.md` | Estados del Evento y de la orden de preparación, quién dispara cada transición |
-| `docs/perfiles-y-permisos.md` | Matriz historia × perfil y reglas especiales |
+| `docs/negocio/maquina-de-estados.md` | Estados del Evento y de la orden de preparación, quién dispara cada transición |
+| `docs/negocio/perfiles-y-permisos.md` | Matriz historia × perfil y reglas especiales |
 | `design/design-system/README.md` | Tono, color, tipografía, accesibilidad |
 | `design/pantallas/UIxx-*.dc.html` | Prototipo de cada pantalla (referencia visual y de contenido) |
 
@@ -70,7 +70,7 @@ design/    Sistema de diseño y prototipos originales (solo referencia, no se co
 5. **Saldo negativo permitido:** `stock_ubicacion` puede quedar negativo; se acepta el movimiento y se genera una notificación `ALERTA_STOCK` a Compras y Administración. Nunca se rechaza un retiro por falta de saldo teórico.
 6. **Operación a ciegas:** a la encargada de barra el backend no le envía saldos del depósito ni cantidades esperadas al cierre.
 7. **Consumo congelado:** al cerrar el evento se escribe `consumo_evento`; no se recalcula después. El sistema no guarda precios ni costos.
-8. **Importe de la seña y su moneda** (único dato económico) filtrados en el backend según perfil (ver `docs/perfiles-y-permisos.md`). La autorización se verifica siempre en el backend, con `@PreAuthorize` y, para «solo sus eventos», en el servicio.
+8. **Importe de la seña y su moneda** (único dato económico) filtrados en el backend según perfil (ver `docs/negocio/perfiles-y-permisos.md`). La autorización se verifica siempre en el backend, con `@PreAuthorize` y, para «solo sus eventos», en el servicio.
 9. **Auditoría:** toda acción que compromete o libera una unidad y todo movimiento de mercadería guarda usuario y momento, y la pantalla lo muestra con el componente `Actor`.
 
 ## Frontend
@@ -96,7 +96,7 @@ cd frontend; npm run e2e                # punta a punta (Playwright) con todo le
                                         # el objetivo del sprint usa los datos de demostración: E2E_DEMO_CONTRASENA
 ```
 
-Ambiente de prueba (Docker Compose + Caddy con HTTPS): `docs/despliegue.md`.
+Ambiente de prueba (Docker Compose + Caddy con HTTPS): `docs/operacion/despliegue.md`.
 
 ## Definición de terminado
 

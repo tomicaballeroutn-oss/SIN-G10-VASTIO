@@ -15,7 +15,7 @@ import ar.edu.utn.vastio.comun.errores.ProblemaException;
 import ar.edu.utn.vastio.configuracion.aplicacion.CatalogoService;
 
 /**
- * Proporciones de consumo (docs/sprint-4.md, decisión 14): por tipo de evento y bebida, las botellas por asistente con
+ * Proporciones de consumo (docs/sprints/sprint-4.md, decisión 14): por tipo de evento y bebida, las botellas por asistente con
  * que arranca la orden sugerida mientras no hay suficientes eventos cerrados del tipo. Una por tipo y bebida.
  */
 @Service

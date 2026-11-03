@@ -1,6 +1,6 @@
 # Vastio — Modelo de datos y diccionario de datos
 
-Modelo operativo actualizado a V13. Los PNG `DER_1` y `DER_2` son referencias históricas del DER v2. [DER_3_bebida.png](DER_3_bebida.png) fue regenerado desde PostgreSQL posterior a V9, con [fuente editable DOT](DER_3_bebida.dot). Ver [alcance y reproducción del módulo B](modelo-bebida-v9.md) y [resguardo antes de V9](../eliminacion-proveedores-despliegue.md).
+Modelo operativo actualizado a V13. Los PNG `DER_1` y `DER_2` son referencias históricas del DER v2. [DER_3_bebida.png](DER_3_bebida.png) fue regenerado desde PostgreSQL posterior a V9, con [fuente editable DOT](DER_3_bebida.dot). Ver [alcance y reproducción del módulo B](modelo-bebida-v9.md) y [resguardo antes de V9](../historico/eliminacion-proveedores-despliegue.md).
 
 Motor: PostgreSQL. Convenciones: nombres en `snake_case` y en español; claves primarias sustitutas (`bigint` generado para tablas transaccionales, `smallint` para catálogos); importes en `numeric(14,2)`, en la moneda que indica su columna de moneda (el único es el de la seña, en ARS o USD sin conversión desde V11: el sistema no maneja precios ni costos); fechas y horas en `timestamptz`; cantidades de bebida en `numeric(10,2)` expresadas siempre en **botellas** (unidad base). Los estados y tipos fijos se modelan como `varchar` con restricción `CHECK`, no como tablas, porque el comportamiento del sistema depende de ellos y no son configurables.
 
@@ -24,7 +24,7 @@ Motor: PostgreSQL. Convenciones: nombres en `snake_case` y en español; claves p
 | `ubicacion`: tipo y salón | Depósito de transición configurable y barra de cada salón. (V6 quitó los sectores y la ubicación padre.) |
 | `movimiento_stock`: fecha y hora, motivo, movimiento corregido, ingreso | Auditoría (RNF-SEG-03) y asiento de ajuste que referencia al original (UI-38). |
 | `asistencia_segmento`: cantidad prevista además de la real; PK simple | UI-19 pide la prevista por segmento. La PK triple del v1 era redundante. |
-| `orden_preparacion`: destino y responsable opcionales, fuente y base de la sugerencia, auditoría y versión (V19, Sprint 4) | Una orden por evento con los totales de todas sus barras; la que se genera al confirmar no tiene usuario. Ver docs/sprint-4.md, decisiones 11 a 25. |
+| `orden_preparacion`: destino y responsable opcionales, fuente y base de la sugerencia, auditoría y versión (V19, Sprint 4) | Una orden por evento con los totales de todas sus barras; la que se genera al confirmar no tiene usuario. Ver docs/sprints/sprint-4.md, decisiones 11 a 25. |
 | `tipo_segmento_asistencia.equivale_invitados` (V17, Sprint 4) | En egresados, la cantidad de invitados son los comensales de la cena: el segmento que la representa no se carga aparte y nadie se cuenta dos veces. |
 | `turno`: horario | Sin horario el sistema no puede pasar el evento a En curso ni a Realizado. |
 | `orden_preparacion`: estado, origen y destino | Tiene su propia máquina de estados (§6.1). |
@@ -32,7 +32,7 @@ Motor: PostgreSQL. Convenciones: nombres en `snake_case` y en español; claves p
 | Eliminación completa de proveedores (V9, decisión 19/10/2026) | Se retiran el maestro y las relaciones habitual e ingreso después de resguardo externo validado. No se alteran ingresos ni movimientos. |
 | Sin precios ni costos (V5, Sprint 3) | El sistema maneja cantidades; cada área calcula los costos con sus remitos. Se quitaron `bebida.precio_referencia` y el precio y el costo de `consumo_evento`. La seña es la única excepción. |
 | Ubicaciones: sin sectores; abastecimiento de la barra y máximo de barras por salón (V6, Sprint 3) | Las divisiones internas del depósito no se modelan. Cada barra se abastece del depósito madre o de una transición, con retiro directo del depósito madre como contingencia. Una barra por salón; Avril, hasta dos. |
-| Tipo de movimiento CONSUMO (V7, Sprint 3) | Lo consumido sale de la barra con la devolución, así su saldo es siempre lo que de verdad hay (la barra sigue de un evento a otro). Ver docs/sprint-3-operacion.md, decisión 13. |
+| Tipo de movimiento CONSUMO (V7, Sprint 3) | Lo consumido sale de la barra con la devolución, así su saldo es siempre lo que de verdad hay (la barra sigue de un evento a otro). Ver docs/sprints/sprint-3-operacion.md, decisión 13. |
 | Solo bebida con alcohol; «Cajón» pasa a «Caja» (V5) | Alcance de esta etapa. La caja es solo la forma de mostrar y cargar: todo se guarda en botellas. |
 | Correcciones menores | `cliente.nombre_cli` estaba marcado como FK; typos `CATEGORIASERIVICIO` y `tipoMovimiemto_id`; `unidadComerciable` → `unidad_comercializable`. |
 
@@ -45,7 +45,7 @@ Motor: PostgreSQL. Convenciones: nombres en `snake_case` y en español; claves p
 - **Tablas de solo inserción.** `cambio_estado_evento`, `modificacion_evento`, `reprogramacion` y `movimiento_stock` no admiten UPDATE ni DELETE: un trigger (`fn_solo_insercion`, V3) los rechaza sin importar quién los intente, porque la aplicación es dueña de las tablas y revocarle permisos no alcanza. Las correcciones de stock se registran como asiento de ajuste con `movimiento_corregido_id`.
 - **Saldo teórico negativo permitido.** `stock_ubicacion.cantidad` no tiene `CHECK ≥ 0`: un retiro mayor al saldo se acepta y genera alerta a compras y administración (operación a ciegas).
 - **Consumo congelado.** Al cerrar el evento se escribe `consumo_evento`; no se recalcula después.
-- **Consumo por asistente.** Se divide lo consumido por la suma de `asistencia_segmento.cantidad_real` si el tipo de evento usa segmentos y todos los segmentos activos tienen la real; si no, por `evento.cantidad_invitados`. Se calcula al consultar: `consumo_evento` no cambia (docs/sprint-4.md, decisión 8).
+- **Consumo por asistente.** Se divide lo consumido por la suma de `asistencia_segmento.cantidad_real` si el tipo de evento usa segmentos y todos los segmentos activos tienen la real; si no, por `evento.cantidad_invitados`. Se calcula al consultar: `consumo_evento` no cambia (docs/sprints/sprint-4.md, decisión 8).
 - **Obligatoriedad por estado** (validada en backend y con `CHECK`): desde SENADO, `importe_sena`, `fecha_sena` y `firmante_dni`; desde CONTRATADO, `fecha_firma_contrato` y un `documento_evento` de tipo CONTRATO; para CONFIRMADO, `planner_id`, `invitados_definitivos = true` y servicios cargados en las categorías con `requerida_para_confirmar`; en CANCELADO, `motivo_cancelacion_id`.
 - **Importe de la seña** (`importe_sena` y su `moneda_sena`, el único dato económico): se filtran por perfil en el backend según RNF-SEG-04; el modelo no los separa en otra tabla.
 
@@ -311,7 +311,7 @@ Asistencia prevista y real por segmento (egresados).
 | `asistencia_id` | bigint | PK | NO | Identificador. |
 | `evento_id` | bigint | FK | NO | → evento. |
 | `tipo_segmento_id` | smallint | FK | NO | → tipo_segmento_asistencia. |
-| `cantidad_prevista` | integer |  | SÍ | ≥ 0. Null en el segmento que equivale a los invitados: su previsto es la cantidad de invitados. Total previsto = invitados + el resto de los segmentos (docs/sprint-4.md, decisión 4). |
+| `cantidad_prevista` | integer |  | SÍ | ≥ 0. Null en el segmento que equivale a los invitados: su previsto es la cantidad de invitados. Total previsto = invitados + el resto de los segmentos (docs/sprints/sprint-4.md, decisión 4). |
 | `cantidad_real` | integer |  | SÍ | ≥ 0. Se carga al cierre. |
 
 *Restricciones:* UNIQUE (evento_id, tipo_segmento_id).
@@ -570,7 +570,7 @@ Entrega abierta de un evento hacia una barra. Agrupa la salida inicial y los ret
 | `entrega_id` | bigint | PK | NO | Identificador. |
 | `evento_id` | bigint | FK | NO | → evento. |
 | `ubicacion_destino_id` | smallint | FK | NO | → ubicacion (barra). |
-| `orden_id` | bigint | FK | SÍ | → orden_preparacion: la confirmada del evento al abrir la entrega, si había (docs/sprint-4.md, decisión 25). |
+| `orden_id` | bigint | FK | SÍ | → orden_preparacion: la confirmada del evento al abrir la entrega, si había (docs/sprints/sprint-4.md, decisión 25). |
 | `estado` | varchar(10) |  | NO | ABIERTA · CERRADA. |
 | `usuario_apertura_id` | bigint | FK | NO | → usuario. |
 | `fecha_apertura` | timestamptz |  | NO | Default now(). |
@@ -642,7 +642,7 @@ Resultado del cierre por artículo, congelado: se escribe al registrar el cierre
 
 #### PROPORCION_CONSUMO
 
-Estimación de consumo por asistente según tipo de evento. Alimenta la orden sugerida mientras haya menos de 3 eventos cerrados del tipo (docs/sprint-4.md, decisiones 13 y 14). Se carga en Parámetros; se borra físicamente.
+Estimación de consumo por asistente según tipo de evento. Alimenta la orden sugerida mientras haya menos de 3 eventos cerrados del tipo (docs/sprints/sprint-4.md, decisiones 13 y 14). Se carga en Parámetros; se borra físicamente.
 
 | Campo | Tipo | Clave | Nulo | Descripción / valores posibles |
 |---|---|---|---|---|

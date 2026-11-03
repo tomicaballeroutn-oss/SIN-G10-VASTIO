@@ -6,7 +6,7 @@ import ar.edu.utn.vastio.agenda.dominio.Evento;
 import ar.edu.utn.vastio.comun.seguridad.UsuarioActual;
 
 /**
- * Reglas «solo sus eventos» de docs/perfiles-y-permisos.md. Un usuario con varios perfiles suma permisos:
+ * Reglas «solo sus eventos» de docs/negocio/perfiles-y-permisos.md. Un usuario con varios perfiles suma permisos:
  * una vendedora que además es planner ve el detalle de todos los eventos.
  */
 public final class AccesoEvento {

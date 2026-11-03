@@ -28,7 +28,7 @@ import ar.edu.utn.vastio.usuarios.dominio.RolCodigo;
 import ar.edu.utn.vastio.usuarios.dominio.Usuario;
 
 /**
- * Notificar cambios de evento: quién recibe cada aviso (docs/sprint-2.md, decisión 10) y qué dice.
+ * Notificar cambios de evento: quién recibe cada aviso (docs/sprints/sprint-2.md, decisión 10) y qué dice.
  */
 @PruebaDeIntegracion
 @Transactional

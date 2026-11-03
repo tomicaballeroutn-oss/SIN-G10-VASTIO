@@ -9,7 +9,7 @@ export const CAMPO_PREVISTA = 'asistencia_prevista.';
 export const CAMPO_REAL = 'asistencia_real.';
 
 /**
- * UI-19 y UI-20 · Asistencia por segmento de un evento de egresados (docs/sprint-4.md, decisiones 1 a 8). Los invitados
+ * UI-19 y UI-20 · Asistencia por segmento de un evento de egresados (docs/sprints/sprint-4.md, decisiones 1 a 8). Los invitados
  * son los comensales de la cena; los demás segmentos suman el público de la fiesta posterior. Sobre el total previsto
  * se dimensiona la bebida; con la real completa se calcula el consumo por asistente.
  */

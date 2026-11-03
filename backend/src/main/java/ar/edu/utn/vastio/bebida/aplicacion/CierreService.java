@@ -30,7 +30,7 @@ import ar.edu.utn.vastio.configuracion.aplicacion.CatalogoService;
 import ar.edu.utn.vastio.configuracion.dominio.Salon;
 
 /**
- * Registrar cierre de evento (UI-33, docs/sprint-3-operacion.md, decisiones 12 a 14): la conciliación final. Por bebida,
+ * Registrar cierre de evento (UI-33, docs/sprints/sprint-3-operacion.md, decisiones 12 a 14): la conciliación final. Por bebida,
  * lo entregado, devuelto, remanente y consumido en todas las barras del evento, y el consumo por asistente. Al cerrar,
  * en una transacción: el evento pasa a Cerrado, se congela {@code consumo_evento} y la orden de preparación queda
  * CERRADA. Lo consumido ya salió de la barra con la devolución: el cierre no mueve stock. Sin importes.
@@ -174,8 +174,8 @@ public class CierreService {
     }
 
     /**
-     * Lo consumido dividido por los asistentes (docs/sprint-3-operacion.md, decisión 14): la asistencia real por
-     * segmento si el tipo la cuenta así y ya se cargó (docs/sprint-4.md, decisión 8); si no, la cantidad de invitados.
+     * Lo consumido dividido por los asistentes (docs/sprints/sprint-3-operacion.md, decisión 14): la asistencia real por
+     * segmento si el tipo la cuenta así y ya se cargó (docs/sprints/sprint-4.md, decisión 8); si no, la cantidad de invitados.
      * Sin ninguna de las dos, no hay consumo por asistente.
      */
     private static BigDecimal porAsistente(BigDecimal consumo, Integer asistentes) {

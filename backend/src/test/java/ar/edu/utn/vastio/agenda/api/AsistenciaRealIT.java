@@ -34,7 +34,7 @@ import ar.edu.utn.vastio.usuarios.dominio.RolCodigo;
 import ar.edu.utn.vastio.usuarios.dominio.Usuario;
 
 /**
- * Registrar asistencia real de cierre (UI-20, docs/sprint-4.md, decisiones 6 a 9) y su uso como divisor del consumo por
+ * Registrar asistencia real de cierre (UI-20, docs/sprints/sprint-4.md, decisiones 6 a 9) y su uso como divisor del consumo por
  * asistente. Segmentos de V2: 1 Comensales cena, 2 Entradas anticipadas, 3 Venta en puerta. Tipo 4: Egresados.
  */
 @PruebaDeIntegracion

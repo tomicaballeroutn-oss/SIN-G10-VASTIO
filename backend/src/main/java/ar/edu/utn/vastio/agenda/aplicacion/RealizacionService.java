@@ -28,7 +28,7 @@ import ar.edu.utn.vastio.configuracion.aplicacion.CatalogoService;
 import ar.edu.utn.vastio.configuracion.dominio.Turno;
 
 /**
- * Registrar realización de evento (docs/sprint-3-operacion.md, decisión 1): un evento Confirmado pasa solo a En curso
+ * Registrar realización de evento (docs/sprints/sprint-3-operacion.md, decisión 1): un evento Confirmado pasa solo a En curso
  * cuando llega la hora de inicio de su turno, y a Realizado cuando el turno termina (el día siguiente si cruza la
  * medianoche). Lo dispara el sistema (usuario null, «Sistema» en el historial) y no genera avisos.
  * Es idempotente: si estuvo apagado, se pone al día y un Confirmado cuyo turno ya terminó pasa por los dos estados.

@@ -15,6 +15,7 @@
 .bebidas__lista-codigos { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: var(--space-2); }
 .bebidas__codigo { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 200px) auto; gap: var(--space-2); align-items: center;
   padding: var(--space-2) var(--space-2) var(--space-2) var(--space-3); background: var(--surface-sunken); border-radius: var(--radius-md); }
+.bebidas__codigo > .numeral-sm { min-width: 0; overflow-wrap: anywhere; }
 /* La etiqueta del Select queda para el lector de pantalla: la fila ya dice de qué código se trata. */
 .bebidas__codigo-unidades .v-field__label { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
 .bebidas__nuevo-codigo { display: flex; flex-wrap: wrap; gap: var(--space-2); align-items: end; }

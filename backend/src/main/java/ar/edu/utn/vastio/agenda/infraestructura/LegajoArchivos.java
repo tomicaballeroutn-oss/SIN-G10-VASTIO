@@ -15,7 +15,7 @@ import org.springframework.transaction.support.TransactionSynchronizationManager
 
 /**
  * Archivos del legajo en disco: {@code <directorio>/<evento_id>/<uuid>.<extensión>}. En el ambiente de prueba el
- * directorio es un volumen de Docker (ver docs/despliegue.md). La base guarda solo la ruta relativa.
+ * directorio es un volumen de Docker (ver docs/operacion/despliegue.md). La base guarda solo la ruta relativa.
  */
 @Component
 public class LegajoArchivos {

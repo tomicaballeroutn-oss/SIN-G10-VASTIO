@@ -44,3 +44,19 @@
 .prereserva__par { display: grid; gap: var(--space-4); }
 @media (min-width: 480px) { .prereserva__par { grid-template-columns: 1fr 1fr; } }
 .agenda__ver { margin-left: calc(-1 * var(--space-3)); }
+
+/* Prueba: menos aire entre título, botones, mes y día elegido. Para volver atrás, borrar este bloque. */
+.pantalla:has(> .agenda__filtros-acciones) { gap: var(--space-3); }
+.agenda, .agenda__lateral { gap: var(--space-4); }
+
+/* Teléfono: los estados se filtran desde un desplegable al lado de los salones, con sus símbolos;
+   el machete de abajo queda solo para pantallas anchas. Para volver atrás, borrar este bloque y el filtroExtra de PaginaAgenda. */
+.v-agenda-leyenda.agenda__estados-movil { display: none; }
+@media (max-width: 639.98px) {
+  .agenda__machete { display: none; }
+  .v-agenda-leyenda.agenda__estados-movil { display: block; position: relative; }
+  .agenda__estados-movil > .v-agenda-leyenda__resumen { min-height: 44px; gap: var(--space-2); padding: 0 var(--space-3); border: 1px solid var(--line-strong); border-radius: var(--radius-pill); }
+  .agenda__estados-movil > .v-agenda-leyenda__resumen .h4 { font-size: 0.875rem; }
+  .agenda__estados-movil[open] > .v-agenda-leyenda__lista { position: absolute; z-index: 5; left: 0; top: 100%; margin-top: var(--space-2); width: max-content; max-width: 80vw;
+    grid-template-columns: 1fr; padding: var(--space-3); background: var(--surface-raised); border: 1px solid var(--line); border-radius: var(--radius-md); box-shadow: var(--shadow-md); }
+}

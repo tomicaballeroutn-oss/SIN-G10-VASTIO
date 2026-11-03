@@ -4,11 +4,10 @@ import { agenda, estadoDs, fechaLarga, hoyEnCordoba, sumarMeses, type Agenda } f
 import type { PreReservaRegistrada } from '../../api/eventos';
 import { useDatos } from '../../api/useDatos';
 import {
-  AgendaGrid, Alert, Button, Card, ESTADOS, ESTADOS_DEL_EVENTO, SALONES, StatusChip, Tabs,
+  AgendaGrid, AgendaLeyenda, Alert, Button, Card, ESTADOS_DEL_EVENTO, SALONES, StatusChip, Tabs,
   type AgendaEvent, type EventStatus, type SalonId, type TurnoId,
 } from '../../ds';
 import { Cargando } from '../comun/Cargando';
-import { FiltroMultiple } from '../comun/FiltroMultiple';
 import { Encabezado } from '../layout/paginas';
 import { useSesion } from '../sesion/contexto';
 import { disponibilidad } from './disponibilidad';
@@ -53,7 +52,6 @@ export function PaginaAgenda() {
   const preReserva = !!usuario?.roles.some((r) => r === 'VENDEDORA' || r === 'DIRECCION' || r === 'COORDINACION');
   const [elegida, setElegida] = useState<UnidadElegida | null>(null);
   const [registrada, setRegistrada] = useState<PreReservaRegistrada | null>(null);
-  const [filtrosAbiertos, setFiltrosAbiertos] = useState(false);
   const navegar = useNavigate();
 
   function cambiar(valores: Record<string, string | null>) {
@@ -86,52 +84,12 @@ export function PaginaAgenda() {
           {registrada.codigo} · {registrada.nombre}. La fecha queda apartada hasta que se señe o se libere.
         </Alert>
       )}
-      <Card
-        title="Resaltar unidades"
-        actions={(
-          <div className="agenda__filtros-acciones">
-            <Button variant="outline" icon="calendar" onClick={() => cambiar({ mes: hoy.slice(0, 7), dia: hoy })}>Ir a hoy</Button>
-            <Button
-              variant="outline"
-              iconEnd={filtrosAbiertos ? 'chevron-up' : 'chevron-down'}
-              ariaExpanded={filtrosAbiertos}
-              ariaControls={filtrosAbiertos ? 'agenda-filtros-contenido' : undefined}
-              onClick={() => setFiltrosAbiertos((abiertos) => !abiertos)}
-            >
-              {filtrosAbiertos ? 'Ocultar filtros' : 'Mostrar filtros'}
-            </Button>
-          </div>
-        )}
-        className={`agenda__filtros-panel${filtrosAbiertos ? '' : ' agenda__filtros-panel--cerrado'}`}
-      >
-      {filtrosAbiertos && <div className="agenda__filtros" id="agenda-filtros-contenido">
-        <FiltroMultiple
-          label="Salones"
-          opciones={(datos.datos?.salones ?? []).map((s) => ({ value: s.codigo, label: s.nombre }))}
-          valores={salones}
-          alCambiar={(valores) => cambiarLista('salon', valores)}
-        />
-        <FiltroMultiple
-          label="Resaltar estados"
-          opciones={ESTADOS_FILTRABLES.map((e) => ({ value: e, label: ESTADOS[e].label }))}
-          valores={estados}
-          alCambiar={(valores) => cambiarLista('estado', valores)}
-        />
-        <FiltroMultiple
-          label="Turnos"
-          opciones={(datos.datos?.turnos ?? []).map((t) => ({ value: t.codigo, label: t.nombre }))}
-          valores={turnos}
-          alCambiar={(valores) => cambiarLista('turno', valores)}
-        />
-        {(salones.length > 0 || estados.length > 0 || turnos.length > 0) && (
+      <div className="agenda__filtros-acciones">
+        <Button variant="outline" icon="calendar" onClick={() => cambiar({ mes: hoy.slice(0, 7), dia: hoy })}>Ir a hoy</Button>
+        {(salones.length > 0 || estados.length > 0) && (
           <Button variant="text" onClick={() => cambiar({ salon: null, estado: null, turno: null })}>Limpiar filtros</Button>
         )}
-        <p className="caption v-muted agenda__filtros-ayuda">
-          Las unidades que coinciden se resaltan. Las demás se atenúan; ninguna se oculta ni se elimina del detalle.
-        </p>
       </div>
-      }
-      </Card>
       <Cargando datos={datos}>
         {(ag) => (
           <div className="agenda">
@@ -146,6 +104,16 @@ export function PaginaAgenda() {
                 onPrev={() => cambiar({ mes: sumarMeses(mes, -1), dia: null })}
                 onNext={() => cambiar({ mes: sumarMeses(mes, 1), dia: null })}
                 salones={ag.salones}
+                salonesElegidos={salones}
+                onCambiarSalones={(valores) => cambiarLista('salon', valores)}
+                filtroExtra={(
+                  <AgendaLeyenda
+                    titulo="Estado"
+                    className="agenda__estados-movil"
+                    elegidos={estados}
+                    onCambiar={(valores) => cambiarLista('estado', valores)}
+                  />
+                )}
                 resaltar={salones.length > 0 || estados.length > 0 || turnos.length > 0
                   ? (u) => (salones.length === 0 || salones.includes(u.salon))
                     && (estados.length === 0 || estados.includes(u.status))
@@ -162,7 +130,7 @@ export function PaginaAgenda() {
                 alVer={(codigo) => cambiar({ ver: codigo })}
                 alPreReservar={preReserva ? (u) => { setRegistrada(null); setElegida(u); } : undefined}
               />
-              <MacheteAgenda />
+              <MacheteAgenda elegidos={estados} alCambiar={(valores) => cambiarLista('estado', valores)} />
             </div>
             {elegida && (
               <DialogoPreReserva

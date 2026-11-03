@@ -5,7 +5,7 @@ import { hora } from '../../api/catalogos';
 import { cocina, type Cocina, type TarjetaCocina } from '../../api/cocina';
 import { ProblemaApi } from '../../api/problema';
 import { useDatos } from '../../api/useDatos';
-import { AgendaGrid, Alert, Button, Card, SalonTag, type AgendaEvent } from '../../ds';
+import { AgendaGrid, Alert, Button, Card, SalonTag, type AgendaEvent, type SalonId } from '../../ds';
 import { Cargando } from '../comun/Cargando';
 import { Encabezado } from '../layout/paginas';
 import '../agenda/agenda.css';
@@ -26,6 +26,7 @@ export function PaginaCocina() {
   const eventoPedido = Number(busqueda.get('evento')) || null;
   const [aviso, setAviso] = useState<{ evento: number; mensaje: string } | null>(null);
   const [intento, setIntento] = useState(0);
+  const [salones, setSalones] = useState<SalonId[]>([]);
 
   const cargar = useCallback(() => cocina.mes(mes), [mes]);
   const datos = useDatos(cargar);
@@ -94,6 +95,9 @@ export function PaginaCocina() {
                     onPrev={() => cambiar({ mes: sumarMeses(mes, -1), dia: null, evento: null })}
                     onNext={() => cambiar({ mes: sumarMeses(mes, 1), dia: null, evento: null })}
                     salones={c.salones}
+                    salonesElegidos={salones}
+                    onCambiarSalones={setSalones}
+                    resaltar={salones.length > 0 ? (u) => salones.includes(u.salon) : undefined}
                   />
                   <p className="caption v-muted">Cada punto lleno es un evento para cocinar.</p>
                 </Card>

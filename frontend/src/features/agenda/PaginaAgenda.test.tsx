@@ -123,14 +123,9 @@ describe('UI-07 · consultar agenda', () => {
     const descripcion = dia.getAttribute('aria-label');
     expect(pipsDel9()).toHaveLength(6);
     expect(screen.queryByRole('button', { name: /^Resaltar estados/ })).not.toBeInTheDocument();
-    const mostrar = screen.getByRole('button', { name: 'Mostrar filtros' });
-    expect(mostrar).toHaveAttribute('aria-expanded', 'false');
-    await usuario.click(mostrar);
-    expect(screen.getByRole('button', { name: 'Ocultar filtros' })).toHaveAttribute('aria-expanded', 'true');
-    await usuario.click(screen.getByRole('button', { name: /^Resaltar estados/ }));
-    const estados = screen.getByRole('group', { name: 'Resaltar estados' });
-    await usuario.click(within(estados).getByRole('checkbox', { name: 'Disponible' }));
-    await usuario.click(screen.getByRole('button', { name: 'Listo' }));
+    const disponible = within(document.querySelector('.agenda__machete') as HTMLElement).getByRole('button', { name: 'Disponible' });
+    await usuario.click(disponible);
+    expect(disponible).toHaveAttribute('aria-pressed', 'true');
 
     const atenuados = [...pipsDel9()].filter((p) => p.classList.contains('is-dim'));
     expect(atenuados).toHaveLength(3);
@@ -173,7 +168,6 @@ describe('UI-07 · consultar agenda', () => {
     const dia = await screen.findByRole('button', { name: /^sábado 9 de marzo/ });
     expect(dia.querySelectorAll('.v-pip')).toHaveLength(6);
     expect(dia.querySelectorAll('.is-dim')).toHaveLength(6);
-    await usuario.click(screen.getByRole('button', { name: 'Mostrar filtros' }));
     await usuario.click(screen.getByRole('button', { name: 'Limpiar filtros' }));
     expect(dia.querySelectorAll('.is-dim, .is-match')).toHaveLength(0);
   });

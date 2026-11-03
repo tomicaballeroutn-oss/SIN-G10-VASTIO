@@ -30,6 +30,7 @@ import { DialogoPlanner } from './DialogoPlanner';
 import { DialogoLiberar } from './DialogoLiberar';
 import { PestanaServicios } from './PestanaServicios';
 import { DialogoSena } from './DialogoSena';
+import { ImprimirFicha } from './ImprimirFicha';
 import './eventos.css';
 import { ROLES_CALENDAR } from '../../api/calendar';
 import { EstadoGoogleCalendar } from './EstadoGoogleCalendar';
@@ -114,39 +115,38 @@ function ContenidoFicha({ ficha, alCambiar }: { ficha: Ficha; alCambiar: (ficha:
         )}
       </header>
 
-      {Object.values(acciones).some(Boolean) && (
-        <div className="ficha__acciones">
-          {acciones.registrarSena && (
-            <Button icon="banknote" onClick={() => setDialogo('sena')}>Registrar seña</Button>
-          )}
-          {acciones.registrarFirma && (
-            <Button icon="file-check" onClick={() => setDialogo('firma')}>Registrar firma</Button>
-          )}
-          {acciones.confirmar && (
-            <Button icon="circle-check" onClick={() => setDialogo('confirmar')}>Confirmar evento</Button>
-          )}
-          {acciones.asignarPlanner && (
-            <Button variant={ficha.planner ? 'outline' : 'solid'} icon="user-plus" onClick={() => setDialogo('planner')}>
-              {ficha.planner ? 'Cambiar planner' : 'Asignar planner'}
-            </Button>
-          )}
-          {acciones.modificar && (
-            <Button variant="outline" icon="pencil" onClick={() => navegar(`/eventos/${ficha.id}/datos`)}>Modificar datos</Button>
-          )}
-          {acciones.modificar && (
-            <Button variant="outline" icon="users" onClick={() => setDialogo('invitados')}>Cantidad de invitados</Button>
-          )}
-          {acciones.reprogramar && (
-            <Button variant="outline" icon="calendar-clock" onClick={() => navegar(`/eventos/${ficha.id}/reprogramar`)}>Reprogramar</Button>
-          )}
-          {acciones.liberar && (
-            <Button variant="outline" icon="lock-open" onClick={() => setDialogo('liberar')}>Liberar pre-reserva</Button>
-          )}
-          {acciones.cancelar && (
-            <Button variant="outline" tone="danger" icon="calendar-x" onClick={() => setDialogo('cancelar')}>Cancelar evento</Button>
-          )}
-        </div>
-      )}
+      <div className="ficha__acciones">
+        {acciones.registrarSena && (
+          <Button icon="banknote" onClick={() => setDialogo('sena')}>Registrar seña</Button>
+        )}
+        {acciones.registrarFirma && (
+          <Button icon="file-check" onClick={() => setDialogo('firma')}>Registrar firma</Button>
+        )}
+        {acciones.confirmar && (
+          <Button icon="circle-check" onClick={() => setDialogo('confirmar')}>Confirmar evento</Button>
+        )}
+        {acciones.asignarPlanner && (
+          <Button variant={ficha.planner ? 'outline' : 'solid'} icon="user-plus" onClick={() => setDialogo('planner')}>
+            {ficha.planner ? 'Cambiar planner' : 'Asignar planner'}
+          </Button>
+        )}
+        {acciones.modificar && (
+          <Button variant="outline" icon="pencil" onClick={() => navegar(`/eventos/${ficha.id}/datos`)}>Modificar datos</Button>
+        )}
+        {acciones.modificar && (
+          <Button variant="outline" icon="users" onClick={() => setDialogo('invitados')}>Cantidad de invitados</Button>
+        )}
+        {acciones.reprogramar && (
+          <Button variant="outline" icon="calendar-clock" onClick={() => navegar(`/eventos/${ficha.id}/reprogramar`)}>Reprogramar</Button>
+        )}
+        {acciones.liberar && (
+          <Button variant="outline" icon="lock-open" onClick={() => setDialogo('liberar')}>Liberar pre-reserva</Button>
+        )}
+        {acciones.cancelar && (
+          <Button variant="outline" tone="danger" icon="calendar-x" onClick={() => setDialogo('cancelar')}>Cancelar evento</Button>
+        )}
+        <span className="ficha__imprimir"><ImprimirFicha ficha={ficha} /></span>
+      </div>
       {dialogo === 'sena' && (
         <DialogoSena
           ficha={ficha}

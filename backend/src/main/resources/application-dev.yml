@@ -16,6 +16,8 @@ vastio:
     contrasena: ${VASTIO_ADMIN_CONTRASENA:}
   demo:
     contrasena: ${VASTIO_DEMO_CONTRASENA:}
+    # Con true, además carga EscenarioCompleto: historia, egresados, órdenes y stock para mostrar todo (scripts/demo-cliente.ps1).
+    completo: ${VASTIO_DEMO_COMPLETO:false}
 
 springdoc:
   api-docs:

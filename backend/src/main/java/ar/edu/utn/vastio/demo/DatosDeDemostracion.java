@@ -136,12 +136,15 @@ public class DatosDeDemostracion implements ApplicationRunner {
     private final InventarioInicialService inventario;
     private final EntityManager entityManager;
     private final String contrasena;
+    /** Con el escenario completo, el stock lo arma {@link EscenarioCompleto} con su historia. */
+    private final boolean completo;
 
     public DatosDeDemostracion(UsuarioService usuarios, PreReservaService preReservas, SenaService senas,
             ContratoService contratos, PlannerService planners, InvitadosService invitados, ServiciosService servicios,
             ConfirmacionService confirmaciones, BebidaService bebidas,
             InventarioInicialService inventario, EntityManager entityManager,
-            @Value("${vastio.demo.contrasena:}") String contrasena) {
+            @Value("${vastio.demo.contrasena:}") String contrasena, @Value("${vastio.demo.completo:false}") boolean completo) {
+        this.completo = completo;
         this.entityManager = entityManager;
         this.senas = senas;
         this.contratos = contratos;
@@ -216,8 +219,10 @@ public class DatosDeDemostracion implements ApplicationRunner {
             }
         }
         long administracion = creados.get("gabriela.paz").getId();
-        inventario.guardar(DEPOSITO_MADRE, deposito, administracion);
-        inventario.guardar(BARRA_AVRIL, barraAvril, administracion);
+        if (!completo) {
+            inventario.guardar(DEPOSITO_MADRE, deposito, administracion);
+            inventario.guardar(BARRA_AVRIL, barraAvril, administracion);
+        }
         log.info("Datos de demostración cargados: {} usuarios, {} eventos y {} bebidas.", PERSONAS.size(), RESERVAS.size(),
                 ARTICULOS.size());
     }

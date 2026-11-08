@@ -51,6 +51,7 @@ function Tablero({ usuario }: { usuario: UsuarioSesion }) {
 
   const verStock = usuario.roles.some((r) => VEN_STOCK.includes(r));
   const verTareas = tieneTareas(usuario.roles);
+  const listaAgendas = agendas.datos;
 
   return (
     <section className="pantalla inicio">
@@ -62,49 +63,63 @@ function Tablero({ usuario }: { usuario: UsuarioSesion }) {
         <Button variant="outline" icon="calendar-days" onClick={() => navegar('/agenda')}>Ir a la agenda</Button>
       </header>
 
-      <Cargando datos={agendas}>
-        {(lista) => {
-          const unidades = lista.flatMap((a) => a.unidades);
-          const r = resumenSemana(unidades, semana, alcance);
-          return (
-            <>
-              <Card
-                tone="deep"
-                className="inicio__semana"
-                notch={<IconButton icon="arrow-right" label="Ver la semana en la agenda" variant="solid" onClick={() => navegar(`/agenda?mes=${hoy.slice(0, 7)}&dia=${hoy}`)} />}
-              >
-                <p className="overline v-muted">{alcance.complejo ? 'Esta semana' : 'Tus eventos esta semana'}</p>
-                <div className="inicio__semana-fila">
-                  <p className="inicio__numero"><span className="stat">{r.total}</span><span className="body-sm v-muted">{r.total === 1 ? 'evento' : 'eventos'}</span></p>
-                  <MiniBarras values={r.porDia} label={`Eventos por día: ${DIAS_SEMANA.map((d, i) => `${d} ${r.porDia[i]}`).join(', ')}`} />
-                </div>
-                <p className="body-sm v-muted inicio__semana-resumen">
-                  {r.confirmados} {r.confirmados === 1 ? 'confirmado' : 'confirmados'} · {r.contratados} {r.contratados === 1 ? 'contratado' : 'contratados'} · {r.porCerrar} por cerrar
-                </p>
-              </Card>
-              <Numero etiqueta="Confirmados" valor={r.confirmados} unidad={r.confirmados === 1 ? 'evento' : 'eventos'} estado="confirmado" />
-              <Numero etiqueta="Contratados" valor={r.contratados} unidad={r.contratadosSinPlanner > 0 ? `${r.contratadosSinPlanner} sin planner` : r.contratados === 1 ? 'evento' : 'eventos'} estado="contratado" />
-              <Numero etiqueta="Señados y pre-reservas" valor={r.porCerrar} unidad="por cerrar" estado="senado" />
-              <ProximosDias dias={dias} hoy={hoy} agendaDe={(dia) => lista.find((a) => a.mes === dia.slice(0, 7))} unidades={unidades} eventos={eventos.datos} alcance={alcance} />
-            </>
-          );
-        }}
-      </Cargando>
+      <div className="inicio__resumen">
+        <Cargando datos={agendas}>
+          {(lista) => {
+            const unidades = lista.flatMap((a) => a.unidades);
+            const r = resumenSemana(unidades, semana, alcance);
+            return (
+              <>
+                <Card
+                  tone="deep"
+                  className="inicio__semana"
+                  notch={<IconButton icon="arrow-right" label="Ver la semana en la agenda" variant="solid" onClick={() => navegar(`/agenda?mes=${hoy.slice(0, 7)}&dia=${hoy}`)} />}
+                >
+                  <p className="overline v-muted">{alcance.complejo ? 'Esta semana' : 'Tus eventos esta semana'}</p>
+                  <div className="inicio__semana-fila">
+                    <p className="inicio__numero"><span className="stat">{r.total}</span><span className="body-sm v-muted">{r.total === 1 ? 'evento' : 'eventos'}</span></p>
+                    <MiniBarras values={r.porDia} label={`Eventos por día: ${DIAS_SEMANA.map((d, i) => `${d} ${r.porDia[i]}`).join(', ')}`} />
+                  </div>
+                  <p className="body-sm v-muted inicio__semana-resumen">
+                    {r.confirmados} {r.confirmados === 1 ? 'confirmado' : 'confirmados'} · {r.contratados} {r.contratados === 1 ? 'contratado' : 'contratados'} · {r.porCerrar} por cerrar
+                  </p>
+                </Card>
+                <Numero etiqueta="Confirmados" valor={r.confirmados} unidad={r.confirmados === 1 ? 'evento' : 'eventos'} estado="confirmado" />
+                <Numero etiqueta="Contratados" valor={r.contratados} unidad={r.contratadosSinPlanner > 0 ? `${r.contratadosSinPlanner} sin planner` : r.contratados === 1 ? 'evento' : 'eventos'} estado="contratado" />
+                <Numero etiqueta="Señados y pre-reservas" valor={r.porCerrar} unidad="por cerrar" estado="senado" />
+              </>
+            );
+          }}
+        </Cargando>
+      </div>
 
-      <Calendario hoy={hoy} />
-
-      <div className="inicio__fila">
-        {verTareas && (
-          <Card eyebrow="Para hacer" title="Te toca a vos">
-            <Cargando datos={eventos}>
-              {(lista) => <Tareas tareas={tareasDe(lista, alcance)} />}
-            </Cargando>
+      <div className="inicio__columnas">
+        <div className="inicio__columna">
+          {listaAgendas && (
+            <ProximosDias
+              dias={dias}
+              hoy={hoy}
+              agendaDe={(dia) => listaAgendas.find((a) => a.mes === dia.slice(0, 7))}
+              unidades={listaAgendas.flatMap((a) => a.unidades)}
+              eventos={eventos.datos}
+              alcance={alcance}
+            />
+          )}
+          {verTareas && (
+            <Card eyebrow="Para hacer" title="Te toca a vos">
+              <Cargando datos={eventos}>
+                {(lista) => <Tareas tareas={tareasDe(lista, alcance)} />}
+              </Cargando>
+            </Card>
+          )}
+          <Card eyebrow="Novedades" title="Notificaciones" notch={<IconButton icon="arrow-right" label="Ver todas las notificaciones" variant="solid" onClick={() => navegar('/notificaciones')} />}>
+            <ListaNotificaciones limite={4} />
           </Card>
-        )}
-        <Card eyebrow="Novedades" title="Notificaciones" notch={<IconButton icon="arrow-right" label="Ver todas las notificaciones" variant="solid" onClick={() => navegar('/notificaciones')} />}>
-          <ListaNotificaciones limite={4} />
-        </Card>
-        {verStock && <DepositoMadre />}
+        </div>
+        <div className="inicio__columna">
+          <Calendario hoy={hoy} />
+          {verStock && <DepositoMadre />}
+        </div>
       </div>
     </section>
   );

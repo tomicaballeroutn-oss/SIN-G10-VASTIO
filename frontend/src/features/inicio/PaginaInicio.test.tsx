@@ -104,8 +104,13 @@ describe('UI-04 · Inicio', () => {
     expect(within(solapas).getAllByRole('tab').map((t) => t.textContent)).toEqual(['Hoy', 'Mañana', 'Vie 23', 'Sáb 24']);
     expect(await screen.findByText('No hay eventos este día.')).toBeInTheDocument();
 
+    await usuario.click(within(solapas).getByRole('tab', { name: 'Mañana' }));
+    expect(screen.getByRole('heading', { name: 'Jueves 22 de octubre' })).toBeInTheDocument();
+    expect(document.querySelectorAll('.inicio__eventos li')).toHaveLength(1);
+
     await usuario.click(within(solapas).getByRole('tab', { name: 'Sáb 24' }));
     expect(screen.getByRole('heading', { name: 'Sábado 24 de octubre' })).toBeInTheDocument();
+    expect(document.querySelectorAll('.inicio__eventos li')).toHaveLength(2);
     expect(screen.getByText('3 de 6 libres')).toBeInTheDocument();
     await usuario.click(screen.getByRole('button', { name: /Cumpleaños de Marta.*80 invitados · Planner: Ana Sosa/ }));
     expect(router.state.location.pathname).toBe('/eventos/12');

@@ -1,8 +1,4 @@
-/*
- * UI-04 · Inicio. Teléfono y tableta: una columna (semana con el resumen en una línea, calendario, próximos días,
- * tareas, notificaciones y bebidas). Desde 960 px, la grilla de 12 del prototipo: semana y tres números arriba,
- * próximos días y calendario en el medio, y abajo tareas, notificaciones y bebidas.
- */
+/* UI-04 · Inicio: resumen arriba; eventos, tareas y notificaciones a la izquierda; calendario y depósito a la derecha. */
 .inicio__cabeza { display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between; gap: var(--space-4); }
 .inicio__numero { display: flex; align-items: baseline; gap: var(--space-2); margin: 0; }
 
@@ -12,9 +8,6 @@
 /* En teléfono los tres números van en una línea dentro de la semana. .v-card.inicio__kpi le gana al display de .v-card. */
 .v-card.inicio__kpi { display: none; }
 .inicio__kpi-fila { display: flex; align-items: baseline; justify-content: space-between; gap: var(--space-3); }
-
-.inicio__calendario { order: 1; }
-.inicio__dias, .inicio__fila { order: 2; }
 
 .inicio__dias { display: flex; flex-direction: column; min-width: 0; }
 .inicio__dia-cabeza { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: var(--space-1) var(--space-3); }
@@ -35,19 +28,16 @@
 .inicio__bebidas { gap: var(--space-4); }
 .inicio__tareas > .v-btn { align-self: flex-start; margin-top: var(--space-2); }
 
-.inicio__fila { display: grid; grid-template-columns: minmax(0, 1fr); gap: var(--space-6); }
+.inicio__resumen { display: grid; grid-template-columns: minmax(0, 1fr); gap: var(--space-6); min-width: 0; }
+.inicio__columnas { display: grid; grid-template-columns: minmax(0, 1fr); gap: var(--space-6); min-width: 0; }
+.inicio__columna { display: contents; }
 
 @media (min-width: 960px) {
-  /* .pantalla.inicio: le gana al display flex de .pantalla, que se carga después. */
-  .pantalla.inicio { display: grid; grid-template-columns: repeat(12, minmax(0, 1fr)); align-items: start; gap: var(--space-6); }
-  .inicio > * { grid-column: 1 / -1; order: 0; }
-  .inicio > .inicio__semana, .inicio > .v-card.inicio__kpi { display: flex; grid-column: span 3; align-self: stretch; }
+  .inicio__resumen { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+  .inicio__resumen > .inicio__semana, .inicio__resumen > .v-card.inicio__kpi { display: flex; }
   .inicio__semana-resumen { display: none; }
-  .inicio > .inicio__dias { grid-column: span 8; }
-  /* Baja lo que ocupan las solapas, para alinearse con la ficha de los días. */
-  .inicio > .inicio__calendario { grid-column: span 4; margin-top: var(--tab-h); }
-  /* Una columna igual por bloque: dos o tres según el perfil. */
-  .inicio__fila { grid-template-columns: none; grid-auto-flow: column; grid-auto-columns: minmax(0, 1fr); align-items: start; }
+  .inicio__columnas { grid-template-columns: minmax(0, 2fr) minmax(0, 1fr); align-items: start; }
+  .inicio__columna { display: flex; flex-direction: column; gap: var(--space-6); min-width: 0; }
   .inicio__evento { grid-template-columns: 150px minmax(0, 1fr) minmax(0, 1fr) auto; grid-template-areas: "lugar nombre detalle estado"; gap: var(--space-4); }
   .inicio__evento-lugar { flex-direction: column; align-items: flex-start; gap: 2px; }
 }

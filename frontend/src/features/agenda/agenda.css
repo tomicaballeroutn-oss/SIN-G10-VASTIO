@@ -60,3 +60,6 @@
   .agenda__estados-movil[open] > .v-agenda-leyenda__lista { position: absolute; z-index: 5; left: 0; top: 100%; margin-top: var(--space-2); width: max-content; max-width: 80vw;
     grid-template-columns: 1fr; padding: var(--space-3); background: var(--surface-raised); border: 1px solid var(--line); border-radius: var(--radius-md); box-shadow: var(--shadow-md); }
 }
+
+/* Envoltorio del calendario para saber si se tocó afuera (useTocarAfuera). */
+.agenda__zona { min-width: 0; }

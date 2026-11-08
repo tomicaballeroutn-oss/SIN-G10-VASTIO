@@ -15,6 +15,7 @@ import { disponibilidad } from './disponibilidad';
 import { MacheteAgenda } from './MacheteAgenda';
 import { NombreTurno } from './NombreTurno';
 import { MarcaSalon } from '../comun/MarcaSalon';
+import { useTocarAfuera } from '../comun/useTocarAfuera';
 import { DialogoPreReserva, type UnidadElegida } from './DialogoPreReserva';
 import './agenda.css';
 
@@ -54,6 +55,11 @@ export function PaginaAgenda() {
   const [elegida, setElegida] = useState<UnidadElegida | null>(null);
   const [registrada, setRegistrada] = useState<PreReservaRegistrada | null>(null);
   const navegar = useNavigate();
+  const filtros = useRef<HTMLDivElement>(null);
+  const calendario = useRef<HTMLDivElement>(null);
+  const lateral = useRef<HTMLDivElement>(null);
+  // Tocar fuera del calendario, del detalle y de los filtros suelta el día elegido.
+  useTocarAfuera([filtros, calendario, lateral], !!dia && !elegida, () => cambiar({ dia: null }));
 
   function cambiar(valores: Record<string, string | null>) {
     const siguiente = new URLSearchParams(busqueda);
@@ -85,7 +91,7 @@ export function PaginaAgenda() {
           {registrada.codigo} · {registrada.nombre}. La fecha queda apartada hasta que se señe o se libere.
         </Alert>
       )}
-      <div className="agenda__filtros-acciones">
+      <div ref={filtros} className="agenda__filtros-acciones">
         <Button variant="outline" icon="calendar" onClick={() => cambiar({ mes: hoy.slice(0, 7), dia: hoy })}>Ir a hoy</Button>
         <FiltroMultiple
           label="Turnos"
@@ -100,7 +106,7 @@ export function PaginaAgenda() {
       <Cargando datos={datos}>
         {(ag) => (
           <div className="agenda">
-            <Card className="agenda__mes">
+            <div ref={calendario} className="agenda__zona"><Card className="agenda__mes">
               <AgendaGrid
                 year={anio}
                 month={numeroMes - 1}
@@ -127,8 +133,8 @@ export function PaginaAgenda() {
                     && (turnos.length === 0 || turnos.includes(u.turno))
                   : undefined}
               />
-            </Card>
-            <div className="agenda__lateral">
+            </Card></div>
+            <div ref={lateral} className="agenda__lateral">
               <DetalleDelDia
                 agenda={ag}
                 fecha={dia}

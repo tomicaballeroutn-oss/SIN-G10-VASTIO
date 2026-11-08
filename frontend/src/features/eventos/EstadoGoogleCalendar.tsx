@@ -71,7 +71,6 @@ export function EstadoGoogleCalendar({ eventoId, version }: { eventoId: number; 
         {e.configurado && e.estado === 'EN_PROCESO' && <Button variant="text" onClick={datos.recargar}>Volver a consultar publicación</Button>}
         {e.configurado && !conflicto && e.puedeRetirar && accion !== 'RETIRAR' && !guardando &&
           <Button variant="text" tone="danger" disabled={!e.configurado || datos.cargando || e.estado === 'EN_PROCESO'} onClick={() => void operar('RETIRAR')}>Retirar de Google Calendar</Button>}
-        <p className="body-sm v-muted">Las publicaciones, actualizaciones y retiradas se realizan solo cuando las solicitás.</p>
       </div>}
     </Card>
   );

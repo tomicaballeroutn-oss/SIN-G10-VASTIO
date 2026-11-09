@@ -1,3 +1,4 @@
+import { useId } from 'react';
 import type { MouseEvent, ReactNode } from 'react';
 import type { IconName, Tone } from '../tipos';
 import { cx } from '../util';
@@ -20,26 +21,36 @@ export interface ButtonProps {
   className?: string;
   ariaExpanded?: boolean;
   ariaControls?: string;
+  /**
+   * La acción todavía no se puede hacer: el botón deja el relleno sólido y muestra que falta algo, pero se puede tocar
+   * para ver qué falta. `true` anuncia «Faltan requisitos»; un texto lo reemplaza.
+   */
+  pendiente?: boolean | string;
 }
 
 export function Button({
   children, variant = 'solid', tone, size = 'md', icon, iconEnd, block, loading, disabled, onClick, href, type = 'button', title, className,
-  ariaExpanded, ariaControls,
+  ariaExpanded, ariaControls, pendiente,
 }: ButtonProps) {
+  const idPendiente = useId();
   const cls = cx('v-btn', 'button', `v-btn--${variant}`, `v-btn--${size}`, tone === 'danger' && 'v-tone-danger',
-    block && 'v-btn--block', loading && 'is-loading', className);
+    block && 'v-btn--block', loading && 'is-loading', pendiente && 'is-pendiente', className);
   const iconSize = size === 'sm' ? 18 : 20;
   const contenido = (
     <>
       {loading ? <span className="v-spin" aria-hidden /> : icon && <Icon name={icon} size={iconSize} />}
       <span>{children}</span>
       {iconEnd && !loading && <Icon name={iconEnd} size={iconSize} />}
+      {pendiente && !loading && <Icon name="circle-alert" size={iconSize} className="v-btn__pendiente" />}
     </>
   );
   if (href) {
     return <a href={href} className={cls} onClick={onClick} title={title} aria-busy={loading || undefined}>{contenido}</a>;
   }
+  // Lo que falta va fuera del botón: lo describe, no cambia su nombre.
+  const descripcion = pendiente ? <span id={idPendiente} className="v-sr">{pendiente === true ? 'Faltan requisitos' : pendiente}</span> : null;
   return (
+    <>
     <button
       type={type}
       className={cls}
@@ -49,9 +60,12 @@ export function Button({
       aria-busy={loading || undefined}
       aria-expanded={ariaExpanded}
       aria-controls={ariaControls}
+      aria-describedby={pendiente ? idPendiente : undefined}
     >
       {contenido}
     </button>
+    {descripcion}
+    </>
   );
 }
 

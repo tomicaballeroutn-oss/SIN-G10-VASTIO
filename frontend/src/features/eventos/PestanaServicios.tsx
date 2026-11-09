@@ -84,7 +84,7 @@ export function PestanaServicios({ ficha, alGuardar }: { ficha: Ficha; alGuardar
   return (
     <Card title="Servicios contratados" className="servicios__tarjeta">
       <div className="servicios">
-        {guardado && !cambiados.length && <Alert tone="success">Servicios guardados.</Alert>}
+        {guardado && !cambiados.length && <Alert tone="success" centrar>Servicios guardados.</Alert>}
         {error && !error.errores.length && <Alert tone="danger">{error.message}</Alert>}
         {ficha.servicios.map((s) => (editable && s.activa ? (
           <CategoriaEditable

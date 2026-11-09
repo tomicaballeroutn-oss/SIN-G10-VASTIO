@@ -124,7 +124,7 @@ function Formulario({ pantalla, catalogo, alRegistrar }: { pantalla: PantallaPre
   }
 
   return <div className="preparacion">
-    {aviso && <Alert tone="success">{aviso}</Alert>}
+    {aviso && <Alert tone="success" centrar>{aviso}</Alert>}
     {!estadoValido && <Alert tone="info">El evento está {pantalla.evento.estado.toLowerCase().replaceAll('_', ' ')}. Solo podés preparar bebida con el evento confirmado o en curso.</Alert>}
     {!pantalla.madre && <Alert tone="warning">No hay un depósito madre activo. Configuralo en Ubicaciones de stock.</Alert>}
     {pantalla.orden && pantalla.orden.renglones.length > 0 && <Card title="Según la orden de preparación"

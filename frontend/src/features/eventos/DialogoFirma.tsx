@@ -56,7 +56,8 @@ export function DialogoFirma({ ficha, alCerrar, alRegistrar }: {
       actions={
         <>
           <Button variant="outline" onClick={alCerrar}>Cancelar</Button>
-          <Button icon="file-check" loading={guardando} onClick={() => void confirmar()}>Registrar firma</Button>
+          <Button icon="file-check" loading={guardando} pendiente={!fechaFirma || !archivos.length}
+            onClick={() => void confirmar()}>Registrar firma</Button>
         </>
       }
     >

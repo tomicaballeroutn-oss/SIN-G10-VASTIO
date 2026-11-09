@@ -8,6 +8,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import java.time.LocalDate;
 import java.time.ZoneId;
+import java.util.List;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -88,11 +89,31 @@ class PerfilDevIT {
                     SELECT count(*) FROM usuario_rol ur JOIN rol r USING (rol_id) WHERE r.codigo = ?""", Integer.class, rol.name()))
                     .as(rol.name()).isPositive();
         }
-        assertThat(jdbc.queryForObject("SELECT count(*) FROM evento WHERE estado = 'PRE_RESERVA'", Integer.class)).isEqualTo(4);
-        assertThat(jdbc.queryForObject("SELECT count(*) FROM evento WHERE estado = 'SENADO'", Integer.class)).isEqualTo(1);
-        assertThat(jdbc.queryForObject("SELECT count(*) FROM evento WHERE estado = 'CONTRATADO'", Integer.class)).isEqualTo(1);
-        assertThat(jdbc.queryForObject("SELECT count(*) FROM evento WHERE estado = 'CONFIRMADO'", Integer.class)).isEqualTo(2);
-        assertThat(jdbc.queryForObject("SELECT count(DISTINCT evento_id) FROM cambio_estado_evento", Integer.class)).isEqualTo(8);
+        // El volumen depende de la fecha de carga; las etapas y su trazabilidad deben mantenerse.
+        var etapas = List.of("PRE_RESERVA", "SENADO", "CONTRATADO", "CONFIRMADO");
+        assertThat(jdbc.queryForList("SELECT DISTINCT estado FROM evento", String.class))
+                .containsExactlyInAnyOrderElementsOf(etapas);
+        var eventos = jdbc.queryForList("SELECT evento_id, estado FROM evento");
+        for (var evento : eventos) {
+            var id = evento.get("evento_id");
+            int etapa = etapas.indexOf(evento.get("estado"));
+            var historial = jdbc.queryForList("""
+                    SELECT estado_anterior, estado_nuevo, usuario_id FROM cambio_estado_evento
+                    WHERE evento_id = ? ORDER BY cambio_id""", id);
+            assertThat(historial).as("Historial del evento %s", id).hasSize(etapa + 1);
+            for (int i = 0; i <= etapa; i++) {
+                assertThat(historial.get(i).get("estado_anterior")).as("Origen del cambio %s del evento %s", i, id)
+                        .isEqualTo(i == 0 ? null : etapas.get(i - 1));
+                assertThat(historial.get(i).get("estado_nuevo")).as("Destino del cambio %s del evento %s", i, id)
+                        .isEqualTo(etapas.get(i));
+                assertThat(historial.get(i).get("usuario_id")).as("Autor del cambio %s del evento %s", i, id)
+                        .isNotNull();
+            }
+        }
+        assertThat(jdbc.queryForObject("""
+                SELECT count(*) FROM (
+                    SELECT unidad_id FROM evento GROUP BY unidad_id HAVING count(*) > 1
+                ) duplicados""", Integer.class)).as("Una reserva por unidad comercializable").isZero();
         // El del objetivo del Sprint 3: confirmado para hoy a la noche en Avril.
         assertThat(jdbc.queryForObject("""
                 SELECT count(*) FROM evento e JOIN unidad_comercializable u USING (unidad_id)

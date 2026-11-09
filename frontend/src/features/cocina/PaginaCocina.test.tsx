@@ -45,6 +45,33 @@ afterEach(() => {
 });
 
 describe('A7-02 · vista de cocina', () => {
+  it('el título del mes abre el selector y salta a cualquier mes y año', async () => {
+    backend();
+    const usuario = userEvent.setup();
+    const router = montar('/cocina?mes=2030-03');
+
+    await usuario.click(await screen.findByRole('button', { name: 'Marzo 2030' }));
+    const panel = screen.getByRole('dialog', { name: 'Elegir mes y año' });
+    expect(within(panel).getByRole('button', { name: 'Marzo 2030' })).toHaveAttribute('aria-pressed', 'true');
+    await usuario.click(within(panel).getByRole('button', { name: 'Año siguiente' }));
+    await usuario.click(within(panel).getByRole('button', { name: 'Año siguiente' }));
+    await usuario.click(within(panel).getByRole('button', { name: 'Julio 2032' }));
+
+    await waitFor(() => expect(router.state.location.search).toContain('mes=2032-07'));
+    expect(screen.queryByRole('dialog', { name: 'Elegir mes y año' })).not.toBeInTheDocument();
+  });
+
+  it('Escape cierra el selector de mes sin cambiar de mes', async () => {
+    backend();
+    const usuario = userEvent.setup();
+    const router = montar('/cocina?mes=2030-03');
+
+    await usuario.click(await screen.findByRole('button', { name: 'Marzo 2030' }));
+    await usuario.keyboard('{Escape}');
+    expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
+    expect(router.state.location.search).toContain('mes=2030-03');
+  });
+
   it('abre en hoy con una tarjeta por evento, en orden de hora, con lo que hay que preparar', async () => {
     backend();
     montar('/cocina?mes=2030-03');

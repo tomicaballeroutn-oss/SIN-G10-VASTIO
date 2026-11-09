@@ -116,6 +116,7 @@ export function PaginaAgenda() {
                 onSelectDay={(iso) => cambiar({ dia: iso })}
                 onPrev={() => cambiar({ mes: sumarMeses(mes, -1), dia: null })}
                 onNext={() => cambiar({ mes: sumarMeses(mes, 1), dia: null })}
+                onElegirMes={(a, m) => cambiar({ mes: `${a}-${String(m + 1).padStart(2, '0')}`, dia: null })}
                 salones={ag.salones}
                 salonesElegidos={salones}
                 onCambiarSalones={(valores) => cambiarLista('salon', valores)}

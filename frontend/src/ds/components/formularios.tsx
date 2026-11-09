@@ -3,6 +3,7 @@ import type { IconName } from '../tipos';
 import { enBultos, plural } from '../cantidad';
 import { cx, tamanoLegible, useFieldId } from '../util';
 import { Icon } from './Icon';
+import { CampoFechaControl } from './CampoFecha';
 
 interface FieldBase {
   label?: string;
@@ -79,7 +80,12 @@ export function Input(p: InputProps) {
     <Field label={p.label} labelHidden={p.labelHidden} hint={p.hint} error={p.error} optional={p.optional} id={id} className={p.className}>
       <div className="v-control-wrap">
         {p.icon && <Icon name={p.icon} size={20} className="v-control__icon" />}
-        {p.multiline ? <textarea {...comunes} rows={p.rows ?? 3} /> : <input {...comunes} type={p.type ?? 'text'} />}
+        {p.multiline ? <textarea {...comunes} rows={p.rows ?? 3} />
+          // Las fechas siempre como día/mes/año, sin depender del idioma del navegador.
+          : p.type === 'date' ? <CampoFechaControl id={id} name={p.name} value={p.value === undefined ? undefined : String(p.value)}
+            defaultValue={p.defaultValue === undefined ? undefined : String(p.defaultValue)} onChange={p.onChange} disabled={p.disabled}
+            required={p.required} readOnly={p.readOnly} size={p.size} aria-invalid={comunes['aria-invalid']} aria-describedby={comunes['aria-describedby']} />
+          : <input {...comunes} type={p.type ?? 'text'} />}
         {p.suffix && <span className="body-sm v-muted v-control__suffix">{p.suffix}</span>}
       </div>
     </Field>

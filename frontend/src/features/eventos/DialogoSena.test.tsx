@@ -1,3 +1,4 @@
+import { fechaDdMmAaaa } from '../../ds';
 import { screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
@@ -79,7 +80,7 @@ describe('UI-11 · registrar seña', () => {
     const fetchMock = backend();
     const { usuario, dialogo } = await abrir();
 
-    expect(within(dialogo).getByLabelText('Fecha del pago')).toHaveValue(hoyEnCordoba());
+    expect(within(dialogo).getByLabelText('Fecha del pago')).toHaveValue(fechaDdMmAaaa(hoyEnCordoba()));
     await usuario.type(within(dialogo).getByLabelText('Importe de la seña'), '150.000,50');
     await usuario.type(within(dialogo).getByLabelText(/Nombre y apellido/), 'Mariela Ruiz');
     await usuario.type(within(dialogo).getByLabelText('DNI'), '30.111.222');

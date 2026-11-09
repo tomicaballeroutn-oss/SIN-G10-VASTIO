@@ -1,3 +1,4 @@
+import { fechaDdMmAaaa } from '../../ds';
 import { screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
@@ -101,7 +102,7 @@ describe('UI-12 · registrar firma de contrato', () => {
     const fetchMock = backend();
     const { usuario, dialogo } = await abrir();
 
-    expect(within(dialogo).getByLabelText('Fecha de firma')).toHaveValue(hoyEnCordoba());
+    expect(within(dialogo).getByLabelText('Fecha de firma')).toHaveValue(fechaDdMmAaaa(hoyEnCordoba()));
     await usuario.upload(within(dialogo).getByLabelText('Contrato digitalizado'), [jpg('hoja 1.jpg'), jpg('hoja 2.jpg')]);
     expect(within(dialogo).getByText('hoja 1.jpg')).toBeInTheDocument();
     expect(within(dialogo).getByText('hoja 2.jpg')).toBeInTheDocument();

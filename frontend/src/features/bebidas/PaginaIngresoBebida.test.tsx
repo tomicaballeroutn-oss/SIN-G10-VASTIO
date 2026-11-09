@@ -74,7 +74,7 @@ describe('UI-29 · ingreso de mercadería', () => {
 
     expect(await screen.findByDisplayValue('Depósito Avril')).toBeInTheDocument();
     await persona.clear(screen.getByLabelText('Fecha de ingreso'));
-    await persona.type(screen.getByLabelText('Fecha de ingreso'), '2026-10-06');
+    await persona.type(screen.getByLabelText('Fecha de ingreso'), '06/10/2026');
     await persona.type(screen.getByLabelText(/Número de remito/), 'R-0002');
     await agregarPorNombre(persona, 'fer', 'Fernet Branca');
     // Las dadas de baja no se ofrecen.

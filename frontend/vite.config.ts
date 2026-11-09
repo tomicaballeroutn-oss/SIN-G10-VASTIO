@@ -10,7 +10,7 @@ export default defineConfig(({ mode }) => ({
     // la interfaz (JS, CSS, fuentes, íconos), nunca respuestas de /api.
     VitePWA({
       registerType: 'autoUpdate',
-      includeAssets: ['brand/icon-192.png'],
+      includeAssets: ['brand/icon-192.png', 'brand/vastio-mark.svg'],
       manifest: {
         name: 'Vastio',
         short_name: 'Vastio',

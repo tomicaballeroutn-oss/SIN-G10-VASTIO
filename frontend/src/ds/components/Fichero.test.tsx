@@ -150,6 +150,6 @@ describe('Logo reverse', () => {
     render(<Logo variant="marca" reverse />);
     const imagenes = screen.getAllByRole('img', { name: 'Vastio' });
     expect(imagenes).toHaveLength(1);
-    expect(imagenes[0]).toHaveAttribute('src', '/brand/vastio-mark-reverse.png');
+    expect(imagenes[0]).toHaveAttribute('src', '/brand/vastio-mark-reverse.svg');
   });
 });

@@ -1,6 +1,7 @@
 package ar.edu.utn.vastio.reportes.api;
 
 import java.time.LocalDate;
+import java.util.List;
 import java.time.temporal.ChronoUnit;
 
 import org.springframework.format.annotation.DateTimeFormat;
@@ -30,13 +31,13 @@ public class ReporteOcupacionController {
 
     @GetMapping
     @PreAuthorize(Permisos.CONSULTAR_REPORTE_OCUPACION)
-    @Operation(summary = "Reporte de ocupación", description = "Incluye eventos señados, contratados, confirmados, en curso, realizados y cerrados; excluye pre-reservas, liberados y cancelados. Temporada alta: octubre a diciembre; baja: enero a septiembre.")
+    @Operation(summary = "Reporte de ocupación", description = "Incluye eventos señados, contratados, confirmados, en curso, realizados y cerrados; excluye pre-reservas, liberados y cancelados. Temporada alta: octubre a diciembre; baja: enero a septiembre. salonId, tipoEventoId y vendedoraId se pueden repetir para incluir varios.")
     public ReporteOcupacionDto consultar(
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate desde,
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate hasta,
-            @RequestParam(required = false) Short salonId,
-            @RequestParam(required = false) Short tipoEventoId,
-            @RequestParam(required = false) Long vendedoraId,
+            @RequestParam(required = false) List<Short> salonId,
+            @RequestParam(required = false) List<Short> tipoEventoId,
+            @RequestParam(required = false) List<Long> vendedoraId,
             @RequestParam(required = false) String regimen) {
         if (hasta.isBefore(desde)) {
             throw ProblemaException.reglaDeNegocio("PERIODO_INVALIDO", "La fecha de fin debe ser igual o posterior a la fecha de inicio.");

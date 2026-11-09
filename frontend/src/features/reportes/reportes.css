@@ -1,6 +1,8 @@
 .reporte-ocupacion__filtros { display: grid; gap: var(--space-5); }
 .reporte-ocupacion__filtros-campos { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 190px), 1fr)); align-items: end; gap: var(--space-4); }
 .reporte-ocupacion__acciones { display: flex; justify-content: flex-end; }
+.reporte-ocupacion__multiple .filtro-multiple, .reporte-ocupacion__multiple .filtro-multiple__trigger { width: 100%; justify-content: space-between; }
+.reporte-ocupacion__multiple .filtro-multiple__nombre { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 /* En el teléfono los filtros se agrupan en «Filtrar», que abre un panel desde abajo. */
 .reporte-ocupacion__filtrar { display: none; }
 .reporte-ocupacion__filtrar-botones { display: flex; gap: var(--space-3); }

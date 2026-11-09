@@ -21,8 +21,8 @@ public class OcupacionRepository {
         this.jdbc = jdbc;
     }
 
-    public List<EventoOcupacion> consultar(LocalDate desde, LocalDate hasta, Short salonId, Short tipoEventoId,
-            Long vendedoraId, String regimen) {
+    public List<EventoOcupacion> consultar(LocalDate desde, LocalDate hasta, List<Short> salonIds, List<Short> tipoEventoIds,
+            List<Long> vendedoraIds, String regimen) {
         StringBuilder sql = new StringBuilder("""
                 select e.evento_id, u.salon_id, e.tipo_evento_id, e.vendedora_id, e.estado
                 from evento e
@@ -31,18 +31,9 @@ public class OcupacionRepository {
                   and e.estado in ('SENADO', 'CONTRATADO', 'CONFIRMADO', 'EN_CURSO', 'REALIZADO', 'CERRADO')
                 """);
         MapSqlParameterSource parametros = new MapSqlParameterSource().addValue("desde", desde).addValue("hasta", hasta);
-        if (salonId != null) {
-            sql.append(" and u.salon_id = :salonId");
-            parametros.addValue("salonId", salonId);
-        }
-        if (tipoEventoId != null) {
-            sql.append(" and e.tipo_evento_id = :tipoEventoId");
-            parametros.addValue("tipoEventoId", tipoEventoId);
-        }
-        if (vendedoraId != null) {
-            sql.append(" and e.vendedora_id = :vendedoraId");
-            parametros.addValue("vendedoraId", vendedoraId);
-        }
+        filtrarPor(sql, parametros, "u.salon_id", "salonIds", salonIds);
+        filtrarPor(sql, parametros, "e.tipo_evento_id", "tipoEventoIds", tipoEventoIds);
+        filtrarPor(sql, parametros, "e.vendedora_id", "vendedoraIds", vendedoraIds);
         if ("ALTA".equals(regimen)) {
             sql.append(" and extract(month from u.fecha) between 10 and 12");
         } else if ("BAJA".equals(regimen)) {
@@ -56,7 +47,7 @@ public class OcupacionRepository {
 
     /** Unidades bloqueadas en su fecha, sin restar también las ocupadas por un evento del reporte.
      * Como en la agenda, el evento tiene prioridad; los filtros comerciales no cambian esta disponibilidad. */
-    public Map<Short, Long> bloqueadasPorSalon(LocalDate desde, LocalDate hasta, Short salonId, String regimen) {
+    public Map<Short, Long> bloqueadasPorSalon(LocalDate desde, LocalDate hasta, List<Short> salonIds, String regimen) {
         StringBuilder sql = new StringBuilder("""
                 select u.salon_id, count(distinct u.unidad_id) as unidades
                 from bloqueo b
@@ -72,10 +63,7 @@ public class OcupacionRepository {
                   )
                 """);
         MapSqlParameterSource parametros = new MapSqlParameterSource().addValue("desde", desde).addValue("hasta", hasta);
-        if (salonId != null) {
-            sql.append(" and u.salon_id = :salonId");
-            parametros.addValue("salonId", salonId);
-        }
+        filtrarPor(sql, parametros, "u.salon_id", "salonIds", salonIds);
         if ("ALTA".equals(regimen)) {
             sql.append(" and extract(month from u.fecha) between 10 and 12");
         } else if ("BAJA".equals(regimen)) {
@@ -87,6 +75,13 @@ public class OcupacionRepository {
             resultado.put(rs.getShort("salon_id"), rs.getLong("unidades"));
         });
         return resultado;
+    }
+
+    /** Sin valores no filtra: son todos. */
+    private static void filtrarPor(StringBuilder sql, MapSqlParameterSource parametros, String columna, String nombre, List<?> valores) {
+        if (valores == null || valores.isEmpty()) return;
+        sql.append(" and ").append(columna).append(" in (:").append(nombre).append(")");
+        parametros.addValue(nombre, valores);
     }
 
     public record EventoOcupacion(long eventoId, short salonId, short tipoEventoId, long vendedoraId, EstadoEvento estado) { }

@@ -102,6 +102,7 @@ export function PaginaCocina() {
                     onSelectDay={(iso) => cambiar({ dia: iso, evento: null })}
                     onPrev={() => cambiar({ mes: sumarMeses(mes, -1), dia: null, evento: null })}
                     onNext={() => cambiar({ mes: sumarMeses(mes, 1), dia: null, evento: null })}
+                    onElegirMes={(a, m) => cambiar({ mes: `${a}-${String(m + 1).padStart(2, '0')}`, dia: null, evento: null })}
                     salones={c.salones}
                     salonesElegidos={salones}
                     onCambiarSalones={setSalones}

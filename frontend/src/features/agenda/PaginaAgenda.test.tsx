@@ -1,4 +1,4 @@
-import { screen, within } from '@testing-library/react';
+import { screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { fechaLarga, hoyEnCordoba, sumarMeses, type Agenda } from '../../api/agenda';
@@ -103,6 +103,33 @@ describe('UI-07 · consultar agenda', () => {
     await usuario.click(screen.getByRole('heading', { name: 'Agenda', level: 1 }));
     expect(router.state.location.search).not.toContain('dia=');
     expect(screen.getByText(/Tocá un día para ver qué turnos/)).toBeInTheDocument();
+  });
+
+  it('el título del mes abre el selector y salta a cualquier mes y año', async () => {
+    backend();
+    const usuario = userEvent.setup();
+    const router = montar('/agenda?mes=2030-03');
+
+    await usuario.click(await screen.findByRole('button', { name: 'Marzo 2030' }));
+    const panel = screen.getByRole('dialog', { name: 'Elegir mes y año' });
+    expect(within(panel).getByRole('button', { name: 'Marzo 2030' })).toHaveAttribute('aria-pressed', 'true');
+    await usuario.click(within(panel).getByRole('button', { name: 'Año siguiente' }));
+    await usuario.click(within(panel).getByRole('button', { name: 'Año siguiente' }));
+    await usuario.click(within(panel).getByRole('button', { name: 'Julio 2032' }));
+
+    await waitFor(() => expect(router.state.location.search).toContain('mes=2032-07'));
+    expect(screen.queryByRole('dialog', { name: 'Elegir mes y año' })).not.toBeInTheDocument();
+  });
+
+  it('Escape cierra el selector de mes sin cambiar de mes', async () => {
+    backend();
+    const usuario = userEvent.setup();
+    const router = montar('/agenda?mes=2030-03');
+
+    await usuario.click(await screen.findByRole('button', { name: 'Marzo 2030' }));
+    await usuario.keyboard('{Escape}');
+    expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
+    expect(router.state.location.search).toContain('mes=2030-03');
   });
 
   it('en un día pasado no cuenta turnos libres ni ofrece pre-reservar', async () => {

@@ -262,6 +262,28 @@ h2.h2, h3.h3, h3.h4 { margin: 0; color: var(--ink); }
 .v-agenda { display: flex; flex-direction: column; gap: var(--space-4); }
 .v-agenda__head { display: flex; align-items: center; gap: var(--space-3); }
 .v-agenda__title { flex: 1; }
+/* Selector de mes: el título abre los doce meses y el año. */
+.v-selector-mes { position: relative; flex: 1; min-width: 0; }
+.v-selector-mes__titulo { display: inline-flex; align-items: center; gap: var(--space-2); margin: 0 calc(-1 * var(--space-2)); padding: 4px var(--space-2); border: 0; border-radius: var(--radius-md); background: none; color: inherit; font: inherit; cursor: pointer;
+  transition: background var(--motion-fast) var(--ease); }
+.v-selector-mes__titulo:hover { background: var(--brand-tint); }
+.v-selector-mes__titulo:focus-visible { outline: 2px solid var(--focus-ring); outline-offset: 2px; }
+.v-selector-mes__chevron { color: var(--ink-muted); transition: transform var(--motion-fast) var(--ease); }
+.v-selector-mes__chevron.is-open { transform: rotate(180deg); }
+.v-selector-mes__panel { position: absolute; z-index: 30; top: calc(100% + var(--space-2)); left: 0; width: min(340px, calc(100vw - 32px)); padding: var(--space-3); border: 1px solid var(--line); border-radius: var(--radius-lg); background: var(--surface-raised); box-shadow: var(--shadow-md);
+  animation: v-selector-mes-entrar var(--motion-fast) var(--ease); }
+@keyframes v-selector-mes-entrar { from { opacity: 0; transform: translateY(-4px); } }
+.v-selector-mes__anio { display: flex; align-items: center; justify-content: space-between; margin-bottom: var(--space-2); }
+.v-selector-mes__meses { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; }
+.v-selector-mes__mes { min-height: 48px; border: 1px solid transparent; border-radius: var(--radius-md); background: none; color: var(--ink); font: inherit; font-weight: 500; cursor: pointer;
+  transition: background var(--motion-fast) var(--ease), border-color var(--motion-fast) var(--ease); }
+.v-selector-mes__mes:hover { background: var(--brand-tint); }
+.v-selector-mes__mes:focus-visible { outline: 2px solid var(--focus-ring); outline-offset: 1px; }
+.v-selector-mes__mes.is-today { border-color: var(--accent); }
+.v-selector-mes__mes.is-selected { background: var(--brand); color: var(--on-brand); font-weight: 600; }
+.v-selector-mes__hoy { display: flex; align-items: center; justify-content: center; gap: var(--space-2); width: 100%; min-height: 44px; margin-top: var(--space-3); border: 0; border-top: 1px solid var(--line); background: none; color: var(--brand-ink); font: inherit; font-weight: 600; cursor: pointer; }
+.v-selector-mes__hoy:hover { text-decoration: underline; }
+@media (max-width: 600px) { .v-selector-mes { position: static; } .v-agenda__head { position: relative; } .v-selector-mes__panel { left: 0; right: 0; width: auto; } }
 .v-agenda__weekdays, .v-agenda__grid { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 6px; }
 .v-agenda__weekdays { color: var(--ink-muted); text-align: center; }
 .v-day { display: flex; flex-direction: column; align-items: center; justify-content: space-between; gap: var(--space-2); min-height: 76px; padding: var(--space-2) 4px; border: 1px solid var(--line); border-radius: var(--radius-md); background: var(--surface); color: var(--ink); cursor: pointer;

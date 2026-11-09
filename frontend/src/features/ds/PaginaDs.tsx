@@ -429,7 +429,7 @@ export function PaginaDs() {
 
       <Seccion titulo="AgendaGrid">
         <div className="ds-agenda">
-          <AgendaGrid year={2026} month={8} events={EVENTOS_DEMO} today="2026-09-28" selected={dia} onSelectDay={setDia} onPrev={() => {}} onNext={() => {}} />
+          <AgendaGrid year={2026} month={8} events={EVENTOS_DEMO} today="2026-09-28" selected={dia} onSelectDay={setDia} onPrev={() => {}} onNext={() => {}} onElegirMes={() => {}} />
         </div>
         <div className="ds-minical">
           <AgendaLeyenda defaultOpen />

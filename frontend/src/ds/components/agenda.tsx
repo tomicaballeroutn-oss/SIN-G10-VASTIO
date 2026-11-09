@@ -1,4 +1,4 @@
-import type { ReactNode } from 'react';
+import { useEffect, useRef, useState, type KeyboardEvent, type ReactNode } from 'react';
 import { ESTADOS, ORDEN_SALONES, SALONES } from '../estados';
 import type { EventStatus, SalonId, TurnoId } from '../tipos';
 import { cx } from '../util';
@@ -36,6 +36,8 @@ export interface AgendaGridProps {
   onSelectDay?: (isoDate: string) => void;
   onPrev?: () => void;
   onNext?: () => void;
+  /** Si se pasa, el título del mes abre un selector para saltar a cualquier mes y año. month: 0 = enero. */
+  onElegirMes?: (year: number, month: number) => void;
   /**
    * Nombres de los salones (se editan en Parámetros). El color y el orden de las columnas salen del código.
    * Sin ellos, los nombres por defecto.
@@ -64,7 +66,7 @@ export interface AgendaGridProps {
  * Arriba, qué salón es cada columna. Qué significa cada relleno va aparte, en AgendaLeyenda.
  */
 export function AgendaGrid({
-  year, month, events = [], today, selected, onSelectDay, onPrev, onNext, salones, resaltar, soloOcupacion, salonesElegidos, onCambiarSalones, filtroExtra, className,
+  year, month, events = [], today, selected, onSelectDay, onPrev, onNext, onElegirMes, salones, resaltar, soloOcupacion, salonesElegidos, onCambiarSalones, filtroExtra, className,
 }: AgendaGridProps) {
   const primero = new Date(year, month, 1);
   const blancos = (primero.getDay() + 6) % 7;
@@ -114,7 +116,9 @@ export function AgendaGrid({
     <div className={cx('v-agenda', className)}>
       <div className="v-agenda__head">
         {onPrev && <IconButton icon="chevron-left" label="Mes anterior" onClick={onPrev} />}
-        <h2 className="h2 v-agenda__title">{MESES[month]} {year}</h2>
+        {onElegirMes
+          ? <SelectorMes year={year} month={month} today={today} onElegir={onElegirMes} />
+          : <h2 className="h2 v-agenda__title">{MESES[month]} {year}</h2>}
         {onNext && <IconButton icon="chevron-right" label="Mes siguiente" onClick={onNext} />}
       </div>
       {/* Qué salón es cada columna de puntos, en el mismo orden en que aparecen en cada día. */}
@@ -305,5 +309,99 @@ export function EventCard(props: EventCardProps) {
         {planner ? <Actor name={planner} action="Planner" size="sm" /> : <Badge tone="warning" icon="user">Sin planner</Badge>}
       </div>
     </Card>
+  );
+}
+
+export interface SelectorMesProps {
+  year: number;
+  /** 0 = enero. */
+  month: number;
+  /** yyyy-mm-dd; marca el mes de hoy y ofrece volver a él. */
+  today?: string;
+  onElegir: (year: number, month: number) => void;
+}
+
+/**
+ * Título del mes que abre un panel con los doce meses y el año: llegar a cualquier fecha son pocos toques.
+ * Teclado: flechas entre meses, Enter elige, Escape cierra.
+ */
+export function SelectorMes({ year, month, today, onElegir }: SelectorMesProps) {
+  const [abierto, setAbierto] = useState(false);
+  const [anio, setAnio] = useState(year);
+  const zona = useRef<HTMLDivElement>(null);
+  const disparador = useRef<HTMLButtonElement>(null);
+  const meses = useRef<(HTMLButtonElement | null)[]>([]);
+  const [anioHoy, mesHoy] = today ? today.split('-').map(Number) : [NaN, NaN];
+
+  useEffect(() => {
+    if (!abierto) return;
+    meses.current[month]?.focus();
+    function alTocar(e: PointerEvent) {
+      if (e.target instanceof Node && !zona.current?.contains(e.target)) setAbierto(false);
+    }
+    document.addEventListener('pointerdown', alTocar);
+    return () => document.removeEventListener('pointerdown', alTocar);
+    // Solo al abrir: el foco va al mes que se está mirando.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [abierto]);
+
+  const cerrar = () => { setAbierto(false); disparador.current?.focus(); };
+  const elegir = (a: number, m: number) => { onElegir(a, m); cerrar(); };
+
+  function teclas(e: KeyboardEvent<HTMLDivElement>) {
+    if (e.key === 'Escape') { e.preventDefault(); cerrar(); return; }
+    const i = meses.current.findIndex((b) => b === document.activeElement);
+    if (i < 0) return;
+    const salto = { ArrowLeft: -1, ArrowRight: 1, ArrowUp: -3, ArrowDown: 3 }[e.key];
+    if (salto === undefined) return;
+    e.preventDefault();
+    meses.current[(i + salto + 12) % 12]?.focus();
+  }
+
+  return (
+    <div ref={zona} className="v-selector-mes" onKeyDown={teclas}>
+      <h2 className="h2 v-agenda__title">
+        <button
+          ref={disparador}
+          type="button"
+          className="v-selector-mes__titulo"
+          aria-expanded={abierto}
+          aria-haspopup="dialog"
+          onClick={() => { setAnio(year); setAbierto((v) => !v); }}
+        >
+          {MESES[month]} {year}
+          <Icon name="chevron-down" size={22} className={cx('v-selector-mes__chevron', abierto && 'is-open')} />
+        </button>
+      </h2>
+      {abierto && (
+        <div className="v-selector-mes__panel" role="dialog" aria-label="Elegir mes y año">
+          <div className="v-selector-mes__anio">
+            <IconButton icon="chevron-left" label="Año anterior" variant="text" onClick={() => setAnio((a) => a - 1)} />
+            <span className="h3 numeral-sm" aria-live="polite">{anio}</span>
+            <IconButton icon="chevron-right" label="Año siguiente" variant="text" onClick={() => setAnio((a) => a + 1)} />
+          </div>
+          <div className="v-selector-mes__meses">
+            {MESES.map((nombre, m) => (
+              <button
+                key={nombre}
+                ref={(b) => { meses.current[m] = b; }}
+                type="button"
+                className={cx('v-selector-mes__mes', anio === year && m === month && 'is-selected', anio === anioHoy && m + 1 === mesHoy && 'is-today')}
+                aria-pressed={anio === year && m === month}
+                aria-label={`${nombre} ${anio}`}
+                onClick={() => elegir(anio, m)}
+              >
+                {nombre.slice(0, 3)}
+              </button>
+            ))}
+          </div>
+          {today && !(year === anioHoy && month + 1 === mesHoy) && (
+            <button type="button" className="v-selector-mes__hoy" onClick={() => elegir(anioHoy, mesHoy - 1)}>
+              <Icon name="calendar" size={18} /> Ir a este mes
+            </button>
+          )}
+        </div>
+      )}
+    </div>
   );
 }

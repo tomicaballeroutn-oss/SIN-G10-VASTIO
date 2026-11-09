@@ -55,8 +55,8 @@ it('combina filtros, no consulta al editarlos y distingue filtros aplicados', as
   const persona = userEvent.setup();
   montar('/bebidas/estadisticas');
   await screen.findByText('Consultá el consumo histórico');
-  await persona.type(screen.getByLabelText('Fecha desde'), '2038-05-01');
-  await persona.type(screen.getByLabelText('Fecha hasta'), '2038-05-31');
+  await persona.type(screen.getByLabelText('Fecha desde'), '01/05/2038');
+  await persona.type(screen.getByLabelText('Fecha hasta'), '31/05/2038');
   await persona.selectOptions(screen.getByLabelText('Tipo de evento'), '2');
   await persona.selectOptions(screen.getByLabelText('Salón'), '1');
   await persona.selectOptions(screen.getByLabelText('Bebida'), '1');
@@ -77,8 +77,8 @@ it('rechaza período invertido sin HTTP y permite corregirlo', async () => {
   const persona = userEvent.setup();
   montar('/bebidas/estadisticas');
   await screen.findByText('Consultá el consumo histórico');
-  await persona.type(screen.getByLabelText('Fecha desde'), '2038-06-01');
-  await persona.type(screen.getByLabelText('Fecha hasta'), '2038-05-01');
+  await persona.type(screen.getByLabelText('Fecha desde'), '01/06/2038');
+  await persona.type(screen.getByLabelText('Fecha hasta'), '01/05/2038');
   await persona.click(screen.getByRole('button', { name: 'Consultar estadísticas' }));
   expect(screen.getByRole('alert')).toHaveTextContent('Revisá el período');
   expect(consultas(mock)).toHaveLength(0);

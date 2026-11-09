@@ -104,17 +104,17 @@ it('ajusta alta y baja y restaura el rango de ambas temporadas', async () => {
   await screen.findByRole('table', { name: 'Ocupación por salón' });
   const desde = screen.getByLabelText('Desde') as HTMLInputElement;
   const hasta = screen.getByLabelText('Hasta') as HTMLInputElement;
-  const anio = desde.value.slice(0, 4);
+  const anio = desde.value.slice(-4);
   await persona.selectOptions(screen.getByLabelText('Régimen de temporada'), 'ALTA');
-  expect(desde).toHaveValue(anio + '-10-01');
-  expect(hasta).toHaveValue(anio + '-12-31');
+  expect(desde).toHaveValue('01/10/' + anio);
+  expect(hasta).toHaveValue('31/12/' + anio);
   await waitFor(() => expect(pedidos(mock).at(-1)?.ruta).toContain('regimen=ALTA'));
   await persona.selectOptions(screen.getByLabelText('Régimen de temporada'), 'BAJA');
-  expect(desde).toHaveValue(anio + '-01-01');
-  expect(hasta).toHaveValue(anio + '-09-30');
+  expect(desde).toHaveValue('01/01/' + anio);
+  expect(hasta).toHaveValue('30/09/' + anio);
   await persona.selectOptions(screen.getByLabelText('Régimen de temporada'), '');
-  expect(desde).toHaveValue(anio + '-01-01');
-  expect(hasta).toHaveValue(anio + '-12-31');
+  expect(desde).toHaveValue('01/01/' + anio);
+  expect(hasta).toHaveValue('31/12/' + anio);
 });
 
 it('permite limpiar una fecha sin desmontar la pantalla', async () => {

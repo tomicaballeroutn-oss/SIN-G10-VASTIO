@@ -12,6 +12,7 @@ export {
   type SegmentadoProps, type InputProps, type SelectProps, type SelectOption, type ChoiceProps, type StepperProps, type ComboboxProps, type ComboboxOption,
   type SelectorArchivosProps, type CantidadEnCajasProps,
 } from './components/formularios';
+export { fechaDdMmAaaa, fechaIso } from './fecha';
 export { LectorCodigo, type LectorCodigoProps, type IniciarLector, type ControlLector } from './components/lector';
 export { cantidadLegible, enBultos, plural } from './cantidad';
 export { Alert, Dialog, EmptyState, Badge, type AlertProps, type DialogProps, type EmptyStateProps, type BadgeProps } from './components/feedback';

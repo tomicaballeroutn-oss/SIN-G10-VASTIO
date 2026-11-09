@@ -205,7 +205,7 @@ describe('UI-21 · bloqueo de unidades', () => {
     expect(alerta).toBeInTheDocument();
     expect(screen.queryByText(/Bloqueo registrado/)).not.toBeInTheDocument();
     expect(screen.getByRole('checkbox', { name: 'Club de Campo' })).toBeChecked();
-    expect(screen.getByLabelText('Desde')).toHaveValue('2033-04-04');
+    expect(screen.getByLabelText('Desde')).toHaveValue('04/04/2033');
   });
 
   it('un error de campo del servidor queda en ese campo', async () => {
@@ -299,7 +299,7 @@ describe('UI-21 · envío en curso', () => {
     await act(async () => responder(problema(503, 'NO_DISPONIBLE', 'Volvé a intentarlo.')));
     expect(await screen.findByText('Volvé a intentarlo.')).toBeInTheDocument();
     expect(boton).toBeEnabled();
-    expect(screen.getByLabelText('Desde')).toHaveValue('2033-04-04');
+    expect(screen.getByLabelText('Desde')).toHaveValue('04/04/2033');
   });
 
   it('no duplica un desbloqueo pendiente y conserva el diálogo al fallar', async () => {

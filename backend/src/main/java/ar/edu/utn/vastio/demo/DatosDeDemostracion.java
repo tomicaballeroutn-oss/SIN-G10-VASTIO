@@ -8,6 +8,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.HashSet;
+import java.util.Random;
 import java.util.Set;
 
 import jakarta.persistence.EntityManager;
@@ -94,7 +96,38 @@ public class DatosDeDemostracion implements ApplicationRunner {
             new Reserva(17, 1, 1, 5, "Roberto Díaz", "sofia.mendez", null, Etapa.PRE_RESERVA),
             new Reserva(24, 2, 2, 4, "Colegio Nacional de Monserrat", "lucia.ferreyra", null, Etapa.PRE_RESERVA),
             new Reserva(31, 1, 2, 1, "Camila Ruiz y Joaquín Vera", "sofia.mendez", 800000, Etapa.CONFIRMADO),
-            new Reserva(38, 3, 1, 2, "Valentina Paz", "lucia.ferreyra", null, Etapa.PRE_RESERVA));
+            new Reserva(38, 3, 1, 2, "Valentina Paz", "lucia.ferreyra", null, Etapa.PRE_RESERVA),
+            new Reserva(1, 2, 2, 5, "Florencia Acosta", "sofia.mendez", 300000, Etapa.SENADO),
+            new Reserva(2, 3, 2, 1, "Lucía Bustos y Tomás Ibarra", "lucia.ferreyra", 700000, Etapa.CONFIRMADO),
+            new Reserva(4, 1, 1, 3, "Banco de Córdoba", "sofia.mendez", null, Etapa.PRE_RESERVA),
+            new Reserva(5, 2, 2, 2, "Abril Funes", "lucia.ferreyra", 450000, Etapa.CONTRATADO),
+            new Reserva(6, 3, 1, 5, "Hugo Bertone", "sofia.mendez", null, Etapa.PRE_RESERVA),
+            new Reserva(7, 1, 2, 1, "Agustina Molina y Facundo Rey", "lucia.ferreyra", 900000, Etapa.CONFIRMADO),
+            new Reserva(7, 2, 1, 3, "Laboratorios Hoya", "sofia.mendez", 350000, Etapa.SENADO),
+            new Reserva(8, 3, 2, 4, "Instituto Domingo Zípoli", "lucia.ferreyra", null, Etapa.PRE_RESERVA),
+            new Reserva(9, 1, 2, 2, "Renata Villalba", "sofia.mendez", 500000, Etapa.SENADO),
+            new Reserva(11, 2, 2, 1, "Milagros Córdoba y Iván Luna", "lucia.ferreyra", 750000, Etapa.CONFIRMADO),
+            new Reserva(12, 1, 1, 5, "Elena Quiroga", "sofia.mendez", null, Etapa.PRE_RESERVA),
+            new Reserva(13, 3, 2, 2, "Josefina Aguirre", "lucia.ferreyra", 480000, Etapa.CONTRATADO),
+            new Reserva(14, 1, 2, 1, "Sol Herrera y Bruno Cáceres", "sofia.mendez", 850000, Etapa.CONFIRMADO),
+            new Reserva(14, 2, 2, 4, "Colegio Alemán", "lucia.ferreyra", null, Etapa.PRE_RESERVA),
+            new Reserva(15, 3, 1, 3, "Tarjeta Naranja", "sofia.mendez", 420000, Etapa.SENADO),
+            new Reserva(16, 2, 1, 5, "Marcelo Ledesma", "lucia.ferreyra", null, Etapa.PRE_RESERVA),
+            new Reserva(18, 3, 2, 1, "Carolina Peralta y Diego Sosa", "sofia.mendez", 800000, Etapa.CONTRATADO),
+            new Reserva(19, 1, 2, 2, "Catalina Moyano", "lucia.ferreyra", 520000, Etapa.SENADO),
+            new Reserva(21, 2, 2, 1, "Antonella Ríos y Lautaro Gil", "sofia.mendez", 900000, Etapa.CONFIRMADO),
+            new Reserva(21, 1, 1, 3, "Volkswagen Argentina", "lucia.ferreyra", null, Etapa.PRE_RESERVA),
+            new Reserva(22, 3, 2, 2, "Emilia Zárate", "sofia.mendez", null, Etapa.PRE_RESERVA),
+            new Reserva(25, 1, 2, 1, "Micaela Toledo y Gonzalo Paz", "lucia.ferreyra", 950000, Etapa.CONTRATADO),
+            new Reserva(26, 3, 1, 5, "Norma Benítez", "sofia.mendez", 200000, Etapa.SENADO),
+            new Reserva(28, 2, 2, 2, "Guadalupe Arias", "lucia.ferreyra", 550000, Etapa.CONFIRMADO),
+            new Reserva(29, 3, 2, 4, "Colegio La Salle", "sofia.mendez", null, Etapa.PRE_RESERVA),
+            new Reserva(33, 2, 1, 3, "Grupo Dinosaurio", "lucia.ferreyra", 380000, Etapa.SENADO),
+            new Reserva(35, 1, 2, 2, "Bianca Ferrero", "sofia.mendez", null, Etapa.PRE_RESERVA),
+            new Reserva(42, 3, 2, 1, "Julieta Godoy y Ramiro Vega", "lucia.ferreyra", 1000000, Etapa.CONTRATADO),
+            new Reserva(45, 2, 2, 1, "Pilar Navarro y Mateo Rossi", "sofia.mendez", null, Etapa.PRE_RESERVA),
+            new Reserva(52, 1, 2, 2, "Lola Medina", "lucia.ferreyra", 600000, Etapa.SENADO),
+            new Reserva(60, 3, 2, 1, "Victoria Ortiz y Santiago Luque", "sofia.mendez", null, Etapa.PRE_RESERVA));
 
     /**
      * Tipo (1 Vino, 2 Espumante, 3 Destilado, 4 Aperitivo, 5 Cerveza), unidad (1 Caja, 2 Pack, 3 Botella), botellas por
@@ -114,7 +147,19 @@ public class DatosDeDemostracion implements ApplicationRunner {
             new Articulo("Cerveza Quilmes Clásica", "1 l", 5, 1, 12, 48, "17790000000054", "7790000000057", 240, 30),
             new Articulo("Gin Bombay Sapphire", "750 ml", 3, 1, 6, 6, "17790000000061", "7790000000064", 18, 0),
             new Articulo("Aperol", "750 ml", 4, 1, 6, 12, "17790000000078", "7790000000071", 30, 0),
-            new Articulo("Vodka Smirnoff", "700 ml", 3, 3, 1, 6, null, "7790000000088", 4, 0));
+            new Articulo("Vodka Smirnoff", "700 ml", 3, 3, 1, 6, null, "7790000000088", 4, 0),
+            new Articulo("Vino tinto Cabernet Trapiche", "750 ml", 1, 1, 6, 24, "17790000000092", "7790000000095", 96, 0),
+            new Articulo("Vino rosado Zuccardi", "750 ml", 1, 1, 6, 12, "17790000000108", "7790000000101", 36, 0),
+            new Articulo("Vino blanco Torrontés Colomé", "750 ml", 1, 1, 6, 12, "17790000000115", "7790000000118", 42, 0),
+            new Articulo("Espumante Baron B Brut Nature", "750 ml", 2, 1, 6, 12, "17790000000122", "7790000000125", 30, 0),
+            new Articulo("Sidra Real", "720 ml", 2, 1, 6, 12, "17790000000139", "7790000000132", 48, 6),
+            new Articulo("Cerveza Stella Artois", "975 ml", 5, 1, 12, 36, "17790000000146", "7790000000149", 144, 24),
+            new Articulo("Cerveza Patagonia Amber", "730 ml", 5, 1, 6, 12, "17790000000153", "7790000000156", 5, 0),
+            new Articulo("Whisky Johnnie Walker Red", "1 l", 3, 3, 1, 4, null, "7790000000163", 10, 2),
+            new Articulo("Ron Havana Club 3 años", "750 ml", 3, 1, 6, 6, "17790000000177", "7790000000170", 12, 0),
+            new Articulo("Campari", "750 ml", 4, 1, 6, 12, "17790000000184", "7790000000187", 24, 3),
+            new Articulo("Gancia", "950 ml", 4, 1, 6, 12, "17790000000191", "7790000000194", 6, 0),
+            new Articulo("Tequila José Cuervo", "750 ml", 3, 3, 1, 3, null, "7790000000200", 2, 0));
 
     /** Ubicaciones de V2. */
     private static final short DEPOSITO_MADRE = 1;
@@ -175,7 +220,9 @@ public class DatosDeDemostracion implements ApplicationRunner {
         LocalDate hoy = LocalDate.now(ZONA);
         UsuarioActual coordinacion = new UsuarioActual(creados.get("melina.sifon").getId(), Set.of(RolCodigo.COORDINACION.name()));
         Usuario ana = creados.get("ana.sosa");
-        for (Reserva r : RESERVAS) {
+        List<Reserva> todas = new ArrayList<>(RESERVAS);
+        todas.addAll(generarReservas());
+        for (Reserva r : todas) {
             Usuario vendedora = creados.get(r.vendedora());
             UsuarioActual quien = new UsuarioActual(vendedora.getId(), Set.of(RolCodigo.VENDEDORA.name()));
             Evento evento = preReservas.registrar(
@@ -218,7 +265,75 @@ public class DatosDeDemostracion implements ApplicationRunner {
         long administracion = creados.get("gabriela.paz").getId();
         inventario.guardar(DEPOSITO_MADRE, deposito, administracion);
         inventario.guardar(BARRA_AVRIL, barraAvril, administracion);
-        log.info("Datos de demostración cargados: {} usuarios, {} eventos y {} bebidas.", PERSONAS.size(), RESERVAS.size(),
+        log.info("Datos de demostración cargados: {} usuarios, {} eventos y {} bebidas.", PERSONAS.size(), todas.size(),
                 ARTICULOS.size());
+    }
+
+    private static final String[] NOMBRES = { "Martina", "Sofía", "Valentina", "Camila", "Isabella", "Emma", "Mía", "Lucía",
+            "Julieta", "Agustina", "Florencia", "Victoria", "Renata", "Olivia", "Malena", "Paula", "Jazmín", "Bianca", "Zoe",
+            "Clara", "Abril", "Pilar", "Morena", "Candela" };
+    private static final String[] NOVIOS = { "Tomás", "Juan", "Mateo", "Benjamín", "Lautaro", "Joaquín", "Facundo", "Nicolás",
+            "Santiago", "Franco", "Ignacio", "Bruno", "Gonzalo", "Ramiro", "Federico", "Matías", "Lucas", "Agustín" };
+    private static final String[] APELLIDOS = { "González", "Rodríguez", "Fernández", "López", "Martínez", "Pérez", "Romero",
+            "Sánchez", "Álvarez", "Torres", "Ruiz", "Ramírez", "Flores", "Acosta", "Benítez", "Medina", "Herrera", "Aguirre",
+            "Giménez", "Molina", "Castro", "Ortiz", "Silva", "Luna", "Juárez", "Cabrera", "Ríos", "Morales", "Vega", "Ferreyra" };
+    private static final String[] EMPRESAS = { "Grupo Arcor", "Banco de Córdoba", "Tarjeta Naranja", "Volkswagen Argentina",
+            "Renault Argentina", "Laboratorios Hoya", "Grido Helados", "Grupo Dinosaurio", "Mercado Libre", "Globant",
+            "Universidad Siglo 21", "Cooperativa La Para", "Fiat Córdoba", "EPEC", "Aguas Cordobesas", "Colegio de Escribanos" };
+    private static final String[] COLEGIOS = { "Colegio Nacional de Monserrat", "Colegio Alemán", "Colegio La Salle",
+            "Instituto Domingo Zípoli", "Colegio Manuel Belgrano", "Instituto Santa Ana", "Colegio Taborin", "Escuela Garzón Agulla" };
+
+    /**
+     * Muchos eventos más, de dos meses a un año y medio, para probar la agenda a largo plazo. Semilla fija: todos ven los
+     * mismos. Cuanto más lejos, menos avanzan en el circuito. Ninguno pisa una unidad de RESERVAS.
+     */
+    private static List<Reserva> generarReservas() {
+        Random azar = new Random(20261109L);
+        Set<String> tomadas = new HashSet<>();
+        for (Reserva r : RESERVAS) {
+            tomadas.add(r.dias() + "-" + r.salon() + "-" + r.turno());
+        }
+        List<Reserva> generadas = new ArrayList<>();
+        LocalDate hoy = LocalDate.now(ZONA);
+        String[] vendedoras = { "lucia.ferreyra", "sofia.mendez" };
+        for (int dias = 4; dias <= 548; dias++) {
+            int diaSemana = hoy.plusDays(dias).getDayOfWeek().getValue(); // 1 lunes … 7 domingo
+            double probabilidad = diaSemana == 6 ? 0.75 : diaSemana == 5 ? 0.45 : diaSemana == 7 ? 0.2 : 0.06;
+            // Cuanto más lejos, menos vendido.
+            probabilidad *= dias < 120 ? 1.0 : dias < 300 ? 0.7 : 0.45;
+            for (int salon = 1; salon <= 3; salon++) {
+                for (int turno = 1; turno <= 2; turno++) {
+                    double p = turno == 2 ? probabilidad : probabilidad * 0.35;
+                    if (azar.nextDouble() >= p || !tomadas.add(dias + "-" + salon + "-" + turno)) {
+                        continue;
+                    }
+                    int tipo = turno == 1 ? (azar.nextBoolean() ? 3 : 5) : new int[] { 1, 1, 1, 2, 2, 3, 4, 5 }[azar.nextInt(8)];
+                    String cliente = switch (tipo) {
+                        case 1 -> NOMBRES[azar.nextInt(NOMBRES.length)] + " " + APELLIDOS[azar.nextInt(APELLIDOS.length)] + " y "
+                                + NOVIOS[azar.nextInt(NOVIOS.length)] + " " + APELLIDOS[azar.nextInt(APELLIDOS.length)];
+                        case 3 -> EMPRESAS[azar.nextInt(EMPRESAS.length)];
+                        case 4 -> COLEGIOS[azar.nextInt(COLEGIOS.length)];
+                        case 5 -> (azar.nextBoolean() ? NOMBRES[azar.nextInt(NOMBRES.length)] : NOVIOS[azar.nextInt(NOVIOS.length)])
+                                + " " + APELLIDOS[azar.nextInt(APELLIDOS.length)];
+                        default -> NOMBRES[azar.nextInt(NOMBRES.length)] + " " + APELLIDOS[azar.nextInt(APELLIDOS.length)];
+                    };
+                    double avance = azar.nextDouble();
+                    Etapa etapa;
+                    if (dias < 60) {
+                        etapa = avance < 0.15 ? Etapa.PRE_RESERVA : avance < 0.35 ? Etapa.SENADO : avance < 0.6 ? Etapa.CONTRATADO : Etapa.CONFIRMADO;
+                    } else if (dias < 180) {
+                        etapa = avance < 0.3 ? Etapa.PRE_RESERVA : avance < 0.65 ? Etapa.SENADO : Etapa.CONTRATADO;
+                    } else {
+                        etapa = avance < 0.55 ? Etapa.PRE_RESERVA : avance < 0.85 ? Etapa.SENADO : Etapa.CONTRATADO;
+                    }
+                    if (tipo == 4 && etapa == Etapa.CONFIRMADO) {
+                        etapa = Etapa.CONTRATADO; // Egresados usa segmentos: la demo no carga invitados por segmento.
+                    }
+                    Integer sena = etapa == Etapa.PRE_RESERVA ? null : (200 + azar.nextInt(17) * 50) * 1000;
+                    generadas.add(new Reserva(dias, salon, turno, tipo, cliente, vendedoras[azar.nextInt(2)], sena, etapa));
+                }
+            }
+        }
+        return generadas;
     }
 }

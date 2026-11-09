@@ -132,6 +132,42 @@ export function Select(p: SelectProps) {
   );
 }
 
+export interface SegmentadoProps {
+  label: string;
+  value: string;
+  options: SelectOption[];
+  onChange: (value: string) => void;
+  className?: string;
+}
+
+/**
+ * Pocas opciones excluyentes (hasta cinco o seis) como botones grandes, para tocar sin abrir un desplegable.
+ * Se anuncia como grupo de radio.
+ */
+export function Segmentado({ label, value, options, onChange, className }: SegmentadoProps) {
+  const id = useFieldId();
+  return (
+    <div className={cx('v-field', className)}>
+      <span id={id} className="label v-field__label">{label}</span>
+      <div role="radiogroup" aria-labelledby={id} className="v-segmentado">
+        {options.map((o) => (
+          <button
+            key={o.value}
+            type="button"
+            role="radio"
+            aria-checked={o.value === value}
+            className={cx('v-segmentado__opcion', o.value === value && 'is-selected')}
+            onClick={() => onChange(o.value)}
+          >
+            {o.value === value && <Icon name="check" size={16} />}
+            {o.label}
+          </button>
+        ))}
+      </div>
+    </div>
+  );
+}
+
 export interface ChoiceProps {
   label: string;
   hint?: string;

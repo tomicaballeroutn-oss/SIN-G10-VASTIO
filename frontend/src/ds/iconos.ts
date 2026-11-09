@@ -9,6 +9,7 @@ export const ICONOS: Record<string, string> = {
   'calendar-off': '<path d="M16 2v3" /> <path d="m2 2 20 20" /> <path d="M21 9h-5.5" /> <path d="M3 9h6" /> <path d="M3.586 3.586A2 2 0 003 5v14a2 2 0 002 2h14a2 2 0 001.414-.586" /> <path d="M8.656 3H19a2 2 0 012 2v10.344" />',
   'plus': '<path d="M5 12h14" /> <path d="M12 5v14" />',
   'minus': '<path d="M5 12h14" />',
+  'sliders-horizontal': '<path d="M10 5H3" /> <path d="M12 19H3" /> <path d="M14 3v4" /> <path d="M16 17v4" /> <path d="M21 12h-9" /> <path d="M21 19h-5" /> <path d="M21 5h-7" /> <path d="M8 10v4" /> <path d="M8 12H3" />',
   'x': '<path d="M18 6 6 18" /> <path d="m6 6 12 12" />',
   'check': '<path d="M20 6 9 17l-5-5" />',
   'check-check': '<path d="M18 6 7 17l-5-5" /> <path d="m22 10-7.5 7.5L13 16" />',

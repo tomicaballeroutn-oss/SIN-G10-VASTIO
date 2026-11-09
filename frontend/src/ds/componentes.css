@@ -150,6 +150,13 @@ h2.h2, h3.h3, h3.h4 { margin: 0; color: var(--ink); }
 .v-badge--info { background: var(--info-tint); color: var(--info-ink); }
 
 /* ---------- Status chip & salon tag ---------- */
+/* Segmentado: opciones excluyentes como botones grandes. */
+.v-segmentado { display: flex; flex-wrap: wrap; gap: var(--space-2); }
+.v-segmentado__opcion { display: inline-flex; align-items: center; gap: 6px; min-height: 44px; padding: 0 var(--space-4); border: 1.5px solid var(--line-strong); border-radius: var(--radius-pill); background: var(--surface); color: var(--ink); font: inherit; font-weight: 500; cursor: pointer;
+  transition: background var(--motion-fast) var(--ease), border-color var(--motion-fast) var(--ease); }
+.v-segmentado__opcion:hover { border-color: var(--brand); }
+.v-segmentado__opcion:focus-visible { outline: 2px solid var(--focus-ring); outline-offset: 2px; }
+.v-segmentado__opcion.is-selected { background: var(--brand); border-color: var(--brand); color: var(--on-brand); font-weight: 600; }
 .v-chip { display: inline-flex; align-items: center; gap: 6px; height: 28px; padding: 0 var(--space-3); border: 1.5px solid transparent; border-radius: var(--radius-pill); white-space: nowrap; }
 .v-chip--sm { height: 24px; padding: 0 var(--space-2); font-size: 12px; line-height: 16px; gap: 4px; }
 .v-chip--outline { background: transparent; color: var(--ink-muted); border: 1.5px dashed var(--line-strong); }

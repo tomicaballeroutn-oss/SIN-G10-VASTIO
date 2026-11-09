@@ -1,6 +1,13 @@
 .reporte-ocupacion__filtros { display: grid; gap: var(--space-5); }
 .reporte-ocupacion__filtros-campos { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 190px), 1fr)); align-items: end; gap: var(--space-4); }
 .reporte-ocupacion__acciones { display: flex; justify-content: flex-end; }
+/* En el teléfono los filtros se agrupan en «Filtrar», que abre un panel desde abajo. */
+.reporte-ocupacion__filtrar { display: none; }
+.reporte-ocupacion__filtrar-botones { display: flex; gap: var(--space-3); }
+.reporte-ocupacion__filtrar-botones .v-btn { flex: 1; }
+.reporte-ocupacion__filtrar-resumen { margin: var(--space-2) 0 0; }
+.reporte-ocupacion__panel-campos { display: grid; gap: var(--space-5); }
+.reporte-ocupacion__panel-fechas { display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-3); }
 .reporte-ocupacion__resumen { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 200px), 1fr)); gap: var(--space-4); }
 .v-card.reporte-ocupacion__stat .v-card__body { display: flex; flex-direction: column; gap: var(--space-1); }
 .reporte-ocupacion__stat p { margin: 0; }
@@ -28,7 +35,7 @@
     --salon-avril: #a9244e; --salon-club: #764d2d; --salon-santa-barbara: #1b7da6;
     position: relative; display: flex; padding: 0; gap: 10px; color: #17212b;
   }
-  .reporte-ocupacion__filtros, .app__lateral, .app__inferior, .app__barra, .reporte-ocupacion [role="status"] { display: none !important; }
+  .reporte-ocupacion__filtros, .reporte-ocupacion__filtrar, .app__lateral, .app__inferior, .app__barra, .reporte-ocupacion [role="status"] { display: none !important; }
   .reporte-ocupacion__impresion { display: block; padding: 8px 11px; border-left: 4px solid var(--brand); background: #f5f6f8; color: #17212b; font-size: 9pt; }
   .reporte-ocupacion__marca { position: absolute; top: 0; right: 0; width: 140px; height: 44px; }
   .reporte-ocupacion__marca .marca-salon__texto-oscuro { display: none !important; }
@@ -59,4 +66,6 @@
 @media (max-width: 600px) {
   .reporte-ocupacion__barra-fila { grid-template-columns: minmax(78px, 100px) minmax(40px, 1fr) 44px; gap: var(--space-2); }
   .reporte-ocupacion__acciones { justify-content: flex-start; }
+  .reporte-ocupacion__filtros { display: none; }
+  .reporte-ocupacion__filtrar { display: block; }
 }

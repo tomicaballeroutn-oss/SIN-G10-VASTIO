@@ -62,7 +62,7 @@ it('vuelve a consultar al cambiar filtros y mantiene la vista de impresión disp
 
   const imprimir = vi.fn();
   window.print = imprimir;
-  await persona.click(screen.getByRole('button', { name: 'Imprimir' }));
+  await persona.click(screen.getAllByRole('button', { name: 'Imprimir' })[0]);
   expect(imprimir).toHaveBeenCalledOnce();
 });
 
@@ -137,9 +137,47 @@ it('no imprime filtros nuevos con los resultados de la consulta anterior', async
   await screen.findByRole('table', { name: 'Ocupación por salón' });
   await userEvent.selectOptions(screen.getByLabelText('Salón'), '2');
   await waitFor(() => expect(responder).toBeDefined());
-  expect(screen.getByRole('button', { name: 'Imprimir' })).toBeDisabled();
+  for (const b of screen.getAllByRole('button', { name: 'Imprimir' })) expect(b).toBeDisabled();
   expect(document.querySelector('.reporte-ocupacion__impresion')).toHaveTextContent('Salón: Todos');
   responder?.(json(200, reporte));
-  await waitFor(() => expect(screen.getByRole('button', { name: 'Imprimir' })).toBeEnabled());
+  await waitFor(() => { for (const b of screen.getAllByRole('button', { name: 'Imprimir' })) expect(b).toBeEnabled(); });
   expect(document.querySelector('.reporte-ocupacion__impresion')).toHaveTextContent('Salón: Club');
+});
+
+it('permite volver a todos los salones después de elegir uno', async () => {
+  const mock = backend();
+  const persona = userEvent.setup();
+  montar('/reportes');
+  await screen.findByRole('table', { name: 'Ocupación por salón' });
+
+  await persona.selectOptions(screen.getByLabelText('Salón'), '2');
+  await waitFor(() => expect(pedidos(mock).at(-1)?.ruta).toContain('&salonId=2'));
+  const todos = screen.getByRole('option', { name: 'Todos los salones' });
+  expect(todos).toBeEnabled();
+  await persona.selectOptions(screen.getByLabelText('Salón'), todos);
+  await waitFor(() => expect(pedidos(mock).at(-1)?.ruta).not.toContain('salonId'));
+});
+
+it('en el teléfono agrupa los filtros en un panel que se aplica con «Ver resultados»', async () => {
+  const mock = backend();
+  const persona = userEvent.setup();
+  montar('/reportes');
+  await screen.findByRole('table', { name: 'Ocupación por salón' });
+
+  await persona.click(screen.getByRole('button', { name: 'Filtrar' }));
+  const panel = screen.getByRole('dialog', { name: 'Filtrar reporte' });
+  await persona.click(within(panel).getByRole('radio', { name: 'Club' }));
+  await persona.click(within(panel).getByRole('radio', { name: 'Alta · oct a dic' }));
+  const antes = pedidos(mock).length;
+  expect(pedidos(mock)).toHaveLength(antes); // nada se consulta hasta confirmar
+
+  await persona.click(within(panel).getByRole('button', { name: 'Ver resultados' }));
+  await waitFor(() => expect(pedidos(mock).at(-1)?.ruta).toMatch(/salonId=2.*regimen=ALTA|regimen=ALTA.*salonId=2/));
+  expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
+  expect(screen.getByRole('button', { name: 'Filtrar · 2' })).toBeInTheDocument();
+
+  await persona.click(screen.getByRole('button', { name: 'Filtrar · 2' }));
+  await persona.click(screen.getByRole('button', { name: 'Limpiar filtros' }));
+  await persona.click(screen.getByRole('button', { name: 'Ver resultados' }));
+  await waitFor(() => expect(pedidos(mock).at(-1)?.ruta).toMatch(/^\/reportes\/ocupacion\?desde=\d{4}-01-01&hasta=\d{4}-12-31$/));
 });

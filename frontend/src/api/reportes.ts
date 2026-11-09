@@ -3,9 +3,10 @@ import { api } from './cliente';
 export interface FiltroReporteOcupacion {
   desde: string;
   hasta: string;
-  salonId: string;
-  tipoEventoId: string;
-  vendedoraId: string;
+  /** Vacío: todos. */
+  salonIds: string[];
+  tipoEventoIds: string[];
+  vendedoraIds: string[];
   regimen: string;
 }
 
@@ -25,9 +26,9 @@ export interface ReporteOcupacion {
 
 export function consultarReporteOcupacion(filtros: FiltroReporteOcupacion): Promise<ReporteOcupacion> {
   const params = new URLSearchParams({ desde: filtros.desde, hasta: filtros.hasta });
-  if (filtros.salonId) params.set('salonId', filtros.salonId);
-  if (filtros.tipoEventoId) params.set('tipoEventoId', filtros.tipoEventoId);
-  if (filtros.vendedoraId) params.set('vendedoraId', filtros.vendedoraId);
+  for (const id of filtros.salonIds) params.append('salonId', id);
+  for (const id of filtros.tipoEventoIds) params.append('tipoEventoId', id);
+  for (const id of filtros.vendedoraIds) params.append('vendedoraId', id);
   if (filtros.regimen) params.set('regimen', filtros.regimen);
   return api<ReporteOcupacion>(`/reportes/ocupacion?${params.toString()}`);
 }

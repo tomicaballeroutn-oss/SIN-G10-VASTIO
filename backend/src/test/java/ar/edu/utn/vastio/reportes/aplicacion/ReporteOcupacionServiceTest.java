@@ -87,11 +87,11 @@ class ReporteOcupacionServiceTest {
     void temporadaAltaCuentaSoloLosDiasDeOctubreADiciembreYReenviaElFiltro() {
         LocalDate desde = LocalDate.of(2040, 9, 30);
         LocalDate hasta = LocalDate.of(2040, 10, 1);
-        when(ocupacion.consultar(desde, hasta, (short) 1, (short) 2, 10L, "ALTA"))
+        when(ocupacion.consultar(desde, hasta, List.of((short) 1), List.of((short) 2), List.of(10L), "ALTA"))
                 .thenReturn(List.of(evento(1, 1, EstadoEvento.SENADO)));
-        when(ocupacion.bloqueadasPorSalon(desde, hasta, (short) 1, "ALTA")).thenReturn(Map.of((short) 1, 1L));
+        when(ocupacion.bloqueadasPorSalon(desde, hasta, List.of((short) 1), "ALTA")).thenReturn(Map.of((short) 1, 1L));
 
-        var resultado = servicio.consultar(desde, hasta, (short) 1, (short) 2, 10L, "ALTA");
+        var resultado = servicio.consultar(desde, hasta, List.of((short) 1), List.of((short) 2), List.of(10L), "ALTA");
 
         assertThat(resultado.regimen()).isEqualTo("ALTA");
         assertThat(resultado.porSalon()).singleElement().satisfies(salon -> {
@@ -99,8 +99,8 @@ class ReporteOcupacionServiceTest {
             assertThat(salon.unidadesDisponibles()).isEqualTo(1);
             assertThat(salon.ocupacion()).isEqualTo(100.0);
         });
-        verify(ocupacion).consultar(desde, hasta, (short) 1, (short) 2, 10L, "ALTA");
-        verify(ocupacion).bloqueadasPorSalon(desde, hasta, (short) 1, "ALTA");
+        verify(ocupacion).consultar(desde, hasta, List.of((short) 1), List.of((short) 2), List.of(10L), "ALTA");
+        verify(ocupacion).bloqueadasPorSalon(desde, hasta, List.of((short) 1), "ALTA");
     }
 
     @Test

@@ -12,11 +12,18 @@ const reporte = {
   porSalon: [{ salonId: 2, codigo: 'club', salon: 'Club', unidadesOcupadas: 2, unidadesDisponibles: 4, ocupacion: 50 }],
   porVendedoraYTipo: [{ vendedoraId: 7, vendedora: 'Lucía Ferreyra', tipoEventoId: 2, tipoEvento: 'Quince', eventosIncluidos: 2 }],
   filtros: {
-    salones: [{ id: 2, nombre: 'Club' }],
+    salones: [{ id: 1, nombre: 'Avril' }, { id: 2, nombre: 'Club' }],
     tiposEvento: [{ id: 2, nombre: 'Quince' }],
     vendedoras: [{ id: 7, nombre: 'Lucía Ferreyra' }],
   },
 };
+
+/** En la computadora, el salón se elige en el filtro de varias opciones. */
+async function elegirSalones(persona: ReturnType<typeof userEvent.setup>, ...nombres: string[]) {
+  await persona.click(screen.getByRole('button', { name: /Todos los salones/ }));
+  for (const nombre of nombres) await persona.click(screen.getByRole('checkbox', { name: nombre }));
+  await persona.click(screen.getByRole('button', { name: 'Listo' }));
+}
 
 function backend(roles: Rol[] = ['DIRECCION']) {
   return backendFalso(sesionDe(roles), ({ ruta }) =>
@@ -56,7 +63,7 @@ it('vuelve a consultar al cambiar filtros y mantiene la vista de impresión disp
   await screen.findByRole('table', { name: 'Ocupación por salón' });
 
   const pedidosIniciales = pedidos(mock).length;
-  await persona.selectOptions(screen.getByLabelText('Salón'), '2');
+  await elegirSalones(persona, 'Club');
   await waitFor(() => expect(pedidos(mock).length).toBeGreaterThan(pedidosIniciales));
   expect(pedidos(mock).at(-1)?.ruta).toContain('&salonId=2');
 
@@ -135,7 +142,7 @@ it('no imprime filtros nuevos con los resultados de la consulta anterior', async
   });
   montar('/reportes');
   await screen.findByRole('table', { name: 'Ocupación por salón' });
-  await userEvent.selectOptions(screen.getByLabelText('Salón'), '2');
+  await elegirSalones(userEvent.setup(), 'Club');
   await waitFor(() => expect(responder).toBeDefined());
   for (const b of screen.getAllByRole('button', { name: 'Imprimir' })) expect(b).toBeDisabled();
   expect(document.querySelector('.reporte-ocupacion__impresion')).toHaveTextContent('Salón: Todos');
@@ -144,18 +151,20 @@ it('no imprime filtros nuevos con los resultados de la consulta anterior', async
   expect(document.querySelector('.reporte-ocupacion__impresion')).toHaveTextContent('Salón: Club');
 });
 
-it('permite volver a todos los salones después de elegir uno', async () => {
+it('permite elegir varios salones y volver a todos', async () => {
   const mock = backend();
   const persona = userEvent.setup();
   montar('/reportes');
   await screen.findByRole('table', { name: 'Ocupación por salón' });
 
-  await persona.selectOptions(screen.getByLabelText('Salón'), '2');
-  await waitFor(() => expect(pedidos(mock).at(-1)?.ruta).toContain('&salonId=2'));
-  const todos = screen.getByRole('option', { name: 'Todos los salones' });
-  expect(todos).toBeEnabled();
-  await persona.selectOptions(screen.getByLabelText('Salón'), todos);
+  await elegirSalones(persona, 'Avril', 'Club');
+  await waitFor(() => expect(pedidos(mock).at(-1)?.ruta).toContain('&salonId=1&salonId=2'));
+  expect(screen.getByRole('button', { name: /Avril, Club/ })).toBeInTheDocument();
+
+  await persona.click(screen.getByRole('button', { name: /Avril, Club/ }));
+  await persona.click(screen.getByRole('button', { name: 'Limpiar' }));
   await waitFor(() => expect(pedidos(mock).at(-1)?.ruta).not.toContain('salonId'));
+  expect(screen.getByRole('button', { name: /Todos los salones/ })).toBeInTheDocument();
 });
 
 it('en el teléfono agrupa los filtros en un panel que se aplica con «Ver resultados»', async () => {
@@ -166,13 +175,15 @@ it('en el teléfono agrupa los filtros en un panel que se aplica con «Ver resul
 
   await persona.click(screen.getByRole('button', { name: 'Filtrar' }));
   const panel = screen.getByRole('dialog', { name: 'Filtrar reporte' });
-  await persona.click(within(panel).getByRole('radio', { name: 'Club' }));
+  await persona.click(within(panel).getByRole('button', { name: 'Avril' }));
+  await persona.click(within(panel).getByRole('button', { name: 'Club' }));
+  expect(within(panel).getByRole('button', { name: 'Club' })).toHaveAttribute('aria-pressed', 'true');
   await persona.click(within(panel).getByRole('radio', { name: 'Alta · oct a dic' }));
   const antes = pedidos(mock).length;
   expect(pedidos(mock)).toHaveLength(antes); // nada se consulta hasta confirmar
 
   await persona.click(within(panel).getByRole('button', { name: 'Ver resultados' }));
-  await waitFor(() => expect(pedidos(mock).at(-1)?.ruta).toMatch(/salonId=2.*regimen=ALTA|regimen=ALTA.*salonId=2/));
+  await waitFor(() => expect(pedidos(mock).at(-1)?.ruta).toMatch(/salonId=1&salonId=2.*regimen=ALTA/));
   expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
   expect(screen.getByRole('button', { name: 'Filtrar · 2' })).toBeInTheDocument();
 

@@ -94,6 +94,20 @@ class ReporteOcupacionIT {
     }
 
     @Test
+    void admiteVariosSalonesYVariasVendedoras() throws Exception {
+        LocalDate fecha = DESDE.plusDays(12);
+        escenario.evento("club", fecha, "mediodia", "SENADO", lucia, "Evento Club");
+        escenario.evento("avril", fecha, "mediodia", "SENADO", sofia, "Evento Avril");
+        escenario.evento("santa-barbara", fecha, "mediodia", "SENADO", lucia, "Evento Santa Bárbara");
+
+        consultar(RolCodigo.DIRECCION, fecha, fecha, "&salonId=" + salonId("club") + "&salonId=" + salonId("avril")
+                + "&vendedoraId=" + lucia.getId() + "&vendedoraId=" + sofia.getId())
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.resumen.unidadesOcupadas").value(2))
+                .andExpect(jsonPath("$.porSalon.length()").value(2));
+    }
+
+    @Test
     void regimenFiltraLosEventosDeCadaTemporada() throws Exception {
         LocalDate septiembre = LocalDate.of(2042, 9, 30);
         LocalDate octubre = LocalDate.of(2042, 10, 1);

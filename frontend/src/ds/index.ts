@@ -8,8 +8,8 @@ export { ESTADOS, ESTADO_POR_CODIGO, ESTADOS_DEL_EVENTO, SALONES, ORDEN_SALONES 
 export { Icon, type IconProps } from './components/Icon';
 export { Button, IconButton, type ButtonProps, type IconButtonProps } from './components/Button';
 export {
-  Input, Select, Segmentado, Checkbox, Switch, Stepper, Combobox, SelectorArchivos, CantidadEnCajas,
-  type SegmentadoProps, type InputProps, type SelectProps, type SelectOption, type ChoiceProps, type StepperProps, type ComboboxProps, type ComboboxOption,
+  Input, Select, Segmentado, OpcionesMultiples, Checkbox, Switch, Stepper, Combobox, SelectorArchivos, CantidadEnCajas,
+  type SegmentadoProps, type OpcionesMultiplesProps, type InputProps, type SelectProps, type SelectOption, type ChoiceProps, type StepperProps, type ComboboxProps, type ComboboxOption,
   type SelectorArchivosProps, type CantidadEnCajasProps,
 } from './components/formularios';
 export { LectorCodigo, type LectorCodigoProps, type IniciarLector, type ControlLector } from './components/lector';

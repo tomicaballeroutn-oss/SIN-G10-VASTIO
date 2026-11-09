@@ -41,17 +41,18 @@ public class ReporteOcupacionService {
         this.usuarios = usuarios;
     }
 
-    public ReporteOcupacionDto consultar(LocalDate desde, LocalDate hasta, Short salonId, Short tipoEventoId,
-            Long vendedoraId, String regimen) {
+    /** salonIds, tipoEventoIds y vendedoraIds: null o vacío es «todos». */
+    public ReporteOcupacionDto consultar(LocalDate desde, LocalDate hasta, List<Short> salonIds, List<Short> tipoEventoIds,
+            List<Long> vendedoraIds, String regimen) {
         List<Salon> salones = catalogos.salones();
         List<TipoEvento> tipos = catalogos.tiposEvento();
         List<Usuario> vendedoras = usuarios.todos().stream().filter(v -> v.codigosDeRol().contains(RolCodigo.VENDEDORA)).toList();
         Map<Short, TipoEvento> tipoPorId = tipos.stream().collect(Collectors.toMap(TipoEvento::getId, Function.identity()));
         Map<Long, String> nombreVendedora = usuarios.nombres(vendedoras.stream().map(Usuario::getId).toList());
-        List<EventoOcupacion> eventos = ocupacion.consultar(desde, hasta, salonId, tipoEventoId, vendedoraId, regimen);
-        Map<Short, Long> unidadesBloqueadas = ocupacion.bloqueadasPorSalon(desde, hasta, salonId, regimen);
+        List<EventoOcupacion> eventos = ocupacion.consultar(desde, hasta, salonIds, tipoEventoIds, vendedoraIds, regimen);
+        Map<Short, Long> unidadesBloqueadas = ocupacion.bloqueadasPorSalon(desde, hasta, salonIds, regimen);
         long dias = diasIncluidos(desde, hasta, regimen);
-        List<Salon> salonesIncluidos = salones.stream().filter(s -> salonId == null || salonId.equals(s.getId())).toList();
+        List<Salon> salonesIncluidos = salones.stream().filter(s -> salonIds == null || salonIds.isEmpty() || salonIds.contains(s.getId())).toList();
         long unidades = eventos.size();
 
         List<ReporteOcupacionDto.OcupacionSalon> porSalon = new ArrayList<>();

@@ -388,7 +388,7 @@ export function Combobox(p: ComboboxProps) {
   }
 
   return (
-    <Field label={p.label} hint={p.hint} error={p.error} optional={p.optional} id={id} className={cx('v-combo', p.className)}>
+    <Field label={p.label} labelHidden={p.labelHidden} hint={p.hint} error={p.error} optional={p.optional} id={id} className={cx('v-combo', p.className)}>
       <div className="v-control-wrap">
         {p.icon && <Icon name={p.icon} size={20} className="v-control__icon" />}
         <input

@@ -5,6 +5,7 @@ import { useDatos, useEnvio } from '../../api/useDatos';
 import { Actor, Alert, Badge, Button, CantidadEnCajas, Card, Combobox, Dialog, EmptyState, Table, cantidadLegible } from '../../ds';
 import { Cargando } from '../comun/Cargando';
 import { fechaCorta, fechaHora } from '../comun/formato';
+import { ImprimirOrden } from './OrdenImpresa';
 import './ordenes.css';
 
 /**
@@ -142,7 +143,7 @@ function ContenidoOrden({ consulta, tipoEvento, alCambiar }: {
           {acciones.ajustar && <Button variant="outline" icon="pencil" onClick={() => setAjustando(true)}>Ajustar cantidades</Button>}
           {acciones.reabrir && <Button variant="outline" icon="lock-open" onClick={() => setDialogo('reabrir')}>Reabrir orden</Button>}
           {acciones.recalcular && <Button variant="outline" icon="refresh-cw" onClick={() => setDialogo('recalcular')}>Recalcular sugerencia</Button>}
-          <Button variant="outline" icon="printer" onClick={() => window.print()}>Vista para imprimir</Button>
+          <ImprimirOrden consulta={{ ...consulta, orden }} origen={origenDeLaSugerencia(orden, tipoEvento)} />
         </div>
       )}
       {dialogo === 'recalcular' && (

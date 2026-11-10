@@ -50,7 +50,7 @@ export function PestanaAsistencia({ ficha, asistencia, alGuardar }: {
       )}
     >
       <div className="asistencia">
-        {aviso && <Alert tone="success">{aviso}</Alert>}
+        {aviso && <Alert tone="success" centrar>{aviso}</Alert>}
         {terminada && asistencia.totalReal == null && (
           <Alert tone="warning" title="Falta la asistencia real">
             Mientras no se cargue la de todos los segmentos, el consumo por asistente se calcula sobre los invitados.

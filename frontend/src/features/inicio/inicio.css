@@ -4,7 +4,9 @@
 
 .inicio__semana .v-card__body, .inicio__kpi .v-card__body { display: flex; flex-direction: column; gap: var(--space-2); }
 .inicio__semana .stat { color: var(--on-deep); }
-.inicio__semana-fila { display: flex; align-items: flex-end; gap: var(--space-5); }
+.inicio__semana-fila { display: flex; flex-wrap: wrap; align-items: flex-end; gap: var(--space-3) var(--space-5); }
+/* Con la tarjeta angosta (cuatro por fila), las barras no entran en el hueco de la muesca: se deja libre ese costado. */
+@media (min-width: 960px) { .inicio__semana-fila { padding-right: calc(var(--notch-size) - var(--space-5)); } }
 /* En teléfono los tres números van en una línea dentro de la semana. .v-card.inicio__kpi le gana al display de .v-card. */
 .v-card.inicio__kpi { display: none; }
 .inicio__kpi-fila { display: flex; align-items: baseline; justify-content: space-between; gap: var(--space-3); }

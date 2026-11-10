@@ -69,18 +69,30 @@ describe('UI-15 · confirmar evento', () => {
     expect(pedidos(fetchMock).some((p) => p.metodo === 'POST' && p.ruta === '/eventos/5/confirmacion')).toBe(true);
   });
 
-  it('si falta algo, la fila dice qué y el botón queda deshabilitado', async () => {
-    backend({
+  it('si falta algo, la fila dice qué; el botón no va sólido pero al tocarlo avisa qué falta sin confirmar', async () => {
+    const fetchMock = backend({
       ...CONTRATADO,
       requisitosConfirmacion: CUMPLIDOS.map((r) => (r.codigo === 'SERVICIOS'
         ? { ...r, cumplido: false, detalle: 'Falta cargar Tipo de barra.' } : r)),
     });
-    const { dialogo } = await abrir();
+    const { usuario, dialogo } = await abrir();
+    // En la ficha, el botón también avisa cuántos requisitos faltan.
+    const enLaFicha = screen.getAllByRole('button', { name: 'Confirmar evento', hidden: true }).find((b) => !dialogo.contains(b));
+    expect(enLaFicha).toHaveClass('is-pendiente');
+    expect(enLaFicha).toHaveAccessibleDescription('Falta 1 requisito');
 
     const fila = within(dialogo).getByText('Falta cargar Tipo de barra.').closest('li') as HTMLElement;
     expect(fila).toHaveTextContent('Pendiente: Falta cargar Tipo de barra.');
-    expect(within(dialogo).getByRole('button', { name: 'Confirmar evento' })).toBeDisabled();
     expect(within(dialogo).getByText('Completá lo que falta para poder confirmar el evento.')).toBeInTheDocument();
+    const boton = within(dialogo).getByRole('button', { name: 'Confirmar evento' });
+    expect(boton).toBeEnabled();
+    expect(boton).toHaveClass('is-pendiente');
+    expect(boton).toHaveAccessibleDescription('Faltan requisitos');
+
+    await usuario.click(boton);
+    expect(within(dialogo).getByRole('alert')).toHaveTextContent('Todavía no se puede confirmar');
+    expect(within(dialogo).getByRole('list', { name: 'Requisitos para confirmar' })).toHaveFocus();
+    expect(pedidos(fetchMock).some((p) => p.metodo === 'POST')).toBe(false);
   });
 
   it('muestra lo que rechaza el sistema', async () => {

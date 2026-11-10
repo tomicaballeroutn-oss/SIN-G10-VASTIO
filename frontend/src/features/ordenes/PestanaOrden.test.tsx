@@ -60,6 +60,28 @@ describe('UI-35 · orden de preparación', () => {
     expect(screen.getByText('Sugerida')).toBeInTheDocument();
   });
 
+  it('«Vista para imprimir» arma una hoja propia con lo que hay que retirar y lugar para firmar', async () => {
+    backend(CON_ORDEN);
+    const imprimir = vi.fn();
+    window.print = imprimir;
+    montar('/eventos/5?pestana=orden');
+
+    await userEvent.click(await screen.findByRole('button', { name: 'Vista para imprimir' }));
+    const hoja = await screen.findByRole('article', { name: 'Orden de preparación para imprimir' });
+    expect(hoja).toHaveTextContent('Bruno y Martina');
+    expect(hoja).toHaveTextContent('EV-2026-00005 · Avril');
+    expect(within(hoja).getByRole('row', { name: /Fernet Branca/ })).toHaveTextContent('8 cajas');
+    expect(hoja).toHaveTextContent('Preparó');
+    expect(hoja).toHaveTextContent('Recibió');
+    // Espera al logo del salón (en jsdom no carga: hasta el límite de 3 s).
+    await vi.waitFor(() => expect(imprimir).toHaveBeenCalledOnce(), { timeout: 4000 });
+    expect(document.body).toHaveClass('orden-imprimiendo');
+
+    window.dispatchEvent(new Event('afterprint'));
+    await vi.waitFor(() => expect(screen.queryByRole('article', { name: 'Orden de preparación para imprimir' })).not.toBeInTheDocument());
+    expect(document.body).not.toHaveClass('orden-imprimiendo');
+  }, 10000);
+
   it('sin orden, Compras la genera', async () => {
     const fetchMock = backend(SIN_ORDEN, ['COMPRAS'], (p) =>
       p.metodo === 'POST' && p.ruta === '/eventos/5/orden-preparacion' ? json(201, CON_ORDEN) : undefined);

@@ -68,6 +68,8 @@ h2.h2, h3.h3, h3.h4 { margin: 0; color: var(--ink); }
 .v-control-wrap { position: relative; display: flex; align-items: center; }
 /* Ojito de la contraseña: 44 × 44 dentro del campo, a la derecha; el texto no queda debajo. */
 .v-control.has-revelar { padding-right: 52px; }
+/* Edge agrega su propio ojito: queda solo el nuestro. */
+.v-control.has-revelar::-ms-reveal, .v-control.has-revelar::-ms-clear { display: none; }
 .v-control__revelar { position: absolute; right: 4px; top: 50%; transform: translateY(-50%); display: grid; place-items: center; width: 44px; height: 44px;
   padding: 0; border: 0; border-radius: var(--radius-md); background: none; color: var(--ink-muted); cursor: pointer; }
 .v-control__revelar:hover { color: var(--ink); background: var(--brand-tint); }

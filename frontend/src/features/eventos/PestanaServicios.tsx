@@ -1,7 +1,8 @@
 import { useState } from 'react';
 import { fichas, tieneServicio, type Ficha, type RenglonServicio, type ServicioAGuardar, type ServicioFicha } from '../../api/eventos';
 import { useEnvio } from '../../api/useDatos';
-import { Actor, Alert, Badge, Button, Card, IconButton, Input } from '../../ds';
+import { Actor, Alert, Badge, Button, Card, Combobox, IconButton, Input, OpcionesMultiples, Segmentado } from '../../ds';
+import { opcionesDe, sugerencias } from './opcionesServicios';
 import { fechaHora } from '../comun/formato';
 
 /** Un renglón mientras se escribe. La cantidad va como texto hasta guardar; `clave` lo identifica en la lista. */
@@ -9,6 +10,8 @@ interface RenglonEnEdicion {
   clave: number;
   texto: string;
   cantidad: string;
+  /** Lo agregó la persona con «Agregar otro»: se muestra aunque esté vacío. */
+  agregado?: boolean;
 }
 
 /** Lo que se está escribiendo en una categoría. */
@@ -47,8 +50,9 @@ function cambio(s: ServicioFicha, b: Borrador): boolean {
 }
 
 /**
- * UI-13 · Servicios contratados (M-09): por categoría, renglones libres con cantidad opcional («Celíaco» · 2) y un
- * detalle libre. Nada predefinido. Quien puede modificar el evento los edita y los guarda juntos; el resto los ve.
+ * UI-13 · Servicios contratados (M-09): por categoría, renglones con cantidad opcional («Celíaco» · 2) y un detalle
+ * libre. Menú sugiere al escribir; Bodega y Tipo de barra se eligen de una lista; Menús especiales se marcan de a varios
+ * (opciones de ejemplo en opcionesServicios.ts). Todo se guarda como renglones de texto. Quien puede modificar el evento los edita y los guarda juntos; el resto los ve.
  * Las categorías dadas de baja con algo cargado se ven sin editar.
  */
 export function PestanaServicios({ ficha, alGuardar }: { ficha: Ficha; alGuardar: (ficha: Ficha) => void }) {
@@ -135,17 +139,47 @@ function CategoriaEditable({ servicio: s, borrador, alCambiar, errorDe }: {
     alCambiar({ ...borrador, renglones: quedan.length ? quedan : [renglonNuevo()] });
   };
 
-  return (
-    <fieldset className="servicios__categoria">
-      <legend className="h4 servicios__leyenda">{s.categoria}</legend>
-      {s.requeridaParaConfirmar && <div><Badge tone="info">Hace falta para confirmar</Badge></div>}
-      <div className="servicios__renglones">
+  const opciones = opcionesDe(s.categoria);
+  const nombres = opciones?.opciones.map((o) => o.nombre) ?? [];
+  const esOpcion = (r: RenglonEnEdicion) => nombres.includes(r.texto.trim());
+
+  const cantidad = (r: RenglonEnEdicion, etiqueta: string) => (
+    <Input
+      label={`${s.categoria}: cantidad ${etiqueta}`}
+      labelHidden
+      inputMode="numeric"
+      placeholder="—"
+      value={r.cantidad}
+      onChange={(e) => cambiarRenglon(r.clave, { cantidad: e.target.value.replace(/\D/gu, '') })}
+      error={errorDeRenglon(r.clave, 'cantidad')}
+    />
+  );
+
+  /** Renglones de texto: libres, o con sugerencias al escribir si la categoría tiene opciones (Menú). */
+  const renglonesLibres = (renglones: RenglonEnEdicion[], agregar: string) => (
+    <div className="servicios__renglones">
+      {renglones.length > 0 && (
         <div className="servicios__encabezado caption v-muted" aria-hidden>
           <span>Qué</span>
           <span>Cantidad</span>
         </div>
-        {borrador.renglones.map((r, i) => (
-          <div key={r.clave} className="servicios__renglon">
+      )}
+      {renglones.map((r, i) => (
+        <div key={r.clave} className="servicios__renglon">
+          {opciones?.modo === 'sugerencias' ? (
+            <Combobox
+              label={`${s.categoria}: renglón ${i + 1}`}
+              labelHidden
+              placeholder="Escribí para ver opciones"
+              value={r.texto}
+              onInputChange={(texto) => cambiarRenglon(r.clave, { texto })}
+              options={sugerencias(opciones.opciones, r.texto)
+                .filter((o) => o.nombre !== r.texto.trim())
+                .map((o) => ({ value: o.nombre, label: o.nombre, detail: o.detalle }))}
+              onSelect={(o) => cambiarRenglon(r.clave, { texto: o.value })}
+              error={errorDeRenglon(r.clave, 'texto')}
+            />
+          ) : (
             <Input
               label={`${s.categoria}: renglón ${i + 1}`}
               labelHidden
@@ -153,25 +187,80 @@ function CategoriaEditable({ servicio: s, borrador, alCambiar, errorDe }: {
               onChange={(e) => cambiarRenglon(r.clave, { texto: e.target.value })}
               error={errorDeRenglon(r.clave, 'texto')}
             />
-            <Input
-              label={`${s.categoria}: cantidad del renglón ${i + 1}`}
-              labelHidden
-              inputMode="numeric"
-              placeholder="—"
-              value={r.cantidad}
-              onChange={(e) => cambiarRenglon(r.clave, { cantidad: e.target.value.replace(/\D/gu, '') })}
-              error={errorDeRenglon(r.clave, 'cantidad')}
-            />
-            <IconButton icon="x" variant="text" label={`Quitar el renglón ${i + 1} de ${s.categoria}`} onClick={() => quitarRenglon(r.clave)} />
-          </div>
-        ))}
-        {errorDe('renglones') && <p className="body-sm v-field__error" role="alert">{errorDe('renglones')}</p>}
-        <div>
-          <Button variant="text" size="sm" icon="plus" onClick={() => alCambiar({ ...borrador, renglones: [...borrador.renglones, renglonNuevo()] })}>
-            Agregar renglón
-          </Button>
+          )}
+          {cantidad(r, `del renglón ${i + 1}`)}
+          <IconButton icon="x" variant="text" label={`Quitar el renglón ${i + 1} de ${s.categoria}`} onClick={() => quitarRenglon(r.clave)} />
         </div>
+      ))}
+      {errorDe('renglones') && <p className="body-sm v-field__error" role="alert">{errorDe('renglones')}</p>}
+      <div>
+        <Button variant="text" size="sm" icon="plus" onClick={() => alCambiar({ ...borrador, renglones: [...borrador.renglones, { ...renglonNuevo(), agregado: true }] })}>
+          {agregar}
+        </Button>
       </div>
+    </div>
+  );
+
+  let carga;
+  if (opciones?.modo === 'una') {
+    // Una sola opción (Bodega, Tipo de barra). Un texto viejo que no está entre las opciones se conserva como una más.
+    const elegida = borrador.renglones.find((r) => r.texto.trim())?.texto.trim() ?? '';
+    const errorUna = errorDe('renglones') ?? (borrador.renglones[0] ? errorDeRenglon(borrador.renglones[0].clave, 'texto') : undefined);
+    carga = (
+      <>
+        <Segmentado
+          label={`Elegí ${s.categoria.toLowerCase()}`}
+          value={elegida}
+          options={[
+            { value: '', label: 'Sin definir' },
+            ...opciones.opciones.map((o) => ({ value: o.nombre, label: o.nombre })),
+            ...(elegida && !nombres.includes(elegida) ? [{ value: elegida, label: elegida }] : []),
+          ]}
+          onChange={(valor) => alCambiar({ ...borrador, renglones: [renglonNuevo(valor)] })}
+        />
+        {errorUna && <p className="body-sm v-field__error" role="alert">{errorUna}</p>}
+      </>
+    );
+  } else if (opciones?.modo === 'varias') {
+    // Varias a la vez, cada una con su cantidad (Menús especiales); abajo, otros que no estén en la lista.
+    const marcadas = borrador.renglones.filter(esOpcion);
+    const otras = borrador.renglones.filter((r) => !esOpcion(r));
+    carga = (
+      <>
+        <OpcionesMultiples
+          label="Marcá los que hagan falta"
+          values={marcadas.map((r) => r.texto.trim())}
+          options={opciones.opciones.map((o) => ({ value: o.nombre, label: o.nombre }))}
+          onChange={(valores) => alCambiar({
+            ...borrador,
+            renglones: [
+              ...valores.map((v) => marcadas.find((r) => r.texto.trim() === v) ?? renglonNuevo(v)),
+              ...otras,
+            ],
+          })}
+        />
+        {marcadas.length > 0 && (
+          <ul className="servicios__marcadas">
+            {marcadas.map((r) => (
+              <li key={r.clave} className="servicios__marcada">
+                <span className="body">{r.texto}</span>
+                {cantidad(r, `de ${r.texto}`)}
+              </li>
+            ))}
+          </ul>
+        )}
+        {renglonesLibres(otras.filter((r) => r.texto.trim() || r.cantidad || r.agregado), 'Agregar otro')}
+      </>
+    );
+  } else {
+    carga = renglonesLibres(borrador.renglones, opciones ? 'Agregar otro menú' : 'Agregar renglón');
+  }
+
+  return (
+    <fieldset className="servicios__categoria">
+      <legend className="h4 servicios__leyenda">{s.categoria}</legend>
+      {s.requeridaParaConfirmar && <div><Badge tone="info">Hace falta para confirmar</Badge></div>}
+      {carga}
       <Input
         label={`Detalle de ${s.categoria}`}
         optional

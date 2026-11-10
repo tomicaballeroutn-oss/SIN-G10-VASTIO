@@ -164,6 +164,11 @@ public class DatosDeDemostracion implements ApplicationRunner {
             new Articulo("Gancia", "950 ml", 4, 1, 6, 12, "17790000000191", "7790000000194", 6, 0),
             new Articulo("Tequila José Cuervo", "750 ml", 3, 3, 1, 3, null, "7790000000200", 2, 0));
 
+    /** Opciones de servicios de ejemplo: las mismas que sugiere la pestaña Servicios (frontend, opcionesServicios.ts). */
+    private static final String[] MENUS = { "Menú Clásico", "Menú Tradición", "Menú Estación", "Menú del Valle", "Menú de Autor" };
+    private static final String[] BODEGAS = { "Selección", "Reserva", "Gran Reserva", "Bodega de Autor" };
+    private static final String[] BARRAS = { "Barra clásica", "Barra libre", "Coctelería de autor" };
+
     /** Ubicaciones de V2. */
     private static final short DEPOSITO_MADRE = 1;
     private static final short BARRA_AVRIL = 2;
@@ -253,11 +258,16 @@ public class DatosDeDemostracion implements ApplicationRunner {
                 entityManager.flush();
                 evento = invitados.registrar(evento.getId(), evento.getVersion(), 180, true, coordinacion);
                 entityManager.flush();
+                int variante = Math.floorMod(r.cliente().hashCode(), 1000);
                 evento = servicios.registrar(evento.getId(), evento.getVersion(), List.of(
-                        new Servicio((short) 2, "Lomo braseado con papas rústicas"),
+                        // Las mismas opciones que sugiere la pestaña Servicios (opcionesServicios.ts), variando por evento.
+                        new Servicio((short) 2, null, List.of(new ServiciosService.Renglon(MENUS[variante % MENUS.length], 168),
+                                new ServiciosService.Renglon("Menú Infantil", 12))),
                         new Servicio((short) 5, null, List.of(new ServiciosService.Renglon("Vegetariano", 6),
-                                new ServiciosService.Renglon("Celíaco", 2))),
-                        new Servicio((short) 7, "Barra libre premium hasta las 5")), coordinacion);
+                                new ServiciosService.Renglon("Sin TACC", 2))),
+                        new Servicio((short) 6, null, List.of(new ServiciosService.Renglon(BODEGAS[variante % BODEGAS.length], null))),
+                        new Servicio((short) 7, "Hasta las 5", List.of(new ServiciosService.Renglon(BARRAS[variante % BARRAS.length], null)))),
+                        coordinacion);
                 confirmaciones.confirmar(evento.getId(), new UsuarioActual(ana.getId(), Set.of(RolCodigo.PLANNER.name())));
             }
         }

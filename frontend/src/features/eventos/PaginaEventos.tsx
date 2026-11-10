@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router';
-import type { EstadoEvento } from '../../api/agenda';
+import { hoyEnCordoba, type EstadoEvento } from '../../api/agenda';
 import { fichas } from '../../api/eventos';
 import type { EventoResumen } from '../../api/eventos';
 import { useDatos } from '../../api/useDatos';
@@ -8,6 +8,7 @@ import { Badge, Button, Card, EmptyState, ESTADO_POR_CODIGO, ESTADOS, EventCard,
 import { Cargando } from '../comun/Cargando';
 import { FiltroMultiple, type OpcionFiltro } from '../comun/FiltroMultiple';
 import { fechaCorta } from '../comun/formato';
+import { agruparPorFecha } from './gruposDeFecha';
 import { itemsPara } from '../layout/menu';
 import { Encabezado } from '../layout/paginas';
 import { useSesion } from '../sesion/contexto';
@@ -33,8 +34,8 @@ function textoDeEvento(evento: EventoResumen): string {
 }
 
 /** Próximos eventos. Para la vendedora son los suyos; los demás perfiles conservan el alcance de la API. */
-/** Cuántas tarjetas se ven de entrada y cuántas suma «Ver más»: unas dos semanas de eventos. */
-const POR_TANDA = 20;
+/** Cuántas tarjetas se ven de entrada y cuántas suma «Ver más»: múltiplo de 3, para llenar las filas de tres en escritorio. */
+const POR_TANDA = 21;
 
 export function PaginaEventos() {
   const datos = useDatos(fichas.proximos);
@@ -180,32 +181,34 @@ export function PaginaEventos() {
                 </Card>
               ) : (
                 <>
-                <ul className="eventos__lista">
-                  {lista.slice(0, visibles).map((e) => (
-                    <li key={e.id}>
-                      <EventCard
-                        salon={e.salon.codigo}
-                        status={ESTADO_POR_CODIGO[e.estado]}
-                        tipo={e.tipo}
-                        title={e.nombre}
-                        fecha={fechaCorta(e.fecha, true)}
-                        turno={e.turno.nombre}
-                        invitados={e.cantidadInvitados ?? undefined}
-                        vendedora={e.vendedora.nombre}
-                        planner={e.planner?.nombre ?? null}
-                        onOpen={() => navegar(`/eventos/${e.id}`)}
-                      />
-                    </li>
-                  ))}
-                </ul>
-                {lista.length > POR_TANDA && (
+                {agruparPorFecha(lista.slice(0, visibles), (e) => e.fecha, hoyEnCordoba()).map((grupo) => (
+                  <section key={grupo.titulo} className="eventos__grupo" aria-label={grupo.titulo}>
+                    <h2 className="overline v-muted eventos__grupo-titulo">{grupo.titulo}</h2>
+                    <ul className="eventos__lista">
+                      {grupo.items.map((e) => (
+                        <li key={e.id}>
+                          <EventCard
+                            salon={e.salon.codigo}
+                            status={ESTADO_POR_CODIGO[e.estado]}
+                            tipo={e.tipo}
+                            title={e.nombre}
+                            fecha={fechaCorta(e.fecha, true)}
+                            turno={e.turno.nombre}
+                            invitados={e.cantidadInvitados ?? undefined}
+                            vendedora={e.vendedora.nombre}
+                            planner={e.planner?.nombre ?? null}
+                            onOpen={() => navegar(`/eventos/${e.id}`)}
+                          />
+                        </li>
+                      ))}
+                    </ul>
+                  </section>
+                ))}
+                {visibles < lista.length && (
                   <div className="eventos__mas">
-                    <p className="body-sm v-muted" aria-live="polite">Mostrando {Math.min(visibles, lista.length)} de {lista.length}</p>
-                    {visibles < lista.length && (
-                      <Button variant="outline" icon="chevron-down" onClick={() => setTanda({ clave: claveFiltros, cantidad: visibles + POR_TANDA })}>
-                        Ver {Math.min(POR_TANDA, lista.length - visibles)} más
-                      </Button>
-                    )}
+                    <Button variant="outline" icon="chevron-down" onClick={() => setTanda({ clave: claveFiltros, cantidad: visibles + POR_TANDA })}>
+                      Ver más
+                    </Button>
                   </div>
                 )}
                 </>

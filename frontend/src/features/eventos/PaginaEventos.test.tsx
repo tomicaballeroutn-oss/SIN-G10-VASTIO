@@ -141,33 +141,38 @@ describe('lista de eventos por tandas', () => {
     codigo: `EV-2030-${String(100 + i).padStart(5, '0')}`,
     nombre: i < 30 ? `Casamiento ${i + 1}` : `Quince ${i + 1}`,
   }));
-  const tarjetas = () => within(document.querySelector('.eventos__lista') as HTMLElement).getAllByRole('listitem');
+  const tarjetas = () => document.querySelectorAll('.eventos__lista > li');
 
-  it('muestra 20, «Ver más» suma de a 20 y al buscar vuelve a la primera tanda sobre todos', async () => {
+  it('muestra 21, «Ver más» suma otros 21 y al buscar vuelve a la primera tanda', async () => {
     backend(MUCHOS);
     const usuario = userEvent.setup();
     montar('/eventos');
 
-    await screen.findByText('Mostrando 20 de 45');
-    expect(tarjetas()).toHaveLength(20);
-
-    await usuario.click(screen.getByRole('button', { name: 'Ver 20 más' }));
-    expect(tarjetas()).toHaveLength(40);
-    await usuario.click(screen.getByRole('button', { name: 'Ver 5 más' }));
+    await screen.findByText('Casamiento 1');
+    expect(tarjetas()).toHaveLength(21);
+    await usuario.click(screen.getByRole('button', { name: 'Ver más' }));
+    expect(tarjetas()).toHaveLength(42);
+    await usuario.click(screen.getByRole('button', { name: 'Ver más' }));
     expect(tarjetas()).toHaveLength(45);
-    expect(screen.getByText('Mostrando 45 de 45')).toBeInTheDocument();
-    expect(screen.queryByRole('button', { name: /^Ver \d+ más$/ })).not.toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: 'Ver más' })).not.toBeInTheDocument();
 
     await usuario.click(screen.getByRole('button', { name: 'Mostrar filtros' }));
     await usuario.type(screen.getByLabelText('Buscar eventos'), 'casamiento');
-    expect(screen.getByText('Mostrando 20 de 30')).toBeInTheDocument();
-    expect(tarjetas()).toHaveLength(20);
+    expect(tarjetas()).toHaveLength(21);
+    expect(screen.getByRole('button', { name: 'Ver más' })).toBeInTheDocument();
   });
 
-  it('con 20 o menos no hay pie', async () => {
-    backend(MUCHOS.slice(0, 20));
+  it('con 21 o menos no hay «Ver más»', async () => {
+    backend(MUCHOS.slice(0, 21));
     montar('/eventos');
     await screen.findByText('Casamiento 1');
-    expect(screen.queryByText(/^Mostrando/)).not.toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: 'Ver más' })).not.toBeInTheDocument();
+  });
+
+  it('agrupa las tarjetas bajo el título de su período', async () => {
+    backend(MUCHOS.slice(0, 3));
+    montar('/eventos');
+    await screen.findByText('Casamiento 1');
+    expect(screen.getByRole('region', { name: 'Marzo 2030' })).toBeInTheDocument();
   });
 });

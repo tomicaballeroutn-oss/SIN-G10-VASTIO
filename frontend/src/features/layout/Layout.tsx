@@ -27,14 +27,8 @@ export function Layout() {
       </div>
     );
   }
-  // Mientras se recupera la sesión, la marca quieta donde va a estar la animación: sin pantallazo blanco ni salto.
-  if (estado === 'cargando') {
-    return (
-      <div className="v-espera-animada v-espera-animada--pantalla" role="status" aria-label="Cargando Vastio">
-        <AnimacionMarca tamano={160} quieta />
-      </div>
-    );
-  }
+  // Mientras se recupera la sesión, solo el fondo de la app: la marca aparece si de verdad se anima, no un instante.
+  if (estado === 'cargando') return <div className="v-espera-animada v-espera-animada--pantalla" role="status" aria-label="Cargando Vastio" />;
   if (estado === 'anonima' || !usuario) {
     return <Navigate to={`/login?volver=${encodeURIComponent(ubicacion.pathname)}`} replace />;
   }

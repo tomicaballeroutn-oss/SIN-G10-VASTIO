@@ -1,7 +1,7 @@
-import { useEffect, useRef, useState, type ReactNode, type SyntheticEvent } from 'react';
+import { useEffect, useRef, useState, type SyntheticEvent } from 'react';
 import { cx } from '../util';
 import { Icon } from './Icon';
-import { DURACION_ANIMACION_MS, puedeAnimar, useEsperaAnimada } from '../animacion';
+import { DURACION_ANIMACION_MS, puedeAnimar } from '../animacion';
 
 /** Safari e iPhone no muestran bien la transparencia del WebM: ahí va el GIF. */
 function usaGif(): boolean {
@@ -76,28 +76,6 @@ export function AnimacionMarca({ tono, tamano = 120, alTerminar, repetir, quieta
       )}
     </span>
   );
-}
-
-export interface EsperaAnimadaProps {
-  cargando: boolean;
-  /** Lo que se ve en una carga corta, o si no se anima (p. ej. «Cargando…»). */
-  mientras?: ReactNode;
-  children: ReactNode;
-  /** A pantalla completa, para la carga inicial de la app. */
-  pantallaCompleta?: boolean;
-}
-
-/** Envuelve una carga: texto breve, animación si tarda, y el contenido cuando terminó la vuelta. */
-export function EsperaAnimada({ cargando, mientras = null, children, pantallaCompleta }: EsperaAnimadaProps) {
-  const { animando, alTerminarVuelta } = useEsperaAnimada(cargando);
-  if (animando) {
-    return (
-      <div className={cx('v-espera-animada', pantallaCompleta && 'v-espera-animada--pantalla')} role="status" aria-label="Cargando">
-        <AnimacionMarca tamano={pantallaCompleta ? 160 : 96} repetir alTerminar={alTerminarVuelta} />
-      </div>
-    );
-  }
-  return <>{cargando ? mientras : children}</>;
 }
 
 export interface CelebracionHitoProps {

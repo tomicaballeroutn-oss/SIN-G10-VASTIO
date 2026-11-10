@@ -33,6 +33,3 @@
 .app--cuenta-inicial { display: block; }
 .app--cuenta-inicial .app__contenido { padding-bottom: calc(var(--space-8) + env(safe-area-inset-bottom, 0px)); }
 
-/* Bienvenida: la marca animada al entrar, una vez por pestaña, sobre la app que carga por debajo. */
-.bienvenida { position: fixed; inset: 0; z-index: 100; display: grid; place-items: center; background: var(--canvas); cursor: pointer; transition: opacity 250ms var(--ease); }
-.bienvenida.is-saliendo { opacity: 0; }

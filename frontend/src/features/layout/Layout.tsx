@@ -1,5 +1,5 @@
 import { Navigate, Outlet, useLocation, useNavigate } from 'react-router';
-import { AnimacionMarca, Logo, Nav, useEsperaAnimada } from '../../ds';
+import { Logo, Nav } from '../../ds';
 import { Campana } from '../notificaciones/Campana';
 import { AvisosDeSesion } from '../sesion/AvisosDeSesion';
 import { useSesion } from '../sesion/contexto';
@@ -17,17 +17,7 @@ export function Layout() {
   const { estado, usuario } = useSesion();
   const ubicacion = useLocation();
   const navegar = useNavigate();
-  // Al abrir la app, mientras se recupera la sesión: la marca animada si tarda, completa.
-  const { animando, alTerminarVuelta } = useEsperaAnimada(estado === 'cargando');
-
-  if (animando) {
-    return (
-      <div className="v-espera-animada v-espera-animada--pantalla" role="status" aria-label="Cargando Vastio">
-        <AnimacionMarca tamano={160} repetir alTerminar={alTerminarVuelta} />
-      </div>
-    );
-  }
-  // Mientras se recupera la sesión, solo el fondo de la app: la marca aparece si de verdad se anima, no un instante.
+  // Mientras se recupera la sesión, solo el fondo de la app (la animación de entrada es la del login).
   if (estado === 'cargando') return <div className="v-espera-animada v-espera-animada--pantalla" role="status" aria-label="Cargando Vastio" />;
   if (estado === 'anonima' || !usuario) {
     return <Navigate to={`/login?volver=${encodeURIComponent(ubicacion.pathname)}`} replace />;

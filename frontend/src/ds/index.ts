@@ -25,9 +25,9 @@ export {
 export { Nav, type NavItem, type NavProps } from './components/Nav';
 export { Logo, type LogoProps } from './components/Logo';
 export {
-  AnimacionMarca, EsperaAnimada, CelebracionHito, type AnimacionMarcaProps, type EsperaAnimadaProps, type CelebracionHitoProps,
+  AnimacionMarca, CelebracionHito, type AnimacionMarcaProps, type CelebracionHitoProps,
 } from './components/animacion';
-export { useEsperaAnimada, puedeAnimar, DURACION_ANIMACION_MS, ESPERA_ANTES_DE_ANIMAR_MS } from './animacion';
+export { puedeAnimar, DURACION_ANIMACION_MS } from './animacion';
 export {
   AgendaGrid, AgendaLeyenda, EventCard, MiniCalendar, SelectorMes,
   type AgendaEvent, type SelectorMesProps, type AgendaGridProps, type AgendaLeyendaProps, type EventCardProps, type MiniCalendarProps, type DiaOcupado,

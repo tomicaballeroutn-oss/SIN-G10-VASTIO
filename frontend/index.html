@@ -8,6 +8,20 @@
     <link rel="icon" type="image/png" href="/brand/icon-192.png" />
     <link rel="apple-touch-icon" href="/brand/icon-192.png" />
     <title>Vastio</title>
+    <!-- Antes de que cargue la app, el fondo del tema que eligió la persona (el mismo que aplica tema.ts): nunca blanco
+         ni un tema que después cambia. Sin marca: en una carga rápida solo parpadearía. -->
+    <style>
+      html, body { margin: 0; background: #e6e2dd; }
+      html[data-theme="dark"], html[data-theme="dark"] body { background: #021226; }
+    </style>
+    <script>
+      try {
+        var tema = localStorage.getItem('vastio.tema');
+        if (tema === 'oscuro' || (tema === 'sistema' && matchMedia('(prefers-color-scheme: dark)').matches)) {
+          document.documentElement.dataset.theme = 'dark';
+        }
+      } catch (e) { /* sin almacenamiento: tema claro */ }
+    </script>
   </head>
   <body>
     <div id="root"></div>

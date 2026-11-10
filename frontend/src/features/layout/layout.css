@@ -32,3 +32,4 @@
 /* El flujo inicial no monta navegación comercial ni reserva su espacio. */
 .app--cuenta-inicial { display: block; }
 .app--cuenta-inicial .app__contenido { padding-bottom: calc(var(--space-8) + env(safe-area-inset-bottom, 0px)); }
+

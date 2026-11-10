@@ -391,6 +391,22 @@ h2.h2, h3.h3, h3.h4 { margin: 0; color: var(--ink); }
 
 /* ---------- Logo (agregado en el port) ---------- */
 .v-brand { display: inline-flex; }
+/* Marca animada: video WebM con transparencia, GIF en Safari, SVG quieto con «reducir movimiento». */
+.v-animacion-marca { display: inline-block; aspect-ratio: 1; }
+.v-animacion-marca video, .v-animacion-marca img { display: block; width: 100%; height: 100%; object-fit: contain; }
+.v-animacion-marca__oscuro { display: none !important; }
+.v-animacion-marca--blanco .v-animacion-marca__oscuro { display: block !important; }
+[data-theme="dark"] .v-animacion-marca:not(.v-animacion-marca--azul) .v-animacion-marca__claro { display: none !important; }
+[data-theme="dark"] .v-animacion-marca:not(.v-animacion-marca--azul) .v-animacion-marca__oscuro { display: block !important; }
+.v-espera-animada { display: grid; place-items: center; min-height: 220px; }
+.v-espera-animada--pantalla { min-height: 100vh; min-height: 100dvh; background: var(--canvas); }
+/* Hito: cartel chico sobre la pantalla apenas desenfocada, sin taparla. */
+.v-hito { position: fixed; inset: 0; z-index: 60; display: grid; place-items: center; padding: var(--space-4); background: color-mix(in srgb, var(--canvas) 35%, transparent); backdrop-filter: blur(3px); -webkit-backdrop-filter: blur(3px); animation: v-hito-entrar 200ms var(--ease); cursor: pointer; }
+.v-hito__cartel { display: grid; justify-items: center; gap: var(--space-2); width: min(320px, 100%); padding: var(--space-6) var(--space-5); border: 1px solid var(--line); border-radius: var(--radius-xl); background: var(--surface-raised); box-shadow: var(--shadow-md); text-align: center; }
+.v-hito__titulo { display: inline-flex; align-items: center; gap: var(--space-2); margin: 0; color: var(--success-ink); }
+.v-hito__cartel p { margin: 0; }
+@keyframes v-hito-entrar { from { opacity: 0; } }
+@media (prefers-reduced-motion: reduce) { .v-hito { animation: none; } }
 .v-brand img { display: block; width: 100%; height: auto; }
 .v-brand__oscuro { display: none !important; }
 [data-theme="dark"] .v-brand__claro { display: none !important; }

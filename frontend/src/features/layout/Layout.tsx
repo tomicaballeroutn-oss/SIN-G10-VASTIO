@@ -17,8 +17,8 @@ export function Layout() {
   const { estado, usuario } = useSesion();
   const ubicacion = useLocation();
   const navegar = useNavigate();
-
-  if (estado === 'cargando') return null;
+  // Mientras se recupera la sesión, solo el fondo de la app (la animación de entrada es la del login).
+  if (estado === 'cargando') return <div className="v-espera-animada v-espera-animada--pantalla" role="status" aria-label="Cargando Vastio" />;
   if (estado === 'anonima' || !usuario) {
     return <Navigate to={`/login?volver=${encodeURIComponent(ubicacion.pathname)}`} replace />;
   }

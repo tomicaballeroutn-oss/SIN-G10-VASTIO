@@ -57,7 +57,8 @@ describe('UI-33 · cierre de evento', () => {
     await persona.click(screen.getByRole('button', { name: 'Cerrar evento' }));
     await persona.click(within(screen.getByRole('dialog', { name: '¿Cerrás el evento?' })).getByRole('button', { name: 'Registrar cierre' }));
 
-    expect(await screen.findByText('Evento cerrado')).toBeInTheDocument();
+    // El aviso verde y el cartel del hito.
+    expect(await screen.findAllByText('Evento cerrado')).toHaveLength(2);
     expect(pedidos(fetchMock).some((p) => p.metodo === 'POST' && p.ruta === '/eventos/10/cierre')).toBe(true);
     expect(screen.queryByRole('button', { name: 'Cerrar evento' })).not.toBeInTheDocument();
   });

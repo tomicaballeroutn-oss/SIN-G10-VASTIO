@@ -37,3 +37,5 @@ secrets/
 **/secrets/
 **/*service-account*.json
 **/vastio-calendar.json
+# Masters de edición de las animaciones (ProRes): pesan decenas de MB y el navegador no los usa
+frontend/public/brand/animaciones/*.mov

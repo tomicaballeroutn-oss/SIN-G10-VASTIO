@@ -4,6 +4,7 @@ import { cierres, type Cierre, type RenglonCierre } from '../../api/cierres';
 import { useDatos, useEnvio } from '../../api/useDatos';
 import {
   Alert, Button, Card, Dialog, ESTADO_POR_CODIGO, SalonTag, StatusChip, Table, cantidadLegible, type SalonId,
+  CelebracionHito,
 } from '../../ds';
 import { Cargando } from '../comun/Cargando';
 import { Encabezado } from '../layout/paginas';
@@ -44,6 +45,7 @@ function Conciliacion({ cierre, alCerrar }: { cierre: Cierre; alCerrar: (c: Cier
   const navegar = useNavigate();
   const [confirmando, setConfirmando] = useState(false);
   const [recienCerrado, setRecienCerrado] = useState(false);
+  const [hito, setHito] = useState(false);
   const { guardando, error, enviar, limpiarError } = useEnvio();
   const estado = ESTADO_POR_CODIGO[cierre.evento.estado as keyof typeof ESTADO_POR_CODIGO];
   const realizado = cierre.evento.estado === 'REALIZADO';
@@ -54,6 +56,7 @@ function Conciliacion({ cierre, alCerrar }: { cierre: Cierre; alCerrar: (c: Cier
     if (cerrado) {
       setConfirmando(false);
       setRecienCerrado(true);
+      setHito(true);
       alCerrar(cerrado);
     }
   }
@@ -64,6 +67,7 @@ function Conciliacion({ cierre, alCerrar }: { cierre: Cierre; alCerrar: (c: Cier
         <SalonTag salon={cierre.salon.codigo as SalonId} label={cierre.salon.nombre} />
       </Card>
 
+      {hito && <CelebracionHito titulo="Evento cerrado" detalle="El consumo quedó fijado." alCerrar={() => setHito(false)} />}
       {recienCerrado && (
         <Alert tone="success" title="Evento cerrado">
           El consumo quedó fijado. Lo que quedó en la barra sigue ahí para el evento siguiente.

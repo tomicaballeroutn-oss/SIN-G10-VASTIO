@@ -17,6 +17,7 @@ import { useDatos, useEnvio } from '../../api/useDatos';
 import {
   Actor, Alert, Button, Card, EmptyState, ESTADOS, ESTADO_POR_CODIGO, Icon, IconButton, SalonTag, StatusChip, Tabs, Timeline,
   tamanoLegible, type TimelineItem, type TimelineTone,
+  CelebracionHito,
 } from '../../ds';
 import { Cargando } from '../comun/Cargando';
 import { MarcaSalon } from '../comun/MarcaSalon';
@@ -81,6 +82,7 @@ function ContenidoFicha({ ficha, alCambiar }: { ficha: Ficha; alCambiar: (ficha:
   const recibido = (useLocation().state as { aviso?: string } | null)?.aviso;
   const [aviso, setAviso] = useState(recibido);
   const [dialogo, setDialogo] = useState<Dialogo>(null);
+  const [hito, setHito] = useState(false);
   const navegar = useNavigate();
   const { acciones } = ficha;
 
@@ -93,6 +95,7 @@ function ContenidoFicha({ ficha, alCambiar }: { ficha: Ficha; alCambiar: (ficha:
   return (
     <>
       {aviso && <Alert tone="success">{aviso}</Alert>}
+      {hito && <CelebracionHito titulo="Evento confirmado" detalle="Se avisó a Compras y Cocina." alCerrar={() => setHito(false)} />}
       <header className="ficha__cabecera">
         <div className="ficha__etiquetas">
           <div className="ficha__etiquetas-principales">
@@ -179,7 +182,7 @@ function ContenidoFicha({ ficha, alCambiar }: { ficha: Ficha; alCambiar: (ficha:
         <DialogoConfirmar
           ficha={ficha}
           alCerrar={() => setDialogo(null)}
-          alConfirmar={(f) => hecho(f, 'Evento confirmado. Se avisó a Compras y Cocina.')}
+          alConfirmar={(f) => { hecho(f, 'Evento confirmado. Se avisó a Compras y Cocina.'); setHito(true); }}
         />
       )}
       {dialogo === 'planner' && (

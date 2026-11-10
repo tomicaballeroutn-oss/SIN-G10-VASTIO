@@ -19,14 +19,17 @@ export interface AnimacionMarcaProps {
   alTerminar?: () => void;
   /** Repetir hasta que se desmonte. */
   repetir?: boolean;
+  /** La marca quieta, en el mismo lugar y tamaño (p. ej. mientras se decide si animar). */
+  quieta?: boolean;
   className?: string;
 }
 
 /**
  * La marca de Vastio animada. Con «reducir movimiento» (o sin forma de saberlo) muestra la marca quieta.
  */
-export function AnimacionMarca({ tono, tamano = 120, alTerminar, repetir, className }: AnimacionMarcaProps) {
-  const [animar] = useState(puedeAnimar);
+export function AnimacionMarca({ tono, tamano = 120, alTerminar, repetir, quieta, className }: AnimacionMarcaProps) {
+  const [puede] = useState(puedeAnimar);
+  const animar = puede && !quieta;
   const [gif] = useState(usaGif);
   const ultimo = useRef(alTerminar);
   useEffect(() => { ultimo.current = alTerminar; });

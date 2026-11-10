@@ -8,9 +8,16 @@
     <link rel="icon" type="image/png" href="/brand/icon-192.png" />
     <link rel="apple-touch-icon" href="/brand/icon-192.png" />
     <title>Vastio</title>
+    <!-- Antes de que cargue la app: el fondo de la app y la marca quieta, nunca una pantalla blanca. -->
+    <style>
+      html, body { margin: 0; background: #e6e2dd; }
+      @media (prefers-color-scheme: dark) { html, body { background: #021226; } }
+      .arranque { display: grid; place-items: center; min-height: 100vh; min-height: 100dvh; }
+      .arranque img { width: 160px; height: auto; }
+    </style>
   </head>
   <body>
-    <div id="root"></div>
+    <div id="root"><div class="arranque" aria-hidden="true"><img src="/brand/vastio-mark.svg" alt="" /></div></div>
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>

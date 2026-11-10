@@ -1,11 +1,8 @@
 import type { ReactNode } from 'react';
 import type { Datos } from '../../api/useDatos';
-import { Alert, Button, EsperaAnimada } from '../../ds';
+import { Alert, Button } from '../../ds';
 
-/**
- * Mientras carga, error con reintento, o el contenido con los datos. Si la carga tarda, la marca animada; una vez que
- * aparece se ve completa.
- */
+/** Mientras carga, error con reintento, o el contenido con los datos. */
 export function Cargando<T>({ datos, children }: { datos: Datos<T>; children: (datos: T) => ReactNode }) {
   if (datos.error) {
     return (
@@ -14,9 +11,6 @@ export function Cargando<T>({ datos, children }: { datos: Datos<T>; children: (d
       </Alert>
     );
   }
-  return (
-    <EsperaAnimada cargando={datos.datos === undefined} mientras={<p className="body-sm v-muted" role="status">Cargando…</p>}>
-      {datos.datos === undefined ? null : children(datos.datos)}
-    </EsperaAnimada>
-  );
+  if (datos.datos === undefined) return <p className="body-sm v-muted" role="status">Cargando…</p>;
+  return children(datos.datos);
 }

@@ -45,7 +45,7 @@ afterEach(() => {
 });
 
 describe('UI-13 · servicios contratados (M-09)', () => {
-  it('carga renglones con cantidad y un detalle, y manda solo las categorías que cambiaron', async () => {
+  it('marca menús especiales con cantidad, elige la bodega y manda solo las categorías que cambiaron', async () => {
     const fetchMock = backend();
     const usuario = userEvent.setup();
     montar('/eventos/5?pestana=servicios');
@@ -54,12 +54,17 @@ describe('UI-13 · servicios contratados (M-09)', () => {
     const guardar = screen.getByRole('button', { name: 'Guardar servicios' });
     expect(guardar).toBeDisabled();
 
-    await usuario.type(within(especiales).getByLabelText('Menús especiales: renglón 1'), 'Celíaco');
-    await usuario.type(within(especiales).getByLabelText('Menús especiales: cantidad del renglón 1'), '2a');
-    await usuario.click(within(especiales).getByRole('button', { name: 'Agregar renglón' }));
-    await usuario.type(within(especiales).getByLabelText('Menús especiales: renglón 2'), 'Sin lactosa');
-    await usuario.type(within(especiales).getByLabelText('Menús especiales: cantidad del renglón 2'), '3');
-    await usuario.click(within(especiales).getByRole('button', { name: 'Agregar renglón' }));
+    await usuario.click(within(especiales).getByRole('button', { name: 'Sin TACC' }));
+    await usuario.type(within(especiales).getByLabelText('Menús especiales: cantidad de Sin TACC'), '2a');
+    await usuario.click(within(especiales).getByRole('button', { name: 'Sin lactosa' }));
+    await usuario.type(within(especiales).getByLabelText('Menús especiales: cantidad de Sin lactosa'), '3');
+    expect(within(especiales).getByRole('button', { name: 'Sin lactosa' })).toHaveAttribute('aria-pressed', 'true');
+    await usuario.click(within(especiales).getByRole('button', { name: 'Agregar otro' }));
+    await usuario.type(within(especiales).getByLabelText('Menús especiales: renglón 1'), 'Sin huevo');
+
+    const bodega = screen.getByRole('group', { name: 'Bodega' });
+    await usuario.click(within(bodega).getByRole('radio', { name: 'Reserva' }));
+    expect(within(bodega).getByText('Incluye: Varietales reserva y espumante brut.')).toBeInTheDocument();
     await usuario.type(screen.getByLabelText(/Detalle de Bodega/), 'Malbec Luigi Bosca');
     await usuario.click(guardar);
 
@@ -67,11 +72,31 @@ describe('UI-13 · servicios contratados (M-09)', () => {
     expect(pedidos(fetchMock).find((p) => p.metodo === 'PUT')?.cuerpo).toEqual({
       version: 1,
       servicios: [
-        { categoriaId: 5, descripcion: '', renglones: [{ texto: 'Celíaco', cantidad: 2 }, { texto: 'Sin lactosa', cantidad: 3 }] },
-        { categoriaId: 6, descripcion: 'Malbec Luigi Bosca', renglones: [] },
+        { categoriaId: 5, descripcion: '', renglones: [{ texto: 'Sin TACC', cantidad: 2 }, { texto: 'Sin lactosa', cantidad: 3 }, { texto: 'Sin huevo', cantidad: null }] },
+        { categoriaId: 6, descripcion: 'Malbec Luigi Bosca', renglones: [{ texto: 'Reserva', cantidad: null }] },
       ],
     });
     expect(screen.getByRole('tab', { name: /Servicios/ })).toHaveTextContent('2');
+  });
+
+  it('el menú sugiere al escribir y también acepta uno escrito a mano', async () => {
+    const fetchMock = backend();
+    const usuario = userEvent.setup();
+    montar('/eventos/5?pestana=servicios');
+
+    const menu = await screen.findByLabelText('Menú: renglón 1');
+    await usuario.type(menu, 'trad');
+    await usuario.click(await screen.findByRole('option', { name: /Menú Tradición/ }));
+    expect(menu).toHaveValue('Menú Tradición');
+    await usuario.type(screen.getByLabelText('Menú: cantidad del renglón 1'), '160');
+    await usuario.click(screen.getByRole('button', { name: 'Agregar otro menú' }));
+    await usuario.type(screen.getByLabelText('Menú: renglón 2'), 'Menú vegano del chef');
+    await usuario.click(screen.getByRole('button', { name: 'Guardar servicios' }));
+
+    await screen.findByText('Servicios guardados.');
+    expect(pedidos(fetchMock).find((p) => p.metodo === 'PUT')?.cuerpo).toMatchObject({
+      servicios: [{ renglones: [{ texto: 'Menú Tradición', cantidad: 160 }, { texto: 'Menú vegano del chef', cantidad: null }] }],
+    });
   });
 
   it('quitar el único renglón lo deja vacío para volver a escribir', async () => {

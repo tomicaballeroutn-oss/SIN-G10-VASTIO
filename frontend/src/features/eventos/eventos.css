@@ -141,3 +141,8 @@
 .reprogramar__acciones { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: var(--space-2); }
 .agenda__caja.is-elegida { border: 2px solid var(--brand); padding: calc(var(--space-3) - 1px); background: var(--surface-raised); }
 .ficha__comprobante { display: flex; flex-direction: column; align-items: flex-end; gap: var(--space-1); }
+
+/* Menús especiales marcados: cada uno con su cantidad. Bodega y barra: qué incluye la opción elegida. */
+.servicios__marcadas { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: var(--space-2); }
+.servicios__marcada { display: grid; grid-template-columns: minmax(0, 1fr) 120px; align-items: center; gap: var(--space-3); }
+.servicios__incluye { margin: 0; }

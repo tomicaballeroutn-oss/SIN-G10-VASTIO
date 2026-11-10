@@ -33,6 +33,9 @@ function textoDeEvento(evento: EventoResumen): string {
 }
 
 /** Próximos eventos. Para la vendedora son los suyos; los demás perfiles conservan el alcance de la API. */
+/** Cuántas tarjetas se ven de entrada y cuántas suma «Ver más»: unas dos semanas de eventos. */
+const POR_TANDA = 20;
+
 export function PaginaEventos() {
   const datos = useDatos(fichas.proximos);
   const navegar = useNavigate();
@@ -50,6 +53,10 @@ export function PaginaEventos() {
   const [desde, setDesde] = useState('');
   const [hasta, setHasta] = useState('');
   const [filtrosAbiertos, setFiltrosAbiertos] = useState(false);
+  // Cuántos se muestran; al cambiar un filtro o la búsqueda vuelve a la primera tanda.
+  const claveFiltros = JSON.stringify([filtro, buscar, estados, salones, turnos, tipos, vendedoras, planners, desde, hasta]);
+  const [tanda, setTanda] = useState({ clave: claveFiltros, cantidad: POR_TANDA });
+  const visibles = tanda.clave === claveFiltros ? tanda.cantidad : POR_TANDA;
   const conFiltros = !!buscar.trim() || estados.length > 0 || salones.length > 0 || turnos.length > 0 || tipos.length > 0
     || vendedoras.length > 0 || planners.length > 0 || !!desde || !!hasta;
 
@@ -172,8 +179,9 @@ export function PaginaEventos() {
                   </EmptyState>
                 </Card>
               ) : (
+                <>
                 <ul className="eventos__lista">
-                  {lista.map((e) => (
+                  {lista.slice(0, visibles).map((e) => (
                     <li key={e.id}>
                       <EventCard
                         salon={e.salon.codigo}
@@ -190,6 +198,17 @@ export function PaginaEventos() {
                     </li>
                   ))}
                 </ul>
+                {lista.length > POR_TANDA && (
+                  <div className="eventos__mas">
+                    <p className="body-sm v-muted" aria-live="polite">Mostrando {Math.min(visibles, lista.length)} de {lista.length}</p>
+                    {visibles < lista.length && (
+                      <Button variant="outline" icon="chevron-down" onClick={() => setTanda({ clave: claveFiltros, cantidad: visibles + POR_TANDA })}>
+                        Ver {Math.min(POR_TANDA, lista.length - visibles)} más
+                      </Button>
+                    )}
+                  </div>
+                )}
+                </>
               )}
             </>
           );

@@ -25,7 +25,6 @@ export function PaginaIngreso() {
         <div className="pagina-ingreso__ficha">
           <div className="pagina-ingreso__titulos">
             <h1 className="h1">Ingresá a tu cuenta</h1>
-            <p className="body v-muted">El sistema del complejo Avril · Club de Campo · Santa Bárbara</p>
           </div>
           {estado !== 'cargando' && <FormularioIngreso alIngresar={() => destino && navegar(destino, { replace: true })} />}
         </div>

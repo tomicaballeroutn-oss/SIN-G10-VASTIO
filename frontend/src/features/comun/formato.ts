@@ -47,6 +47,19 @@ export function dinero(importe: number, moneda: 'ARS' | 'USD'): string {
  * Lee un importe escrito a mano: «150.000,50», «150000,5», «150000.50» o «150.000».
  * Con coma, el punto es separador de miles; sin coma, solo si agrupa de a tres. Null si no es un número.
  */
+/**
+ * Mientras se escribe un importe, lo deja con separador de miles y coma decimal (150000 → 150.000; 1500,5 → 1.500,5).
+ * Solo quedan dígitos y una coma, con hasta dos decimales.
+ */
+export function formatearImporte(texto: string): string {
+  const limpio = texto.replace(/[^\d,]/g, '');
+  const coma = limpio.indexOf(',');
+  const entero = (coma < 0 ? limpio : limpio.slice(0, coma)).replace(/^0+(?=\d)/, '');
+  const miles = entero.replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+  if (coma < 0) return miles;
+  return `${miles || '0'},${limpio.slice(coma + 1).replace(/,/g, '').slice(0, 2)}`;
+}
+
 export function leerImporte(texto: string): number | null {
   const limpio = texto.replace(/[\s$]/g, '');
   if (!limpio) return null;

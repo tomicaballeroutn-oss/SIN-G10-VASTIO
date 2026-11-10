@@ -3,7 +3,7 @@ import { hoyEnCordoba } from '../../api/agenda';
 import { fichas, type Ficha, type Moneda } from '../../api/eventos';
 import { useEnvio } from '../../api/useDatos';
 import { Alert, Button, Dialog, Input, Select } from '../../ds';
-import { fechaCorta, leerImporte } from '../comun/formato';
+import { fechaCorta, formatearImporte, leerImporte } from '../comun/formato';
 
 /**
  * UI-11 · Registrar seña: la pre-reserva pasa a Señado y se vuelve una reserva firme.
@@ -68,7 +68,7 @@ export function DialogoSena({ ficha, alCerrar, alRegistrar }: {
             placeholder="0"
             suffix={moneda === 'USD' ? 'dólares' : 'pesos'}
             value={importe}
-            onChange={(e) => setImporte(e.target.value)}
+            onChange={(e) => setImporte(formatearImporte(e.target.value))}
             error={importeIlegible ? 'Escribí el importe con números, p. ej. 150.000.' : error?.errorDe('importe')}
             required
           />

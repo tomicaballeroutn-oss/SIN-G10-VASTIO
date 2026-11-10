@@ -2,6 +2,8 @@ package ar.edu.utn.vastio.demo;
 
 import java.math.BigDecimal;
 import java.nio.charset.StandardCharsets;
+import java.text.Normalizer;
+import java.util.Locale;
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.util.ArrayList;
@@ -25,6 +27,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
 import ar.edu.utn.vastio.VastioApplication;
+import ar.edu.utn.vastio.agenda.aplicacion.ClienteService;
 import ar.edu.utn.vastio.agenda.aplicacion.ClienteService.DatosCliente;
 import ar.edu.utn.vastio.agenda.aplicacion.ConfirmacionService;
 import ar.edu.utn.vastio.agenda.aplicacion.ContratoService;
@@ -170,6 +173,7 @@ public class DatosDeDemostracion implements ApplicationRunner {
             .getBytes(StandardCharsets.US_ASCII);
 
     private final UsuarioService usuarios;
+    private final ClienteService clientes;
     private final PreReservaService preReservas;
     private final SenaService senas;
     private final ContratoService contratos;
@@ -182,7 +186,7 @@ public class DatosDeDemostracion implements ApplicationRunner {
     private final EntityManager entityManager;
     private final String contrasena;
 
-    public DatosDeDemostracion(UsuarioService usuarios, PreReservaService preReservas, SenaService senas,
+    public DatosDeDemostracion(UsuarioService usuarios, ClienteService clientes, PreReservaService preReservas, SenaService senas,
             ContratoService contratos, PlannerService planners, InvitadosService invitados, ServiciosService servicios,
             ConfirmacionService confirmaciones, BebidaService bebidas,
             InventarioInicialService inventario, EntityManager entityManager,
@@ -197,6 +201,7 @@ public class DatosDeDemostracion implements ApplicationRunner {
         this.bebidas = bebidas;
         this.inventario = inventario;
         this.usuarios = usuarios;
+        this.clientes = clientes;
         this.preReservas = preReservas;
         this.contrasena = contrasena;
     }
@@ -220,14 +225,20 @@ public class DatosDeDemostracion implements ApplicationRunner {
         LocalDate hoy = LocalDate.now(ZONA);
         UsuarioActual coordinacion = new UsuarioActual(creados.get("melina.sifon").getId(), Set.of(RolCodigo.COORDINACION.name()));
         Usuario ana = creados.get("ana.sosa");
+        // Clientes con documento, teléfono y correo; uno que vuelve a reservar es el mismo cliente.
+        Map<String, Long> clientePorNombre = new HashMap<>();
+        for (String nombre : CLIENTES_SIN_EVENTOS) {
+            clientePorNombre.put(nombre, clientes.obtenerOCrear(datosDeCliente(nombre)).getId());
+        }
         List<Reserva> todas = new ArrayList<>(RESERVAS);
         todas.addAll(generarReservas());
         for (Reserva r : todas) {
+            long clienteId = clientePorNombre.computeIfAbsent(r.cliente(), n -> clientes.obtenerOCrear(datosDeCliente(n)).getId());
             Usuario vendedora = creados.get(r.vendedora());
             UsuarioActual quien = new UsuarioActual(vendedora.getId(), Set.of(RolCodigo.VENDEDORA.name()));
             Evento evento = preReservas.registrar(
                     new PreReserva((short) r.salon(), hoy.plusDays(r.dias()), (short) r.turno(), (short) r.tipo(), null, null,
-                            new DatosCliente(null, r.cliente(), null, null, null)),
+                            new DatosCliente(clienteId, null, null, null, null)),
                     quien);
             if (r.sena() != null) {
                 senas.registrar(evento.getId(), new Sena(BigDecimal.valueOf(r.sena()), Moneda.ARS, hoy, null, "30111222", null), quien);
@@ -265,7 +276,7 @@ public class DatosDeDemostracion implements ApplicationRunner {
         long administracion = creados.get("gabriela.paz").getId();
         inventario.guardar(DEPOSITO_MADRE, deposito, administracion);
         inventario.guardar(BARRA_AVRIL, barraAvril, administracion);
-        log.info("Datos de demostración cargados: {} usuarios, {} eventos y {} bebidas.", PERSONAS.size(), todas.size(),
+        log.info("Datos de demostración cargados: {} usuarios, {} clientes, {} eventos y {} bebidas.", PERSONAS.size(), clientePorNombre.size(), todas.size(),
                 ARTICULOS.size());
     }
 
@@ -335,5 +346,36 @@ public class DatosDeDemostracion implements ApplicationRunner {
             }
         }
         return generadas;
+    }
+
+    /** Clientes que consultaron o reservaron antes y hoy no tienen evento: para que el buscador de clientes tenga dónde elegir. */
+    private static final List<String> CLIENTES_SIN_EVENTOS = List.of(
+            "Lourdes Bazán", "Ezequiel Mansilla", "Carolina Bustamante", "Hernán Quinteros", "Mariana Oviedo", "Gustavo Bringas",
+            "Silvina Ceballos", "Pablo Altamirano", "Daniela Tissera", "Marcos Olmedo", "Verónica Paredes", "Federico Arguello",
+            "Natalia Brizuela", "Sergio Maldonado", "Cecilia Ludueña", "Diego Barrionuevo", "Laura Vaca Narvaja", "Andrés Peralta Ramos",
+            "Rosario Funes", "Tomás Allende", "Fundación Hogar de Día", "Rotary Club Córdoba", "Colegio de Abogados de Córdoba",
+            "Club Atlético Belgrano", "Club Atlético Talleres", "Instituto Santo Tomás", "Colegio Monserrat Ex Alumnos",
+            "Cervecería Córdoba", "Grupo Werthein", "Agencia Córdoba Turismo");
+
+    private static final java.util.regex.Pattern INSTITUCION = java.util.regex.Pattern.compile(
+            "^(Grupo|Banco|Colegio|Instituto|Escuela|Laboratorios|Universidad|Cooperativa|Tarjeta|Fundación|Rotary|Club|Cervecería|Agencia|EPEC|Aguas|Fiat|Renault|Volkswagen|Mercado|Globant|Grido)\\b.*");
+
+    /**
+     * Documento, teléfono y correo inventados pero con forma real, derivados del nombre: siempre los mismos. Personas con
+     * DNI y Gmail; empresas, colegios y clubes con CUIT y el correo de eventos.
+     */
+    static DatosCliente datosDeCliente(String nombre) {
+        int base = Math.floorMod(nombre.hashCode(), Integer.MAX_VALUE);
+        String slug = Normalizer.normalize(nombre, Normalizer.Form.NFD).replaceAll("\\p{M}", "").toLowerCase(Locale.ROOT);
+        String telefono = String.format("351 %03d-%04d", 400 + base % 600, (base / 600) % 10000);
+        if (INSTITUCION.matcher(nombre).matches()) {
+            String cuit = String.format("30-%08d-%d", 50_000_000 + base % 49_999_999, base % 10);
+            String dominio = slug.replaceAll("[^a-z0-9]+", "").replaceFirst("^(grupo|colegio|instituto|escuela|club)", "");
+            return new DatosCliente(null, nombre, cuit, telefono, "eventos@" + dominio + ".com.ar");
+        }
+        String[] palabras = slug.replaceAll("[^a-z ]", "").trim().split("\\s+");
+        String correo = palabras[0] + (palabras.length > 1 ? "." + palabras[1] : "") + (base % 90 + 10) + "@gmail.com";
+        String dni = String.valueOf(20_000_000 + base % 26_000_000);
+        return new DatosCliente(null, nombre, dni, telefono, correo);
     }
 }

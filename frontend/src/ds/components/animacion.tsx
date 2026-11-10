@@ -21,13 +21,15 @@ export interface AnimacionMarcaProps {
   repetir?: boolean;
   /** La marca quieta, en el mismo lugar y tamaño (p. ej. mientras se decide si animar). */
   quieta?: boolean;
+  /** Velocidad de reproducción (1 = normal; el login usa 1,8). El GIF de Safari no se puede acelerar: va a velocidad normal. */
+  velocidad?: number;
   className?: string;
 }
 
 /**
  * La marca de Vastio animada. Con «reducir movimiento» (o sin forma de saberlo) muestra la marca quieta.
  */
-export function AnimacionMarca({ tono, tamano = 120, alTerminar, repetir, quieta, className }: AnimacionMarcaProps) {
+export function AnimacionMarca({ tono, tamano = 120, alTerminar, repetir, quieta, velocidad = 1, className }: AnimacionMarcaProps) {
   const [puede] = useState(puedeAnimar);
   const animar = puede && !quieta;
   const [gif] = useState(usaGif);
@@ -37,10 +39,11 @@ export function AnimacionMarca({ tono, tamano = 120, alTerminar, repetir, quieta
   // El GIF no avisa cuándo termina, y la marca quieta tampoco: se cuenta la duración.
   useEffect(() => {
     if (animar && !gif) return undefined;
-    const espera = DURACION_ANIMACION_MS;
+    // El GIF siempre va a velocidad normal; la marca quieta dura lo que duraría la animación a esa velocidad.
+    const espera = gif && animar ? DURACION_ANIMACION_MS : DURACION_ANIMACION_MS / velocidad;
     const id = repetir && animar ? window.setInterval(() => ultimo.current?.(), espera) : window.setTimeout(() => ultimo.current?.(), espera);
     return () => { window.clearInterval(id); window.clearTimeout(id); };
-  }, [animar, gif, repetir]);
+  }, [animar, gif, repetir, velocidad]);
 
   const clase = cx('v-animacion-marca', tono && `v-animacion-marca--${tono}`, className);
   const estilo = { width: tamano };
@@ -62,6 +65,12 @@ export function AnimacionMarca({ tono, tamano = 120, alTerminar, repetir, quieta
       </span>
     );
   }
+  // playbackRate se aplica al montar y otra vez al cargar los metadatos (algunos navegadores lo reinician al cargar).
+  const acelerar = (video: HTMLVideoElement | null) => {
+    if (!video) return;
+    video.defaultPlaybackRate = velocidad;
+    video.playbackRate = velocidad;
+  };
   const terminar = (e: SyntheticEvent<HTMLVideoElement>) => {
     ultimo.current?.();
     if (repetir) { e.currentTarget.currentTime = 0; e.currentTarget.play()?.catch(() => undefined); }
@@ -69,10 +78,10 @@ export function AnimacionMarca({ tono, tamano = 120, alTerminar, repetir, quieta
   return (
     <span className={clase} style={estilo} aria-hidden>
       {tono !== 'blanco' && (
-        <video className="v-animacion-marca__claro" src={`${nombre('azul')}.webm`} autoPlay muted playsInline onEnded={terminar} />
+        <video className="v-animacion-marca__claro" src={`${nombre('azul')}.webm`} ref={acelerar} onLoadedMetadata={(e) => acelerar(e.currentTarget)} autoPlay muted playsInline onEnded={terminar} />
       )}
       {tono !== 'azul' && (
-        <video className="v-animacion-marca__oscuro" src={`${nombre('blanco')}.webm`} autoPlay muted playsInline onEnded={terminar} />
+        <video className="v-animacion-marca__oscuro" src={`${nombre('blanco')}.webm`} ref={acelerar} onLoadedMetadata={(e) => acelerar(e.currentTarget)} autoPlay muted playsInline onEnded={terminar} />
       )}
     </span>
   );

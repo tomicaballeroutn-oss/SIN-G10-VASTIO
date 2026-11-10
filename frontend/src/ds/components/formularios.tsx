@@ -56,10 +56,14 @@ export interface InputProps extends FieldBase {
   required?: boolean;
   readOnly?: boolean;
   autoComplete?: string;
+  /** Con type="password", el botón del ojito para mostrar u ocultar lo escrito. Por defecto, sí. */
+  revelable?: boolean;
 }
 
 export function Input(p: InputProps) {
   const id = useFieldId(p.id);
+  const revelable = p.type === 'password' && p.revelable !== false && !p.multiline;
+  const [visible, setVisible] = useState(false);
   const comunes = {
     id,
     name: p.name,
@@ -72,7 +76,7 @@ export function Input(p: InputProps) {
     readOnly: p.readOnly,
     inputMode: p.inputMode,
     autoComplete: p.autoComplete,
-    className: cx('v-control', 'body', p.size === 'lg' && 'v-control--lg', p.icon && 'has-icon', p.suffix && 'has-suffix', p.multiline && 'v-control--area'),
+    className: cx('v-control', 'body', p.size === 'lg' && 'v-control--lg', p.icon && 'has-icon', p.suffix && 'has-suffix', revelable && 'has-revelar', p.multiline && 'v-control--area'),
     'aria-invalid': p.error ? true : undefined,
     'aria-describedby': p.error || p.hint ? `${id}-msg` : undefined,
   };
@@ -85,8 +89,23 @@ export function Input(p: InputProps) {
           : p.type === 'date' ? <CampoFechaControl id={id} name={p.name} value={p.value === undefined ? undefined : String(p.value)}
             defaultValue={p.defaultValue === undefined ? undefined : String(p.defaultValue)} onChange={p.onChange} disabled={p.disabled}
             required={p.required} readOnly={p.readOnly} size={p.size} aria-invalid={comunes['aria-invalid']} aria-describedby={comunes['aria-describedby']} />
-          : <input {...comunes} type={p.type ?? 'text'} />}
+          : <input {...comunes} type={revelable && visible ? 'text' : (p.type ?? 'text')} />}
         {p.suffix && <span className="body-sm v-muted v-control__suffix">{p.suffix}</span>}
+        {revelable && (
+          <button
+            type="button"
+            className="v-control__revelar"
+            aria-label={visible ? 'Ocultar contraseña' : 'Mostrar contraseña'}
+            aria-pressed={visible}
+            aria-controls={id}
+            disabled={p.disabled}
+            // No le saca el foco al campo: se sigue escribiendo donde estaba.
+            onMouseDown={(e) => e.preventDefault()}
+            onClick={() => setVisible((v) => !v)}
+          >
+            <Icon name={visible ? 'eye-off' : 'eye'} size={20} />
+          </button>
+        )}
       </div>
     </Field>
   );

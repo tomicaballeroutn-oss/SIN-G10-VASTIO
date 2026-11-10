@@ -66,6 +66,13 @@ h2.h2, h3.h3, h3.h4 { margin: 0; color: var(--ink); }
 .v-field__error { display: flex; align-items: flex-start; gap: var(--space-1); color: var(--danger-ink); }
 .v-field__error .v-icon { margin-top: 2px; }
 .v-control-wrap { position: relative; display: flex; align-items: center; }
+/* Ojito de la contraseña: 44 × 44 dentro del campo, a la derecha; el texto no queda debajo. */
+.v-control.has-revelar { padding-right: 52px; }
+.v-control__revelar { position: absolute; right: 4px; top: 50%; transform: translateY(-50%); display: grid; place-items: center; width: 44px; height: 44px;
+  padding: 0; border: 0; border-radius: var(--radius-md); background: none; color: var(--ink-muted); cursor: pointer; }
+.v-control__revelar:hover { color: var(--ink); background: var(--brand-tint); }
+.v-control__revelar:focus-visible { outline: 2px solid var(--focus-ring); outline-offset: -2px; }
+.v-control__revelar:disabled { opacity: .4; cursor: default; }
 .v-control { width: 100%; height: var(--control-md); padding: 0 var(--space-4); background: var(--surface-raised); color: var(--ink); border: 1.5px solid var(--line-strong); border-radius: var(--radius-md);
   transition: border-color var(--motion-fast) var(--ease); appearance: none; -webkit-appearance: none; margin: 0; }
 .v-control--lg { height: var(--control-lg); }

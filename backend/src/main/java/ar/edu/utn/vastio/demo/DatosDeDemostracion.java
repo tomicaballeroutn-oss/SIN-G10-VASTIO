@@ -362,7 +362,7 @@ public class DatosDeDemostracion implements ApplicationRunner {
 
     /**
      * Documento, teléfono y correo inventados pero con forma real, derivados del nombre: siempre los mismos. Personas con
-     * DNI y Gmail; empresas, colegios y clubes con CUIT y el correo de eventos.
+     * DNI y correos ficticios; empresas, colegios y clubes con CUIT y el correo de eventos. Usar example.com evita destinatarios reales.
      */
     static DatosCliente datosDeCliente(String nombre) {
         int base = Math.floorMod(nombre.hashCode(), Integer.MAX_VALUE);
@@ -371,10 +371,10 @@ public class DatosDeDemostracion implements ApplicationRunner {
         if (INSTITUCION.matcher(nombre).matches()) {
             String cuit = String.format("30-%08d-%d", 50_000_000 + base % 49_999_999, base % 10);
             String dominio = slug.replaceAll("[^a-z0-9]+", "").replaceFirst("^(grupo|colegio|instituto|escuela|club)", "");
-            return new DatosCliente(null, nombre, cuit, telefono, "eventos@" + dominio + ".com.ar");
+            return new DatosCliente(null, nombre, cuit, telefono, "eventos+" + dominio + "@example.com");
         }
         String[] palabras = slug.replaceAll("[^a-z ]", "").trim().split("\\s+");
-        String correo = palabras[0] + (palabras.length > 1 ? "." + palabras[1] : "") + (base % 90 + 10) + "@gmail.com";
+        String correo = palabras[0] + (palabras.length > 1 ? "." + palabras[1] : "") + (base % 90 + 10) + "@example.com";
         String dni = String.valueOf(20_000_000 + base % 26_000_000);
         return new DatosCliente(null, nombre, dni, telefono, correo);
     }

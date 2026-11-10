@@ -2,6 +2,7 @@ import { useCallback, useEffect, useMemo, useRef, useState, type ReactNode } fro
 import {
   cerrarSesion, iniciarSesion, renovarSesion, suscribirSesion, vencerSesion, type Sesion, type UsuarioSesion,
 } from '../../api/cliente';
+import { guardarUltimoUsuario } from './ultimoUsuario';
 import { SesionContext, type EstadoSesion } from './contexto';
 
 const MINUTO = 60_000;
@@ -33,6 +34,7 @@ export function SesionProvider({ children }: { children: ReactNode }) {
     ultimaRenovacion.current = Date.now();
     ultimaActividad.current = Date.now();
     setUsuario(sesion.usuario);
+    guardarUltimoUsuario(sesion.usuario.id);
     setEstado('activa');
     setVencida(false);
     setAvisoVencimiento(false);

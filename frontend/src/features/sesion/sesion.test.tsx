@@ -1,4 +1,4 @@
-import { act, render, screen, within } from '@testing-library/react';
+import { act, render, screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { createMemoryRouter, RouterProvider } from 'react-router';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
@@ -49,6 +49,7 @@ const menuLateral = () => screen.getAllByRole('navigation', { name: 'Navegación
 
 beforeEach(() => {
   _reiniciarCliente();
+  sessionStorage.clear();
 });
 
 afterEach(() => {
@@ -64,6 +65,32 @@ describe('UI-01 · inicio de sesión', () => {
     expect(await screen.findByRole('heading', { name: 'Ingresá a tu cuenta' })).toBeInTheDocument();
     expect(router.state.location.pathname).toBe('/login');
     expect(router.state.location.search).toBe('?volver=%2Fagenda');
+  });
+
+  it('después de otra cuenta, entra a su inicio y no a la última pantalla de la anterior', async () => {
+    sessionStorage.setItem('vastio.ultimoUsuario', '99');
+    backend(null, () => sesionDe(['ADMINISTRACION']));
+    const usuario = userEvent.setup();
+    const router = montar('/login?volver=%2Fbarra');
+
+    await usuario.type(await screen.findByLabelText('Usuario'), 'lucia.ferreyra');
+    await usuario.type(screen.getByLabelText('Contraseña'), 'clave');
+    await usuario.click(screen.getByRole('button', { name: 'Ingresar' }));
+
+    await waitFor(() => expect(router.state.location.pathname).toBe('/inicio'));
+  });
+
+  it('si vuelve a entrar la misma persona, sigue donde estaba', async () => {
+    sessionStorage.setItem('vastio.ultimoUsuario', '1');
+    backend(null, () => sesionDe(['ADMINISTRACION']));
+    const usuario = userEvent.setup();
+    const router = montar('/login?volver=%2Fexistencias');
+
+    await usuario.type(await screen.findByLabelText('Usuario'), 'lucia.ferreyra');
+    await usuario.type(screen.getByLabelText('Contraseña'), 'clave');
+    await usuario.click(screen.getByRole('button', { name: 'Ingresar' }));
+
+    await waitFor(() => expect(router.state.location.pathname).toBe('/existencias'));
   });
 
   it('el login es el telón: marca animada, VASTIO y la bajada, el formulario sin ficha y siempre en tema claro', async () => {

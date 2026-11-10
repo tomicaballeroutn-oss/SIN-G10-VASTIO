@@ -118,6 +118,22 @@ describe('Registrar evento', () => {
     });
   });
 
+  it('si cambió algo y cancela, pregunta antes de salir; sin cambios, sale directo', async () => {
+    backend(FICHA);
+    const usuario = userEvent.setup();
+    const router = montar('/eventos/5/datos');
+
+    await usuario.type(await screen.findByLabelText('Nombre del evento'), ' (nuevo)');
+    await usuario.click(screen.getByRole('button', { name: 'Cancelar' }));
+    const aviso = await screen.findByRole('dialog', { name: 'Tenés cambios sin guardar' });
+    await usuario.click(within(aviso).getByRole('button', { name: 'Seguir editando' }));
+    expect(router.state.location.pathname).toBe('/eventos/5/datos');
+
+    await usuario.click(screen.getByRole('button', { name: 'Cancelar' }));
+    await usuario.click(within(await screen.findByRole('dialog', { name: 'Tenés cambios sin guardar' })).getByRole('button', { name: 'Salir sin guardar' }));
+    expect(router.state.location.pathname).toBe('/eventos/5');
+  });
+
   it('si otra persona guardó en el medio, avisa y no pisa', async () => {
     backend(FICHA, () => problema(409, 'EVENTO_MODIFICADO', 'Otra persona modificó el evento mientras lo editabas. Volvé a abrir la ficha para ver los cambios.'));
     const usuario = userEvent.setup();

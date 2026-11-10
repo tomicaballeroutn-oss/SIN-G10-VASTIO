@@ -56,7 +56,11 @@
 }
 
 .ficha__datos { display: grid; gap: var(--space-4); align-items: start; }
-@media (min-width: 960px) { .ficha__datos { grid-template-columns: 1fr 1fr; } }
+/* Dos columnas que se acomodan solas (sin huecos cuando una tarjeta es más corta que la de al lado). */
+@media (min-width: 960px) {
+  .ficha__datos { display: block; columns: 2; column-gap: var(--space-4); }
+  .ficha__datos > * { break-inside: avoid; margin-bottom: var(--space-4); }
+}
 .ficha__lista { display: flex; flex-direction: column; gap: var(--space-3); margin: 0; }
 .ficha__dato { display: grid; gap: var(--space-1); }
 @media (min-width: 480px) { .ficha__dato { grid-template-columns: 160px minmax(0, 1fr); align-items: baseline; } }
@@ -91,23 +95,35 @@
 .v-card.servicios__tarjeta { padding: 0; background: none; border: 0; border-radius: 0; box-shadow: none; }
 .servicios__tarjeta > .v-card__head { display: none; }
 .servicios { display: grid; gap: var(--space-4); align-items: start; }
-@media (min-width: 960px) { .servicios { grid-template-columns: 1fr 1fr; } }
-.servicios > .v-alert, .servicios__acciones { grid-column: 1 / -1; }
+@media (min-width: 960px) {
+  .servicios { display: block; columns: 2; column-gap: var(--space-4); }
+  .servicios > * { break-inside: avoid; margin-bottom: var(--space-4); }
+  .servicios > .v-alert, .servicios__acciones, .servicios__pie { column-span: all; }
+}
 .servicios__categoria {
   display: flex; flex-direction: column; gap: var(--space-3); min-width: 0; margin: 0; padding: var(--space-4);
   background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius-lg);
 }
 .servicios__titulo { display: flex; align-items: center; flex-wrap: wrap; gap: var(--space-2); }
 .servicios__categoria .h4 { font: 600 20px/28px var(--font-sans); }
-/* La leyenda de un fieldset se dibuja sobre el borde: flotada queda adentro de la caja. */
+/* La leyenda de un fieldset se dibuja sobre el borde: flotada queda adentro de la caja. Título y avisos en una línea. */
 .servicios__leyenda { float: left; width: 100%; padding: 0; margin-bottom: var(--space-1); }
+.servicios__avisos { display: flex; flex-wrap: wrap; gap: var(--space-2); }
 .servicios__leyenda + * { clear: both; }
 .servicios__texto { margin: 0; white-space: pre-line; }
 /* M-09: renglones libres. El texto ocupa lo que sobra; la cantidad, un ancho fijo; al final, quitar. */
 .servicios__renglones { display: flex; flex-direction: column; gap: var(--space-2); }
-.servicios__encabezado, .servicios__renglon { display: grid; grid-template-columns: minmax(0, 1fr) 88px var(--control-md); gap: var(--space-2); align-items: start; }
+.servicios__renglon { display: grid; grid-template-columns: minmax(0, 1fr) 88px var(--control-md); gap: var(--space-2); align-items: start; }
 .servicios__lista { margin: 0; padding-left: var(--space-5); }
 .servicios__acciones { display: flex; justify-content: flex-end; }
+.servicios__pie { display: flex; justify-content: flex-start; }
+/* En teléfono y tableta, «Guardar» queda fijo arriba de la barra de navegación: el formulario es largo. */
+@media (max-width: 959px) {
+  .servicios__acciones, .datos-evento__acciones { position: sticky; z-index: 5; bottom: calc(96px + env(safe-area-inset-bottom, 0px));
+    padding: var(--space-3); margin-inline: calc(-1 * var(--space-3)); border-radius: var(--radius-lg);
+    background: color-mix(in srgb, var(--canvas) 88%, transparent); backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px); }
+  .servicios__acciones .v-btn, .datos-evento__acciones .v-btn[type="submit"] { flex: 1; }
+}
 
 /* UI-14 · Cantidad de invitados */
 .invitados { display: flex; flex-direction: column; gap: var(--space-4); min-width: min(400px, 100%); }

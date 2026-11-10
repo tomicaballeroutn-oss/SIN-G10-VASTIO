@@ -162,6 +162,8 @@ export interface SegmentadoProps {
   value: string;
   options: SelectOption[];
   onChange: (value: string) => void;
+  /** La etiqueta queda para los lectores de pantalla pero no se ve (p. ej. cuando el título de la sección ya lo dice). */
+  labelHidden?: boolean;
   className?: string;
 }
 
@@ -169,11 +171,11 @@ export interface SegmentadoProps {
  * Pocas opciones excluyentes (hasta cinco o seis) como botones grandes, para tocar sin abrir un desplegable.
  * Se anuncia como grupo de radio.
  */
-export function Segmentado({ label, value, options, onChange, className }: SegmentadoProps) {
+export function Segmentado({ label, value, options, onChange, labelHidden, className }: SegmentadoProps) {
   const id = useFieldId();
   return (
     <div className={cx('v-field', className)}>
-      <span id={id} className="label v-field__label">{label}</span>
+      <span id={id} className={cx('label v-field__label', labelHidden && 'v-sr')}>{label}</span>
       <div role="radiogroup" aria-labelledby={id} className="v-segmentado">
         {options.map((o) => (
           <button
@@ -200,15 +202,16 @@ export interface OpcionesMultiplesProps {
   options: SelectOption[];
   onChange: (values: string[]) => void;
   hint?: string;
+  labelHidden?: boolean;
   className?: string;
 }
 
 /** Como Segmentado, pero se pueden marcar varias. Cada opción es un botón que se prende y se apaga. */
-export function OpcionesMultiples({ label, values, options, onChange, hint, className }: OpcionesMultiplesProps) {
+export function OpcionesMultiples({ label, values, options, onChange, hint, labelHidden, className }: OpcionesMultiplesProps) {
   const id = useFieldId();
   return (
     <div className={cx('v-field', className)}>
-      <span id={id} className="label v-field__label">{label}</span>
+      <span id={id} className={cx('label v-field__label', labelHidden && 'v-sr')}>{label}</span>
       <div role="group" aria-labelledby={id} className="v-segmentado">
         {options.map((o) => {
           const elegida = values.includes(o.value);

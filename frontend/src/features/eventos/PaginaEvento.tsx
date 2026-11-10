@@ -34,6 +34,7 @@ import { DialogoSena } from './DialogoSena';
 import { ImprimirFicha } from './ImprimirFicha';
 import './eventos.css';
 import { ROLES_CALENDAR } from '../../api/calendar';
+import { resumenDeServicios } from './opcionesServicios';
 import { EstadoGoogleCalendar } from './EstadoGoogleCalendar';
 
 /**
@@ -113,6 +114,11 @@ function ContenidoFicha({ ficha, alCambiar }: { ficha: Ficha; alCambiar: (ficha:
         <p className="body-sm v-muted">
           {ficha.codigo} · {ficha.tipo.nombre} · {ficha.planner ? `Planner: ${ficha.planner.nombre}` : 'Sin planner asignada'}
         </p>
+        {resumenDeServicios(ficha.servicios) && (
+          <p className="body-sm ficha__resumen-servicios">
+            <Icon name="utensils-crossed" size={16} /> {resumenDeServicios(ficha.servicios)}
+          </p>
+        )}
         {ficha.reprogramadoDesde && (
           <p className="body-sm ficha__reprogramado">
             <Icon name="calendar-clock" size={16} /> Reprogramado. Fecha original: {ficha.reprogramadoDesde}

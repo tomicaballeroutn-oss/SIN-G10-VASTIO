@@ -4,7 +4,7 @@
  * categoría: si una categoría se renombra en Parámetros, vuelve a texto libre.
  *
  * - `sugerencias`: muchas opciones o se combinan con cantidades (Menú): se escribe y sugiere, y se puede escribir otra.
- * - `una`: se elige una sola (Bodega, Tipo de barra): botones con lo que incluye cada una.
+ * - `una`: se elige una sola (Bodega, Tipo de barra): botones.
  * - `varias`: pocas y se marcan varias, cada una con su cantidad (Menús especiales).
  */
 export interface OpcionServicio {
@@ -47,19 +47,19 @@ const OPCIONES: Record<string, OpcionesDeCategoria> = {
   bodega: {
     modo: 'una',
     opciones: [
-      { nombre: 'Selección', detalle: 'Tinto, blanco y espumante de línea' },
-      { nombre: 'Reserva', detalle: 'Varietales reserva y espumante brut' },
-      { nombre: 'Gran Reserva', detalle: 'Blends de alta gama y espumante nature' },
-      { nombre: 'Bodega de Autor', detalle: 'Etiquetas de pequeñas bodegas, elegidas con el cliente' },
+      { nombre: 'Selección' },
+      { nombre: 'Reserva' },
+      { nombre: 'Gran Reserva' },
+      { nombre: 'Bodega de Autor' },
     ],
   },
   'tipo de barra': {
     modo: 'una',
     opciones: [
-      { nombre: 'Sin alcohol', detalle: 'Jugos, gaseosas y limonadas' },
-      { nombre: 'Barra clásica', detalle: 'Tragos tradicionales y cerveza' },
-      { nombre: 'Barra libre', detalle: 'Tragos y cerveza sin límite durante el evento' },
-      { nombre: 'Coctelería de autor', detalle: 'Bartenders y carta de cócteles propia' },
+      { nombre: 'Sin alcohol' },
+      { nombre: 'Barra clásica' },
+      { nombre: 'Barra libre' },
+      { nombre: 'Coctelería de autor' },
     ],
   },
 };

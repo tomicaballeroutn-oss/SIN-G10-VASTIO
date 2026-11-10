@@ -64,7 +64,7 @@ describe('UI-13 · servicios contratados (M-09)', () => {
 
     const bodega = screen.getByRole('group', { name: 'Bodega' });
     await usuario.click(within(bodega).getByRole('radio', { name: 'Reserva' }));
-    expect(within(bodega).getByText('Incluye: Varietales reserva y espumante brut.')).toBeInTheDocument();
+    expect(within(bodega).queryByText(/^Incluye/)).not.toBeInTheDocument();
     await usuario.type(screen.getByLabelText(/Detalle de Bodega/), 'Malbec Luigi Bosca');
     await usuario.click(guardar);
 

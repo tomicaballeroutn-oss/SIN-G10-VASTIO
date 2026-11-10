@@ -205,7 +205,6 @@ function CategoriaEditable({ servicio: s, borrador, alCambiar, errorDe }: {
   if (opciones?.modo === 'una') {
     // Una sola opción (Bodega, Tipo de barra). Un texto viejo que no está entre las opciones se conserva como una más.
     const elegida = borrador.renglones.find((r) => r.texto.trim())?.texto.trim() ?? '';
-    const detalle = opciones.opciones.find((o) => o.nombre === elegida)?.detalle;
     const errorUna = errorDe('renglones') ?? (borrador.renglones[0] ? errorDeRenglon(borrador.renglones[0].clave, 'texto') : undefined);
     carga = (
       <>
@@ -219,7 +218,6 @@ function CategoriaEditable({ servicio: s, borrador, alCambiar, errorDe }: {
           ]}
           onChange={(valor) => alCambiar({ ...borrador, renglones: [renglonNuevo(valor)] })}
         />
-        {detalle && <p className="body-sm v-muted servicios__incluye">Incluye: {detalle}.</p>}
         {errorUna && <p className="body-sm v-field__error" role="alert">{errorUna}</p>}
       </>
     );

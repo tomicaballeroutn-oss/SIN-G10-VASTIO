@@ -1,10 +1,12 @@
+import { useRef, useState } from 'react';
 import { fichas, type Ficha } from '../../api/eventos';
 import { useEnvio } from '../../api/useDatos';
 import { Alert, Button, Dialog, Icon } from '../../ds';
 
 /**
  * UI-15 · Confirmar evento: lista los requisitos (planner, invitados definitivos, servicios requeridos, fecha).
- * Si falta alguno, el botón queda deshabilitado y la fila dice qué falta, no solo se atenúa.
+ * Si falta alguno, el botón no va sólido pero se puede tocar: avisa qué falta y lleva a la lista. Cada fila dice qué falta,
+ * no solo se atenúa.
  */
 export function DialogoConfirmar({ ficha, alCerrar, alConfirmar }: {
   ficha: Ficha;
@@ -14,8 +16,16 @@ export function DialogoConfirmar({ ficha, alCerrar, alConfirmar }: {
   const requisitos = ficha.requisitosConfirmacion ?? [];
   const listo = requisitos.length > 0 && requisitos.every((r) => r.cumplido);
   const { guardando, error, enviar } = useEnvio();
+  const [intento, setIntento] = useState(false);
+  const lista = useRef<HTMLUListElement>(null);
+  const pendientes = requisitos.filter((r) => !r.cumplido);
 
   async function confirmar() {
+    if (!listo) {
+      setIntento(true);
+      lista.current?.focus();
+      return;
+    }
     const nueva = await enviar(() => fichas.confirmar(ficha.id));
     if (nueva) alConfirmar(nueva);
   }
@@ -28,13 +38,18 @@ export function DialogoConfirmar({ ficha, alCerrar, alConfirmar }: {
       actions={
         <>
           <Button variant="outline" onClick={alCerrar}>Cancelar</Button>
-          <Button icon="circle-check" loading={guardando} disabled={!listo} onClick={() => void confirmar()}>Confirmar evento</Button>
+          <Button icon="circle-check" loading={guardando} pendiente={!listo} onClick={() => void confirmar()}>Confirmar evento</Button>
         </>
       }
     >
       <div className="confirmar">
         {error && <Alert tone="danger">{error.message}</Alert>}
-        <ul className="confirmar__requisitos" aria-label="Requisitos para confirmar">
+        {intento && !listo && (
+          <Alert tone="warning" title="Todavía no se puede confirmar">
+            Falta: {pendientes.map((r) => r.titulo.toLowerCase()).join(', ')}.
+          </Alert>
+        )}
+        <ul ref={lista} tabIndex={-1} className="confirmar__requisitos" aria-label="Requisitos para confirmar">
           {requisitos.map((r) => (
             <li key={r.codigo} className={r.cumplido ? 'confirmar__requisito' : 'confirmar__requisito is-pendiente'}>
               <Icon name={r.cumplido ? 'circle-check' : 'circle-alert'} size={20} />

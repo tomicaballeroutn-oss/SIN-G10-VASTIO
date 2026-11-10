@@ -20,11 +20,19 @@ export interface AlertProps {
   action?: ReactNode;
   icon?: IconName;
   className?: string;
+  /** Al aparecer, lleva la pantalla hasta el aviso y lo deja centrado (p. ej. «Guardado» después de un formulario largo). */
+  centrar?: boolean;
 }
 
-export function Alert({ tone = 'info', title, children, action, icon, className }: AlertProps) {
+export function Alert({ tone = 'info', title, children, action, icon, className, centrar }: AlertProps) {
+  const ref = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    if (!centrar) return;
+    const sinMovimiento = window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
+    ref.current?.scrollIntoView?.({ block: 'center', behavior: sinMovimiento ? 'auto' : 'smooth' });
+  }, [centrar, children, title]);
   return (
-    <div className={cx('v-alert', `v-alert--${tone}`, className)} role={tone === 'danger' || tone === 'warning' ? 'alert' : 'status'}>
+    <div ref={ref} className={cx('v-alert', `v-alert--${tone}`, className)} role={tone === 'danger' || tone === 'warning' ? 'alert' : 'status'}>
       <Icon name={icon ?? ICONO_DE_TONO[tone]} size={22} className="v-alert__icon" />
       <div className="v-alert__body">
         {title && <p className="label">{title}</p>}

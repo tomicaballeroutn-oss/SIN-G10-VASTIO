@@ -1,5 +1,6 @@
 package ar.edu.utn.vastio.bebida.api;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.hasItem;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -11,6 +12,7 @@ import java.time.LocalDate;
 
 import jakarta.persistence.EntityManager;
 
+import org.hibernate.Hibernate;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,6 +28,7 @@ import com.jayway.jsonpath.JsonPath;
 import ar.edu.utn.vastio.Escenario;
 import ar.edu.utn.vastio.Personas;
 import ar.edu.utn.vastio.PruebaDeIntegracion;
+import ar.edu.utn.vastio.bebida.aplicacion.PreparacionService;
 import ar.edu.utn.vastio.usuarios.dominio.RolCodigo;
 import ar.edu.utn.vastio.usuarios.dominio.Usuario;
 
@@ -53,6 +56,9 @@ class OrdenAjusteIT {
 
     @Autowired
     EntityManager entityManager;
+
+    @Autowired
+    PreparacionService preparacion;
 
     Usuario compras;
     long evento;
@@ -180,6 +186,17 @@ class OrdenAjusteIT {
                 .andExpect(jsonPath("$.orden.estado").value("SUGERIDA"))
                 .andExpect(jsonPath("$.orden.renglones[0].bebidaId").value(fernet))
                 .andExpect(jsonPath("$.orden.renglones[0].aRetirar").value(18.0));
+    }
+
+    /** La respuesta se arma fuera de la transacción (open-in-view apagado): los renglones tienen que venir cargados. */
+    @Test
+    void laPantallaDePreparacionTraeLosRenglonesDeLaOrden() {
+        entityManager.flush();
+        entityManager.clear();
+        var orden = preparacion.pantalla(evento).orden();
+        entityManager.clear();
+        assertThat(Hibernate.isInitialized(orden.getRenglones())).isTrue();
+        assertThat(orden.getRenglones()).hasSize(1);
     }
 
     private long bebida(String nombre, boolean activa) {

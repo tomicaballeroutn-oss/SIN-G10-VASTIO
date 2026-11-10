@@ -71,7 +71,7 @@ public class PreparacionService {
                 .stream().sorted(Comparator.comparing(Ubicacion::getNombre)).map(b -> new Circuito(b, b.getAbastecimiento())).toList();
         return new Pantalla(evento, ubicaciones.findFirstByTipoAndActivoTrue(TipoUbicacion.DEPOSITO).orElse(null), circuitos,
                 preparaciones.findByEventoIdOrderByIdDesc(eventoId).stream().map(this::registrada).toList(),
-                ordenes.vigente(eventoId).orElse(null));
+                ordenes.vigenteConRenglones(eventoId).orElse(null));
     }
 
     @Transactional

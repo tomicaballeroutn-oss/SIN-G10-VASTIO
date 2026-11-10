@@ -9,20 +9,20 @@ import ar.edu.utn.vastio.agenda.aplicacion.ClienteService.DatosCliente;
 class DatosDeClienteTest {
 
     @Test
-    void unaPersonaTieneDniTelefonoDeCordobaYGmail() {
+    void unaPersonaTieneDniTelefonoDeCordobaYCorreoReservado() {
         DatosCliente datos = DatosDeDemostracion.datosDeCliente("Martina Ortiz");
         assertThat(datos.nombre()).isEqualTo("Martina Ortiz");
         assertThat(datos.documento()).matches("\\d{8}");
         assertThat(datos.telefono()).matches("351 \\d{3}-\\d{4}");
-        assertThat(datos.email()).matches("martina\\.ortiz\\d{2}@gmail\\.com");
+        assertThat(datos.email()).matches("martina\\.ortiz\\d{2}@example\\.com");
     }
 
     @Test
     void unaInstitucionTieneCuitYCorreoDeEventosSinTildes() {
         DatosCliente datos = DatosDeDemostracion.datosDeCliente("Colegio Nacional de Monserrat");
         assertThat(datos.documento()).matches("30-\\d{8}-\\d").hasSizeLessThanOrEqualTo(13);
-        assertThat(datos.email()).isEqualTo("eventos@nacionaldemonserrat.com.ar");
-        assertThat(DatosDeDemostracion.datosDeCliente("Fundación Hogar de Día").email()).isEqualTo("eventos@fundacionhogardedia.com.ar");
+        assertThat(datos.email()).isEqualTo("eventos+nacionaldemonserrat@example.com");
+        assertThat(DatosDeDemostracion.datosDeCliente("Fundación Hogar de Día").email()).isEqualTo("eventos+fundacionhogardedia@example.com");
     }
 
     @Test

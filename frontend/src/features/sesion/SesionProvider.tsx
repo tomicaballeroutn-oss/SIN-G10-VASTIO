@@ -8,7 +8,30 @@ import { SesionContext, type EstadoSesion } from './contexto';
 const MINUTO = 60_000;
 /** Cada cuánto se revisa la inactividad. */
 const INTERVALO_REVISION = 15_000;
-const EVENTOS_DE_ACTIVIDAD = ['pointerdown', 'keydown', 'wheel', 'touchstart'] as const;
+const EVENTOS_DE_ACTIVIDAD = ['pointerdown', 'keydown', 'wheel', 'touchstart', 'scroll', 'mousemove'] as const;
+/**
+ * La última actividad, compartida entre pestañas. Si no, una pestaña olvidada llegaba a la inactividad, cerraba la sesión
+ * en el servidor (la cookie es una sola) y cortaba la pestaña que la persona estaba usando.
+ */
+const CLAVE_ACTIVIDAD = 'vastio.ultimaActividad';
+/** Cada cuánto se escribe la actividad compartida (mover el mouse dispara muchísimos eventos). */
+const ESCRITURA_ACTIVIDAD = 10_000;
+
+function actividadCompartida(): number {
+  try {
+    return Number(localStorage.getItem(CLAVE_ACTIVIDAD)) || 0;
+  } catch {
+    return 0;
+  }
+}
+
+function compartirActividad(momento: number) {
+  try {
+    localStorage.setItem(CLAVE_ACTIVIDAD, String(momento));
+  } catch {
+    // sin almacenamiento: cada pestaña cuenta la suya, como antes
+  }
+}
 
 /**
  * Estado de la sesión para toda la app.
@@ -33,6 +56,7 @@ export function SesionProvider({ children }: { children: ReactNode }) {
     minutos.current = { expiracion: sesion.minutosExpiracionSesion, aviso: sesion.minutosAvisoExpiracion };
     ultimaRenovacion.current = Date.now();
     ultimaActividad.current = Date.now();
+    compartirActividad(Date.now());
     setUsuario(sesion.usuario);
     guardarUltimoUsuario(sesion.usuario.id);
     setEstado('activa');
@@ -66,8 +90,13 @@ export function SesionProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     if (estado !== 'activa' || vencida) return undefined;
 
+    let ultimaEscritura = 0;
     function registrarActividad() {
       ultimaActividad.current = Date.now();
+      if (Date.now() - ultimaEscritura > ESCRITURA_ACTIVIDAD) {
+        ultimaEscritura = Date.now();
+        compartirActividad(ultimaEscritura);
+      }
       const mitadDeLaSesion = (minutos.current.expiracion * MINUTO) / 2;
       if (Date.now() - ultimaRenovacion.current > mitadDeLaSesion) {
         ultimaRenovacion.current = Date.now();
@@ -76,7 +105,8 @@ export function SesionProvider({ children }: { children: ReactNode }) {
     }
 
     const revisar = window.setInterval(() => {
-      const inactivo = Date.now() - ultimaActividad.current;
+      // Cuenta la actividad de cualquier pestaña: la de esta o la última que compartió otra.
+      const inactivo = Date.now() - Math.max(ultimaActividad.current, actividadCompartida());
       const { expiracion, aviso } = minutos.current;
       if (inactivo >= expiracion * MINUTO) {
         void vencerSesion();
@@ -104,6 +134,7 @@ export function SesionProvider({ children }: { children: ReactNode }) {
       salir: () => cerrarSesion(),
       seguirTrabajando: async () => {
         ultimaActividad.current = Date.now();
+        compartirActividad(Date.now());
         setAvisoVencimiento(false);
         await renovarSesion();
       },

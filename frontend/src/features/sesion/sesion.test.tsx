@@ -50,6 +50,7 @@ const menuLateral = () => screen.getAllByRole('navigation', { name: 'Navegación
 beforeEach(() => {
   _reiniciarCliente();
   sessionStorage.clear();
+  localStorage.removeItem('vastio.ultimaActividad');
 });
 
 afterEach(() => {
@@ -240,6 +241,33 @@ describe('UI-02 · sesión vencida', () => {
     act(() => vi.advanceTimersByTime(5 * 60_000));
     expect(await screen.findByRole('dialog', { name: 'Tu sesión expiró' })).toBeInTheDocument();
     expect(fetchMock.mock.calls.some(([url]) => String(url).endsWith('/auth/logout'))).toBe(true);
+  });
+
+  it('si se usa en otra pestaña, esta no cierra la sesión por inactividad', async () => {
+    vi.useFakeTimers({ toFake: ['setInterval', 'clearInterval', 'Date'] });
+    const fetchMock = backend(sesionDe(['COMPRAS']));
+    montar('/');
+    await screen.findByRole('heading', { level: 1, name: 'Hola, Lucía' });
+
+    // Pasan 59 minutos sin tocar esta pestaña, pero la otra se usó hace un rato.
+    act(() => vi.advanceTimersByTime(59 * 60_000));
+    localStorage.setItem('vastio.ultimaActividad', String(Date.now() - 60_000));
+    act(() => vi.advanceTimersByTime(5 * 60_000));
+
+    expect(screen.queryByRole('dialog', { name: 'Tu sesión expiró' })).not.toBeInTheDocument();
+    expect(fetchMock.mock.calls.some(([url]) => String(url).endsWith('/auth/logout'))).toBe(false);
+  });
+
+  it('desplazarse por la pantalla cuenta como actividad', async () => {
+    vi.useFakeTimers({ toFake: ['setInterval', 'clearInterval', 'Date'] });
+    backend(sesionDe(['COMPRAS']));
+    montar('/');
+    await screen.findByRole('heading', { level: 1, name: 'Hola, Lucía' });
+
+    act(() => vi.advanceTimersByTime(50 * 60_000));
+    act(() => { window.dispatchEvent(new Event('scroll')); });
+    act(() => vi.advanceTimersByTime(20 * 60_000));
+    expect(screen.queryByRole('dialog', { name: 'Tu sesión expiró' })).not.toBeInTheDocument();
   });
 
   it('«Seguir trabajando» renueva la sesión y saca el aviso', async () => {

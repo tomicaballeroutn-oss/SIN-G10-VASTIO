@@ -1,8 +1,10 @@
-import { Navigate, useNavigate, useSearchParams } from 'react-router';
+import { useState } from 'react';
+import { Navigate, useSearchParams } from 'react-router';
 import { AnimacionMarca } from '../../ds';
 import { FormularioIngreso } from './FormularioIngreso';
 import { useSesion } from './contexto';
 import { rutaDeInicio } from '../layout/menu';
+import { leerUltimoUsuario } from './ultimoUsuario';
 import './sesion.css';
 
 /**
@@ -12,13 +14,17 @@ import './sesion.css';
 export function PaginaIngreso() {
   const { estado, usuario } = useSesion();
   const [parametros] = useSearchParams();
-  const navegar = useNavigate();
   const volver = parametros.get('volver');
   // Solo rutas internas, para no redirigir afuera con un enlace armado.
   const destino = volver && volver.startsWith('/') && !volver.startsWith('//') ? volver : null;
+  // Quién estaba antes en esta pestaña, leído al abrir el login (antes de que entre la persona nueva).
+  const [anterior] = useState(leerUltimoUsuario);
 
   if (estado === 'activa' && usuario) {
-    return <Navigate to={destino ?? rutaDeInicio(usuario.roles)} replace />;
+    // `volver` es la última pantalla de quien estaba antes: solo vale si vuelve a entrar la misma persona (o si se abrió
+    // un enlace directo en una pestaña sin sesión previa). Si entra otra cuenta, va a su inicio.
+    const mismaPersona = anterior === null || anterior === usuario.id;
+    return <Navigate to={(mismaPersona && destino) || rutaDeInicio(usuario.roles)} replace />;
   }
 
   return (
@@ -35,7 +41,7 @@ export function PaginaIngreso() {
             <p className="overline v-muted">Inicio de sesión</p>
             <h1 className="h1">Ingresá a tu cuenta</h1>
           </div>
-          {estado !== 'cargando' && <FormularioIngreso alIngresar={() => destino && navegar(destino, { replace: true })} />}
+          {estado !== 'cargando' && <FormularioIngreso />}
         </div>
       </div>
     </main>

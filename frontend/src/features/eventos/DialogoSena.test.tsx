@@ -6,7 +6,7 @@ import { hoyEnCordoba } from '../../api/agenda';
 import { _reiniciarCliente } from '../../api/cliente';
 import type { Ficha } from '../../api/eventos';
 import { backendFalso, json, montar, pedidos, problema, sesionDe, type Pedido } from '../../test/backendFalso';
-import { leerImporte } from '../comun/formato';
+import { formatearImporte, leerImporte } from '../comun/formato';
 import { SIN_ACCIONES } from '../../test/fichas';
 
 const PRE_RESERVA: Ficha = {
@@ -131,15 +131,17 @@ describe('UI-11 · registrar seña', () => {
     expect(pedidos(fetchMock).find((p) => p.metodo === 'POST')?.cuerpo).toMatchObject({ importe: 1500.75, moneda: 'USD' });
   });
 
-  it('un importe ilegible se marca sin llamar al sistema', async () => {
-    const fetchMock = backend();
+  it('el importe se puntúa solo al escribirlo y no acepta letras', async () => {
+    backend();
     const { usuario, dialogo } = await abrir();
+    const importe = within(dialogo).getByLabelText('Importe de la seña');
 
-    await usuario.type(within(dialogo).getByLabelText('Importe de la seña'), 'ciento cincuenta');
-    await usuario.click(within(dialogo).getByRole('button', { name: 'Confirmar seña' }));
-
-    expect(within(dialogo).getByLabelText('Importe de la seña')).toHaveAccessibleDescription('Escribí el importe con números, p. ej. 150.000.');
-    expect(pedidos(fetchMock).some((p) => p.metodo === 'POST')).toBe(false);
+    await usuario.type(importe, 'ciento cincuenta');
+    expect(importe).toHaveValue('');
+    await usuario.type(importe, '1500000');
+    expect(importe).toHaveValue('1.500.000');
+    await usuario.type(importe, ',758');
+    expect(importe).toHaveValue('1.500.000,75');
   });
 
   it('muestra en cada campo lo que rechaza el sistema', async () => {
@@ -165,6 +167,14 @@ describe('UI-11 · registrar seña', () => {
     await usuario.click(within(dialogo).getByRole('button', { name: 'Confirmar seña' }));
 
     expect(await within(dialogo).findByText(/no puede ser posterior a hoy/)).toBeInTheDocument();
+  });
+});
+
+describe('formatearImporte', () => {
+  it.each([
+    ['150000', '150.000'], ['1500,5', '1.500,5'], ['1.500.000,759', '1.500.000,75'], ['0045', '45'], [',5', '0,5'], ['abc', ''], ['999', '999'],
+  ])('%s → %s', (texto, esperado) => {
+    expect(formatearImporte(texto)).toBe(esperado);
   });
 });
 

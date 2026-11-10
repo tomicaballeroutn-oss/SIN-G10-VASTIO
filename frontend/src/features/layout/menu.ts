@@ -55,9 +55,12 @@ const PRIORIDAD_INFERIOR = ['agenda', 'eventos', 'barra', 'existencias', 'movimi
 
 export const ITEM_MAS: ItemDeMenu = { id: 'mas', label: 'Más', icon: 'menu', ruta: '/mas', roles: TODOS };
 
-/** Hasta cinco ítems; si no entran, cuatro y «Más» con el resto. */
+/**
+ * Hasta cuatro ítems y siempre «Más» al final: ahí están el resto, «Mi cuenta» y «Cerrar sesión». Sin «Más», los perfiles
+ * con pocos ítems (Barra, Cocina) no tenían cómo cerrar sesión en el teléfono.
+ */
 export function itemsInferiores(items: ItemDeMenu[]): ItemDeMenu[] {
-  if (items.length <= MAXIMO_INFERIOR) return items;
+  if (items.length < MAXIMO_INFERIOR) return [...items, ITEM_MAS];
   const orden = (it: ItemDeMenu) => {
     const i = PRIORIDAD_INFERIOR.indexOf(it.id);
     return i < 0 ? PRIORIDAD_INFERIOR.length : i;

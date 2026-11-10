@@ -53,8 +53,15 @@ describe('menú por perfil', () => {
 });
 
 describe('navegación inferior', () => {
-  it('si entran, muestra todos los ítems', () => {
-    expect(itemsInferiores(itemsPara(['PLANNER'])).map((it) => it.id)).toEqual(['inicio', 'notificaciones', 'agenda', 'eventos', 'cocina']);
+  it('siempre termina en «Más», donde están «Mi cuenta» y «Cerrar sesión»', () => {
+    expect(itemsInferiores(itemsPara(['BARRA'])).map((it) => it.id)).toEqual(['notificaciones', 'barra', 'existencias', 'mas']);
+    expect(itemsInferiores(itemsPara(['COCINA'])).map((it) => it.id)).toEqual(['notificaciones', 'cocina', 'mas']);
+    const roles: Rol[] = ['DIRECCION', 'COORDINACION', 'ADMINISTRACION', 'VENDEDORA', 'PLANNER', 'COMPRAS', 'BARRA', 'COCINA'];
+    for (const rol of roles) expect(itemsInferiores(itemsPara([rol])).at(-1)?.id).toBe('mas');
+  });
+
+  it('con cinco ítems o más, cuatro por prioridad y «Más»', () => {
+    expect(itemsInferiores(itemsPara(['PLANNER'])).map((it) => it.id)).toEqual(['agenda', 'eventos', 'cocina', 'inicio', 'mas']);
   });
 
   it('si no entran, muestra cuatro por prioridad y «Más»', () => {

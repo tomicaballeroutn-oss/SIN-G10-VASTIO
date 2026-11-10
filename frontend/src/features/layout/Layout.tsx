@@ -1,10 +1,10 @@
 import { Navigate, Outlet, useLocation, useNavigate } from 'react-router';
-import { Logo, Nav } from '../../ds';
+import { IconButton, Logo, Nav } from '../../ds';
 import { Campana } from '../notificaciones/Campana';
 import { AvisosDeSesion } from '../sesion/AvisosDeSesion';
 import { useSesion } from '../sesion/contexto';
 import { BloqueCuenta } from './BloqueCuenta';
-import { ITEM_MAS, itemsInferiores, itemsPara } from './menu';
+import { ITEM_MAS, itemsInferiores, itemsPara, rutaDeInicio } from './menu';
 import './layout.css';
 
 const RUTA_MI_CUENTA = '/mi-cuenta';
@@ -33,6 +33,15 @@ export function Layout() {
   const todos = [...items, ITEM_MAS];
   const actual = todos.find((it) => ubicacion.pathname.startsWith(it.ruta))?.id;
   const actualInferior = inferiores.some((it) => it.id === actual) ? actual : ITEM_MAS.id;
+  // En el teléfono, una flecha para volver cuando se está dentro de una pantalla (no en una del menú ni en el inicio).
+  const enPantallaDelMenu = ubicacion.pathname === rutaDeInicio(usuario.roles) || todos.some((it) => ubicacion.pathname === it.ruta);
+  const volver = () => {
+    // Si se llegó navegando dentro de la app, vuelve a donde estaba. Si se abrió un enlace directo: a la sección
+    // (de /eventos/5 a /eventos) o, si ya es una sección, al inicio del perfil.
+    if (ubicacion.key !== 'default') { navegar(-1); return; }
+    const partes = ubicacion.pathname.split('/').filter(Boolean);
+    navegar(partes.length > 1 ? `/${partes[0]}` : rutaDeInicio(usuario.roles));
+  };
   const ir = (id: string) => {
     const destino = todos.find((it) => it.id === id);
     if (destino) navegar(destino.ruta);
@@ -48,6 +57,7 @@ export function Layout() {
       <main className="app__contenido">
         {!usuario.debeCambiarContrasena && (
           <div className="app__barra">
+            {!enPantallaDelMenu && <IconButton icon="arrow-left" label="Volver" variant="text" className="app__volver" onClick={volver} />}
             <Campana />
           </div>
         )}

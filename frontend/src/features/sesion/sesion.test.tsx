@@ -66,6 +66,22 @@ describe('UI-01 · inicio de sesión', () => {
     expect(router.state.location.search).toBe('?volver=%2Fagenda');
   });
 
+  it('el login es el telón: marca animada, VASTIO y la bajada, el formulario sin ficha y siempre en tema claro', async () => {
+    backend(null);
+    montar('/login');
+
+    const titulo = await screen.findByRole('heading', { name: 'Ingresá a tu cuenta' });
+    const pantalla = titulo.closest('main') as HTMLElement;
+    expect(pantalla).toHaveAttribute('data-theme', 'light');
+    expect(pantalla.querySelector('.pagina-ingreso__telon')).not.toBeNull();
+    expect(pantalla).toHaveTextContent('VASTIO');
+    expect(pantalla).toHaveTextContent('Todo a la vista.');
+    expect(pantalla).toHaveTextContent('Inicio de sesión');
+    expect(pantalla.querySelector('.pagina-ingreso__ficha')).toBeNull();
+    expect(pantalla).not.toHaveTextContent('El sistema del complejo');
+    expect(screen.getByRole('button', { name: 'Mostrar contraseña' })).toBeInTheDocument();
+  });
+
   it('con usuario o contraseña incorrectos avisa sin decir cuál de los dos', async () => {
     backend(null);
     const usuario = userEvent.setup();

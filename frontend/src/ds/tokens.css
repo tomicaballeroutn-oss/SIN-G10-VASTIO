@@ -1,5 +1,5 @@
 /* Vastio design tokens — generated from tokens.json. Load before components/bundle.css. */
-:root {
+:root, [data-theme="light"] { /* [data-theme="light"]: una pantalla puede forzar el tema claro (p. ej. el ingreso). */
   --canvas: #e6e2dd;
   --surface: #f2eee8;
   --surface-raised: #f8f5f0;

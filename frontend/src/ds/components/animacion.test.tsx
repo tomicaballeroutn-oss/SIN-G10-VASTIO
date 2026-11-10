@@ -1,6 +1,27 @@
 import { act, fireEvent, render, screen } from '@testing-library/react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import { CelebracionHito } from './animacion';
+import { AnimacionMarca, CelebracionHito } from './animacion';
+
+describe('AnimacionMarca', () => {
+  afterEach(() => { vi.unstubAllGlobals(); });
+
+  it('aplica la velocidad al video', () => {
+    vi.stubGlobal('matchMedia', (q: string) => ({ matches: false, media: q }));
+    render(<AnimacionMarca tono="blanco" velocidad={1.8} />);
+    const video = document.querySelector('video')!;
+    expect(video.playbackRate).toBe(1.8);
+    expect(video.defaultPlaybackRate).toBe(1.8);
+    video.playbackRate = 1;
+    fireEvent.loadedMetadata(video);
+    expect(video.playbackRate).toBe(1.8);
+  });
+
+  it('sin velocidad va a velocidad normal', () => {
+    vi.stubGlobal('matchMedia', (q: string) => ({ matches: false, media: q }));
+    render(<AnimacionMarca tono="azul" />);
+    expect(document.querySelector('video')!.playbackRate).toBe(1);
+  });
+});
 
 describe('CelebracionHito', () => {
   afterEach(() => { vi.useRealTimers(); });

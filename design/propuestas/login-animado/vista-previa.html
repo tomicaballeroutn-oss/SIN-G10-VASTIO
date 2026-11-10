@@ -1,0 +1,65 @@
+<!doctype html>
+<html lang="es" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Vastio · vista previa del login animado</title>
+<!-- Abrila directo en el navegador (doble clic). Usa los tokens y la animación que ya están en el repo. -->
+<link rel="stylesheet" href="../../../frontend/src/ds/tokens.css">
+<link rel="stylesheet" href="../../../frontend/src/ds/tipografia.css">
+<link rel="stylesheet" href="login-animado.css">
+<style>
+  /* Solo para esta vista previa: imitan Input, el botón del ojito y Button del sistema. */
+  .campo { display: flex; flex-direction: column; gap: 6px; }
+  .campo label { font: 500 14px/20px var(--font-sans); }
+  .control { position: relative; }
+  .control input { width: 100%; height: 52px; box-sizing: border-box; padding: 0 16px; border: 1.5px solid var(--line-strong); border-radius: 12px; background: var(--surface-raised); color: var(--ink); font: 400 16px/24px var(--font-sans); }
+  .control input.con-ojo { padding-right: 52px; }
+  .ojo { position: absolute; top: 4px; right: 4px; width: 44px; height: 44px; display: grid; place-items: center; border: 0; border-radius: 999px; background: none; color: var(--ink-muted); cursor: pointer; }
+  .ojo:hover { background: var(--surface-sunken); color: var(--ink); }
+  .ojo svg { width: 20px; height: 20px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+  .boton { height: 52px; border: 0; border-radius: 12px; background: var(--brand); color: var(--on-brand); font: 600 15px/20px var(--font-sans); cursor: pointer; }
+  .repetir { position: fixed; z-index: 9; right: 12px; bottom: 12px; height: 32px; padding: 0 12px; border: 0; border-radius: 999px; background: rgba(2,18,38,.6); color: #fff; font: 500 12px/16px var(--font-sans); cursor: pointer; }
+  body { margin: 0; }
+</style>
+</head>
+<body>
+<main class="pagina-ingreso" id="pagina">
+  <div class="pagina-ingreso__telon" aria-hidden="true"></div>
+  <div class="pagina-ingreso__marca" aria-hidden="true">
+    <span class="pagina-ingreso__logo"><video id="logo" src="../../../frontend/public/brand/animaciones/vastio-logo-animado-blanco.webm" muted playsinline style="width:100%;height:100%"></video></span>
+    <p class="pagina-ingreso__nombre">VASTIO</p>
+    <p class="pagina-ingreso__bajada">Todo a la vista.</p>
+  </div>
+  <div class="pagina-ingreso__lado">
+    <div class="pagina-ingreso__form">
+      <div class="pagina-ingreso__titulos">
+        <p class="overline" style="color: var(--ink-muted);">Inicio de sesión</p>
+        <h1 class="h1">Ingresá a tu cuenta</h1>
+      </div>
+      <form class="ingreso" onsubmit="return false">
+        <div class="campo"><label for="u">Usuario</label><div class="control"><input id="u" placeholder="nombre.apellido" autocomplete="username"></div></div>
+        <div class="campo"><label for="c">Contraseña</label><div class="control">
+          <input id="c" class="con-ojo" type="password" placeholder="••••••••" autocomplete="current-password">
+          <button type="button" class="ojo" id="ojo" aria-label="Mostrar contraseña" aria-pressed="false" aria-controls="c"></button>
+        </div></div>
+        <button class="boton" type="submit">Ingresar</button>
+      </form>
+    </div>
+  </div>
+</main>
+<button class="repetir" type="button" onclick="location.reload()">Ver de nuevo</button>
+<script>
+  var v = document.getElementById('logo'); v.playbackRate = 1.8; v.play().catch(function(){});
+  var EYE = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M2.062 12.348a1 1 0 0 1 0-.696 10.75 10.75 0 0 1 19.876 0 1 1 0 0 1 0 .696 10.75 10.75 0 0 1-19.876 0"/><circle cx="12" cy="12" r="3"/></svg>';
+  var EYE_OFF = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M10.733 5.076a10.744 10.744 0 0 1 11.205 6.575 1 1 0 0 1 0 .696 10.747 10.747 0 0 1-1.444 2.49"/><path d="M14.084 14.158a3 3 0 0 1-4.242-4.242"/><path d="M17.479 17.499a10.75 10.75 0 0 1-15.417-5.151 1 1 0 0 1 0-.696 10.75 10.75 0 0 1 4.446-5.143"/><path d="m2 2 20 20"/></svg>';
+  var ojo = document.getElementById('ojo'), c = document.getElementById('c');
+  ojo.innerHTML = EYE;
+  ojo.onclick = function () {
+    var ver = c.type === 'password'; c.type = ver ? 'text' : 'password';
+    ojo.innerHTML = ver ? EYE_OFF : EYE; ojo.setAttribute('aria-pressed', String(ver));
+    ojo.setAttribute('aria-label', ver ? 'Ocultar contraseña' : 'Mostrar contraseña'); c.focus();
+  };
+</script>
+</body>
+</html>

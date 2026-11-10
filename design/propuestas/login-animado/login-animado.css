@@ -1,0 +1,63 @@
+/* UI-01 · Inicio de sesión animado («Telón»). Va en frontend/src/features/sesion/sesion.css, en lugar del bloque actual de UI-01.
+   Línea de tiempo (≈ 3,2 s), con el logo a 1,8× (≈ 2 s):
+     0 – 2,0 s    la V se arma (AnimacionMarca, tono blanco)
+     1,6 / 1,75   aparecen VASTIO y «Todo a la vista.»
+     2,1 – 2,9    el azul se retira con el borde curvo (escritorio: a la izquierda; teléfono: hacia arriba)
+     2,6 – 3,2    aparece el formulario
+   Con «reducir movimiento» todo aparece ya armado. */
+
+.pagina-ingreso { --ease-io: cubic-bezier(.7, 0, .2, 1); --ease-out: cubic-bezier(.2, .7, .2, 1);
+  position: relative; overflow: hidden; min-height: 100vh; min-height: 100dvh; background: var(--canvas); color: var(--ink); }
+
+/* El telón azul */
+.pagina-ingreso__telon { position: absolute; z-index: 1; background: var(--deep); pointer-events: none; }
+
+/* La marca: logo animado + VASTIO + bajada */
+.pagina-ingreso__marca { position: absolute; z-index: 2; left: 50%; top: 50%; transform: translate(-50%, -50%);
+  display: flex; flex-direction: column; align-items: center; gap: var(--space-1); pointer-events: none; }
+.pagina-ingreso__logo { display: block; width: 260px; height: 260px; }
+.pagina-ingreso__logo .v-animacion-marca { width: 100% !important; }
+.pagina-ingreso__nombre { margin: -6px 0 0; padding-left: .42em; font: 500 24px/30px var(--font-display); letter-spacing: .42em; color: #fff;
+  animation: ingresoAparece .45s var(--ease-out) 1.6s both; }
+.pagina-ingreso__bajada { margin: 0; font: 400 14px/22px var(--font-sans); color: #c6dffe;
+  animation: ingresoAparece .45s var(--ease-out) 1.75s both; }
+
+/* El formulario (sin ficha: va directo sobre el fondo crema) */
+.pagina-ingreso__lado { position: relative; z-index: 1; display: flex; }
+.pagina-ingreso__form { width: 100%; max-width: 400px; display: flex; flex-direction: column; gap: var(--space-5);
+  animation: ingresoSube .55s var(--ease-out) 2.6s both; }
+.pagina-ingreso__titulos { display: flex; flex-direction: column; gap: var(--space-1); }
+.pagina-ingreso__titulos > * { margin: 0; }
+.ingreso { width: 100%; display: flex; flex-direction: column; gap: var(--space-4); }
+
+@keyframes ingresoAparece { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+@keyframes ingresoSube { from { opacity: 0; transform: translateY(18px); } to { opacity: 1; transform: none; } }
+
+/* Teléfono y tableta: el azul sube y queda arriba con el borde inferior curvo */
+.pagina-ingreso__telon { left: -30%; right: -30%; top: 0; height: 175%; border-radius: 0 0 62% 38% / 0 0 190px 120px;
+  animation: ingresoTelonArriba .8s var(--ease-io) 2.1s both; }
+@keyframes ingresoTelonArriba { to { height: 300px; } }
+.pagina-ingreso__marca { animation: ingresoMarcaArriba .8s var(--ease-io) 2.1s both; }
+@keyframes ingresoMarcaArriba { to { top: 128px; } }
+.pagina-ingreso__logo { animation: ingresoLogoChico .8s var(--ease-io) 2.1s both; }
+@keyframes ingresoLogoChico { to { width: 112px; height: 112px; } }
+.pagina-ingreso__lado { padding: 318px var(--space-6) var(--space-8); min-height: 100vh; min-height: 100dvh; }
+
+/* Escritorio: el azul se corre a la izquierda y queda con el borde derecho curvo */
+@media (min-width: 960px) {
+  .pagina-ingreso__telon { left: 0; right: auto; top: -12%; bottom: -12%; height: auto; width: 160%; border-radius: 0 46% 54% 0 / 0 58% 42% 0;
+    animation-name: ingresoTelonIzquierda; }
+  @keyframes ingresoTelonIzquierda { to { width: 47%; } }
+  .pagina-ingreso__logo { width: 300px; height: 300px; animation-name: ingresoLogoMedio; }
+  @keyframes ingresoLogoMedio { to { width: 240px; height: 240px; } }
+  .pagina-ingreso__nombre { font-size: 30px; line-height: 36px; margin-top: -14px; }
+  .pagina-ingreso__bajada { font-size: 15px; }
+  .pagina-ingreso__marca { animation-name: ingresoMarcaIzquierda; }
+  @keyframes ingresoMarcaIzquierda { to { left: 22%; } }
+  .pagina-ingreso__lado { position: absolute; top: 0; bottom: 0; right: 0; width: 53%; min-height: 0; padding: var(--space-12) 72px var(--space-12) 120px;
+    align-items: center; justify-content: center; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pagina-ingreso *, .pagina-ingreso *::before, .pagina-ingreso *::after { animation-duration: .01s !important; animation-delay: 0s !important; }
+}

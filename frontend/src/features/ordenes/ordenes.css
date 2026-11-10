@@ -6,14 +6,38 @@
 .orden__acciones { display: flex; flex-wrap: wrap; gap: var(--space-2); }
 .orden__estado { display: inline-flex; flex-wrap: wrap; gap: var(--space-1); }
 
-/* Vista para imprimir: solo la orden, sin navegación ni acciones. */
+/* Vista para imprimir: una hoja propia (OrdenImpresa), no la pantalla. Blanco y negro, legible en láser. */
+.orden-impresa { display: none; }
 @media print {
-  @page { size: A4 portrait; margin: 13mm 14mm; }
-  html, body { background: #fff !important; color: #17212b; }
-  .app__lateral, .app__inferior, .app__barra, .ficha__acciones, .orden__acciones, .v-tabs,
-  .pantalla > div:first-child { display: none !important; }
-  .app__contenido { width: auto; max-width: none; margin: 0; padding: 0; }
-  .orden .v-card { box-shadow: none !important; border: 1px solid #cbd1d7; break-inside: avoid; }
+  @page { size: A4 portrait; margin: 14mm; }
+  body.orden-imprimiendo { background: #fff !important; }
+  body.orden-imprimiendo > :not(.orden-impresa) { display: none !important; }
+  body.orden-imprimiendo > .orden-impresa { display: block; }
+
+  .orden-impresa { color: #17212b; font-family: var(--font-sans, sans-serif); font-size: 10.5pt; line-height: 1.4; }
+  .orden-impresa p { margin: 0; }
+  .orden-impresa h1 { margin: 2pt 0 4pt; font-size: 18pt; line-height: 1.2; }
+  .orden-impresa__cabecera { display: flex; justify-content: space-between; align-items: center; gap: 12pt; padding-bottom: 10pt; margin-bottom: 10pt; border-bottom: 2px solid #17212b; }
+  .orden-impresa__sobre { font-size: 9pt; text-transform: uppercase; letter-spacing: .08em; color: #52606d; }
+  .orden-impresa__dato { color: #52606d; }
+  .orden-impresa__logo { width: 140pt; height: 60pt; object-fit: contain; object-position: right center; flex: 0 0 auto; }
+  .orden-impresa__nota { margin-bottom: 12pt !important; color: #52606d; font-size: 9.5pt; }
+  .orden-impresa__vacia { padding: 18pt; border: 1px dashed #aeb7c0; text-align: center; }
+
+  .orden-impresa__tabla { width: 100%; border-collapse: collapse; }
+  .orden-impresa__tabla th, .orden-impresa__tabla td { padding: 6pt 6pt; border-bottom: 1px solid #cbd1d7; text-align: left; vertical-align: middle; }
+  .orden-impresa__tabla thead th { border-bottom: 1.5px solid #17212b; font-size: 9pt; text-transform: uppercase; letter-spacing: .04em; }
+  .orden-impresa__tabla tfoot th, .orden-impresa__tabla tfoot td { border-top: 1.5px solid #17212b; border-bottom: 0; font-weight: 600; }
+  .orden-impresa__tabla tr { break-inside: avoid; }
+  .orden-impresa__tabla .is-num { text-align: right; font-variant-numeric: tabular-nums; white-space: nowrap; }
+  .orden-impresa__tabla .is-check { width: 58pt; text-align: center; }
+  .orden-impresa__presentacion { color: #52606d; }
+  .orden-impresa__casilla { display: inline-block; width: 12pt; height: 12pt; border: 1.2px solid #17212b; border-radius: 2pt; }
+
+  .orden-impresa__pie { margin-top: 16pt; break-inside: avoid; }
+  .orden-impresa__firmas { display: grid; grid-template-columns: 1fr 1fr; gap: 28pt; margin-top: 30pt; }
+  .orden-impresa__firmas span { padding-top: 4pt; border-top: 1px solid #17212b; font-size: 9.5pt; color: #52606d; }
+  .orden-impresa__generado { margin-top: 18pt !important; font-size: 8.5pt; color: #8a96a3; }
 }
 
 /* Ajustar orden: una fila por bebida con cajas y botellas sueltas. */

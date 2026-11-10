@@ -132,3 +132,42 @@ describe('búsqueda y filtros de Eventos', () => {
     expect(screen.getByText('No hay opciones para mostrar.')).toBeInTheDocument();
   });
 });
+
+describe('lista de eventos por tandas', () => {
+  // 30 casamientos y 15 quinces, para ver las tandas y que el buscador cuente sobre todos.
+  const MUCHOS = Array.from({ length: 45 }, (_, i) => ({
+    ...EVENTOS_FILTROS[0],
+    id: 100 + i,
+    codigo: `EV-2030-${String(100 + i).padStart(5, '0')}`,
+    nombre: i < 30 ? `Casamiento ${i + 1}` : `Quince ${i + 1}`,
+  }));
+  const tarjetas = () => within(document.querySelector('.eventos__lista') as HTMLElement).getAllByRole('listitem');
+
+  it('muestra 20, «Ver más» suma de a 20 y al buscar vuelve a la primera tanda sobre todos', async () => {
+    backend(MUCHOS);
+    const usuario = userEvent.setup();
+    montar('/eventos');
+
+    await screen.findByText('Mostrando 20 de 45');
+    expect(tarjetas()).toHaveLength(20);
+
+    await usuario.click(screen.getByRole('button', { name: 'Ver 20 más' }));
+    expect(tarjetas()).toHaveLength(40);
+    await usuario.click(screen.getByRole('button', { name: 'Ver 5 más' }));
+    expect(tarjetas()).toHaveLength(45);
+    expect(screen.getByText('Mostrando 45 de 45')).toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: /^Ver \d+ más$/ })).not.toBeInTheDocument();
+
+    await usuario.click(screen.getByRole('button', { name: 'Mostrar filtros' }));
+    await usuario.type(screen.getByLabelText('Buscar eventos'), 'casamiento');
+    expect(screen.getByText('Mostrando 20 de 30')).toBeInTheDocument();
+    expect(tarjetas()).toHaveLength(20);
+  });
+
+  it('con 20 o menos no hay pie', async () => {
+    backend(MUCHOS.slice(0, 20));
+    montar('/eventos');
+    await screen.findByText('Casamiento 1');
+    expect(screen.queryByText(/^Mostrando/)).not.toBeInTheDocument();
+  });
+});

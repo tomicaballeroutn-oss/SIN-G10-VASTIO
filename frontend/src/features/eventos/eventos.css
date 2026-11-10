@@ -97,7 +97,7 @@
 .servicios { display: grid; gap: var(--space-4); align-items: start; }
 @media (min-width: 960px) {
   .servicios { display: block; columns: 2; column-gap: var(--space-4); }
-  .servicios > * { break-inside: avoid; margin-bottom: var(--space-4); }
+  .servicios > *, .servicios > .servicios__categoria { break-inside: avoid; margin: 0 0 var(--space-4); }
   .servicios > .v-alert, .servicios__acciones, .servicios__pie { column-span: all; }
 }
 .servicios__categoria {

@@ -83,6 +83,8 @@ function ContenidoFicha({ ficha, alCambiar }: { ficha: Ficha; alCambiar: (ficha:
   const [dialogo, setDialogo] = useState<Dialogo>(null);
   const navegar = useNavigate();
   const { acciones } = ficha;
+  // Confirmar se puede tocar siempre que esté permitido; si faltan requisitos, el diálogo dice cuáles.
+  const faltanParaConfirmar = (ficha.requisitosConfirmacion ?? []).filter((r) => !r.cumplido).length;
 
   function hecho(nueva: Ficha, mensaje: string) {
     setDialogo(null);
@@ -92,7 +94,7 @@ function ContenidoFicha({ ficha, alCambiar }: { ficha: Ficha; alCambiar: (ficha:
 
   return (
     <>
-      {aviso && <Alert tone="success">{aviso}</Alert>}
+      {aviso && <Alert tone="success" centrar>{aviso}</Alert>}
       <header className="ficha__cabecera">
         <div className="ficha__etiquetas">
           <div className="ficha__etiquetas-principales">
@@ -123,7 +125,8 @@ function ContenidoFicha({ ficha, alCambiar }: { ficha: Ficha; alCambiar: (ficha:
           <Button icon="file-check" onClick={() => setDialogo('firma')}>Registrar firma</Button>
         )}
         {acciones.confirmar && (
-          <Button icon="circle-check" onClick={() => setDialogo('confirmar')}>Confirmar evento</Button>
+          <Button icon="circle-check" pendiente={faltanParaConfirmar > 0 && (faltanParaConfirmar === 1 ? 'Falta 1 requisito' : `Faltan ${faltanParaConfirmar} requisitos`)}
+            onClick={() => setDialogo('confirmar')}>Confirmar evento</Button>
         )}
         {acciones.asignarPlanner && (
           <Button variant={ficha.planner ? 'outline' : 'solid'} icon="user-plus" onClick={() => setDialogo('planner')}>

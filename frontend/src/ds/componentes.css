@@ -31,6 +31,9 @@ h2.h2, h3.h3, h3.h4 { margin: 0; color: var(--ink); }
 .v-btn--solid.v-tone-danger { background: var(--danger); color: var(--on-danger); }
 .v-btn--solid.v-tone-danger:hover { filter: brightness(.9); background: var(--danger); }
 .v-btn--solid.v-tone-danger:active { filter: brightness(.8); background: var(--danger); }
+.v-btn.is-pendiente, .v-btn.is-pendiente:hover, .v-btn.is-pendiente:active { background: var(--surface); color: var(--brand-ink); border: 1.5px dashed var(--brand); box-shadow: none; filter: none; }
+.v-btn.is-pendiente:hover { background: var(--brand-tint); }
+.v-btn__pendiente { color: var(--warning); }
 .v-btn--outline { background: transparent; color: var(--brand-ink); border-color: var(--line-strong); }
 .v-btn--outline:hover { background: var(--brand-tint); }
 .v-btn--outline:active { background: var(--brand-tint); border-color: var(--brand-ink); }

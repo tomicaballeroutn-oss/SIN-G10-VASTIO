@@ -43,7 +43,8 @@ export function DialogoSena({ ficha, alCerrar, alRegistrar }: {
       actions={
         <>
           <Button variant="outline" onClick={alCerrar}>Cancelar</Button>
-          <Button icon="banknote" loading={guardando} onClick={() => void confirmar()}>Confirmar seña</Button>
+          <Button icon="banknote" loading={guardando} pendiente={!importe.trim() || !fechaPago || !firmanteDni.trim()}
+            onClick={() => void confirmar()}>Confirmar seña</Button>
         </>
       }
     >

@@ -193,6 +193,44 @@ export function Segmentado({ label, value, options, onChange, className }: Segme
   );
 }
 
+export interface OpcionesMultiplesProps {
+  label: string;
+  /** Sin valores elegidos se entiende «todos». */
+  values: string[];
+  options: SelectOption[];
+  onChange: (values: string[]) => void;
+  hint?: string;
+  className?: string;
+}
+
+/** Como Segmentado, pero se pueden marcar varias. Cada opción es un botón que se prende y se apaga. */
+export function OpcionesMultiples({ label, values, options, onChange, hint, className }: OpcionesMultiplesProps) {
+  const id = useFieldId();
+  return (
+    <div className={cx('v-field', className)}>
+      <span id={id} className="label v-field__label">{label}</span>
+      <div role="group" aria-labelledby={id} className="v-segmentado">
+        {options.map((o) => {
+          const elegida = values.includes(o.value);
+          return (
+            <button
+              key={o.value}
+              type="button"
+              aria-pressed={elegida}
+              className={cx('v-segmentado__opcion', elegida && 'is-selected')}
+              onClick={() => onChange(elegida ? values.filter((v) => v !== o.value) : [...values, o.value])}
+            >
+              {elegida && <Icon name="check" size={16} />}
+              {o.label}
+            </button>
+          );
+        })}
+      </div>
+      {hint && <p className="body-sm v-muted">{hint}</p>}
+    </div>
+  );
+}
+
 export interface ChoiceProps {
   label: string;
   hint?: string;

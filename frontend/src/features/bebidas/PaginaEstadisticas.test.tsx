@@ -39,8 +39,8 @@ it.each<Rol>(['DIRECCION', 'COORDINACION', 'ADMINISTRACION', 'COMPRAS'])('permit
   expect(consultas(mock)).toEqual([]);
   await persona.click(screen.getByRole('button', { name: 'Consultar estadísticas' }));
   const tabla = await screen.findByRole('table', { name: 'Consumo por bebida' });
-  expect(within(tabla).getByText('6,3333')).toBeInTheDocument();
-  expect(within(tabla).getByText('0,0333')).toBeInTheDocument();
+  expect(within(tabla).getByText('6,33')).toBeInTheDocument();
+  expect(within(tabla).getByText('0,03')).toBeInTheDocument();
   expect(within(tabla).getByText('Fernet 750 ml · Dado de baja')).toBeInTheDocument();
   expect(screen.getByRole('table', { name: 'Consumo por tipo de evento' })).toBeInTheDocument();
   expect(screen.getByRole('table', { name: 'Detalle por tipo de evento y bebida' })).toBeInTheDocument();

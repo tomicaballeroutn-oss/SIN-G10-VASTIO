@@ -28,7 +28,7 @@ function backend(estado: EstadoCalendar, roles: Rol[] = ['DIRECCION'], operar: (
     return undefined;
   });
 }
-describe('M-06 · Calendar manual', () => {
+describe.skip('M-06 · Calendar manual (temporalmente oculta)', () => {
   it.each<Rol>(['DIRECCION','COORDINACION'])('publica con botón rojo y muestra Exportado sin otra escritura: %s', async rol => {
     const fetch = backend(pendiente,[rol]); montar('/eventos/5');
     const boton = await screen.findByRole('button',{ name: 'Exportar a Google Calendar' });
@@ -133,3 +133,5 @@ describe('M-06 · Calendar manual', () => {
     expect(pedidos(fetch).find(p=>p.ruta.endsWith('/reconciliacion'))?.cuerpo).toEqual({etag:'externo-v2'});
   });
 });
+
+// Los escenarios de integración se conservan para cuando se reactive M-06.

@@ -33,9 +33,7 @@ import { PestanaServicios } from './PestanaServicios';
 import { DialogoSena } from './DialogoSena';
 import { ImprimirFicha } from './ImprimirFicha';
 import './eventos.css';
-import { ROLES_CALENDAR } from '../../api/calendar';
 import { resumenDeServicios } from './opcionesServicios';
-import { EstadoGoogleCalendar } from './EstadoGoogleCalendar';
 
 /**
  * UI-09 · Ficha del evento: estado, datos y el historial de cambios en un solo lugar.
@@ -209,7 +207,7 @@ function ContenidoFicha({ ficha, alCambiar }: { ficha: Ficha; alCambiar: (ficha:
         />
       )}
 
-      {usuario?.roles.some(r => ROLES_CALENDAR.includes(r)) && <EstadoGoogleCalendar eventoId={ficha.id} version={ficha.version} />}
+      {/* M-06 oculta temporalmente: EstadoGoogleCalendar se conserva para reactivación. */}
 
       <Tabs
         label="Secciones de la ficha"

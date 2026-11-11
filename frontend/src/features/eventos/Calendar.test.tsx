@@ -5,6 +5,7 @@ import { _reiniciarCliente, type Rol } from '../../api/cliente';
 import type { EstadoCalendar } from '../../api/calendar';
 import { backendFalso, json, montar, pedidos, problema, sesionDe } from '../../test/backendFalso';
 import { fichaDePrueba } from '../../test/fichas';
+import { MENU, itemsPara } from '../layout/menu';
 
 const pendiente: EstadoCalendar = {
   eventoId: 5, codigo: 'EV-2026-00123', salon: 'Avril', fecha: '2032-12-31', turno: 'Noche',
@@ -28,7 +29,7 @@ function backend(estado: EstadoCalendar, roles: Rol[] = ['DIRECCION'], operar: (
     return undefined;
   });
 }
-describe('M-06 · Calendar manual', () => {
+describe.skip('M-06 · Calendar manual (temporalmente oculta)', () => {
   it.each<Rol>(['DIRECCION','COORDINACION'])('publica con botón rojo y muestra Exportado sin otra escritura: %s', async rol => {
     const fetch = backend(pendiente,[rol]); montar('/eventos/5');
     const boton = await screen.findByRole('button',{ name: 'Exportar a Google Calendar' });
@@ -131,5 +132,30 @@ describe('M-06 · Calendar manual', () => {
     expect(await screen.findByRole('button',{name:'Actualizar en Google Calendar'})).toBeEnabled();
     expect(pedidos(fetch).some(p=>p.metodo==='PUT'||p.metodo==='DELETE')).toBe(false);
     expect(pedidos(fetch).find(p=>p.ruta.endsWith('/reconciliacion'))?.cuerpo).toEqual({etag:'externo-v2'});
+  });
+});
+
+// Los escenarios de integración se conservan para cuando se reactive M-06.
+
+
+describe('M-06 · integración oculta', () => {
+  it('no expone Google Calendar en el menú de Dirección ni Coordinación', () => {
+    expect(MENU.some(item => item.id === 'calendar-pendientes')).toBe(false);
+    expect(itemsPara(['DIRECCION', 'COORDINACION']).some(item => item.ruta === '/calendar/pendientes')).toBe(false);
+  });
+
+  it('no monta el componente ni consulta Calendar en la ficha', async () => {
+    const fetch = backend(pendiente, ['DIRECCION']);
+    montar('/eventos/5');
+    await screen.findByRole('heading', { name: 'Bruno y Martina' });
+    expect(screen.queryByText('Google Calendar')).not.toBeInTheDocument();
+    expect(pedidos(fetch).filter(p => p.ruta.includes('/calendar'))).toHaveLength(0);
+  });
+
+  it('no permite abrir la antigua ruta desde un enlace directo', async () => {
+    const fetch = backend(pendiente, ['DIRECCION']);
+    montar('/calendar/pendientes');
+    await vi.waitFor(() => expect(pedidos(fetch).filter(p => p.ruta === '/calendar/pendientes')).toHaveLength(0));
+    expect(screen.queryByText('Pendientes de Google Calendar')).not.toBeInTheDocument();
   });
 });

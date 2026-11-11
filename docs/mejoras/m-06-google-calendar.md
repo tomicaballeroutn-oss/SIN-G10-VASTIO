@@ -1,5 +1,8 @@
 # M-06 — Publicación manual en Google Calendar
 
+> **Estado temporal:** integración oculta en el frontend. La ficha no monta el componente, el menú no ofrece pendientes y la ruta de pendientes no se registra. El código de integración permanece conservado. Para desactivar las operaciones externas, mantener `VASTIO_CALENDAR_HABILITADO=false` en el entorno real del backend y reiniciarlo. No utilizar `docker-compose.calendar.yml`, ya que habilita la integración explícitamente. No se modifican las migraciones ni los datos históricos. Los tests anteriores de UI quedan pausados y se agregan verificaciones del estado oculto.
+
+
 ## 1. Objetivo y alcance
 
 Exportar un evento desde su ficha hacia un calendario compartido. Publicación, actualización y retirada son manuales y exclusivas de Dirección y Coordinación. No hay publicación masiva, sincronización bidireccional, calendarios por usuario, invitados, adjuntos ni creación de calendarios.

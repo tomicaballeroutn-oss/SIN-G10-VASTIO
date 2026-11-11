@@ -58,7 +58,7 @@ const OPCIONES: Record<string, OpcionesDeCategoria> = {
     opciones: [
       { nombre: 'Sin alcohol' },
       { nombre: 'Barra clásica' },
-      { nombre: 'Barra libre' },
+      { nombre: 'Barra de gin' },
       { nombre: 'Coctelería de autor' },
     ],
   },

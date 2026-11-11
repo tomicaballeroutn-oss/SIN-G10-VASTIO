@@ -7,6 +7,7 @@ import { Alert, Button, Card, IconButton, Input, SalonTag, Select } from '../../
 import { Cargando } from '../comun/Cargando';
 import { fechaCorta } from '../comun/formato';
 import { Encabezado } from '../layout/paginas';
+import { useAvisoSinGuardar } from '../comun/useAvisoSinGuardar';
 import './eventos.css';
 
 /**
@@ -61,6 +62,10 @@ function Formulario({ ficha, tipos }: { ficha: Ficha; tipos: { id: number; nombr
     })),
   );
   const { guardando, error, enviar } = useEnvio();
+  // Hay cambios si el formulario no es el que se abrió (también al agregar o quitar un contacto).
+  const actual = JSON.stringify([nombre, tipoId, horaInicio, observaciones, cliente, contactos.map((c) => ({ ...c, clave: undefined }))]);
+  const [original] = useState(actual);
+  const { aviso, liberar } = useAvisoSinGuardar(actual !== original);
 
   // El tipo actual se ofrece aunque esté dado de baja: el evento lo conserva.
   const opcionesTipo = tipos.filter((t) => t.activo || t.id === ficha.tipo.id).map((t) => ({ value: String(t.id), label: t.nombre }));
@@ -82,7 +87,10 @@ function Formulario({ ficha, tipos }: { ficha: Ficha; tipos: { id: number; nombr
         contactos: contactos.map((c) => ({ id: c.id, nombre: c.nombre, vinculo: c.vinculo, telefono: c.telefono, email: c.email })),
       }),
     );
-    if (guardada) navegar(`/eventos/${ficha.id}`, { replace: true, state: { aviso: 'Datos del evento guardados.' } });
+    if (guardada) {
+      liberar();
+      navegar(`/eventos/${ficha.id}`, { replace: true, state: { aviso: 'Datos del evento guardados.' } });
+    }
   }
 
   const errorDe = (campo: string) => error?.errorDe(campo);
@@ -181,6 +189,7 @@ function Formulario({ ficha, tipos }: { ficha: Ficha; tipos: { id: number; nombr
         <Button variant="outline" onClick={() => navegar(`/eventos/${ficha.id}`)}>Cancelar</Button>
         <Button type="submit" icon="check" loading={guardando}>Guardar datos del evento</Button>
       </div>
+      {aviso}
     </form>
   );
 }

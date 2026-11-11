@@ -65,7 +65,8 @@ describe('UI-13 · servicios contratados (M-09)', () => {
     const bodega = screen.getByRole('group', { name: 'Bodega' });
     await usuario.click(within(bodega).getByRole('radio', { name: 'Reserva' }));
     expect(within(bodega).queryByText(/^Incluye/)).not.toBeInTheDocument();
-    await usuario.type(screen.getByLabelText(/Detalle de Bodega/), 'Malbec Luigi Bosca');
+    await usuario.click(within(bodega).getByRole('button', { name: 'Agregar aclaración' }));
+    await usuario.type(within(bodega).getByLabelText('Aclaración de Bodega'), 'Malbec Luigi Bosca');
     await usuario.click(guardar);
 
     expect(await screen.findByText('Servicios guardados.')).toBeInTheDocument();
@@ -133,9 +134,45 @@ describe('UI-13 · servicios contratados (M-09)', () => {
     montar('/eventos/5?pestana=servicios');
 
     expect(await screen.findByText('DJ hasta las 5')).toBeInTheDocument();
-    expect(screen.getByText('Categoría dada de baja')).toBeInTheDocument();
+    expect(screen.getByText('Dada de baja')).toBeInTheDocument();
     expect(screen.queryByLabelText('After: renglón 1')).not.toBeInTheDocument();
     expect(screen.getByLabelText('Menú: renglón 1')).toBeInTheDocument();
+  });
+
+  it('cuenta menús comunes y especiales contra los invitados, solo con el resultado', async () => {
+    backend({ ...EDITABLE, cantidadInvitados: 180 });
+    const usuario = userEvent.setup();
+    montar('/eventos/5?pestana=servicios');
+
+    const menu = await screen.findByRole('group', { name: 'Menú' });
+    await usuario.type(within(menu).getByLabelText('Menú: renglón 1'), 'Menú Clásico');
+    await usuario.type(within(menu).getByLabelText('Menú: cantidad del renglón 1'), '170');
+    expect(within(menu).getByText('Faltan 10')).toBeInTheDocument();
+
+    const especiales = screen.getByRole('group', { name: 'Menús especiales' });
+    await usuario.click(within(especiales).getByRole('button', { name: 'Sin TACC' }));
+    await usuario.type(within(especiales).getByLabelText('Menús especiales: cantidad de Sin TACC'), '10');
+    expect(within(menu).getByText('180 menús')).toBeInTheDocument();
+
+    await usuario.type(within(especiales).getByLabelText('Menús especiales: cantidad de Sin TACC'), '0');
+    expect(within(menu).getByText('Sobran 90')).toBeInTheDocument();
+  });
+
+  it('con cambios sin guardar, avisa antes de salir de la pestaña', async () => {
+    backend();
+    const usuario = userEvent.setup();
+    const router = montar('/eventos/5?pestana=servicios');
+
+    await usuario.type(await screen.findByLabelText('Otros: renglón 1'), 'Cabina de fotos');
+    await usuario.click(screen.getByRole('tab', { name: /Datos/ }));
+    const aviso = await screen.findByRole('dialog', { name: 'Tenés cambios sin guardar' });
+    await usuario.click(within(aviso).getByRole('button', { name: 'Seguir editando' }));
+    expect(router.state.location.search).toContain('pestana=servicios');
+    expect(screen.getByLabelText('Otros: renglón 1')).toHaveValue('Cabina de fotos');
+
+    await usuario.click(screen.getByRole('tab', { name: /Datos/ }));
+    await usuario.click(within(await screen.findByRole('dialog', { name: 'Tenés cambios sin guardar' })).getByRole('button', { name: 'Salir sin guardar' }));
+    expect(router.state.location.search).not.toContain('pestana=servicios');
   });
 
   it('las requeridas para confirmar lo avisan', async () => {
@@ -143,8 +180,8 @@ describe('UI-13 · servicios contratados (M-09)', () => {
     montar('/eventos/5?pestana=servicios');
 
     const menu = await screen.findByRole('group', { name: 'Menú' });
-    expect(within(menu).getByText('Hace falta para confirmar')).toBeInTheDocument();
-    expect(within(screen.getByRole('group', { name: 'Bodega' })).queryByText('Hace falta para confirmar')).not.toBeInTheDocument();
+    expect(within(menu).getByText('Falta para confirmar')).toBeInTheDocument();
+    expect(within(screen.getByRole('group', { name: 'Bodega' })).queryByText('Falta para confirmar')).not.toBeInTheDocument();
   });
 
   it('muestra lo que rechaza el sistema', async () => {

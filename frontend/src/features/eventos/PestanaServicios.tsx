@@ -1,8 +1,9 @@
-import { useState } from 'react';
+import { useState, type ReactNode } from 'react';
 import { fichas, tieneServicio, type Ficha, type RenglonServicio, type ServicioAGuardar, type ServicioFicha } from '../../api/eventos';
 import { useEnvio } from '../../api/useDatos';
 import { Actor, Alert, Badge, Button, Card, Combobox, IconButton, Input, OpcionesMultiples, Segmentado } from '../../ds';
 import { opcionesDe, sugerencias } from './opcionesServicios';
+import { useAvisoSinGuardar } from '../comun/useAvisoSinGuardar';
 import { fechaHora } from '../comun/formato';
 
 /** Un renglón mientras se escribe. La cantidad va como texto hasta guardar; `clave` lo identifica en la lista. */
@@ -64,6 +65,15 @@ export function PestanaServicios({ ficha, alGuardar }: { ficha: Ficha; alGuardar
   const [guardado, setGuardado] = useState(false);
 
   const cambiados = ficha.servicios.filter((s) => s.activa && cambio(s, borradores[s.categoriaId]));
+  const { aviso } = useAvisoSinGuardar(editable && cambiados.length > 0);
+
+  // Menús (comunes + especiales) contra invitados: solo el resultado, sin la cuenta.
+  const renglonesDe = (x: ServicioFicha) => (editable && x.activa ? normalizar(borradores[x.categoriaId]).renglones : x.renglones);
+  const menus = ficha.servicios.filter((x) => ['sugerencias', 'varias'].includes(opcionesDe(x.categoria)?.modo ?? ''))
+    .flatMap(renglonesDe).reduce((suma, r) => suma + (r.cantidad ?? 0), 0);
+  const contador = <ContadorMenus menus={menus} invitados={ficha.cantidadInvitados} />;
+  const ultima = ficha.servicios.filter((x) => x.usuario && x.fechaModificacion)
+    .sort((a, b) => (b.fechaModificacion ?? '').localeCompare(a.fechaModificacion ?? ''))[0];
 
   async function guardar() {
     setGuardado(false);
@@ -97,18 +107,24 @@ export function PestanaServicios({ ficha, alGuardar }: { ficha: Ficha; alGuardar
             borrador={borradores[s.categoriaId]}
             alCambiar={(b) => setBorradores((previos) => ({ ...previos, [s.categoriaId]: b }))}
             errorDe={erroresDe(s)}
+            extra={opcionesDe(s.categoria)?.modo === 'sugerencias' ? contador : null}
           />
         ) : (
           <div key={s.categoriaId} className="servicios__categoria">
             <div className="servicios__titulo">
               <h4 className="h4">{s.categoria}</h4>
-              {s.requeridaParaConfirmar && <Badge tone="info">Hace falta para confirmar</Badge>}
-              {!s.activa && <Badge>Categoría dada de baja</Badge>}
+              {s.requeridaParaConfirmar && !tieneServicio(s) && <Badge tone="warning">Falta para confirmar</Badge>}
+              {!s.activa && <Badge>Dada de baja</Badge>}
+              {opcionesDe(s.categoria)?.modo === 'sugerencias' && contador}
             </div>
             <ServicioCargado servicio={s} />
-            <Autor servicio={s} />
           </div>
         )))}
+        {ultima?.usuario && ultima.fechaModificacion && (
+          <div className="servicios__pie">
+            <Actor name={ultima.usuario.nombre} action="última carga" at={fechaHora(ultima.fechaModificacion)} size="sm" />
+          </div>
+        )}
         {editable && (
           <div className="servicios__acciones">
             <Button icon="check" loading={guardando} disabled={!cambiados.length} onClick={() => void guardar()}>
@@ -117,16 +133,28 @@ export function PestanaServicios({ ficha, alGuardar }: { ficha: Ficha; alGuardar
           </div>
         )}
       </div>
+      {aviso}
     </Card>
   );
 }
 
-function CategoriaEditable({ servicio: s, borrador, alCambiar, errorDe }: {
+/** «180 menús», o cuántos faltan o sobran para los invitados. Nada si no hay invitados ni menús cargados. */
+function ContadorMenus({ menus, invitados }: { menus: number; invitados: number | null }) {
+  if (!invitados || !menus) return null;
+  if (menus === invitados) return <Badge tone="success" icon="circle-check">{menus} menús</Badge>;
+  const diferencia = Math.abs(invitados - menus);
+  return <Badge tone="warning" icon="triangle-alert">{menus < invitados ? `Faltan ${diferencia}` : `Sobran ${diferencia}`}</Badge>;
+}
+
+function CategoriaEditable({ servicio: s, borrador, alCambiar, errorDe, extra }: {
   servicio: ServicioFicha;
   borrador: Borrador;
   alCambiar: (b: Borrador) => void;
   errorDe: (campo: string) => string | undefined;
+  /** Al lado del título, p. ej. el contador de menús. */
+  extra?: ReactNode;
 }) {
+  const [conDetalle, setConDetalle] = useState(() => !!borrador.detalle.trim());
   const { claves } = normalizar(borrador);
   const errorDeRenglon = (clave: number, campo: 'texto' | 'cantidad') => {
     const j = claves.indexOf(clave);
@@ -148,7 +176,7 @@ function CategoriaEditable({ servicio: s, borrador, alCambiar, errorDe }: {
       label={`${s.categoria}: cantidad ${etiqueta}`}
       labelHidden
       inputMode="numeric"
-      placeholder="—"
+      placeholder="Cant."
       value={r.cantidad}
       onChange={(e) => cambiarRenglon(r.clave, { cantidad: e.target.value.replace(/\D/gu, '') })}
       error={errorDeRenglon(r.clave, 'cantidad')}
@@ -158,12 +186,6 @@ function CategoriaEditable({ servicio: s, borrador, alCambiar, errorDe }: {
   /** Renglones de texto: libres, o con sugerencias al escribir si la categoría tiene opciones (Menú). */
   const renglonesLibres = (renglones: RenglonEnEdicion[], agregar: string) => (
     <div className="servicios__renglones">
-      {renglones.length > 0 && (
-        <div className="servicios__encabezado caption v-muted" aria-hidden>
-          <span>Qué</span>
-          <span>Cantidad</span>
-        </div>
-      )}
       {renglones.map((r, i) => (
         <div key={r.clave} className="servicios__renglon">
           {opciones?.modo === 'sugerencias' ? (
@@ -210,6 +232,7 @@ function CategoriaEditable({ servicio: s, borrador, alCambiar, errorDe }: {
       <>
         <Segmentado
           label={`Elegí ${s.categoria.toLowerCase()}`}
+          labelHidden
           value={elegida}
           options={[
             { value: '', label: 'Sin definir' },
@@ -228,7 +251,8 @@ function CategoriaEditable({ servicio: s, borrador, alCambiar, errorDe }: {
     carga = (
       <>
         <OpcionesMultiples
-          label="Marcá los que hagan falta"
+          label={`${s.categoria}: marcá los que hagan falta`}
+          labelHidden
           values={marcadas.map((r) => r.texto.trim())}
           options={opciones.opciones.map((o) => ({ value: o.nombre, label: o.nombre }))}
           onChange={(valores) => alCambiar({
@@ -256,22 +280,33 @@ function CategoriaEditable({ servicio: s, borrador, alCambiar, errorDe }: {
     carga = renglonesLibres(borrador.renglones, opciones ? 'Agregar otro menú' : 'Agregar renglón');
   }
 
+  const vacia = normalizar(borrador).renglones.length === 0 && !borrador.detalle.trim();
   return (
     <fieldset className="servicios__categoria">
       <legend className="h4 servicios__leyenda">{s.categoria}</legend>
-      {s.requeridaParaConfirmar && <div><Badge tone="info">Hace falta para confirmar</Badge></div>}
+      {((s.requeridaParaConfirmar && vacia) || extra) && (
+        <div className="servicios__avisos">
+          {s.requeridaParaConfirmar && vacia && <Badge tone="warning">Falta para confirmar</Badge>}
+          {extra}
+        </div>
+      )}
       {carga}
-      <Input
-        label={`Detalle de ${s.categoria}`}
-        optional
-        multiline
-        rows={2}
-        placeholder="Lo que haga falta aclarar"
-        value={borrador.detalle}
-        onChange={(e) => alCambiar({ ...borrador, detalle: e.target.value })}
-        error={errorDe('descripcion')}
-      />
-      <Autor servicio={s} />
+      {conDetalle ? (
+        <Input
+          label={`Aclaración de ${s.categoria}`}
+          labelHidden
+          multiline
+          rows={2}
+          placeholder="Aclaración"
+          value={borrador.detalle}
+          onChange={(e) => alCambiar({ ...borrador, detalle: e.target.value })}
+          error={errorDe('descripcion')}
+        />
+      ) : (
+        <div>
+          <Button variant="text" size="sm" icon="pencil" onClick={() => setConDetalle(true)}>Agregar aclaración</Button>
+        </div>
+      )}
     </fieldset>
   );
 }
@@ -294,9 +329,4 @@ function ServicioCargado({ servicio: s }: { servicio: ServicioFicha }) {
       {s.descripcion && <p className="body servicios__texto">{s.descripcion}</p>}
     </>
   );
-}
-
-function Autor({ servicio: s }: { servicio: ServicioFicha }) {
-  if (!s.usuario || !s.fechaModificacion) return null;
-  return <Actor name={s.usuario.nombre} action="lo cargó" at={fechaHora(s.fechaModificacion)} size="sm" />;
 }

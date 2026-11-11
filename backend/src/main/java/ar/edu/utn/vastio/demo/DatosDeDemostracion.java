@@ -167,7 +167,7 @@ public class DatosDeDemostracion implements ApplicationRunner {
     /** Opciones de servicios de ejemplo: las mismas que sugiere la pestaña Servicios (frontend, opcionesServicios.ts). */
     private static final String[] MENUS = { "Menú Clásico", "Menú Tradición", "Menú Estación", "Menú del Valle", "Menú de Autor" };
     private static final String[] BODEGAS = { "Selección", "Reserva", "Gran Reserva", "Bodega de Autor" };
-    private static final String[] BARRAS = { "Barra clásica", "Barra libre", "Coctelería de autor" };
+    private static final String[] BARRAS = { "Barra clásica", "Barra de gin", "Coctelería de autor" };
 
     /** Ubicaciones de V2. */
     private static final short DEPOSITO_MADRE = 1;

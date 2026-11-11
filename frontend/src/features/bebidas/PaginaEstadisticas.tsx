@@ -12,7 +12,7 @@ const cargarCatalogos = async () => {
   const [tipos, salones, articulos] = await Promise.all([catalogos.tiposEvento(), catalogos.salones(), bebidas.listar()]);
   return { tipos, salones, articulos };
 };
-const NUMERO = new Intl.NumberFormat('es-AR', { maximumFractionDigits: 4 });
+const NUMERO = new Intl.NumberFormat('es-AR', { maximumFractionDigits: 2 });
 const numero = (n: number | null) => n === null ? 'No disponible' : NUMERO.format(n);
 const estado = (activo: boolean) => activo ? '' : ' · Dado de baja';
 type Catalogos = Awaited<ReturnType<typeof cargarCatalogos>>;

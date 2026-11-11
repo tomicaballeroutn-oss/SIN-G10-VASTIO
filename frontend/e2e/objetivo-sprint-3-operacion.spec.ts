@@ -5,10 +5,10 @@ import { expect, request, test, type APIRequestContext, type Browser, type Page 
  * curso, la barra retira (salida y retiro adicional), registra la devolución y el remanente, el evento pasa solo a
  * Realizado y al cerrarlo se ve el consumo real y por asistente. El remanente queda en la barra para el evento siguiente.
  *
- * Usa el evento de demostración de hoy («Quince de Martina Ortiz», Avril, noche) con la Barra Avril, que arranca con
- * 9 botellas de Fernet y 30 de cerveza: se corre una vez por carga de los datos de demostración (para repetir:
- * docker compose down -v y volver a levantar). Para no esperar a las 20:00, Coordinación corre el horario del turno
- * noche por la API y lo deja como estaba al final. Tarda unos minutos: espera al proceso automático, que corre por minuto.
+ * Usa el evento de demostración de hoy («Quince de Martina Ortiz», Avril, mediodía) con la Barra Avril, que arranca con
+ * 9 botellas de Fernet y 30 de cerveza: va con los datos básicos (backend con VASTIO_DEMO_COMPLETO=false) y se corre una
+ * vez por carga (para repetir: docker compose down -v y volver a levantar). Para no esperar a las 12:00, Coordinación
+ * corre el horario del turno mediodía por la API y lo deja como estaba al final. Tarda unos minutos: espera al proceso automático, que corre por minuto.
  *   $env:E2E_DEMO_CONTRASENA='...'; npm run e2e
  */
 const contrasena = process.env.E2E_DEMO_CONTRASENA ?? '';
@@ -69,13 +69,13 @@ test('la noche del evento: en curso, salida y retiro, devolución, realizado, ci
   const coordinacion = await api(baseURL!, 'melina.sifon');
   const barraApi = await api(baseURL!, 'rocio.blanco');
   const turnos: Turno[] = await (await coordinacion.get('/api/v1/turnos')).json();
-  const noche = turnos.find((t) => t.codigo === 'noche')!;
+  const turnoDelEvento = turnos.find((t) => t.codigo === 'mediodia')!;
   const turno = (horaInicio: string, horaFin: string) =>
-    coordinacion.put(`/api/v1/turnos/${noche.id}`, { data: { nombre: noche.nombre, horaInicio, horaFin } });
+    coordinacion.put(`/api/v1/turnos/${turnoDelEvento.id}`, { data: { nombre: turnoDelEvento.nombre, horaInicio, horaFin } });
 
   try {
-    // 1. El turno noche empieza hace dos minutos: el evento confirmado de hoy pasa solo a En curso.
-    expect((await turno(hora(-2), noche.horaFin.slice(0, 5))).ok()).toBe(true);
+    // 1. El turno del evento empieza hace dos minutos: el evento confirmado de hoy pasa solo a En curso.
+    expect((await turno(hora(-2), '23:59')).ok()).toBe(true);
     await expect.poll(() => estadoDelEvento(barraApi), { timeout: 150_000, intervals: [5_000] }).toBe('EN_CURSO');
 
     // 2. Salida a barra: 2 cajas de Fernet. Después, un retiro adicional de 1 caja de cerveza.
@@ -141,6 +141,6 @@ test('la noche del evento: en curso, salida y retiro, devolución, realizado, ci
     await expect(compras.locator('li').filter({ hasText: 'Fernet Branca' })).toContainText('2 botellas');
     await expect(compras.locator('li').filter({ hasText: 'Cerveza Quilmes' })).toHaveCount(0);
   } finally {
-    await turno(noche.horaInicio.slice(0, 5), noche.horaFin.slice(0, 5));
+    await turno(turnoDelEvento.horaInicio.slice(0, 5), turnoDelEvento.horaFin.slice(0, 5));
   }
 });

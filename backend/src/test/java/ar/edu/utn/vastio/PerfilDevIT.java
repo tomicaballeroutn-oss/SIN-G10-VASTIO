@@ -29,7 +29,9 @@ import ar.edu.utn.vastio.usuarios.infraestructura.UsuarioRepository;
 @SpringBootTest(properties = {
         "vastio.usuario-inicial.usuario=direccion.test",
         "vastio.usuario-inicial.contrasena=clave-inicial-de-prueba",
-        "vastio.demo.contrasena=clave-de-demostracion"
+        "vastio.demo.contrasena=clave-de-demostracion",
+        // Los datos básicos: el escenario completo se prueba en EscenarioCompletoIT.
+        "vastio.demo.completo=false"
 })
 @AutoConfigureMockMvc
 @ActiveProfiles({"dev", "test"})
@@ -114,10 +116,10 @@ class PerfilDevIT {
                 SELECT count(*) FROM (
                     SELECT unidad_id FROM evento GROUP BY unidad_id HAVING count(*) > 1
                 ) duplicados""", Integer.class)).as("Una reserva por unidad comercializable").isZero();
-        // El del objetivo del Sprint 3: confirmado para hoy a la noche en Avril.
+        // El del objetivo del Sprint 3: confirmado para hoy al mediodía en Avril.
         assertThat(jdbc.queryForObject("""
                 SELECT count(*) FROM evento e JOIN unidad_comercializable u USING (unidad_id)
-                WHERE e.estado = 'CONFIRMADO' AND u.fecha = ? AND u.salon_id = 1 AND u.turno_id = 2""",
+                WHERE e.estado = 'CONFIRMADO' AND u.fecha = ? AND u.salon_id = 1 AND u.turno_id = 1""",
                 Integer.class, LocalDate.now(ZoneId.of(VastioApplication.ZONA_HORARIA)))).isEqualTo(1);
     }
 

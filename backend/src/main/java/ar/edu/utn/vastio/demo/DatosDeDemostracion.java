@@ -91,8 +91,8 @@ public class DatosDeDemostracion implements ApplicationRunner {
     }
 
     private static final List<Reserva> RESERVAS = List.of(
-            // Hoy a la noche en Avril: pasa solo a En curso a las 20:00 y es el que usa el objetivo del Sprint 3.
-            new Reserva(0, 1, 2, 2, "Martina Ortiz", "lucia.ferreyra", 500000, Etapa.CONFIRMADO),
+            // Hoy al mediodía en Avril (12 a 18): pasa solo a En curso a las 12, el horario de la presentación.
+            new Reserva(0, 1, 1, 2, "Martina Ortiz", "lucia.ferreyra", 500000, Etapa.CONFIRMADO),
             new Reserva(3, 1, 2, 2, "Delfina Ríos", "lucia.ferreyra", null, Etapa.PRE_RESERVA),
             new Reserva(3, 2, 1, 3, "Grupo Arcor", "sofia.mendez", 400000, Etapa.SENADO),
             new Reserva(10, 3, 2, 1, "Paula Gómez y Martín Paz", "lucia.ferreyra", 650000, Etapa.CONTRATADO),
@@ -116,7 +116,7 @@ public class DatosDeDemostracion implements ApplicationRunner {
             new Reserva(14, 2, 2, 4, "Colegio Alemán", "lucia.ferreyra", null, Etapa.PRE_RESERVA),
             new Reserva(15, 3, 1, 3, "Tarjeta Naranja", "sofia.mendez", 420000, Etapa.SENADO),
             new Reserva(16, 2, 1, 5, "Marcelo Ledesma", "lucia.ferreyra", null, Etapa.PRE_RESERVA),
-            new Reserva(18, 3, 2, 1, "Carolina Peralta y Diego Sosa", "sofia.mendez", 800000, Etapa.CONTRATADO),
+            new Reserva(18, 2, 2, 1, "Carolina Peralta y Diego Sosa", "sofia.mendez", 800000, Etapa.CONTRATADO),
             new Reserva(19, 1, 2, 2, "Catalina Moyano", "lucia.ferreyra", 520000, Etapa.SENADO),
             new Reserva(21, 2, 2, 1, "Antonella Ríos y Lautaro Gil", "sofia.mendez", 900000, Etapa.CONFIRMADO),
             new Reserva(21, 1, 1, 3, "Volkswagen Argentina", "lucia.ferreyra", null, Etapa.PRE_RESERVA),
@@ -124,7 +124,7 @@ public class DatosDeDemostracion implements ApplicationRunner {
             new Reserva(25, 1, 2, 1, "Micaela Toledo y Gonzalo Paz", "lucia.ferreyra", 950000, Etapa.CONTRATADO),
             new Reserva(26, 3, 1, 5, "Norma Benítez", "sofia.mendez", 200000, Etapa.SENADO),
             new Reserva(28, 2, 2, 2, "Guadalupe Arias", "lucia.ferreyra", 550000, Etapa.CONFIRMADO),
-            new Reserva(29, 3, 2, 4, "Colegio La Salle", "sofia.mendez", null, Etapa.PRE_RESERVA),
+            new Reserva(29, 2, 1, 4, "Colegio La Salle", "sofia.mendez", null, Etapa.PRE_RESERVA),
             new Reserva(33, 2, 1, 3, "Grupo Dinosaurio", "lucia.ferreyra", 380000, Etapa.SENADO),
             new Reserva(35, 1, 2, 2, "Bianca Ferrero", "sofia.mendez", null, Etapa.PRE_RESERVA),
             new Reserva(42, 3, 2, 1, "Julieta Godoy y Ramiro Vega", "lucia.ferreyra", 1000000, Etapa.CONTRATADO),
@@ -164,6 +164,13 @@ public class DatosDeDemostracion implements ApplicationRunner {
             new Articulo("Gancia", "950 ml", 4, 1, 6, 12, "17790000000191", "7790000000194", 6, 0),
             new Articulo("Tequila José Cuervo", "750 ml", 3, 3, 1, 3, null, "7790000000200", 2, 0));
 
+    /**
+     * Días-salón-turno que usa {@link EscenarioCompleto} (eventos, reprogramación y bloqueos de las próximas semanas):
+     * el generador no los toma, para que el escenario se cargue sin chocar con la exclusividad.
+     */
+    private static final Set<String> UNIDADES_DEL_ESCENARIO = Set.of("6-2-2", "9-3-2", "13-1-2", "18-3-1", "18-3-2", "20-3-2",
+            "22-1-1", "25-2-2", "27-2-2", "29-3-2", "33-1-2");
+
     /** Opciones de servicios de ejemplo: las mismas que sugiere la pestaña Servicios (frontend, opcionesServicios.ts). */
     private static final String[] MENUS = { "Menú Clásico", "Menú Tradición", "Menú Estación", "Menú del Valle", "Menú de Autor" };
     private static final String[] BODEGAS = { "Selección", "Reserva", "Gran Reserva", "Bodega de Autor" };
@@ -190,12 +197,15 @@ public class DatosDeDemostracion implements ApplicationRunner {
     private final InventarioInicialService inventario;
     private final EntityManager entityManager;
     private final String contrasena;
+    /** Con el escenario completo, el stock lo arma {@link EscenarioCompleto} con su historia. */
+    private final boolean completo;
 
     public DatosDeDemostracion(UsuarioService usuarios, ClienteService clientes, PreReservaService preReservas, SenaService senas,
             ContratoService contratos, PlannerService planners, InvitadosService invitados, ServiciosService servicios,
             ConfirmacionService confirmaciones, BebidaService bebidas,
             InventarioInicialService inventario, EntityManager entityManager,
-            @Value("${vastio.demo.contrasena:}") String contrasena) {
+            @Value("${vastio.demo.contrasena:}") String contrasena, @Value("${vastio.demo.completo:false}") boolean completo) {
+        this.completo = completo;
         this.entityManager = entityManager;
         this.senas = senas;
         this.contratos = contratos;
@@ -256,13 +266,16 @@ public class DatosDeDemostracion implements ApplicationRunner {
                 // Todo va en una transacción: se baja a la base antes de leer la versión, como si fueran pedidos separados.
                 planners.asignar(evento.getId(), ana.getId(), coordinacion);
                 entityManager.flush();
-                evento = invitados.registrar(evento.getId(), evento.getVersion(), 180, true, coordinacion);
-                entityManager.flush();
                 int variante = Math.floorMod(r.cliente().hashCode(), 1000);
+                // Invitados entre 80 y 280; los menús (comunes + infantiles + especiales) suman justo eso.
+                int cantidadInvitados = 80 + (variante % 21) * 10;
+                int infantiles = cantidadInvitados / 15;
+                evento = invitados.registrar(evento.getId(), evento.getVersion(), cantidadInvitados, true, coordinacion);
+                entityManager.flush();
                 evento = servicios.registrar(evento.getId(), evento.getVersion(), List.of(
                         // Las mismas opciones que sugiere la pestaña Servicios (opcionesServicios.ts), variando por evento.
-                        new Servicio((short) 2, null, List.of(new ServiciosService.Renglon(MENUS[variante % MENUS.length], 168),
-                                new ServiciosService.Renglon("Menú Infantil", 12))),
+                        new Servicio((short) 2, null, List.of(new ServiciosService.Renglon(MENUS[variante % MENUS.length], cantidadInvitados - infantiles - 8),
+                                new ServiciosService.Renglon("Menú Infantil", infantiles))),
                         new Servicio((short) 5, null, List.of(new ServiciosService.Renglon("Vegetariano", 6),
                                 new ServiciosService.Renglon("Sin TACC", 2))),
                         new Servicio((short) 6, null, List.of(new ServiciosService.Renglon(BODEGAS[variante % BODEGAS.length], null))),
@@ -284,8 +297,14 @@ public class DatosDeDemostracion implements ApplicationRunner {
             }
         }
         long administracion = creados.get("gabriela.paz").getId();
-        inventario.guardar(DEPOSITO_MADRE, deposito, administracion);
-        inventario.guardar(BARRA_AVRIL, barraAvril, administracion);
+        if (!completo) {
+            inventario.guardar(DEPOSITO_MADRE, deposito, administracion);
+            inventario.guardar(BARRA_AVRIL, barraAvril, administracion);
+        }
+        // Los avisos que generó la carga (cientos) ya se dan por leídos: la campana arranca limpia y muestra los que
+        // aparecen durante la demostración.
+        entityManager.flush();
+        entityManager.createNativeQuery("UPDATE notificacion_destinatario SET leida = true, fecha_lectura = now() WHERE NOT leida").executeUpdate();
         log.info("Datos de demostración cargados: {} usuarios, {} clientes, {} eventos y {} bebidas.", PERSONAS.size(), clientePorNombre.size(), todas.size(),
                 ARTICULOS.size());
     }
@@ -314,6 +333,7 @@ public class DatosDeDemostracion implements ApplicationRunner {
         for (Reserva r : RESERVAS) {
             tomadas.add(r.dias() + "-" + r.salon() + "-" + r.turno());
         }
+        tomadas.addAll(UNIDADES_DEL_ESCENARIO);
         List<Reserva> generadas = new ArrayList<>();
         LocalDate hoy = LocalDate.now(ZONA);
         String[] vendedoras = { "lucia.ferreyra", "sofia.mendez" };

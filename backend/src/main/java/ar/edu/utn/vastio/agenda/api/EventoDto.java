@@ -8,6 +8,7 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import org.springframework.stereotype.Component;
@@ -32,6 +33,7 @@ import ar.edu.utn.vastio.agenda.dominio.ServicioContratado;
 import ar.edu.utn.vastio.configuracion.aplicacion.CatalogoService;
 import ar.edu.utn.vastio.configuracion.dominio.CategoriaServicio;
 import ar.edu.utn.vastio.configuracion.dominio.Salon;
+import ar.edu.utn.vastio.configuracion.dominio.TipoEvento;
 import ar.edu.utn.vastio.configuracion.dominio.Turno;
 
 /**
@@ -181,6 +183,29 @@ public class EventoDto {
                 f.documentos() == null ? null : f.documentos().stream().map(d -> documento(d, nombres)).toList(),
                 servicios(f.servicios(), nombres), AsistenciaDto.de(f.asistencia()), f.requisitos(), e.getFechaCreacion(), e.getVersion(), f.acciones(),
                 historial);
+    }
+
+    /**
+     * Muchos resúmenes juntos (la lista de eventos): salones, turnos y tipos se leen una vez y no por cada evento (con
+     * cientos de eventos eran más de mil consultas).
+     */
+    public List<EventoResumen> resumenes(List<Evento> lista, Map<Long, String> nombres) {
+        Map<Short, Salon> salones = catalogos.salones().stream().collect(Collectors.toMap(Salon::getId, s -> s));
+        Map<Short, Turno> turnos = catalogos.turnos().stream().collect(Collectors.toMap(Turno::getId, t -> t));
+        Map<Short, String> tipos = catalogos.tiposEvento().stream().collect(Collectors.toMap(TipoEvento::getId, TipoEvento::getNombre));
+        return lista.stream().map(e -> {
+            Salon s = salones.get(e.getUnidad().getSalonId());
+            Turno t = turnos.get(e.getUnidad().getTurnoId());
+            if (s == null || t == null || !tipos.containsKey(e.getTipoEventoId())) {
+                return resumen(e, nombres); // algo fuera de la lista (no debería): por el camino de a uno
+            }
+            return new EventoResumen(e.getId(), e.getCodigo(), e.getEstado(), e.getNombre(),
+                    tipos.get(e.getTipoEventoId()),
+                    new SalonDto(s.getId(), s.getCodigo(), s.getNombre(), s.getCapacidad()), e.getUnidad().getFecha(),
+                    new TurnoDto(t.getId(), t.getCodigo(), t.getNombre(), t.getHoraInicio(), t.getHoraFin()),
+                    e.getCliente().getNombre(), persona(e.getVendedoraId(), nombres), persona(e.getPlannerId(), nombres),
+                    e.getCantidadInvitados());
+        }).toList();
     }
 
     public EventoResumen resumen(Evento e, Map<Long, String> nombres) {

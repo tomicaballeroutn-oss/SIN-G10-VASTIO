@@ -264,7 +264,7 @@ public class EventoController {
             Administración, Planner y Compras, todos.""")
     public List<EventoResumen> proximos(@AuthenticationPrincipal Jwt jwt) {
         var proximos = consultas.proximos(UsuarioActual.de(jwt));
-        return proximos.eventos().stream().map(e -> dto.resumen(e, proximos.nombres())).toList();
+        return dto.resumenes(proximos.eventos(), proximos.nombres());
     }
 
     @GetMapping("/afectados")
@@ -274,7 +274,7 @@ public class EventoController {
             antes de dar de baja a alguien.""")
     public List<EventoResumen> afectados(@RequestParam long usuarioId) {
         var afectados = consultas.afectados(usuarioId);
-        return afectados.eventos().stream().map(e -> dto.resumen(e, afectados.nombres())).toList();
+        return dto.resumenes(afectados.eventos(), afectados.nombres());
     }
 
     @GetMapping("/{id}")

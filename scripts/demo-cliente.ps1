@@ -32,7 +32,7 @@ do { Start-Sleep -Seconds 1; docker exec vastio-demo pg_isready -U vastio -d vas
 
 Write-Host 'Abriendo el backend (carga los datos al arrancar, tarda un minuto)...'
 Start-Process powershell -WorkingDirectory (Join-Path $raiz 'backend') -ArgumentList '-NoExit', '-Command',
-    "`$env:DB_PORT='5434'; `$env:VASTIO_DEMO_COMPLETO='true'; .\mvnw clean spring-boot:run"
+    "`$env:DB_PORT='5434'; `$env:VASTIO_DEMO_COMPLETO='true'; .\mvnw.cmd spring-boot:run '-Dspring-boot.run.profiles=dev'"
 
 Write-Host 'Abriendo el frontend...'
 Start-Process powershell -WorkingDirectory (Join-Path $raiz 'frontend') -ArgumentList '-NoExit', '-Command', 'npm run dev'

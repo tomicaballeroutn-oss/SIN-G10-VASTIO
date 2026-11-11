@@ -9,7 +9,7 @@ Recorrido de punta a punta: un evento desde que se vende hasta que se cierra, y 
 3. Esperá en la del backend el mensaje «Escenario completo de demostración cargado» y entrá a http://localhost:5173.
 4. Todos los usuarios de ejemplo usan la contraseña `VASTIO_DEMO_CONTRASENA` del `.env`. Dirección es el usuario inicial (`direccion`, con `VASTIO_ADMIN_CONTRASENA`).
 
-Las fechas son relativas al día de la carga, por eso conviene correrlo el mismo día: el evento de hoy queda **En curso** para poder operar la barra. Si algo se rompe durante la prueba, volvé a correr el script y la base queda como nueva. Tu base de desarrollo no se toca: la demo usa otra base, `vastio-demo`.
+Las fechas son relativas al día de la carga, por eso conviene correrlo el mismo día: el evento de hoy pasa a **En curso** automáticamente al comenzar el turno del mediodía. Si algo se rompe durante la prueba, volvé a correr el script y la base queda como nueva. Tu base de desarrollo no se toca: la demo usa otra base, `vastio-demo`.
 
 Tip: usá dos navegadores, o una ventana normal y otra de incógnito, para cambiar de perfil sin cerrar sesión.
 
@@ -29,7 +29,7 @@ Tip: usá dos navegadores, o una ventana normal y otra de incógnito, para cambi
 - **Historia:** 12 eventos cerrados en los últimos cinco meses (casamientos, quinces, dos egresados, un corporativo y un cumpleaños), con entregas a barra, devoluciones y consumo. También ingresos al depósito, un recuento y una rotura.
 - **Ayer:** «Egresados Escuela Normal Superior» (Santa Bárbara), **Realizado**. Ya se hizo la devolución; falta la asistencia real y el cierre.
 - **Hoy:** «Quince de Martina Ortiz» (Avril, **mediodía, 12 a 18**). A las 12 el sistema lo pasa solo a **En curso**. Tiene la orden confirmada y la bebida ya preparada en la Transición Avril.
-- **Cargar la base el mismo día de la presentación** (las fechas son relativas a hoy). Con la base de desarrollo alcanza con reiniciarla (`docker compose down -v; docker compose up -d db`) y levantar el backend: el escenario completo se carga por defecto.
+- **Cargar la base el mismo día de la presentación** (las fechas son relativas a hoy). Usá preferentemente `scripts/demo-cliente.ps1`: crea la demo en un contenedor separado (`vastio-demo`, puerto 5434) y conserva la base de desarrollo. **No ejecutes `docker compose down -v` en tu entorno habitual**, porque elimina los volúmenes de datos.
 - **Próximos días:**
   - Órdenes en tres estados: «Agustina y Lucas» (en 6 días, Modificada), «Quince de Emma Torres» (en 9, Confirmada) y el casamiento de Camila Ruiz (en 31, Sugerida).
   - «Egresados Colegio Nacional» (en 13 días, Contratado): falta la asistencia prevista para poder confirmarlo.

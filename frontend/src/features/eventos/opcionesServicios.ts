@@ -78,3 +78,20 @@ export function sugerencias(opciones: OpcionServicio[], texto: string): OpcionSe
   const buscado = normalizarTexto(texto);
   return opciones.filter((o) => normalizarTexto(`${o.nombre} ${o.detalle ?? ''}`).includes(buscado));
 }
+
+/**
+ * Lo contratado en una línea para la cabecera de la ficha: los menús, la bodega y la barra, sin cantidades
+ * («Menú Tradición, Menú Infantil · Bodega Reserva · Barra de gin»). Vacío si no hay nada de eso cargado.
+ */
+export function resumenDeServicios(servicios: { categoria: string; renglones: { texto: string }[] }[]): string {
+  const partes: string[] = [];
+  for (const s of servicios) {
+    const textos = s.renglones.map((r) => r.texto.trim()).filter(Boolean);
+    if (!textos.length) continue;
+    const categoria = normalizarTexto(s.categoria);
+    if (categoria === 'menu') partes.push(textos.join(', '));
+    else if (categoria === 'bodega') partes.push(textos.map((t) => (normalizarTexto(t).startsWith('bodega') ? t : `Bodega ${t}`)).join(', '));
+    else if (categoria === 'tipo de barra') partes.push(textos.map((t) => (normalizarTexto(t).startsWith('barra') || normalizarTexto(t).startsWith('cocteleria') ? t : `Barra ${t.toLowerCase()}`)).join(', '));
+  }
+  return partes.join(' · ');
+}

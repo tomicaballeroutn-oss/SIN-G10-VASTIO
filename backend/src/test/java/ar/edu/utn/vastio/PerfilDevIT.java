@@ -29,7 +29,9 @@ import ar.edu.utn.vastio.usuarios.infraestructura.UsuarioRepository;
 @SpringBootTest(properties = {
         "vastio.usuario-inicial.usuario=direccion.test",
         "vastio.usuario-inicial.contrasena=clave-inicial-de-prueba",
-        "vastio.demo.contrasena=clave-de-demostracion"
+        "vastio.demo.contrasena=clave-de-demostracion",
+        // Los datos básicos: el escenario completo se prueba en EscenarioCompletoIT.
+        "vastio.demo.completo=false"
 })
 @AutoConfigureMockMvc
 @ActiveProfiles({"dev", "test"})

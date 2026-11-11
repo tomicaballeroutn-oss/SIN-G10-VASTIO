@@ -16,6 +16,9 @@ vastio:
     contrasena: ${VASTIO_ADMIN_CONTRASENA:}
   demo:
     contrasena: ${VASTIO_DEMO_CONTRASENA:}
+    # Además de los datos de demostración, EscenarioCompleto: historia (eventos cerrados con consumo), egresados, órdenes
+    # en todos los estados y stock, para mostrar todo el circuito. Con VASTIO_DEMO_COMPLETO=false, solo los datos básicos.
+    completo: ${VASTIO_DEMO_COMPLETO:true}
 
 springdoc:
   api-docs:

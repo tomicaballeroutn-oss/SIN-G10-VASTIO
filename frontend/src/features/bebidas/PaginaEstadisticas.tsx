@@ -109,9 +109,10 @@ function Resultados({ filtros, lista }: { filtros: FiltrosEstadisticas; lista: C
     <p className="body-sm">Filtros aplicados: {seleccion}</p>
     <Cargando datos={datos}>{(r) => <>
       <Alert tone="info" title="Consumo por asistente">
-        En los eventos con asistencia por segmento (egresados) y la real cargada, se usa la asistencia real; en el resto, los invitados
-        registrados. Se excluyen del consumo y del denominador los eventos sin asistentes conocidos.
-        Los eventos sin consumo cuentan en los promedios. Todas las cantidades se expresan en botellas.
+        El consumo por asistente se calcula dividiendo las botellas consumidas entre la cantidad de asistentes.
+        Si se registró la asistencia real por segmento (en eventos de egresados), se usa ese dato; en los demás casos,
+        se utiliza la cantidad de invitados registrados. Los eventos sin datos de asistencia no se incluyen en este cálculo.
+        Los eventos sin consumo registrado cuentan como consumo cero en los promedios.
       </Alert>
       {r.resumen.eventos === 0 ? <Alert tone="info" title="No hay eventos cerrados para estos filtros">Probá con otro período o combinación de filtros.</Alert>
         : r.resumen.eventosConConsumoRegistrado === 0

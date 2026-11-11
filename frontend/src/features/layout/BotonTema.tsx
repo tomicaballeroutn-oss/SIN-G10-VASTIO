@@ -1,18 +1,16 @@
-import { useState } from 'react';
+import { useSyncExternalStore } from 'react';
 import { IconButton, aplicarTema } from '../../ds';
+import { suscribirTema, temaOscuroActivo } from '../../ds/tema';
 
-/** Cambio de tema a mano, en la barra de arriba de todas las pantallas (antes solo estaba en Mi cuenta). */
+/** Cambio manual de tema, sincronizado con Mi cuenta y la preferencia del dispositivo. */
 export function BotonTema() {
-  const [oscuro, setOscuro] = useState(() => document.documentElement.dataset.theme === 'dark');
+  const oscuro = useSyncExternalStore(suscribirTema, temaOscuroActivo);
   return (
     <IconButton
       icon={oscuro ? 'sun' : 'moon'}
       label={oscuro ? 'Tema claro' : 'Tema oscuro'}
       variant="text"
-      onClick={() => {
-        aplicarTema(oscuro ? 'claro' : 'oscuro');
-        setOscuro(!oscuro);
-      }}
+      onClick={() => aplicarTema(oscuro ? 'claro' : 'oscuro')}
     />
   );
 }

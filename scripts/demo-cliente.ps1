@@ -25,7 +25,8 @@ if (Get-NetTCPConnection -LocalPort 8080 -State Listen -ErrorAction SilentlyCont
 }
 
 Write-Host 'Recreando la base de demo (vastio-demo, puerto 5434)...'
-$contenedorDemo = docker ps -a --filter 'name=^/vastio-demo
+$contenedorDemo = docker ps -a --filter 'name=^/vastio-demo$' --format '{{.Names}}'
+if ($contenedorDemo -eq 'vastio-demo') { docker rm -f vastio-demo | Out-Null }
 docker run -d --name vastio-demo -e POSTGRES_DB=vastio -e POSTGRES_USER=vastio -e POSTGRES_PASSWORD=vastio -p 5434:5432 postgres:17 | Out-Null
 do { Start-Sleep -Seconds 1; docker exec vastio-demo pg_isready -U vastio -d vastio *> $null } until ($LASTEXITCODE -eq 0)
 

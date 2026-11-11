@@ -33,3 +33,11 @@
 .app--cuenta-inicial { display: block; }
 .app--cuenta-inicial .app__contenido { padding-bottom: calc(var(--space-8) + env(safe-area-inset-bottom, 0px)); }
 
+
+/* Subir: abajo a la derecha; en teléfono y tableta, arriba de la barra de navegación. No se imprime. */
+.boton-subir { position: fixed; z-index: var(--z-nav); right: var(--space-4); bottom: calc(112px + env(safe-area-inset-bottom, 0px)); }
+.boton-subir .v-iconbtn { border-radius: var(--radius-pill); box-shadow: var(--shadow-md); }
+/* Donde hay un «Guardar» fijo (servicios, datos del evento), el botón va más arriba para no taparlo. */
+.app__contenido:has(.servicios__acciones, .datos-evento__acciones) .boton-subir { bottom: calc(184px + env(safe-area-inset-bottom, 0px)); }
+@media (min-width: 960px) { .boton-subir { right: var(--space-6); bottom: var(--space-6); } }
+@media print { .boton-subir { display: none; } }

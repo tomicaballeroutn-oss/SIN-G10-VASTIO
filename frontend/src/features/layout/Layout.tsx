@@ -4,6 +4,7 @@ import { Campana } from '../notificaciones/Campana';
 import { AvisosDeSesion } from '../sesion/AvisosDeSesion';
 import { useSesion } from '../sesion/contexto';
 import { BloqueCuenta } from './BloqueCuenta';
+import { BotonSubir } from './BotonSubir';
 import { ITEM_MAS, itemsInferiores, itemsPara, rutaDeInicio } from './menu';
 import './layout.css';
 
@@ -62,6 +63,7 @@ export function Layout() {
           </div>
         )}
         <Outlet />
+        <BotonSubir />
       </main>
       {!usuario.debeCambiarContrasena && (
         <div className="app__inferior">

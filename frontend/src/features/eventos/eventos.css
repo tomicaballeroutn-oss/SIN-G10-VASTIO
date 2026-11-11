@@ -19,7 +19,11 @@
 .eventos__lista { list-style: none; margin: 0; padding: 0; display: grid; gap: var(--space-4); }
 @media (min-width: 720px) { .eventos__lista { grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); } }
 .eventos__lista > li { display: flex; }
-/* Pie de la lista: cuántos se ven y «Ver más». */
+/* Grupos por cercanía: «Esta semana», «La semana que viene», el mes. */
+.eventos__grupo { display: flex; flex-direction: column; gap: var(--space-3); }
+.eventos__grupo + .eventos__grupo { margin-top: var(--space-6); }
+.eventos__grupo-titulo { margin: 0; }
+/* Pie de la lista: «Ver más». */
 .eventos__mas { display: flex; flex-direction: column; align-items: center; gap: var(--space-3); margin-top: var(--space-6); }
 .eventos__mas p { margin: 0; }
 .eventos__lista .v-event { flex: 1; }

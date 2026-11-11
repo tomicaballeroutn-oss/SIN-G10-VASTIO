@@ -10,7 +10,7 @@
 #
 # Requisitos: Docker Desktop abierto, VASTIO_DEMO_CONTRASENA en el .env (es la contraseña de todos los usuarios de
 # ejemplo) y nada escuchando en el 8080 (cerrá el backend de desarrollo si lo tenés levantado).
-# Correlo el mismo día de la reunión: las fechas son relativas a hoy y el evento de la noche queda En curso.
+# Correlo el mismo día de la reunión: las fechas son relativas a hoy y el evento del mediodía pasa a En curso a las 12.
 
 $ErrorActionPreference = 'Stop'
 $raiz = Split-Path -Parent $PSScriptRoot
@@ -25,7 +25,8 @@ if (Get-NetTCPConnection -LocalPort 8080 -State Listen -ErrorAction SilentlyCont
 }
 
 Write-Host 'Recreando la base de demo (vastio-demo, puerto 5434)...'
-docker rm -f vastio-demo *> $null
+docker container inspect vastio-demo *> $null
+if ($LASTEXITCODE -eq 0) { docker rm -f vastio-demo | Out-Null }
 docker run -d --name vastio-demo -e POSTGRES_DB=vastio -e POSTGRES_USER=vastio -e POSTGRES_PASSWORD=vastio -p 5434:5432 postgres:17 | Out-Null
 do { Start-Sleep -Seconds 1; docker exec vastio-demo pg_isready -U vastio -d vastio *> $null } until ($LASTEXITCODE -eq 0)
 

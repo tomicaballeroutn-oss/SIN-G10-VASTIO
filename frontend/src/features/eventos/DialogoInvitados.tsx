@@ -74,9 +74,7 @@ export function DialogoInvitados({ ficha, alCerrar, alGuardar }: {
         )}
         <Checkbox
           label="Cantidad definitiva"
-          hint={confirmado
-            ? 'El evento está confirmado: la cantidad sigue siendo definitiva.'
-            : 'Marcala cuando el cliente confirme el número final. Hace falta para confirmar el evento.'}
+          hint={confirmado ? undefined : 'Hace falta para confirmar el evento.'}
           checked={definitivos}
           disabled={confirmado}
           onChange={(e) => setDefinitivos(e.target.checked)}

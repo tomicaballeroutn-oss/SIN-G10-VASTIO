@@ -61,11 +61,7 @@ export function DialogoConfirmar({ ficha, alCerrar, alConfirmar }: {
             </li>
           ))}
         </ul>
-        <p className="body-sm v-muted">
-          {listo
-            ? 'Al confirmar se avisa a Compras y Cocina, y ya se puede preparar la bebida.'
-            : 'Completá lo que falta para poder confirmar el evento.'}
-        </p>
+        {listo && <p className="body-sm v-muted">Al confirmar se avisa a Compras y Cocina.</p>}
       </div>
     </Dialog>
   );

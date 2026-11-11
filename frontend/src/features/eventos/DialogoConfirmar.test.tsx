@@ -83,7 +83,7 @@ describe('UI-15 · confirmar evento', () => {
 
     const fila = within(dialogo).getByText('Falta cargar Tipo de barra.').closest('li') as HTMLElement;
     expect(fila).toHaveTextContent('Pendiente: Falta cargar Tipo de barra.');
-    expect(within(dialogo).getByText('Completá lo que falta para poder confirmar el evento.')).toBeInTheDocument();
+    expect(within(dialogo).queryByText('Al confirmar se avisa a Compras y Cocina.')).not.toBeInTheDocument();
     const boton = within(dialogo).getByRole('button', { name: 'Confirmar evento' });
     expect(boton).toBeEnabled();
     expect(boton).toHaveClass('is-pendiente');

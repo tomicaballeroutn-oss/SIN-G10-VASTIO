@@ -116,7 +116,7 @@ function Formulario({ ficha, tipos }: { ficha: Ficha; tipos: { id: number; nombr
             label="Hora de inicio"
             type="time"
             optional
-            hint={`Vacía: la del turno (${hora(ficha.turno.horaInicio)}). La usa la vista de cocina.`}
+            hint={`Vacía: la del turno (${hora(ficha.turno.horaInicio)}).`}
             value={horaInicio}
             onChange={(e) => setHoraInicio(e.target.value)}
             error={errorDe('horaInicio')}
@@ -126,7 +126,6 @@ function Formulario({ ficha, tipos }: { ficha: Ficha; tipos: { id: number; nombr
             optional
             multiline
             rows={4}
-            hint="No se muestran en la vista de cocina."
             value={observaciones}
             onChange={(e) => setObservaciones(e.target.value)}
             error={errorDe('observacionesInternas')}
@@ -141,7 +140,7 @@ function Formulario({ ficha, tipos }: { ficha: Ficha; tipos: { id: number; nombr
             label="Documento"
             optional
             inputMode="numeric"
-            hint="DNI o CUIT, sin puntos ni guiones."
+            hint="Sin puntos ni guiones."
             value={cliente.documento}
             onChange={(e) => setCliente({ ...cliente, documento: e.target.value.replace(/\D/g, '') })}
             error={errorDe('cliente.documento')}

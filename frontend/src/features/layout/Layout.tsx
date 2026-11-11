@@ -4,6 +4,7 @@ import { Campana } from '../notificaciones/Campana';
 import { AvisosDeSesion } from '../sesion/AvisosDeSesion';
 import { useSesion } from '../sesion/contexto';
 import { BloqueCuenta } from './BloqueCuenta';
+import { BotonTema } from './BotonTema';
 import { BotonSubir } from './BotonSubir';
 import { ITEM_MAS, itemsInferiores, itemsPara, rutaDeInicio } from './menu';
 import './layout.css';
@@ -59,6 +60,7 @@ export function Layout() {
         {!usuario.debeCambiarContrasena && (
           <div className="app__barra">
             {!enPantallaDelMenu && <IconButton icon="arrow-left" label="Volver" variant="text" className="app__volver" onClick={volver} />}
+            <BotonTema />
             <Campana />
           </div>
         )}

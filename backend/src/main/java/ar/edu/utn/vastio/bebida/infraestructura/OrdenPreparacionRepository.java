@@ -20,6 +20,14 @@ public interface OrdenPreparacionRepository extends JpaRepository<OrdenPreparaci
         return vigente(eventoId, EstadoOrden.VIGENTES);
     }
 
+    /** La orden vigente del evento con sus renglones, para leerla fuera de la transacción. */
+    @Query("select distinct o from OrdenPreparacion o left join fetch o.renglones where o.eventoId = :eventoId and o.estado in :vigentes")
+    Optional<OrdenPreparacion> vigenteConRenglones(long eventoId, Collection<EstadoOrden> vigentes);
+
+    default Optional<OrdenPreparacion> vigenteConRenglones(long eventoId) {
+        return vigenteConRenglones(eventoId, EstadoOrden.VIGENTES);
+    }
+
     /** Las vigentes de esos eventos, con sus renglones. */
     @Query("select distinct o from OrdenPreparacion o left join fetch o.renglones where o.eventoId in :eventoIds and o.estado in :vigentes")
     List<OrdenPreparacion> vigentes(Collection<Long> eventoIds, Collection<EstadoOrden> vigentes);

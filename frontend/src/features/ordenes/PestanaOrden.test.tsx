@@ -55,7 +55,7 @@ describe('UI-35 · orden de preparación', () => {
     expect(within(fernet).getByText('6 cajas')).toBeInTheDocument();
     expect(within(within(tabla).getByRole('row', { name: /Vodka/ })).getAllByText('5 botellas')).toHaveLength(2);
     expect(screen.getByText('Sugerida según el consumo de 12 eventos cerrados de Quince.')).toBeInTheDocument();
-    expect(screen.getByText(/Calculada sobre 180 asistentes, con 10 % de margen/)).toBeInTheDocument();
+    expect(screen.queryByText(/Calculada sobre/)).not.toBeInTheDocument();
     expect(screen.getByText('Sistema')).toBeInTheDocument();
     expect(screen.getByText('Sugerida')).toBeInTheDocument();
   });

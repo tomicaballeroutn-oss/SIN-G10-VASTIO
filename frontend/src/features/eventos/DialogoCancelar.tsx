@@ -56,7 +56,6 @@ export function DialogoCancelar({ ficha, alCerrar, alCancelar }: {
       }
     >
       <div className="cancelar">
-        <p className="body-sm v-muted">{ficha.nombre} · {ficha.salon.nombre} · {ficha.turno.nombre}</p>
         {errorGeneral && <Alert tone="danger">{errorGeneral}</Alert>}
         <Cargando datos={motivos}>
           {() => (

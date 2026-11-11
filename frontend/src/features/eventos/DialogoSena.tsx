@@ -3,7 +3,7 @@ import { hoyEnCordoba } from '../../api/agenda';
 import { fichas, type Ficha, type Moneda } from '../../api/eventos';
 import { useEnvio } from '../../api/useDatos';
 import { Alert, Button, Dialog, Input, Select } from '../../ds';
-import { fechaCorta, formatearImporte, leerImporte } from '../comun/formato';
+import { formatearImporte, leerImporte } from '../comun/formato';
 
 /**
  * UI-11 · Registrar seña: la pre-reserva pasa a Señado y se vuelve una reserva firme.
@@ -49,9 +49,6 @@ export function DialogoSena({ ficha, alCerrar, alRegistrar }: {
       }
     >
       <div className="sena">
-        <p className="body-sm v-muted">
-          {ficha.nombre} · {ficha.salon.nombre} · {fechaCorta(ficha.fecha, true)} · {ficha.turno.nombre}
-        </p>
         {error && !error.errores.length && error.codigo !== 'FECHA_PAGO_FUTURA' && <Alert tone="danger">{error.message}</Alert>}
         <div className="sena__par">
           <Select
@@ -85,13 +82,11 @@ export function DialogoSena({ ficha, alCerrar, alRegistrar }: {
         </div>
         <fieldset className="sena__firmante">
           <legend className="label">Datos del firmante</legend>
-          <p className="body-sm v-muted">Quien firma el contrato. El DNI es obligatorio.</p>
           <Input label="Nombre y apellido" optional value={firmanteNombre} onChange={(e) => setFirmanteNombre(e.target.value)} error={error?.errorDe('firmanteNombre')} />
           <div className="sena__par">
             <Input
               label="DNI"
               inputMode="numeric"
-              hint="Sin puntos."
               value={firmanteDni}
               onChange={(e) => setFirmanteDni(e.target.value.replace(/\D/g, ''))}
               error={error?.errorDe('firmanteDni')}

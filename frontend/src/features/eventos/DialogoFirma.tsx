@@ -3,7 +3,6 @@ import { hoyEnCordoba } from '../../api/agenda';
 import { CONTRATO_MAXIMO_ARCHIVOS, CONTRATO_MAXIMO_BYTES, CONTRATO_TIPOS, fichas, type Ficha } from '../../api/eventos';
 import { useEnvio } from '../../api/useDatos';
 import { Alert, Button, Dialog, Input, SelectorArchivos } from '../../ds';
-import { fechaCorta } from '../comun/formato';
 
 /** Errores del sistema que van debajo de la fecha o de los archivos, no arriba del formulario. */
 const DE_LA_FECHA = ['FECHA_FIRMA_FUTURA', 'FECHA_FIRMA_ANTERIOR_A_SENA'];
@@ -62,23 +61,19 @@ export function DialogoFirma({ ficha, alCerrar, alRegistrar }: {
       }
     >
       <div className="firma">
-        <p className="body-sm v-muted">
-          {ficha.nombre} · {ficha.salon.nombre} · {fechaCorta(ficha.fecha, true)} · {ficha.turno.nombre}
-        </p>
         {errorGeneral && <Alert tone="danger">{errorGeneral}</Alert>}
         <Input
           label="Fecha de firma"
           type="date"
           value={fechaFirma}
           onChange={(e) => setFechaFirma(e.target.value)}
-          hint={ficha.sena ? `No puede ser anterior a la seña (${fechaCorta(ficha.sena.fecha, true)}) ni posterior a hoy.` : undefined}
           error={errorFecha}
           required
         />
         <SelectorArchivos
           label="Contrato digitalizado"
           prompt="Sacá una foto o elegí un archivo de la galería"
-          hint="PDF, JPG o PNG, hasta 10 MB cada uno. Si son varias hojas, agregalas todas."
+          hint="PDF, JPG o PNG, hasta 10 MB."
           accept={CONTRATO_TIPOS}
           multiple
           files={archivos}

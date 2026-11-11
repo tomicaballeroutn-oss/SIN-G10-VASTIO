@@ -1,7 +1,6 @@
 import { fichas, type Ficha } from '../../api/eventos';
 import { useEnvio } from '../../api/useDatos';
 import { Alert, Button, Dialog } from '../../ds';
-import { fechaCorta } from '../comun/formato';
 
 /**
  * UI-10 · Liberar pre-reserva: la fecha vuelve a la agenda y queda en el historial como liberación.
@@ -34,9 +33,6 @@ export function DialogoLiberar({ ficha, alCerrar, alLiberar }: {
       {error && <Alert tone="danger">{error.message}</Alert>}
       <p className="body-lg">
         La fecha vuelve a estar disponible en la agenda y queda registrada en el historial del evento como liberación.
-      </p>
-      <p className="body-sm v-muted">
-        {ficha.nombre} · {ficha.salon.nombre} · {fechaCorta(ficha.fecha, true)} · {ficha.turno.nombre}
       </p>
     </Dialog>
   );

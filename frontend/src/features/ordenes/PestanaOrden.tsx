@@ -103,12 +103,6 @@ function ContenidoOrden({ consulta, tipoEvento, alCambiar }: {
       >
         <div className="orden__cuerpo">
           <p className="body-sm">{origenDeLaSugerencia(orden, tipoEvento)}</p>
-          {orden.asistentesBase != null && (
-            <p className="body-sm v-muted">
-              Calculada sobre {orden.asistentesBase} asistentes, con {orden.margenPorcentaje} % de margen, en cajas completas.
-              Sale de {orden.origen}.
-            </p>
-          )}
           {ajustando ? (
             <Ajuste
               orden={orden}

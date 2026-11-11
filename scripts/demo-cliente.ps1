@@ -42,20 +42,3 @@ Write-Host 'Listo. Cuando el backend diga "Escenario completo de demostración c
 Write-Host 'Usuarios (contraseña: la de VASTIO_DEMO_CONTRASENA): melina.sifon (Coordinación), gabriela.paz (Administración),'
 Write-Host 'lucia.ferreyra y sofia.mendez (Vendedoras), ana.sosa y carla.nunez (Planners), nicolas.herrera (Compras),'
 Write-Host 'rocio.blanco (Barra), julian.torres (Cocina). Dirección: el usuario inicial del .env.'
- --format '{{.Names}}'
-if ($contenedorDemo -eq 'vastio-demo') { docker rm -f vastio-demo | Out-Null }
-docker run -d --name vastio-demo -e POSTGRES_DB=vastio -e POSTGRES_USER=vastio -e POSTGRES_PASSWORD=vastio -p 5434:5432 postgres:17 | Out-Null
-do { Start-Sleep -Seconds 1; docker exec vastio-demo pg_isready -U vastio -d vastio *> $null } until ($LASTEXITCODE -eq 0)
-
-Write-Host 'Abriendo el backend (carga los datos al arrancar, tarda un minuto)...'
-Start-Process powershell -WorkingDirectory (Join-Path $raiz 'backend') -ArgumentList '-NoExit', '-Command',
-    "`$env:DB_PORT='5434'; `$env:VASTIO_DEMO_COMPLETO='true'; .\mvnw.cmd spring-boot:run '-Dspring-boot.run.profiles=dev'"
-
-Write-Host 'Abriendo el frontend...'
-Start-Process powershell -WorkingDirectory (Join-Path $raiz 'frontend') -ArgumentList '-NoExit', '-Command', 'npm run dev'
-
-Write-Host ''
-Write-Host 'Listo. Cuando el backend diga "Escenario completo de demostración cargado", entrá a http://localhost:5173'
-Write-Host 'Usuarios (contraseña: la de VASTIO_DEMO_CONTRASENA): melina.sifon (Coordinación), gabriela.paz (Administración),'
-Write-Host 'lucia.ferreyra y sofia.mendez (Vendedoras), ana.sosa y carla.nunez (Planners), nicolas.herrera (Compras),'
-Write-Host 'rocio.blanco (Barra), julian.torres (Cocina). Dirección: el usuario inicial del .env.'

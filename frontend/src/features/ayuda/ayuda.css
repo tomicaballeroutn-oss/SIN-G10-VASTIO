@@ -1,4 +1,10 @@
 .ayuda { min-width: 0; }
+.ayuda__busqueda { display: flex; flex-wrap: wrap; align-items: end; gap: var(--space-3); }
+.ayuda__busqueda .v-field { flex: 1 1 240px; min-width: 0; }
+.ayuda__resultados { display: grid; gap: var(--space-3); }
+.ayuda__resultados .ayuda__lista { margin-top: 0; }
+.ayuda__resultados li { padding-block: var(--space-2); }
+.ayuda__resultados li p { margin: 0; }
 .ayuda-contextual__encabezado { display: flex; align-items: center; gap: var(--space-2); }
 .ayuda-contextual__encabezado > :first-child { min-width: 0; }
 .ayuda__categorias { display: grid; gap: var(--space-4); grid-template-columns: minmax(0, 1fr); }

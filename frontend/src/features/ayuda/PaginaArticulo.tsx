@@ -3,7 +3,7 @@ import { Link, useLocation, useParams } from 'react-router';
 import { Card, EmptyState } from '../../ds';
 import { useSesion } from '../sesion/contexto';
 import { ARTICULOS, CATEGORIAS, GLOSARIO } from './articulos';
-import { CONTENIDO, TERMINOS } from './contenido';
+import { CONTENIDO, DESCRIPCION_GLOSARIO, TERMINOS } from './contenido';
 import { puedeLeer } from './modelo';
 import { VideoTutorial } from './VideoTutorial';
 import './ayuda.css';
@@ -46,7 +46,7 @@ export function PaginaArticulo() {
       </nav>
       <header className="pantalla__titulos">
         <h1 ref={titulo} tabIndex={-1}>{articulo.titulo}</h1>
-        <p className="body v-muted">{esGlosario ? 'Consultá el significado de los términos que utiliza Vastio.' : contenido.descripcion}</p>
+        <p className="body v-muted">{esGlosario ? DESCRIPCION_GLOSARIO : contenido.descripcion}</p>
       </header>
       <Card>
         {esGlosario ? (

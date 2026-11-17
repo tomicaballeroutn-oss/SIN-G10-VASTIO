@@ -11,6 +11,8 @@ export const CONTENIDO: Record<string, ContenidoAyuda> = {
   ...GESTION,
 };
 
+export const DESCRIPCION_GLOSARIO = 'Consultá el significado de los términos que utiliza Vastio.';
+
 export const TERMINOS = [
   { termino: 'Unidad comercializable', definicion: 'Combinación de salón, fecha y turno.' },
   { termino: 'Pre-reserva', definicion: 'Fecha apartada durante una negociación.' },

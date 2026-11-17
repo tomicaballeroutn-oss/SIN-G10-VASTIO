@@ -15,6 +15,13 @@
 .ayuda__lista .ayuda__enlace { display: flex; align-items: center; min-height: var(--control-md); padding-block: var(--space-2); }
 .ayuda__enlace:hover { color: var(--brand-hover); }
 .ayuda__enlace:focus-visible { outline: 2px solid var(--focus-ring); outline-offset: 3px; border-radius: var(--radius-sm); }
+.ayuda__categoria .ayuda__articulo { justify-content: space-between; gap: var(--space-3); width: 100%; min-height: var(--control-lg); padding: var(--space-3); border-radius: var(--radius-md); color: var(--ink); font-weight: 500; text-decoration: none; }
+.ayuda__articulo > span { min-width: 0; }
+.ayuda__articulo > .v-icon { flex: none; color: var(--ink-muted); }
+.ayuda__categoria .ayuda__articulo:hover { background: var(--surface-sunken); color: var(--brand-ink); }
+.ayuda__categoria .ayuda__articulo:focus-visible { background: var(--brand-tint); outline-offset: -2px; }
+.ayuda__categoria .ayuda__articulo:active { background: var(--brand-tint); color: var(--brand-pressed); }
+.ayuda__articulo:is(:hover, :focus-visible, :active) > .v-icon { color: currentColor; }
 .ayuda--articulo { max-width: 800px; margin-inline: auto; line-height: 1.7; overflow-wrap: anywhere; }
 .ayuda__navegacion { display: flex; flex-wrap: wrap; gap: var(--space-2) var(--space-6); }
 .ayuda__seccion { display: grid; gap: var(--space-3); }

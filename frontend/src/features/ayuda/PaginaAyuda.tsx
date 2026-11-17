@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Link, useLocation } from 'react-router';
-import { Button, Card, EmptyState, Input } from '../../ds';
+import { Button, Card, EmptyState, Icon, Input } from '../../ds';
 import { Encabezado } from '../layout/paginas';
 import { rutaDeInicio } from '../layout/menu';
 import { useSesion } from '../sesion/contexto';
@@ -67,7 +67,12 @@ export function PaginaAyuda() {
                   <h2 className="h3" id={categoria.id} tabIndex={-1}>{categoria.titulo}</h2>
                   <ul className="ayuda__lista" aria-labelledby={categoria.id}>
                     {articulos.map((articulo) => (
-                      <li key={articulo.id}><Link className="ayuda__enlace" to={rutaArticulo(articulo)}>{articulo.titulo}</Link></li>
+                      <li key={articulo.id}>
+                        <Link className="ayuda__enlace ayuda__articulo" to={rutaArticulo(articulo)}>
+                          <span>{articulo.titulo}</span>
+                          <Icon name="chevron-right" size={18} />
+                        </Link>
+                      </li>
                     ))}
                   </ul>
                 </Card>

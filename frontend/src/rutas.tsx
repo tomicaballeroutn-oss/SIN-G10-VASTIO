@@ -1,5 +1,7 @@
 import type { ReactNode } from 'react';
 import type { RouteObject } from 'react-router';
+import { PaginaAyuda } from './features/ayuda/PaginaAyuda';
+import { PaginaArticulo } from './features/ayuda/PaginaArticulo';
 import { PaginaAgenda } from './features/agenda/PaginaAgenda';
 import { PaginaBarra } from './features/bebidas/PaginaBarra';
 import { PaginaBloqueos } from './features/bloqueos/PaginaBloqueos';
@@ -76,6 +78,8 @@ export const rutas: RouteObject[] = [
         element: <ConPermiso item={MENU.find((it) => it.id === 'eventos')!}><PaginaReprogramar /></ConPermiso>,
       },
       { path: 'mas', element: <PaginaMas /> },
+      { path: 'ayuda', element: <PaginaAyuda /> },
+      { path: 'ayuda/:categoria/:articulo', element: <PaginaArticulo /> },
       { path: 'mi-cuenta', element: <PaginaMiCuenta /> },
       { path: '*', element: <IrAlInicio /> },
     ],

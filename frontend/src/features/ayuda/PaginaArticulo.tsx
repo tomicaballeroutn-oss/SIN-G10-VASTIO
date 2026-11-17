@@ -1,5 +1,5 @@
 import { useEffect, useRef } from 'react';
-import { Link, useParams } from 'react-router';
+import { Link, useLocation, useParams } from 'react-router';
 import { Card, EmptyState } from '../../ds';
 import { useSesion } from '../sesion/contexto';
 import { ARTICULOS, CATEGORIAS, GLOSARIO } from './articulos';
@@ -10,6 +10,9 @@ import './ayuda.css';
 
 export function PaginaArticulo() {
   const { categoria, articulo: id } = useParams();
+  const { state } = useLocation();
+  const origen = (state as { volverAyuda?: unknown } | null)?.volverAyuda;
+  const volver = typeof origen === 'string' && origen.startsWith('/') && !origen.startsWith('//') ? origen : undefined;
   const { usuario } = useSesion();
   const roles = usuario?.roles ?? [];
   const articulo = [...ARTICULOS, GLOSARIO].find((item) => item.categoria === categoria && item.id === id);
@@ -37,6 +40,7 @@ export function PaginaArticulo() {
   return (
     <article className="pantalla ayuda ayuda--articulo">
       <nav className="ayuda__navegacion" aria-label="Navegación de ayuda">
+        {volver && <Link className="ayuda__enlace" to={volver}>Volver a la pantalla anterior</Link>}
         <Link className="ayuda__enlace" to="/ayuda">Centro de ayuda</Link>
         <Link className="ayuda__enlace" to={`/ayuda#${categoriaActual.id}`}>{categoriaActual.titulo}</Link>
       </nav>

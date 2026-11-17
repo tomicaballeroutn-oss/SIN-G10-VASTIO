@@ -1,5 +1,7 @@
 import { useCallback, useState } from 'react';
 import { useNavigate, useParams } from 'react-router';
+import { AyudaContextual } from '../ayuda/AyudaContextual';
+import { AYUDAS } from '../ayuda/contextos';
 import { cierres, type Cierre, type RenglonCierre } from '../../api/cierres';
 import { useDatos, useEnvio } from '../../api/useDatos';
 import {
@@ -89,7 +91,8 @@ function Conciliacion({ cierre, alCerrar }: { cierre: Cierre; alCerrar: (c: Cier
         </Alert>
       )}
 
-      <Card title="Consumo real" subtitle="Entregado − devuelto − remanente, en todas las barras del evento">
+      <Card title="Consumo real" subtitle="Entregado − devuelto − remanente, en todas las barras del evento"
+        actions={<AyudaContextual {...AYUDAS.cierre} />}>
         <Table
           caption="Consumo por bebida"
           dense

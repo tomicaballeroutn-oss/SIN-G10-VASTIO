@@ -6,6 +6,7 @@
 export * from './tipos';
 export { ESTADOS, ESTADO_POR_CODIGO, ESTADOS_DEL_EVENTO, SALONES, ORDEN_SALONES } from './estados';
 export { Icon, type IconProps } from './components/Icon';
+export { Popover, type PopoverProps } from './components/Popover';
 export { Button, IconButton, type ButtonProps, type IconButtonProps } from './components/Button';
 export {
   Input, Select, Segmentado, OpcionesMultiples, Checkbox, Switch, Stepper, Combobox, SelectorArchivos, CantidadEnCajas,

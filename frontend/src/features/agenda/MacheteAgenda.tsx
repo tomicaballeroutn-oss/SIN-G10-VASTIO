@@ -1,5 +1,7 @@
 import { useState } from 'react';
 import { AgendaLeyenda, Card, type EventStatus } from '../../ds';
+import { AyudaContextual } from '../ayuda/AyudaContextual';
+import { AYUDAS } from '../ayuda/contextos';
 
 /** Ancho desde el que la agenda pone el detalle del día al costado del mes (ver agenda.css). */
 const DOS_COLUMNAS = '(min-width: 1200px)';
@@ -12,7 +14,8 @@ export function MacheteAgenda({ elegidos, alCambiar }: { elegidos?: EventStatus[
   const [abierto] = useState(() => typeof window !== 'undefined' && !!window.matchMedia?.(DOS_COLUMNAS).matches);
   return (
     <Card className="agenda__machete">
-      <AgendaLeyenda titulo="Filtrar por estado" defaultOpen={abierto} elegidos={elegidos} onCambiar={alCambiar} />
+      <AgendaLeyenda titulo="Filtrar por estado" defaultOpen={abierto} elegidos={elegidos} onCambiar={alCambiar}
+        ayuda={<AyudaContextual {...AYUDAS.estadosAgenda} />} />
     </Card>
   );
 }

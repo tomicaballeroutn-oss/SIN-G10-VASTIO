@@ -157,6 +157,8 @@ export interface AgendaLeyendaProps {
   onCambiar?: (estados: EventStatus[]) => void;
   /** Texto del encabezado que abre y cierra. */
   titulo?: string;
+  /** Acción junto al encabezado, independiente de abrir o cerrar la leyenda. */
+  ayuda?: ReactNode;
   className?: string;
 }
 
@@ -165,11 +167,12 @@ function alternar<T>(lista: T[], valor: T): T[] {
 }
 
 /** Machete de la agenda: qué estado significa cada relleno de punto. Se abre y se cierra. */
-export function AgendaLeyenda({ defaultOpen = false, elegidos, onCambiar, titulo = 'Qué significa cada punto', className }: AgendaLeyendaProps) {
+export function AgendaLeyenda({ defaultOpen = false, elegidos, onCambiar, titulo = 'Qué significa cada punto', ayuda, className }: AgendaLeyendaProps) {
   return (
     <details className={cx('v-agenda-leyenda', className)} open={defaultOpen}>
       <summary className="v-agenda-leyenda__resumen">
         <span className="h4">{titulo}</span>
+        {ayuda}
         <Icon name="chevron-down" size={20} className="v-agenda-leyenda__chevron" />
       </summary>
       <ul className="v-agenda-leyenda__lista body-sm">

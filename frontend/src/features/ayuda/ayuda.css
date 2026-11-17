@@ -1,4 +1,6 @@
 .ayuda { min-width: 0; }
+.ayuda-contextual__encabezado { display: flex; align-items: center; gap: var(--space-2); }
+.ayuda-contextual__encabezado > :first-child { min-width: 0; }
 .ayuda__categorias { display: grid; gap: var(--space-4); grid-template-columns: minmax(0, 1fr); }
 .ayuda__categoria h2 { scroll-margin-top: var(--space-6); }
 .ayuda__lista { list-style: none; margin: var(--space-3) 0 0; padding: 0; }

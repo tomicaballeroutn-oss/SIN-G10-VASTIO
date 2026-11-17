@@ -5,6 +5,8 @@ import { Alert, Button, Card, Dialog, EmptyState, Input, OpcionesMultiples, Segm
 import { FiltroMultiple } from '../comun/FiltroMultiple';
 import { MarcaSalon } from '../comun/MarcaSalon';
 import { Encabezado } from '../layout/paginas';
+import { AyudaContextual } from '../ayuda/AyudaContextual';
+import { AYUDAS } from '../ayuda/contextos';
 import './reportes.css';
 
 const hoy = new Date();
@@ -61,7 +63,10 @@ export function PaginaReporteOcupacion() {
 
   return (
     <section className="pantalla reporte-ocupacion">
-      <Encabezado titulo="Reporte de ocupación" antetitulo="Gestión comercial" />
+      <div className="ayuda-contextual__encabezado">
+        <Encabezado titulo="Reporte de ocupación" antetitulo="Gestión comercial" />
+        <AyudaContextual {...AYUDAS.ocupacion} />
+      </div>
       <div className="reporte-ocupacion__impresion">
         {codigoSalonElegido && <MarcaSalon salon={codigoSalonElegido} className="reporte-ocupacion__marca" />}
         <p><strong>Período:</strong> {fecha(filtrosDelResultado.desde)} al {fecha(filtrosDelResultado.hasta)}</p>

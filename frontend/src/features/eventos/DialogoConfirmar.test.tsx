@@ -61,6 +61,13 @@ describe('UI-15 · confirmar evento', () => {
     const lista = within(dialogo).getByRole('list', { name: 'Requisitos para confirmar' });
     expect(within(lista).getAllByRole('listitem')).toHaveLength(4);
     expect(within(lista).getByText('Ana Sosa')).toBeInTheDocument();
+    const ayuda = within(dialogo).getByRole('button', { name: 'Ayuda sobre requisitos de confirmación' });
+    await usuario.click(ayuda);
+    expect(screen.getByRole('dialog', { name: 'Requisitos de confirmación' })).toBeInTheDocument();
+    await usuario.keyboard('{Escape}');
+    expect(dialogo).toBeInTheDocument();
+    expect(ayuda).toHaveFocus();
+    expect(pedidos(fetchMock).some((p) => p.metodo === 'POST')).toBe(false);
     await usuario.click(within(dialogo).getByRole('button', { name: 'Confirmar evento' }));
 
     expect(await screen.findByText('Evento confirmado. Se avisó a Compras y Cocina.')).toBeInTheDocument();

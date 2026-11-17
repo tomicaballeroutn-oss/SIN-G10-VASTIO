@@ -7,6 +7,8 @@ import { Alert, Button, Card, EmptyState, Input, Select, StockLevel, cantidadLeg
 import { Cargando } from '../comun/Cargando';
 import { Encabezado } from '../layout/paginas';
 import { useSesion } from '../sesion/contexto';
+import { AyudaContextual } from '../ayuda/AyudaContextual';
+import { AYUDAS } from '../ayuda/contextos';
 import { DialogoRecuento, DialogoRotura } from './DialogosAjuste';
 import { SeleccionBebidaRecuento } from './SeleccionBebidaRecuento';
 import './existencias.css';
@@ -108,26 +110,34 @@ function Consulta({ ubicaciones }: { ubicaciones: UbicacionConsultable[] }) {
             );
           }
           return (
-            <ul className="existencias__lista" aria-label="Existencias por bebida">
-              {visibles.map((r) => (
-                <li key={r.bebida.id}>
-                  <StockLevel
-                    name={r.bebida.nombre}
-                    presentacion={[r.bebida.presentacion, r.bebida.tipo, !r.bebida.activo && 'dada de baja'].filter(Boolean).join(' · ')}
-                    cantidad={r.cantidad}
-                    cantidadTexto={cantidadLegible(r.cantidad, r.bebida.unidadesPorBulto, r.bebida.unidad)}
-                    status={r.estado ? ESTADO_STOCK[r.estado] : null}
-                    actions={puedeAjustar ? (
-                      <>
-                        <Button variant="outline" size="sm" icon="clipboard-list" onClick={() => setAjuste({ tipo: 'recuento', renglon: r })}>Registrar recuento</Button>
-                        <Button variant="text" size="sm" onClick={() => setAjuste({ tipo: 'rotura', renglon: r })}>Declarar rotura</Button>
-                      </>
-                    ) : undefined}
-                  />
-                </li>
-              ))}
-              {visibles.length === 0 && <li className="body-sm v-muted">Ninguna bebida coincide con «{buscar.trim()}».</li>}
-            </ul>
+            <>
+              {visibles.some((r) => r.estado != null) && (
+                <div className="ayuda-contextual__encabezado">
+                  <h2 className="h4">Estado de las existencias</h2>
+                  <AyudaContextual {...AYUDAS.existencias} />
+                </div>
+              )}
+              <ul className="existencias__lista" aria-label="Existencias por bebida">
+                {visibles.map((r) => (
+                  <li key={r.bebida.id}>
+                    <StockLevel
+                      name={r.bebida.nombre}
+                      presentacion={[r.bebida.presentacion, r.bebida.tipo, !r.bebida.activo && 'dada de baja'].filter(Boolean).join(' · ')}
+                      cantidad={r.cantidad}
+                      cantidadTexto={cantidadLegible(r.cantidad, r.bebida.unidadesPorBulto, r.bebida.unidad)}
+                      status={r.estado ? ESTADO_STOCK[r.estado] : null}
+                      actions={puedeAjustar ? (
+                        <>
+                          <Button variant="outline" size="sm" icon="clipboard-list" onClick={() => setAjuste({ tipo: 'recuento', renglon: r })}>Registrar recuento</Button>
+                          <Button variant="text" size="sm" onClick={() => setAjuste({ tipo: 'rotura', renglon: r })}>Declarar rotura</Button>
+                        </>
+                      ) : undefined}
+                    />
+                  </li>
+                ))}
+                {visibles.length === 0 && <li className="body-sm v-muted">Ninguna bebida coincide con «{buscar.trim()}».</li>}
+              </ul>
+            </>
           );
         }}
       </Cargando>

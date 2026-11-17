@@ -2,6 +2,8 @@ import { useRef, useState } from 'react';
 import { fichas, type Ficha } from '../../api/eventos';
 import { useEnvio } from '../../api/useDatos';
 import { Alert, Button, Dialog, Icon } from '../../ds';
+import { AyudaContextual } from '../ayuda/AyudaContextual';
+import { AYUDAS } from '../ayuda/contextos';
 
 /**
  * UI-15 · Confirmar evento: lista los requisitos (planner, invitados definitivos, servicios requeridos, fecha).
@@ -49,6 +51,10 @@ export function DialogoConfirmar({ ficha, alCerrar, alConfirmar }: {
             Falta: {pendientes.map((r) => r.titulo.toLowerCase()).join(', ')}.
           </Alert>
         )}
+        <div className="ayuda-contextual__encabezado">
+          <h3 className="h4">Requisitos para confirmar</h3>
+          <AyudaContextual {...AYUDAS.confirmacion} />
+        </div>
         <ul ref={lista} tabIndex={-1} className="confirmar__requisitos" aria-label="Requisitos para confirmar">
           {requisitos.map((r) => (
             <li key={r.codigo} className={r.cumplido ? 'confirmar__requisito' : 'confirmar__requisito is-pendiente'}>

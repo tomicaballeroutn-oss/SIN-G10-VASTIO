@@ -16,6 +16,25 @@ beforeEach(() => {
 });
 
 describe('centro de ayuda integrado', () => {
+  it('explica que la devolución registra el consumo y actualiza las existencias', async () => {
+    backendFalso(sesionDe(['BARRA']), () => json(200, []));
+    montar('/ayuda/barra/devoluciones');
+    await screen.findByText(/Al confirmar la devolución, Vastio calcula y registra el consumo real de cada bebida\./);
+    expect(screen.getByText('Al confirmar la devolución, se registran los movimientos de consumo y se actualizan las existencias.')).toBeInTheDocument();
+    expect(screen.getByText('El cierre posterior del evento no vuelve a descontar esas bebidas del stock.')).toBeInTheDocument();
+    expect(within(screen.getByRole('article')).getAllByRole('listitem')).toHaveLength(5);
+  });
+
+  it('explica que el cierre consolida el consumo previamente registrado', async () => {
+    backendFalso(sesionDe(['BARRA']), () => json(200, []));
+    montar('/ayuda/barra/cierre');
+    await screen.findByText('El consumo de cada barra ya fue calculado y registrado al confirmar su devolución.');
+    expect(screen.getByText('Durante el cierre, Vastio consolida esos consumos y guarda el resultado definitivo en consumo_evento.')).toBeInTheDocument();
+    expect(screen.getByText('El cierre no genera nuevamente movimientos CONSUMO ni descuenta otra vez las bebidas del stock.')).toBeInTheDocument();
+    expect(screen.getByText('Los ajustes de stock posteriores no modifican el consumo consolidado del evento.')).toBeInTheDocument();
+    expect(within(screen.getByRole('article')).getAllByRole('listitem')).toHaveLength(5);
+  });
+
   it('permite abrir los 19 artículos y el glosario por URL y volver a su categoría', async () => {
     backendFalso(sesionDe(['DIRECCION']), () => json(200, []));
     const router = montar('/ayuda');

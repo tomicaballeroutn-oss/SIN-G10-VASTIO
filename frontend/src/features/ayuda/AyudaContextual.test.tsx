@@ -27,6 +27,16 @@ function montarAyuda(ayuda: AyudaContextualProps, roles: Rol[] = ['DIRECCION']) 
 beforeEach(() => vi.spyOn(window, 'scrollTo').mockImplementation(() => {}));
 
 describe('ayuda contextual conectada con artículos', () => {
+  it.each([
+    { ayuda: AYUDAS.devoluciones, titulo: 'Devoluciones y remanentes', texto: 'Al confirmar la devolución, Vastio calcula y registra el consumo: entregado menos devuelto y remanente.' },
+    { ayuda: AYUDAS.cierre, titulo: 'Consumo real y cierre', texto: 'El consumo se registra al devolver las bebidas. El cierre consolida lo consumido por todas las barras, sin volver a descontar stock.' },
+  ])('conserva el texto corregido de $titulo', async ({ ayuda, titulo, texto }) => {
+    montarAyuda(ayuda, ['BARRA']);
+    await userEvent.click(screen.getByRole('button'));
+    expect(screen.getByRole('dialog', { name: titulo })).toBeInTheDocument();
+    expect(screen.getByText(texto)).toBeInTheDocument();
+  });
+
   it.each(Object.values(AYUDAS))('Saber más de $titulo abre su artículo y permite regresar al origen', async (ayuda) => {
     const router = montarAyuda(ayuda);
     const persona = userEvent.setup();

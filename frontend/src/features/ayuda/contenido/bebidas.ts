@@ -36,7 +36,7 @@ export const BEBIDAS: Record<string, ContenidoAyuda> = {
     }, {
       titulo: 'Registrar una preparación',
       pasos: ['Abrí un evento Confirmado o En curso e ingresá a Preparación.', 'Elegí la Barra y verificá Sale de y Destino.', 'Agregá las bebidas y cantidades en cajas y botellas enteras.', 'Seleccioná Revisar preparación y luego Registrar preparación.'],
-      notas: ['La carga de cantidades es manual. Esta operación traslada bebida del depósito madre al de transición y queda asociada al evento.', 'Si la barra se abastece directamente del depósito madre, la pantalla informa que el evento puede operar sin preparación. El traspaso conserva las cantidades entre ubicaciones y el consumo se registra en la operación de barra.'],
+      notas: ['La carga de cantidades es manual. Esta operación traslada bebida del depósito madre al de transición y queda asociada al evento.', 'Si la barra se abastece directamente del depósito madre, la pantalla informa que el evento puede operar sin preparación. El traspaso conserva las cantidades entre ubicaciones. El consumo se calcula y registra al confirmar la devolución de cada barra.'],
     }],
   },
   retiros: {
@@ -48,19 +48,34 @@ export const BEBIDAS: Record<string, ContenidoAyuda> = {
     }],
   },
   devoluciones: {
-    descripcion: 'Al terminar, registrá qué botellas cerradas vuelven al depósito y cuáles quedan para el siguiente evento.',
+    descripcion: 'Al finalizar la operación de barra, registrá las bebidas que vuelven al depósito y las que quedan como remanente. Al confirmar la devolución, Vastio calcula y registra el consumo real de cada bebida.',
     secciones: [{
       titulo: 'Registrar la devolución',
-      pasos: ['Desde Barra, seleccioná Registrar devolución en la entrega correspondiente.', 'Por cada bebida, completá Vuelve al depósito y Queda en la barra (remanente).', 'Si la pantalla lo solicita, indicá también Queda en la transición para devolver ese sobrante al depósito madre.', 'Seleccioná Revisar devolución y luego Registrar devolución.'],
-      notas: ['Las botellas abiertas se imputan como consumidas. La devolución y el remanente se cargan en botellas cerradas.', 'La entrega queda cerrada y el consumo se muestra después de registrar la devolución. Completá las devoluciones de todas las barras del evento.'],
+      pasos: ['Desde Barra, seleccioná Registrar devolución en la entrega correspondiente.', 'Por cada bebida, indicá cuánto Vuelve al depósito y cuánto Queda en la barra (remanente).', 'Si corresponde, registrá también las bebidas que quedan en el depósito de transición.', 'Seleccioná Revisar devolución y luego Registrar devolución.', 'Consultá el consumo real calculado por el sistema.'],
+      notas: [
+        'El consumo se calcula mediante la fórmula: Consumo = Entregado − Devuelto − Remanente.',
+        'Al confirmar la devolución, se registran los movimientos de consumo y se actualizan las existencias.',
+        'Las botellas abiertas se consideran consumidas. Solamente las botellas cerradas pueden devolverse o quedar como remanente.',
+        'La entrega queda cerrada y no admite nuevos retiros.',
+        'El cierre posterior del evento no vuelve a descontar esas bebidas del stock.',
+      ],
     }],
   },
   cierre: {
-    descripcion: 'El cierre fija el consumo real de bebidas del evento y lo lleva al estado Cerrado.',
+    descripcion: 'El cierre del evento verifica las devoluciones y consolida definitivamente el consumo registrado por las barras, sin volver a descontar bebidas del stock.',
     secciones: [{
       titulo: 'Cerrar el evento',
-      pasos: ['Con el evento Realizado, abrí Barra y seleccioná Ir al cierre o Ir al cierre del evento.', 'Revisá los avisos de devoluciones pendientes y completalas en Barra.', 'Consultá lo Entregado, Devuelto, Remanente y el Consumo de todas las barras.', 'Seleccioná Cerrar evento y confirmá con Registrar cierre.'],
-      notas: ['El evento debe estar Realizado y tener cerradas todas sus entregas.', 'Consumo real = Entregado − Devuelto − Remanente. Entregado incluye el remanente heredado de la jornada anterior.', 'El consumo queda fijado. Los ajustes posteriores corrigen el stock. La asistencia real por segmento puede completarse después por las personas autorizadas y actualizar el indicador por asistente.'],
+      pasos: ['Con el evento en estado Realizado, ingresá a Barra y abrí el cierre correspondiente.', 'Revisá si existen devoluciones pendientes y completalas antes de continuar.', 'Consultá las cantidades entregadas, devueltas, remanentes y consumidas de todas las barras.', 'Seleccioná Cerrar evento.', 'Confirmá la operación mediante Registrar cierre.'],
+      notas: [
+        'El evento debe estar en estado Realizado y todas sus entregas deben estar cerradas.',
+        'El consumo de cada barra ya fue calculado y registrado al confirmar su devolución.',
+        'Durante el cierre, Vastio consolida esos consumos y guarda el resultado definitivo en consumo_evento.',
+        'El cierre no genera nuevamente movimientos CONSUMO ni descuenta otra vez las bebidas del stock.',
+        'El evento pasa a estado Cerrado y la orden de preparación se cierra si existe.',
+        'Los ajustes de stock posteriores no modifican el consumo consolidado del evento.',
+        'La asistencia real por segmento puede actualizar posteriormente el indicador de consumo por asistente, sin alterar las cantidades consumidas.',
+        'Entregado incluye el remanente heredado de la jornada anterior.',
+      ],
     }],
   },
 };

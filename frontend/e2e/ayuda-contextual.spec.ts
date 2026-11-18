@@ -69,7 +69,7 @@ test('los ocho puntos abren su artículo y vuelven a la pantalla operativa', asy
     { origen: '/eventos/5', titulo: 'Requisitos de confirmación', destino: '/ayuda/agenda/confirmacion-reprogramacion' },
     { origen: '/existencias', titulo: 'Estado de las existencias', destino: '/ayuda/bebidas/existencias' },
     { origen: '/barra', titulo: 'Devoluciones y remanentes', destino: '/ayuda/barra/devoluciones' },
-    { origen: '/barra/cierre/10', titulo: 'Cálculo del consumo', destino: '/ayuda/barra/cierre' },
+    { origen: '/barra/cierre/10', titulo: 'Consumo real y cierre', destino: '/ayuda/barra/cierre' },
     { origen: '/reportes', titulo: 'Cálculo de ocupación', destino: '/ayuda/reportes/ocupacion' },
   ];
   for (const punto of puntos) {

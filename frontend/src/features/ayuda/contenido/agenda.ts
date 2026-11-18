@@ -20,8 +20,8 @@ export const AGENDA: Record<string, ContenidoAyuda> = {
       notas: [
         'Pre-reserva aparta la fecha mientras se negocia y permanece hasta que se señe o se libere.',
         'Señado indica que se registró la seña. Contratado indica que se registró la firma del contrato.',
-        'Confirmado indica que se completaron los requisitos operativos. En curso corresponde al desarrollo del evento y Realizado al turno terminado, pendiente de cerrar el consumo.',
-        'Cerrado indica que se fijó el consumo de bebida. La asistencia real por segmento puede completarse después por las personas autorizadas.',
+        'Confirmado indica que se completaron los requisitos operativos. En curso corresponde al desarrollo del evento y Realizado al turno terminado, pendiente del cierre que consolida el consumo de las barras.',
+        'Cerrado indica que se consolidó definitivamente el consumo de bebida. La asistencia real por segmento puede completarse después por las personas autorizadas.',
         'Liberada y Cancelado liberan la unidad. Se consultan en Eventos o Mis eventos. El calendario ofrece los estados activos, Disponible y Bloqueado.',
         'Un bloqueo retira unidades de la venta por motivos no comerciales. Reprogramar conserva el estado del evento y queda registrado en su historial.',
       ],

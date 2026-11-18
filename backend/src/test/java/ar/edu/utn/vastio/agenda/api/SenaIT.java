@@ -87,6 +87,9 @@ class SenaIT {
         jdbc.update("UPDATE evento SET cantidad_invitados = 150 WHERE evento_id = ?", id);
         servicio(id, 2, "Lomo");
         servicio(id, 6, "Malbec");
+        // El evento se creó por MockMvc y quedó en el EntityManager; sin esto, la carga por jdbc no se ve al leerlo.
+        entityManager.flush();
+        entityManager.clear();
     }
 
     private void servicio(long id, int categoria, String descripcion) {

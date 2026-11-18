@@ -142,15 +142,16 @@ public class EventoDto {
 
     /**
      * {@code documentos} es null para quien no ve el legajo (el contrato tiene importes). {@code requisitosConfirmacion}
-     * es null salvo en Contratado: lo que muestra el diálogo «Confirmar evento». {@code asistencia} es null si el tipo
-     * de evento no la cuenta por segmento.
+     * es null salvo en Contratado: lo que muestra el diálogo «Confirmar evento». {@code requisitosSena} es null salvo en
+     * Pre-reserva: lo que muestra el diálogo «Registrar seña». {@code asistencia} es null si el tipo de evento no la
+     * cuenta por segmento.
      */
     public record FichaResponse(long id, String codigo, EstadoEvento estado, String nombre, Nombre tipo, SalonDto salon,
             LocalDate fecha, TurnoDto turno, LocalTime horaInicio, String reprogramadoDesde, ClienteDto cliente,
             List<ContactoDto> contactos, Nombre vendedora, Nombre planner, Integer cantidadInvitados,
             boolean invitadosDefinitivos, String observacionesInternas, SenaDto sena, LocalDate fechaFirmaContrato, CancelacionDto cancelacion, List<DocumentoDto> documentos,
             List<ServicioDto> servicios, AsistenciaDto asistencia,
-            List<Requisito> requisitosConfirmacion, OffsetDateTime fechaCreacion, int version, Acciones acciones,
+            List<Requisito> requisitosConfirmacion, List<Requisito> requisitosSena, OffsetDateTime fechaCreacion, int version, Acciones acciones,
             List<HistorialDto> historial) {
     }
 
@@ -181,7 +182,8 @@ public class EventoDto {
                 e.getMotivoCancelacionId() == null ? null
                         : new CancelacionDto(catalogos.motivo(e.getMotivoCancelacionId()).getNombre(), e.getDetalleCancelacion()),
                 f.documentos() == null ? null : f.documentos().stream().map(d -> documento(d, nombres)).toList(),
-                servicios(f.servicios(), nombres), AsistenciaDto.de(f.asistencia()), f.requisitos(), e.getFechaCreacion(), e.getVersion(), f.acciones(),
+                servicios(f.servicios(), nombres), AsistenciaDto.de(f.asistencia()), f.requisitos(), f.requisitosSena(),
+                e.getFechaCreacion(), e.getVersion(), f.acciones(),
                 historial);
     }
 

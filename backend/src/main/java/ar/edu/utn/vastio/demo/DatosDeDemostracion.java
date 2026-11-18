@@ -256,6 +256,28 @@ public class DatosDeDemostracion implements ApplicationRunner {
                             new DatosCliente(clienteId, null, null, null, null)),
                     quien);
             if (r.sena() != null) {
+                // Antes de la seña hacen falta invitados, menú y bodega (A3-01): son los datos que fijan el precio. Los
+                // confirmados, además, dejan los invitados definitivos y cargan menús especiales y tipo de barra.
+                // Todo va en una transacción: se baja a la base antes de leer la versión, como si fueran pedidos separados.
+                boolean confirmado = r.etapa() == Etapa.CONFIRMADO;
+                int variante = Math.floorMod(r.cliente().hashCode(), 1000);
+                // Invitados entre 80 y 280; los menús (comunes + infantiles + especiales) suman justo eso.
+                int cantidadInvitados = 80 + (variante % 21) * 10;
+                int infantiles = cantidadInvitados / 15;
+                evento = invitados.registrar(evento.getId(), evento.getVersion(), cantidadInvitados, confirmado, coordinacion);
+                entityManager.flush();
+                // Las mismas opciones que sugiere la pestaña Servicios (opcionesServicios.ts), variando por evento.
+                List<Servicio> serviciosDelEvento = new ArrayList<>(List.of(
+                        new Servicio((short) 2, null, List.of(new ServiciosService.Renglon(MENUS[variante % MENUS.length], cantidadInvitados - infantiles - 8),
+                                new ServiciosService.Renglon("Menú Infantil", infantiles))),
+                        new Servicio((short) 6, null, List.of(new ServiciosService.Renglon(BODEGAS[variante % BODEGAS.length], null)))));
+                if (confirmado) {
+                    serviciosDelEvento.add(new Servicio((short) 5, null, List.of(new ServiciosService.Renglon("Vegetariano", 6),
+                            new ServiciosService.Renglon("Sin TACC", 2))));
+                    serviciosDelEvento.add(new Servicio((short) 7, "Hasta las 5", List.of(new ServiciosService.Renglon(BARRAS[variante % BARRAS.length], null))));
+                }
+                evento = servicios.registrar(evento.getId(), evento.getVersion(), serviciosDelEvento, coordinacion);
+                entityManager.flush();
                 senas.registrar(evento.getId(), new Sena(BigDecimal.valueOf(r.sena()), Moneda.ARS, hoy, null, "30111222", null), quien);
             }
             if (r.etapa() == Etapa.CONTRATADO || r.etapa() == Etapa.CONFIRMADO) {
@@ -263,24 +285,8 @@ public class DatosDeDemostracion implements ApplicationRunner {
                         List.of(new ContratoService.Archivo("contrato-de-ejemplo.pdf", CONTRATO_DEMO)), coordinacion);
             }
             if (r.etapa() == Etapa.CONFIRMADO) {
-                // Todo va en una transacción: se baja a la base antes de leer la versión, como si fueran pedidos separados.
                 planners.asignar(evento.getId(), ana.getId(), coordinacion);
                 entityManager.flush();
-                int variante = Math.floorMod(r.cliente().hashCode(), 1000);
-                // Invitados entre 80 y 280; los menús (comunes + infantiles + especiales) suman justo eso.
-                int cantidadInvitados = 80 + (variante % 21) * 10;
-                int infantiles = cantidadInvitados / 15;
-                evento = invitados.registrar(evento.getId(), evento.getVersion(), cantidadInvitados, true, coordinacion);
-                entityManager.flush();
-                evento = servicios.registrar(evento.getId(), evento.getVersion(), List.of(
-                        // Las mismas opciones que sugiere la pestaña Servicios (opcionesServicios.ts), variando por evento.
-                        new Servicio((short) 2, null, List.of(new ServiciosService.Renglon(MENUS[variante % MENUS.length], cantidadInvitados - infantiles - 8),
-                                new ServiciosService.Renglon("Menú Infantil", infantiles))),
-                        new Servicio((short) 5, null, List.of(new ServiciosService.Renglon("Vegetariano", 6),
-                                new ServiciosService.Renglon("Sin TACC", 2))),
-                        new Servicio((short) 6, null, List.of(new ServiciosService.Renglon(BODEGAS[variante % BODEGAS.length], null))),
-                        new Servicio((short) 7, "Hasta las 5", List.of(new ServiciosService.Renglon(BARRAS[variante % BARRAS.length], null)))),
-                        coordinacion);
                 confirmaciones.confirmar(evento.getId(), new UsuarioActual(ana.getId(), Set.of(RolCodigo.PLANNER.name())));
             }
         }

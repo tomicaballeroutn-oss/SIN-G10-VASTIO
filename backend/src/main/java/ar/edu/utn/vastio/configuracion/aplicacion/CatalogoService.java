@@ -183,22 +183,23 @@ public class CatalogoService {
 
     @Transactional
     public CategoriaServicio crearCategoria(String nombre, short orden, boolean visibleEnCocina,
-            boolean requeridaParaConfirmar, boolean avisaACompras) {
+            boolean requeridaParaConfirmar, boolean requeridaParaSenar, boolean avisaACompras) {
         if (categorias.existsByNombreIgnoreCaseAndIdNot(nombre, SIN_ID)) {
             throw repetido("Ya hay una categoría con ese nombre.");
         }
-        return categorias.save(new CategoriaServicio(nombre, orden, visibleEnCocina, requeridaParaConfirmar, avisaACompras));
+        return categorias.save(new CategoriaServicio(nombre, orden, visibleEnCocina, requeridaParaConfirmar,
+                requeridaParaSenar, avisaACompras));
     }
 
     @Transactional
     public CategoriaServicio actualizarCategoria(short id, String nombre, short orden, boolean visibleEnCocina,
-            boolean requeridaParaConfirmar, boolean avisaACompras, boolean activo) {
+            boolean requeridaParaConfirmar, boolean requeridaParaSenar, boolean avisaACompras, boolean activo) {
         CategoriaServicio categoria = categorias.findById(id).orElseThrow(() -> ProblemaException.noEncontrado(
                 "CATEGORIA_INEXISTENTE", "No encontramos esa categoría."));
         if (categorias.existsByNombreIgnoreCaseAndIdNot(nombre, id)) {
             throw repetido("Ya hay una categoría con ese nombre.");
         }
-        categoria.actualizar(nombre, orden, visibleEnCocina, requeridaParaConfirmar, avisaACompras, activo);
+        categoria.actualizar(nombre, orden, visibleEnCocina, requeridaParaConfirmar, requeridaParaSenar, avisaACompras, activo);
         return categoria;
     }
 

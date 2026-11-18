@@ -44,6 +44,8 @@ export interface Categoria {
   orden: number;
   visibleEnCocina: boolean;
   requeridaParaConfirmar: boolean;
+  /** Hace falta un servicio cargado en esta categoría para registrar la seña (fija el precio). */
+  requeridaParaSenar: boolean;
   /** Categoría de bebida: sus cambios en un evento confirmado le llegan a Compras. */
   avisaACompras: boolean;
   activo: boolean;

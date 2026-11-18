@@ -151,7 +151,7 @@ export interface Acciones {
   registrarAsistenciaReal: boolean;
 }
 
-/** Una condición de «Confirmar evento»: lo que hay («Ana Sosa», «180») o lo que falta. */
+/** Una condición de «Confirmar evento» o «Registrar seña»: lo que hay («Ana Sosa», «180») o lo que falta. */
 export interface RequisitoConfirmacion {
   codigo: 'PLANNER' | 'INVITADOS' | 'SERVICIOS' | 'FECHA';
   titulo: string;
@@ -267,6 +267,8 @@ export interface Ficha {
   asistencia: Asistencia | null;
   /** Solo en Contratado: lo que muestra el diálogo «Confirmar evento». */
   requisitosConfirmacion: RequisitoConfirmacion[] | null;
+  /** Solo en Pre-reserva: lo que muestra el diálogo «Registrar seña» (invitados, menú y bodega fijan el precio). */
+  requisitosSena: RequisitoConfirmacion[] | null;
   fechaCreacion: string;
   /** Se manda al guardar, para no pisar cambios de otra persona. */
   version: number;

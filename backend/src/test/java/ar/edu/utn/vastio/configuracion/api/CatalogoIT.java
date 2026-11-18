@@ -193,6 +193,16 @@ class CatalogoIT {
     }
 
     @Test
+    void elMenuYLaBodegaSonRequeridosParaSenarYElFlagSePuedeCambiar() throws Exception {
+        leer("/categorias-servicio", personas.bearer(RolCodigo.ADMINISTRACION))
+                .andExpect(jsonPath("$[?(@.requeridaParaSenar == true)].nombre", containsInAnyOrder("Menú", "Bodega")));
+        escribir(put("/api/v1/categorias-servicio/7"), RolCodigo.ADMINISTRACION, """
+                {"nombre":"Tipo de barra","orden":7,"visibleEnCocina":false,"requeridaParaConfirmar":true,"requeridaParaSenar":true,"avisaACompras":true,"activo":true}""")
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.requeridaParaSenar").value(true));
+    }
+
+    @Test
     void elNombreDeUnMotivoEsUnicoDentroDeSuAmbito() throws Exception {
         // «Otro» existe para cancelación, reprogramación y ajuste, pero no para bloqueo.
         escribir(post("/api/v1/motivos"), RolCodigo.ADMINISTRACION, """

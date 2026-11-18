@@ -56,17 +56,19 @@ public class ConsultaEventoService {
     private final DocumentoEventoRepository documentos;
     private final ServicioContratadoRepository servicios;
     private final RequisitosConfirmacion requisitos;
+    private final RequisitosSena requisitosSena;
     private final ReprogramacionRepository reprogramaciones;
     private final UsuarioService usuarios;
     private final AsistenciaPorSegmento asistencias;
 
     public ConsultaEventoService(EventoRepository eventos, CambioEstadoEventoRepository historial,
             ModificacionEventoRepository modificaciones, DocumentoEventoRepository documentos,
-            ServicioContratadoRepository servicios, RequisitosConfirmacion requisitos,
+            ServicioContratadoRepository servicios, RequisitosConfirmacion requisitos, RequisitosSena requisitosSena,
             ReprogramacionRepository reprogramaciones, UsuarioService usuarios, AsistenciaPorSegmento asistencias) {
         this.asistencias = asistencias;
         this.reprogramaciones = reprogramaciones;
         this.requisitos = requisitos;
+        this.requisitosSena = requisitosSena;
         this.eventos = eventos;
         this.historial = historial;
         this.modificaciones = modificaciones;
@@ -86,11 +88,13 @@ public class ConsultaEventoService {
      *
      * @param documentos null si la persona no ve el legajo (el contrato tiene importes).
      * @param requisitos condiciones para confirmar; null salvo en Contratado.
+     * @param requisitosSena condiciones para registrar la seña; null salvo en Pre-reserva.
      * @param asistencia por segmento; null si el tipo de evento no la cuenta por partes.
      */
     public record Ficha(Evento evento, boolean veImportes, Acciones acciones, List<ContactoEvento> contactos,
             List<CambioEstadoEvento> cambios, List<ModificacionEvento> modificaciones, List<DocumentoEvento> documentos,
             List<ServicioContratado> servicios, List<RequisitosConfirmacion.Requisito> requisitos,
+            List<RequisitosConfirmacion.Requisito> requisitosSena,
             List<Reprogramacion> reprogramaciones, AsistenciaPorSegmento.Asistencia asistencia, Map<Long, String> nombres) {
     }
 
@@ -120,7 +124,8 @@ public class ConsultaEventoService {
         AsistenciaPorSegmento.Asistencia asistencia = asistencias.de(evento);
         return new Ficha(evento, veImportes, acciones(evento, asistencia != null, quien), List.copyOf(evento.getContactos()),
                 cambios, datos, legajo, contratados,
-                evento.getEstado() == EstadoEvento.CONTRATADO ? requisitos.de(evento) : null, cambiosDeUnidad, asistencia,
+                evento.getEstado() == EstadoEvento.CONTRATADO ? requisitos.de(evento) : null,
+                evento.getEstado() == EstadoEvento.PRE_RESERVA ? requisitosSena.de(evento) : null, cambiosDeUnidad, asistencia,
                 usuarios.nombres(personas));
     }
 

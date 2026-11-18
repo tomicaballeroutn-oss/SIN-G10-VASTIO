@@ -90,10 +90,10 @@ public final class CatalogoDto {
     // ---------- categorías de servicio ----------
 
     public record CategoriaResponse(short id, String nombre, short orden, boolean visibleEnCocina,
-            boolean requeridaParaConfirmar, boolean avisaACompras, boolean activo) {
+            boolean requeridaParaConfirmar, boolean requeridaParaSenar, boolean avisaACompras, boolean activo) {
         static CategoriaResponse de(CategoriaServicio c) {
             return new CategoriaResponse(c.getId(), c.getNombre(), c.getOrden(), c.isVisibleEnCocina(),
-                    c.isRequeridaParaConfirmar(), c.isAvisaACompras(), c.isActivo());
+                    c.isRequeridaParaConfirmar(), c.isRequeridaParaSenar(), c.isAvisaACompras(), c.isActivo());
         }
     }
 
@@ -102,6 +102,7 @@ public final class CatalogoDto {
             @NotNull(message = "Indicá el orden.") @Min(value = 1, message = "El orden empieza en 1.") @Max(value = 999, message = "Usá un orden hasta 999.") Short orden,
             boolean visibleEnCocina,
             boolean requeridaParaConfirmar,
+            boolean requeridaParaSenar,
             boolean avisaACompras,
             Boolean activo) {
     }

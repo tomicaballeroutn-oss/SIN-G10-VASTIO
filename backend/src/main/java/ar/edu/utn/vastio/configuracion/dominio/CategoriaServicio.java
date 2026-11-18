@@ -33,6 +33,10 @@ public class CategoriaServicio {
     @Column(name = "requerida_para_confirmar", nullable = false)
     private boolean requeridaParaConfirmar;
 
+    /** Condición de «Registrar seña»: tiene que haber un servicio cargado en esta categoría (el dato que fija el precio). */
+    @Column(name = "requerida_para_senar", nullable = false)
+    private boolean requeridaParaSenar;
+
     /** Categoría de bebida (bodega, tipo de barra): sus cambios en un evento confirmado le llegan a Compras. */
     @Column(name = "avisa_a_compras", nullable = false)
     private boolean avisaACompras;
@@ -44,20 +48,22 @@ public class CategoriaServicio {
     }
 
     public CategoriaServicio(String nombre, short orden, boolean visibleEnCocina, boolean requeridaParaConfirmar,
-            boolean avisaACompras) {
+            boolean requeridaParaSenar, boolean avisaACompras) {
         this.nombre = nombre;
         this.orden = orden;
         this.visibleEnCocina = visibleEnCocina;
         this.requeridaParaConfirmar = requeridaParaConfirmar;
+        this.requeridaParaSenar = requeridaParaSenar;
         this.avisaACompras = avisaACompras;
     }
 
     public void actualizar(String nombre, short orden, boolean visibleEnCocina, boolean requeridaParaConfirmar,
-            boolean avisaACompras, boolean activo) {
+            boolean requeridaParaSenar, boolean avisaACompras, boolean activo) {
         this.nombre = nombre;
         this.orden = orden;
         this.visibleEnCocina = visibleEnCocina;
         this.requeridaParaConfirmar = requeridaParaConfirmar;
+        this.requeridaParaSenar = requeridaParaSenar;
         this.avisaACompras = avisaACompras;
         this.activo = activo;
     }
@@ -80,6 +86,10 @@ public class CategoriaServicio {
 
     public boolean isRequeridaParaConfirmar() {
         return requeridaParaConfirmar;
+    }
+
+    public boolean isRequeridaParaSenar() {
+        return requeridaParaSenar;
     }
 
     public boolean isAvisaACompras() {

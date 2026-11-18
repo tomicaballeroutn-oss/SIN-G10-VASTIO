@@ -1,5 +1,7 @@
 import { useCallback, useState, type ReactNode } from 'react';
 import { useLocation, useNavigate, useParams, useSearchParams } from 'react-router';
+import { AyudaContextual } from '../ayuda/AyudaContextual';
+import { AYUDAS } from '../ayuda/contextos';
 import type { EstadoEvento } from '../../api/agenda';
 import { ROLES_CONSUMO } from '../../api/consumos';
 import { ROLES_ORDEN } from '../../api/ordenes';
@@ -524,6 +526,10 @@ function Historial({ historial, cambio }: { historial: EntradaHistorial[]; cambi
   });
   return (
     <Card>
+      <div className="ayuda-contextual__encabezado">
+        <h2 className="h3">Historial</h2>
+        <AyudaContextual {...AYUDAS.historial} />
+      </div>
       <Timeline items={items} className="ficha__historial" />
     </Card>
   );

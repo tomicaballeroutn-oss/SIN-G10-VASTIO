@@ -2,6 +2,8 @@ import { useState } from 'react';
 import { entregas, type BebidaParaRetiro, type Devolucion, type Entrega } from '../../api/entregas';
 import { useEnvio } from '../../api/useDatos';
 import { Alert, Button, CantidadEnCajas, Card, Dialog, EmptyState, Table, cantidadLegible } from '../../ds';
+import { AyudaContextual } from '../ayuda/AyudaContextual';
+import { AYUDAS } from '../ayuda/contextos';
 
 interface Declarado {
   devuelto: number;
@@ -45,7 +47,10 @@ export function DevolucionBarra({ entrega, alCancelar, alRegistrar }: {
 
   return (
     <section className="barra__retiro" aria-label="Devolución">
-      <h2 className="h4">Devolución de {entrega.barra.nombre}</h2>
+      <div className="ayuda-contextual__encabezado">
+        <h2 className="h4">Devolución de {entrega.barra.nombre}</h2>
+        <AyudaContextual {...AYUDAS.devoluciones} />
+      </div>
       <p className="body-sm v-muted">
         Contá solo las botellas cerradas: las abiertas cuentan como consumidas por este evento.
       </p>

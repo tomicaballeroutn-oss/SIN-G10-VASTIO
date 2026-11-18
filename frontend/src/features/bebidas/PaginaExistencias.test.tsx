@@ -55,6 +55,7 @@ describe('UI-27 · consultar stock', () => {
     expect(within(lista).getByText('Falta registrar un movimiento')).toBeInTheDocument();
     expect(within(lista).getByText('−3 botellas')).toBeInTheDocument();
     expect(within(lista).getByText('Sin stock')).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Ayuda sobre estado de las existencias' })).toBeInTheDocument();
 
     await persona.selectOptions(screen.getByLabelText('Ubicación'), 'todas');
     expect(await screen.findByText('14 cajas y 3 botellas')).toBeInTheDocument();
@@ -74,6 +75,7 @@ describe('UI-27 · consultar stock', () => {
     expect(within(selector).getByRole('option', { name: 'Barra Avril · Quince de Sofía' })).toBeInTheDocument();
     expect(within(selector).queryByRole('option', { name: /Todas/ })).not.toBeInTheDocument();
     expect(screen.queryByText('En stock')).not.toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: 'Ayuda sobre estado de las existencias' })).not.toBeInTheDocument();
   });
 
   it('sin eventos en la jornada, la barra lo ve dicho', async () => {

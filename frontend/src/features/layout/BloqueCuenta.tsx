@@ -13,6 +13,7 @@ export function BloqueCuenta() {
       <Actor name={usuario.nombreCompleto} action={usuario.roles.map((r) => NOMBRE_DE_ROL[r]).join(' · ')} size="sm" />
       <div className="app__cuenta-acciones">
         <Button variant="text" size="sm" icon="user" onClick={() => navegar('/mi-cuenta')}>Mi cuenta</Button>
+        <Button variant="text" size="sm" icon="file-text" onClick={() => navegar('/ayuda')}>Centro de ayuda</Button>
         <Button variant="text" size="sm" icon="log-out" onClick={() => void salir()}>Cerrar sesión</Button>
       </div>
     </div>

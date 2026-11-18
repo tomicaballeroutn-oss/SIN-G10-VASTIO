@@ -1,5 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router';
+import { AyudaContextual } from '../ayuda/AyudaContextual';
+import { AYUDAS } from '../ayuda/contextos';
 import { agenda, estadoDs, fechaLarga, hoyEnCordoba, sumarMeses, type Agenda } from '../../api/agenda';
 import type { PreReservaRegistrada } from '../../api/eventos';
 import { useDatos } from '../../api/useDatos';
@@ -92,6 +94,7 @@ export function PaginaAgenda() {
         </Alert>
       )}
       <div ref={filtros} className="agenda__filtros-acciones">
+        <AyudaContextual {...AYUDAS.filtrosAgenda} />
         <Button variant="outline" icon="calendar" onClick={() => cambiar({ mes: hoy.slice(0, 7), dia: hoy })}>Ir a hoy</Button>
         <FiltroMultiple
           label="Turnos"
@@ -123,6 +126,7 @@ export function PaginaAgenda() {
                 filtroExtra={(
                   <AgendaLeyenda
                     titulo="Estado"
+                    ayuda={<AyudaContextual {...AYUDAS.estadosAgenda} />}
                     className="agenda__estados-movil"
                     elegidos={estados}
                     onCambiar={(valores) => cambiarLista('estado', valores)}

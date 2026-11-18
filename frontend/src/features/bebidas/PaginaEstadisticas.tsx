@@ -85,14 +85,14 @@ function Tabla({ titulo, filas }: { titulo: string; filas: Fila[] }) {
     { key: 'eventos', header: 'Eventos cerrados', numeric: true, render: (f) => numero(f.medidas.eventos) },
     { key: 'registros', header: 'Eventos con registro', numeric: true, render: (f) => numero(f.medidas.eventosConConsumoRegistrado) },
     { key: 'total', header: 'Consumo total (botellas)', numeric: true, render: (f) => numero(f.medidas.consumoTotal) },
-    { key: 'porEvento', header: 'Botellas por evento', numeric: true, render: (f) => numero(f.medidas.promedioPorEvento) },
+    { key: 'porEvento', header: 'Botellas por evento', numeric: true, principal: true, render: (f) => numero(f.medidas.promedioPorEvento) },
     { key: 'porInvitado', header: 'Botellas por asistente', numeric: true, render: (f) => numero(f.medidas.porInvitadoRegistrado) },
     { key: 'validos', header: 'Eventos con asistentes válidos', numeric: true, render: (f) => numero(f.medidas.eventosConInvitadosValidos) },
     { key: 'invitados', header: 'Asistentes', numeric: true, render: (f) => numero(f.medidas.invitadosRegistrados) },
   ];
   return <Card title={titulo}>
-    <p className="body-sm v-muted">Si no ves todas las columnas, desplazá la tabla hacia los costados.</p>
-    <Table className="estadisticas__tabla" caption={titulo} dense rows={filas} columns={columnas} empty="No hay grupos para esta consulta." />
+    <p className="body-sm v-muted estadisticas__desplazar">Si no ves todas las columnas, desplazá la tabla hacia los costados.</p>
+    <Table className="estadisticas__tabla" caption={titulo} dense apilada rows={filas} columns={columnas} empty="No hay grupos para esta consulta." />
   </Card>;
 }
 

@@ -1,8 +1,11 @@
 import { useCallback } from 'react';
+import { useNavigate } from 'react-router';
 import { consultarConsumo } from '../../api/consumos';
 import { useDatos } from '../../api/useDatos';
 import { Alert, Button, Card, Table, cantidadLegible } from '../../ds';
 import { Cargando } from '../comun/Cargando';
+import { itemsPara } from '../layout/menu';
+import { useSesion } from '../sesion/contexto';
 
 const NUMERO = new Intl.NumberFormat('es-AR', { maximumFractionDigits: 4 });
 const botellas = (n: number | null) => n === null ? 'No disponible' : `${NUMERO.format(n)} ${n === 1 ? 'botella' : 'botellas'}`;
@@ -11,12 +14,16 @@ const botellas = (n: number | null) => n === null ? 'No disponible' : `${NUMERO.
 export function PestanaConsumo({ eventoId }: { eventoId: number }) {
   const cargar = useCallback(() => consultarConsumo(eventoId), [eventoId]);
   const datos = useDatos(cargar);
+  const { usuario } = useSesion();
+  const navegar = useNavigate();
+  const cierra = usuario ? itemsPara(usuario.roles).some((it) => it.id === 'barra') : false;
 
   if (datos.error?.codigo === 'EVENTO_NO_CERRADO') {
     return (
       <Alert tone="info" title="Consumo pendiente de cierre"
-        action={<Button variant="outline" size="sm" onClick={datos.recargar}>Actualizar consumo</Button>}>
+        action={cierra ? <Button variant="outline" size="sm" icon="archive" onClick={() => navegar(`/barra/cierre/${eventoId}`)}>Ir al cierre del evento</Button> : undefined}>
         El consumo consolidado estará disponible cuando se cierre el evento.
+        {cierra && ' En el cierre ves lo entregado, lo devuelto y el remanente de cada bebida.'}
       </Alert>
     );
   }
@@ -32,6 +39,7 @@ export function PestanaConsumo({ eventoId }: { eventoId: number }) {
           <Card title="Consumo por bebida" subtitle="Cantidades registradas al cierre, sin recalcular desde el stock actual">
             <Table
               caption="Consumo por bebida"
+          apilada
               dense
               rows={consumo.renglones.map((r) => ({ ...r, id: r.bebidaId }))}
               empty="No hay registros de consumo para este evento cerrado."
@@ -40,7 +48,7 @@ export function PestanaConsumo({ eventoId }: { eventoId: number }) {
                 { key: 'entregado', header: 'Entregado', numeric: true, render: (r) => cantidadLegible(r.entregado, r.unidadesPorBulto, r.unidad) },
                 { key: 'devuelto', header: 'Devuelto', numeric: true, render: (r) => cantidadLegible(r.devuelto, r.unidadesPorBulto, r.unidad) },
                 { key: 'remanente', header: 'Remanente', numeric: true, render: (r) => cantidadLegible(r.remanente, r.unidadesPorBulto, r.unidad) },
-                { key: 'consumo', header: 'Consumido', numeric: true, render: (r) => cantidadLegible(r.consumo, r.unidadesPorBulto, r.unidad) },
+                { key: 'consumo', header: 'Consumido', numeric: true, principal: true, render: (r) => cantidadLegible(r.consumo, r.unidadesPorBulto, r.unidad) },
                 { key: 'porInvitado', header: 'Por asistente', numeric: true, render: (r) => botellas(r.porInvitado) },
               ]}
             />

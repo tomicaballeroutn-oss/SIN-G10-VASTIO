@@ -148,17 +148,17 @@ export function PaginaReporteOcupacion() {
           </Card>
 
           <Card title="Detalle por salón" className="reporte-ocupacion__tabla">
-            <Table caption="Ocupación por salón" rows={datos.datos.porSalon.map((s) => ({ ...s, id: s.salonId }))} empty="Sin unidades para este filtro" columns={[
+            <Table caption="Ocupación por salón" apilada rows={datos.datos.porSalon.map((s) => ({ ...s, id: s.salonId }))} empty="Sin unidades para este filtro" columns={[
               { key: 'salon', header: 'Salón' },
               { key: 'unidades', header: 'Unidades ocupadas / disponibles', numeric: true, render: (s) => `${s.unidadesOcupadas} / ${s.unidadesDisponibles}` },
-              { key: 'ocupacion', header: 'Ocupación', numeric: true, render: (s) => `${numero.format(s.ocupacion)}%` },
+              { key: 'ocupacion', header: 'Ocupación', numeric: true, principal: true, render: (s) => `${numero.format(s.ocupacion)}%` },
             ]} />
           </Card>
 
           <Card title="Eventos por vendedora y tipo" subtitle="Eventos señados, contratados, confirmados, en curso, realizados o cerrados">
-            <Table caption="Eventos por vendedora y tipo" rows={datos.datos.porVendedoraYTipo.map((r) => ({ ...r, id: `${r.vendedoraId}-${r.tipoEventoId}` }))} empty="No hay eventos para este filtro" columns={[
+            <Table caption="Eventos por vendedora y tipo" apilada rows={datos.datos.porVendedoraYTipo.map((r) => ({ ...r, id: `${r.vendedoraId}-${r.tipoEventoId}` }))} empty="No hay eventos para este filtro" columns={[
               { key: 'vendedora', header: 'Vendedora' }, { key: 'tipo', header: 'Tipo de evento', render: (r) => r.tipoEvento },
-              { key: 'eventos', header: 'Eventos', numeric: true, render: (r) => r.eventosIncluidos },
+              { key: 'eventos', header: 'Eventos', numeric: true, principal: true, render: (r) => r.eventosIncluidos },
             ]} />
           </Card>
         </>

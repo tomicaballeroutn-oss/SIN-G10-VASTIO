@@ -3,6 +3,8 @@ package ar.edu.utn.vastio.agenda.aplicacion;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.ZoneId;
+import java.util.List;
+import java.util.stream.Collectors;
 
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.LockModeType;
@@ -11,6 +13,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import ar.edu.utn.vastio.VastioApplication;
+import ar.edu.utn.vastio.agenda.aplicacion.RequisitosConfirmacion.Requisito;
 import ar.edu.utn.vastio.agenda.dominio.EstadoEvento;
 import ar.edu.utn.vastio.agenda.dominio.Evento;
 import ar.edu.utn.vastio.agenda.dominio.Moneda;
@@ -27,11 +30,14 @@ public class SenaService {
     private static final ZoneId ZONA = ZoneId.of(VastioApplication.ZONA_HORARIA);
 
     private final ConsultaEventoService consultas;
+    private final RequisitosSena requisitos;
     private final MaquinaDeEstados maquina;
     private final EntityManager entityManager;
 
-    public SenaService(ConsultaEventoService consultas, MaquinaDeEstados maquina, EntityManager entityManager) {
+    public SenaService(ConsultaEventoService consultas, RequisitosSena requisitos, MaquinaDeEstados maquina,
+            EntityManager entityManager) {
         this.consultas = consultas;
+        this.requisitos = requisitos;
         this.maquina = maquina;
         this.entityManager = entityManager;
     }
@@ -58,6 +64,12 @@ public class SenaService {
         }
         // Una versión nueva: si justo otra persona liberaba la pre-reserva, una de las dos recibe 409.
         entityManager.lock(evento, LockModeType.PESSIMISTIC_FORCE_INCREMENT);
+        // La seña se calcula sobre la cantidad de invitados, el menú y la bodega (A3-01): sin esos datos no se registra.
+        List<Requisito> pendientes = requisitos.de(evento).stream().filter(r -> !r.cumplido()).toList();
+        if (!pendientes.isEmpty()) {
+            throw ProblemaException.reglaDeNegocio("REQUISITOS_PENDIENTES", "Todavía no se puede registrar la seña. "
+                    + pendientes.stream().map(Requisito::detalle).collect(Collectors.joining(" ")));
+        }
         evento.registrarSena(sena.importe(), sena.moneda(), sena.fechaPago(), sena.firmanteNombre(), sena.firmanteDni(),
                 sena.firmanteContacto());
         maquina.transicionar(evento, EstadoEvento.SENADO, quien.id(), null);

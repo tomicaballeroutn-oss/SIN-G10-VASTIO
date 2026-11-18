@@ -276,7 +276,7 @@ export function SeccionCategorias() {
             <span className="catalogo__texto">
               <span className="label">{c.nombre}</span>
               <span className="body-sm v-muted">
-                {[c.visibleEnCocina && 'Se ve en cocina', c.requeridaParaConfirmar && 'Hace falta para confirmar', c.avisaACompras && 'Avisa a compras']
+                {[c.visibleEnCocina && 'Se ve en cocina', c.requeridaParaSenar && 'Hace falta para la seña', c.requeridaParaConfirmar && 'Hace falta para confirmar', c.avisaACompras && 'Avisa a compras']
                   .filter(Boolean).join(' · ') || 'Solo comercial'}
               </span>
             </span>
@@ -304,12 +304,14 @@ function FormularioCategoria({ categoria, siguienteOrden, listo }: {
   const [orden, setOrden] = useState(String(categoria?.orden ?? siguienteOrden));
   const [visibleEnCocina, setVisibleEnCocina] = useState(categoria?.visibleEnCocina ?? false);
   const [requerida, setRequerida] = useState(categoria?.requeridaParaConfirmar ?? false);
+  const [requeridaSena, setRequeridaSena] = useState(categoria?.requeridaParaSenar ?? false);
   const [avisaACompras, setAvisaACompras] = useState(categoria?.avisaACompras ?? false);
   const [activo, setActivo] = useState(categoria?.activo ?? true);
   const { guardando, error, enviar } = useEnvio();
 
   async function guardar() {
-    const datos = { nombre, orden: Number(orden), visibleEnCocina, requeridaParaConfirmar: requerida, avisaACompras };
+    const datos = { nombre, orden: Number(orden), visibleEnCocina, requeridaParaConfirmar: requerida,
+      requeridaParaSenar: requeridaSena, avisaACompras };
     const guardado = await enviar(() =>
       categoria ? catalogos.actualizarCategoria(categoria.id, { ...datos, activo }) : catalogos.crearCategoria(datos),
     );
@@ -328,6 +330,12 @@ function FormularioCategoria({ categoria, siguienteOrden, listo }: {
         required
       />
       <Checkbox label="Se ve en la vista de cocina" checked={visibleEnCocina} onChange={(e) => setVisibleEnCocina(e.target.checked)} />
+      <Checkbox
+        label="Hace falta para registrar la seña"
+        hint="La seña no se registra sin un servicio cargado en esta categoría (es lo que fija el precio)."
+        checked={requeridaSena}
+        onChange={(e) => setRequeridaSena(e.target.checked)}
+      />
       <Checkbox
         label="Hace falta para confirmar el evento"
         hint="El evento no se confirma sin un servicio cargado en esta categoría."

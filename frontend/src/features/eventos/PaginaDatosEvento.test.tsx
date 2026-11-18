@@ -34,6 +34,7 @@ const FICHA: Ficha = {
   servicios: [],
   asistencia: null,
   requisitosConfirmacion: null,
+  requisitosSena: null,
   fechaCreacion: '2026-09-21T10:15:00-03:00',
   version: 2,
   acciones: { ...SIN_ACCIONES, modificar: true, liberar: true, registrarSena: true },

@@ -574,6 +574,14 @@ public class EscenarioCompleto implements ApplicationRunner {
     private Evento hastaSenado(LocalDate fecha, int salon, int turno, short tipo, String nombre, String cliente, String vendedora,
             BigDecimal sena, Moneda moneda) {
         Evento e = preReserva(fecha, salon, turno, tipo, nombre, cliente, vendedora);
+        // La seña requiere invitados, Menú y Bodega. Cargar esos datos antes de registrar
+        // la seña mantiene el escenario completo compatible con las reglas A3-01.
+        UsuarioActual coordinacion = quien("melina.sifon", "COORDINACION");
+        int cantidad = tipo == EGRESADOS ? 140 : 120;
+        e = invitados.registrar(e.getId(), version(e.getId()), cantidad, false, coordinacion);
+        entityManager.flush();
+        e = servicios.registrar(e.getId(), version(e.getId()), servicios(tipo), coordinacion);
+        entityManager.flush();
         e = senas.registrar(e.getId(), new Sena(sena, moneda, LocalDate.now(ZONA), cliente,
                 String.valueOf(25000000 + Math.abs(cliente.hashCode()) % 10000000), "351 555 0101"), quien(vendedora, "VENDEDORA"));
         entityManager.flush();

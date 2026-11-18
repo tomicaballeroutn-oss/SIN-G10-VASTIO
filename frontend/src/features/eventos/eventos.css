@@ -94,6 +94,8 @@
 @media (min-width: 480px) { .sena__par { grid-template-columns: 1fr 1fr; } }
 .sena__firmante { display: flex; flex-direction: column; gap: var(--space-3); margin: 0; padding: 0; border: 0; }
 .sena__firmante legend { padding: 0; margin-bottom: var(--space-1); }
+.sena__requisitos { display: flex; flex-direction: column; gap: var(--space-3); }
+.sena__requisitos p { margin: 0; }
 
 /* UI-13 · Servicios contratados: una caja por categoría, como las tarjetas de Datos; sin la tarjeta de afuera. */
 .v-card.servicios__tarjeta { padding: 0; background: none; border: 0; border-radius: 0; box-shadow: none; }

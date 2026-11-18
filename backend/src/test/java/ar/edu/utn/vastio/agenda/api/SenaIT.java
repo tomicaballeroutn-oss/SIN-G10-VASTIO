@@ -2,7 +2,13 @@ package ar.edu.utn.vastio.agenda.api;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.hamcrest.Matchers.contains;
+import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.everyItem;
 import static org.hamcrest.Matchers.hasItem;
+import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.nullValue;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -72,6 +78,23 @@ class SenaIT {
                                 {"salonId":3,"fecha":"2032-06-19","turnoId":2,"tipoEventoId":1,"cliente":{"nombre":"Camila Ruiz"}}"""))
                 .andExpect(status().isCreated()).andReturn().getResponse().getContentAsString();
         preReserva = ((Number) JsonPath.read(respuesta, "$.id")).longValue();
+        // La seña exige cantidad de invitados, menú y bodega (A3-01): sin eso no se puede señar.
+        cargarDatosDeSena(preReserva);
+    }
+
+    /** Deja un evento en condiciones de señarse: cantidad de invitados y servicios en Menú (2) y Bodega (6). */
+    private void cargarDatosDeSena(long id) {
+        jdbc.update("UPDATE evento SET cantidad_invitados = 150 WHERE evento_id = ?", id);
+        servicio(id, 2, "Lomo");
+        servicio(id, 6, "Malbec");
+        // El evento se creó por MockMvc y quedó en el EntityManager; sin esto, la carga por jdbc no se ve al leerlo.
+        entityManager.flush();
+        entityManager.clear();
+    }
+
+    private void servicio(long id, int categoria, String descripcion) {
+        jdbc.update("INSERT INTO servicio_contratado (evento_id, categoria_id, descripcion, usuario_id) VALUES (?, ?, ?, ?)",
+                id, categoria, descripcion, lucia.getId());
     }
 
     @Test
@@ -86,6 +109,7 @@ class SenaIT {
                 .andExpect(jsonPath("$.sena.firmanteDni").value("30111222"))
                 .andExpect(jsonPath("$.acciones.registrarSena").value(false))
                 .andExpect(jsonPath("$.acciones.liberar").value(false))
+                .andExpect(jsonPath("$.requisitosSena").value(nullValue()))
                 .andExpect(jsonPath("$.acciones.modificar").value(true))
                 .andExpect(jsonPath("$.historial[?(@.estadoNuevo == 'SENADO')].estadoAnterior", hasItem("PRE_RESERVA")))
                 .andExpect(jsonPath("$.historial[?(@.estadoNuevo == 'SENADO')].usuario.nombre", hasItem("Lucía Ferreyra")));
@@ -201,6 +225,55 @@ class SenaIT {
 
         long liberada = escenario.evento("avril", LocalDate.of(2032, 6, 19), "noche", "LIBERADA", lucia, "No prosperó");
         registrar(lucia, liberada, sena("100000", HOY, "30111222", null)).andExpect(status().isUnprocessableContent());
+    }
+
+    @Test
+    void sinInvitadosNiServiciosRequeridosNoSeRegistraLaSena() throws Exception {
+        long incompleto = escenario.evento("avril", LocalDate.of(2032, 7, 3), "noche", "PRE_RESERVA", lucia, "Sin datos");
+
+        registrar(lucia, incompleto, sena("100000", HOY, "30111222", null))
+                .andExpect(status().isUnprocessableContent())
+                .andExpect(jsonPath("$.codigo").value("REQUISITOS_PENDIENTES"))
+                .andExpect(jsonPath("$.detail").value(containsString("Falta registrar la cantidad de invitados.")))
+                .andExpect(jsonPath("$.detail").value(containsString("Falta cargar Menú y Bodega.")));
+        assertThat(jdbc.queryForObject("SELECT estado FROM evento WHERE evento_id = ?", String.class, incompleto))
+                .isEqualTo("PRE_RESERVA");
+    }
+
+    @Test
+    void faltandoSoloLaBodegaTampocoSeRegistraLaSena() throws Exception {
+        long incompleto = escenario.evento("avril", LocalDate.of(2032, 7, 3), "noche", "PRE_RESERVA", lucia, "Sin bodega");
+        jdbc.update("UPDATE evento SET cantidad_invitados = 120 WHERE evento_id = ?", incompleto);
+        servicio(incompleto, 2, "Lomo");
+
+        registrar(lucia, incompleto, sena("100000", HOY, "30111222", null))
+                .andExpect(status().isUnprocessableContent())
+                .andExpect(jsonPath("$.codigo").value("REQUISITOS_PENDIENTES"))
+                .andExpect(jsonPath("$.detail").value(containsString("Falta cargar Bodega.")));
+    }
+
+    @Test
+    void laFichaDeLaPreReservaMuestraLosRequisitosDeSenaPendientes() throws Exception {
+        long incompleto = escenario.evento("avril", LocalDate.of(2032, 7, 10), "noche", "PRE_RESERVA", lucia, "Sin datos");
+
+        ficha(lucia, incompleto)
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.requisitosSena[*].codigo", contains("INVITADOS", "SERVICIOS")))
+                .andExpect(jsonPath("$.requisitosSena[?(@.codigo == 'SERVICIOS')].titulo", hasItem("Menú y Bodega")))
+                .andExpect(jsonPath("$.requisitosSena[?(@.codigo == 'INVITADOS')].cumplido", hasItem(false)))
+                .andExpect(jsonPath("$.acciones.registrarSena").value(true));
+    }
+
+    @Test
+    void conInvitadosYServiciosLaFichaMarcaLosRequisitosDeSenaCumplidos() throws Exception {
+        ficha(lucia, preReserva)
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.requisitosSena[*].cumplido", everyItem(is(true))))
+                .andExpect(jsonPath("$.requisitosSena[?(@.codigo == 'INVITADOS')].detalle", hasItem("150")));
+    }
+
+    private ResultActions ficha(Usuario quien, long id) throws Exception {
+        return mvc.perform(get("/api/v1/eventos/{id}", id).header(HttpHeaders.AUTHORIZATION, personas.bearer(quien)));
     }
 
     private ResultActions registrar(Usuario quien, long id, String json) throws Exception {

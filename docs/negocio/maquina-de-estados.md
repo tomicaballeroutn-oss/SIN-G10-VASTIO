@@ -24,7 +24,7 @@ Estados activos (ocupan la unidad): todos salvo `LIBERADA` y `CANCELADO`.
 |---|---|---|---|---|
 | — → PRE_RESERVA | Registrar pre-reserva | Vendedora, Coordinación | Unidad sin evento activo ni bloqueo | Crea la unidad si no existe. Notifica a administración y coordinación. |
 | PRE_RESERVA → LIBERADA | Liberar pre-reserva | Vendedora titular, Coordinación | — | Libera la unidad. |
-| PRE_RESERVA → SENADO | Registrar seña | Vendedora titular, Coordinación | Importe, fecha de seña y DNI del firmante | Notifica a administración y coordinación. |
+| PRE_RESERVA → SENADO | Registrar seña | Vendedora titular, Coordinación | Cantidad de invitados, menú y bodega cargados (fijan el precio); importe, fecha de seña y DNI del firmante | Notifica a administración y coordinación. |
 | SENADO → CONTRATADO | Registrar firma de contrato | Coordinación | Contrato adjunto (documento tipo CONTRATO) y fecha de firma | Habilita asignar planner. Notifica a administración, coordinación y la vendedora titular. |
 | CONTRATADO → CONFIRMADO | Confirmar evento | Planner asignada, Coordinación | Planner asignada, invitados definitivos, servicios en las categorías requeridas | Habilita la orden de preparación. Notifica a compras, cocina, administración y la vendedora titular. |
 | CONFIRMADO → EN_CURSO | Automático | Sistema | Llega la hora de inicio del turno | Bloquea la edición comercial. Habilita salidas a barra. |

@@ -34,10 +34,22 @@ const PRE_RESERVA: Ficha = {
   servicios: [],
   asistencia: null,
   requisitosConfirmacion: null,
+  requisitosSena: [
+    { codigo: 'INVITADOS', titulo: 'Cantidad de invitados', cumplido: true, detalle: '150' },
+    { codigo: 'SERVICIOS', titulo: 'Menú y Bodega', cumplido: true, detalle: 'Cargado' },
+  ],
   fechaCreacion: '2026-09-21T10:15:00-03:00',
   version: 0,
   acciones: { ...SIN_ACCIONES, modificar: true, liberar: true, registrarSena: true },
   historial: [{ tipo: 'ESTADO', estadoNuevo: 'PRE_RESERVA', usuario: { id: 1, nombre: 'Lucía Ferreyra' }, fechaHora: '2026-09-21T10:15:00-03:00' }],
+};
+
+const PRE_RESERVA_INCOMPLETA: Ficha = {
+  ...PRE_RESERVA,
+  requisitosSena: [
+    { codigo: 'INVITADOS', titulo: 'Cantidad de invitados', cumplido: false, detalle: 'Falta registrar la cantidad de invitados.' },
+    { codigo: 'SERVICIOS', titulo: 'Menú y Bodega', cumplido: false, detalle: 'Falta cargar Menú y Bodega.' },
+  ],
 };
 
 const SENADO: Ficha = {
@@ -45,6 +57,7 @@ const SENADO: Ficha = {
   estado: 'SENADO',
   version: 1,
   sena: { importe: 150000.5, fecha: '2026-09-29', firmanteNombre: 'Mariela Ruiz', firmanteDni: '30111222', firmanteContacto: null },
+  requisitosSena: null,
   acciones: { ...SIN_ACCIONES, modificar: true, liberar: false, registrarSena: false },
   historial: [
     ...PRE_RESERVA.historial,
@@ -167,6 +180,23 @@ describe('UI-11 · registrar seña', () => {
     await usuario.click(within(dialogo).getByRole('button', { name: 'Confirmar seña' }));
 
     expect(await within(dialogo).findByText(/no puede ser posterior a hoy/)).toBeInTheDocument();
+  });
+
+  it('con invitados, menú o bodega sin cargar no deja registrar la seña y dice qué falta', async () => {
+    const fetchMock = backendFalso(sesionDe(['VENDEDORA']), (p) => {
+      if (p.metodo === 'GET' && p.ruta === '/eventos/5') return json(200, PRE_RESERVA_INCOMPLETA);
+      if (p.metodo === 'POST' && p.ruta === '/eventos/5/sena') return json(200, SENADO);
+      return undefined;
+    });
+    const { usuario, dialogo } = await abrir();
+
+    expect(within(dialogo).getByText('Falta cargar Menú y Bodega.')).toBeInTheDocument();
+    await usuario.type(within(dialogo).getByLabelText('Importe de la seña'), '100000');
+    await usuario.type(within(dialogo).getByLabelText('DNI'), '30111222');
+    await usuario.click(within(dialogo).getByRole('button', { name: 'Confirmar seña' }));
+
+    expect(within(dialogo).getByText('Todavía no se puede registrar la seña')).toBeInTheDocument();
+    expect(pedidos(fetchMock).find((p) => p.metodo === 'POST')).toBeUndefined();
   });
 });
 

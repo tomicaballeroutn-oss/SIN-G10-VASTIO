@@ -46,7 +46,7 @@ describe('centro de ayuda integrado', () => {
       await usuario.click(screen.getByRole('link', { name: articulo.titulo }));
       expect(router.state.location.pathname).toBe(rutaArticulo(articulo));
       expect(await screen.findByRole('heading', { level: 1, name: articulo.titulo })).toHaveFocus();
-      expect(document.querySelector('video, iframe')).toBeNull();
+      expect(document.querySelectorAll('video, iframe')).toHaveLength(articulo.videoUrl ? 1 : 0);
       await usuario.click(screen.getByRole('link', { name: /^Volver a / }));
       expect(router.state.location.pathname).toBe('/ayuda');
       expect(router.state.location.hash).toBe(`#${articulo.categoria}`);
@@ -103,9 +103,11 @@ describe('centro de ayuda integrado', () => {
     expect(screen.getByRole('link', { name: 'Devoluciones y remanentes' })).toBeInTheDocument();
     expect(screen.getByRole('link', { name: 'Vista de cocina' })).toBeInTheDocument();
     expect(screen.queryByRole('link', { name: 'Órdenes y preparación de bebidas' })).not.toBeInTheDocument();
-    await router.navigate('/ayuda/bebidas/ordenes-preparacion');
+    await router.navigate('/ayuda/reportes/ocupacion');
     await screen.findByText('Este artículo no está disponible');
-    expect(screen.queryByText('Gestionar una orden')).not.toBeInTheDocument();
+    expect(screen.queryByText('Consultar el reporte')).not.toBeInTheDocument();
+    expect(document.querySelector('video, iframe')).toBeNull();
+    expect(screen.queryByRole('link', { name: 'Abrir video en YouTube' })).not.toBeInTheDocument();
   });
 
   it.each([

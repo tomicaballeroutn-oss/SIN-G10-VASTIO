@@ -32,4 +32,5 @@
 .ayuda__glosario { display: grid; gap: var(--space-5); margin: 0; }
 .ayuda__glosario dd { margin: var(--space-1) 0 0; }
 .ayuda__video { width: 100%; max-height: 65vh; border-radius: var(--radius-md); }
+.ayuda__youtube { display: block; width: 100%; height: auto; margin-block: var(--space-4); border: 0; border-radius: var(--radius-md); background: #000; }
 @media (min-width: 640px) { .ayuda__categorias { grid-template-columns: repeat(2, minmax(0, 1fr)); } }

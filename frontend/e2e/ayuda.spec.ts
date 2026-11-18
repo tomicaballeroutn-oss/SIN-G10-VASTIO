@@ -1,4 +1,18 @@
 import { expect, test, type Page } from '@playwright/test';
+import { urlInsercionYoutube } from '../src/features/ayuda/video';
+
+const videosEsperados: Record<string, string> = {
+  'utilizar-agenda': 'HaqrhVjUWCg', 'ficha-historial': '_IvVyLp1BkI',
+  'pre-reservas-senas': 'I7zpEWDAP-I', 'confirmacion-reprogramacion': 'kpOcrk667Ic',
+  existencias: 'CnYJ7_p4fmg', 'ingresos-ajustes': 'CnYJ7_p4fmg',
+  retiros: 'NVNaKzVUP3w', devoluciones: 'NVNaKzVUP3w', cierre: 'qygweTi5ZvQ',
+  ocupacion: 'bWLLdKbdjXw', 'estadisticas-consumo': 'bWLLdKbdjXw',
+};
+
+// Estas pruebas verifican la integración visual, no la reproducción de YouTube.
+test.beforeEach(async ({ page }) => {
+  await page.route('https://www.youtube-nocookie.com/**', (route) => route.fulfill({ body: '<html><body>Reproductor simulado</body></html>', contentType: 'text/html' }));
+});
 
 // La ayuda usa contenido local. Se simula únicamente la sesión y el contador de avisos.
 async function sesion(page: Page, roles: string[] = ['DIRECCION'], debeCambiarContrasena = false) {
@@ -34,7 +48,17 @@ test('categorías, artículos, enlaces directos y regreso en ambos tamaños', as
   for (const enlace of enlaces) {
     await page.goto(enlace.href);
     await expect(page.getByRole('heading', { level: 1, name: enlace.titulo, exact: true })).toBeVisible();
-    await expect(page.locator('video, iframe')).toHaveCount(0);
+    const id = videosEsperados[enlace.href.split('/').at(-1)!];
+    await expect(page.locator('video, iframe')).toHaveCount(id ? 1 : 0);
+    if (id) {
+      const iframe = page.getByTitle(`Video tutorial de ${enlace.titulo}`);
+      await iframe.scrollIntoViewIfNeeded();
+      await expect(iframe).toHaveAttribute('src', urlInsercionYoutube(`https://youtu.be/${id}`)!);
+      await expect(page.getByRole('link', { name: 'Abrir video en YouTube' })).toBeVisible();
+      const caja = await iframe.boundingBox();
+      const aspecto = id === 'NVNaKzVUP3w' ? 1080 / 2162 : id === 'qygweTi5ZvQ' ? 1080 / 1368 : 1898 / 1170;
+      expect(caja!.width / caja!.height).toBeCloseTo(aspecto, 1);
+    }
     expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
     await page.getByRole('link', { name: /^Volver a / }).click();
     await expect(page.getByRole('heading', { level: 1, name: 'Centro de ayuda' })).toBeVisible();
@@ -50,6 +74,23 @@ test('categorías, artículos, enlaces directos y regreso en ambos tamaños', as
   await expect(page.getByRole('heading', { level: 1, name: 'Centro de ayuda' })).toBeVisible();
   expect(errores).toEqual([]);
   expect(pedidos.filter((url) => /\/api\/.*calendar/i.test(url))).toEqual([]);
+});
+
+test('videos verticales, tema oscuro y alternativa accesible con teclado', async ({ page }, testInfo) => {
+  await sesion(page);
+  for (const articulo of ['retiros', 'cierre']) {
+    await page.goto(`/ayuda/barra/${articulo}`);
+    await page.evaluate(() => { document.documentElement.dataset.theme = 'dark'; });
+    const iframe = page.locator('iframe');
+    await iframe.scrollIntoViewIfNeeded();
+    await expect(iframe).toBeVisible();
+    const enlace = page.getByRole('link', { name: 'Abrir video en YouTube' });
+    await iframe.focus();
+    await page.keyboard.press('Tab');
+    await expect(enlace).toBeFocused();
+    expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
+    await page.screenshot({ path: testInfo.outputPath(`${articulo}-oscuro.png`), fullPage: true });
+  }
 });
 
 test('acceso desde cuenta y Más para todos los perfiles y protección directa', async ({ page }, testInfo) => {

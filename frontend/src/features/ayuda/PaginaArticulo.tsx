@@ -60,7 +60,7 @@ export function PaginaArticulo() {
             {seccion.notas?.map((nota) => <p key={nota}>{nota}</p>)}
           </section>
         ))}
-        <VideoTutorial url={articulo.videoUrl} titulo={articulo.titulo} />
+        <VideoTutorial url={articulo.videoUrl} titulo={articulo.titulo} relacionAspecto={articulo.videoRelacionAspecto} />
       </Card>
       <div><Link className="ayuda__enlace" to={`/ayuda#${categoriaActual.id}`}>Volver a {categoriaActual.titulo}</Link></div>
     </article>

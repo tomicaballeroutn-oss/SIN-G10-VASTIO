@@ -20,8 +20,10 @@ export interface ArticuloAyuda {
   /** Id de una pantalla del menú existente. Sin pantalla, es ayuda compartida. */
   pantalla?: string;
   roles?: readonly Rol[];
-  /** Archivo de video HTTPS (mp4, webm u ogv), configurado cuando esté disponible. */
+  /** Enlace HTTPS de YouTube o archivo directo mp4, webm u ogv. */
   videoUrl?: string;
+  /** Ancho / alto del video original, verificado en los metadatos de YouTube. */
+  videoRelacionAspecto?: number;
 }
 
 export function puedeLeer(articulo: ArticuloAyuda, roles: readonly Rol[]): boolean {

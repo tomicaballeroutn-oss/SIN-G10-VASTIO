@@ -412,7 +412,15 @@ class CalendarIT {
         verify(google,never()).comprobarDestino(anyString());
     }
     @Test void falloDuranteSenaNoRevierteImporteEstadoNiHistorial() {
-        long id=evento("PRE_RESERVA");fallarSeguimiento(id);
+        long id=evento("PRE_RESERVA");
+        // La prueba verifica la tolerancia a fallos de Calendar, no las precondiciones
+        // comerciales: preparar un evento válido para registrar la seña.
+        jdbc.update("UPDATE evento SET cantidad_invitados = 120 WHERE evento_id = ?", id);
+        jdbc.update("INSERT INTO servicio_contratado (evento_id, categoria_id, descripcion, usuario_id) VALUES (?, ?, ?, ?)",
+                id, 2, "Menú Clásico", quien.id());
+        jdbc.update("INSERT INTO servicio_contratado (evento_id, categoria_id, descripcion, usuario_id) VALUES (?, ?, ?, ?)",
+                id, 6, "Reserva", quien.id());
+        fallarSeguimiento(id);
         senas.registrar(id,new SenaService.Sena(java.math.BigDecimal.TEN,ar.edu.utn.vastio.agenda.dominio.Moneda.ARS,LocalDate.of(2026,1,1),null,"30111222",null),quien);
         assertThat(jdbc.queryForObject("SELECT estado FROM evento WHERE evento_id=?",String.class,id)).isEqualTo("SENADO");
         assertThat(jdbc.queryForObject("SELECT importe_sena FROM evento WHERE evento_id=?",java.math.BigDecimal.class,id)).isEqualByComparingTo("10");

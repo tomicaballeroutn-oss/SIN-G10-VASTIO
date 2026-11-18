@@ -95,6 +95,7 @@ function Conciliacion({ cierre, alCerrar }: { cierre: Cierre; alCerrar: (c: Cier
         actions={<AyudaContextual {...AYUDAS.cierre} />}>
         <Table
           caption="Consumo por bebida"
+          apilada
           dense
           rows={cierre.renglones.map((r) => ({ ...r, id: r.bebidaId }))}
           empty="No se entregó bebida a ninguna barra para este evento."
@@ -103,7 +104,7 @@ function Conciliacion({ cierre, alCerrar }: { cierre: Cierre; alCerrar: (c: Cier
             { key: 'entregado', header: 'Entregado', numeric: true, render: (r) => legible(r, r.entregado) },
             { key: 'devuelto', header: 'Devuelto', numeric: true, render: (r) => legible(r, r.devuelto) },
             { key: 'remanente', header: 'Remanente', numeric: true, render: (r) => legible(r, r.remanente) },
-            { key: 'consumo', header: 'Consumo', numeric: true, render: (r) => legible(r, r.consumo) },
+            { key: 'consumo', header: 'Consumo', numeric: true, principal: true, render: (r) => legible(r, r.consumo) },
             { key: 'porAsistente', header: 'Por asistente', numeric: true, render: (r) => porAsistente(r.porAsistente) },
           ]}
         />

@@ -4,7 +4,7 @@ import { preparaciones, ROLES_PREPARACION, type PantallaPreparacion, type Prepar
 import { useDatos, useEnvio } from '../../api/useDatos';
 import { ProblemaApi } from '../../api/problema';
 import { ESTADO_ORDEN } from '../../api/ordenes';
-import { Actor, Alert, Button, CantidadEnCajas, Card, Combobox, Dialog, EmptyState, IconButton, Input, LectorCodigo, Select, Table, cantidadLegible } from '../../ds';
+import { Actor, Alert, Button, CantidadEnCajas, Card, Combobox, Dialog, EmptyState, ESTADO_POR_CODIGO, ESTADOS, IconButton, Input, LectorCodigo, Select, Table, cantidadLegible } from '../../ds';
 import { Cargando } from '../comun/Cargando';
 import { fechaHora } from '../comun/formato';
 import { useSesion } from '../sesion/contexto';
@@ -125,7 +125,7 @@ function Formulario({ pantalla, catalogo, alRegistrar }: { pantalla: PantallaPre
 
   return <div className="preparacion">
     {aviso && <Alert tone="success" centrar>{aviso}</Alert>}
-    {!estadoValido && <Alert tone="info">El evento está {pantalla.evento.estado.toLowerCase().replaceAll('_', ' ')}. Solo podés preparar bebida con el evento confirmado o en curso.</Alert>}
+    {!estadoValido && <Alert tone="info">El evento está {nombreEstado(pantalla.evento.estado)}. Solo podés preparar bebida con el evento confirmado o en curso.</Alert>}
     {!pantalla.madre && <Alert tone="warning">No hay un depósito madre activo. Configuralo en Ubicaciones de stock.</Alert>}
     {pantalla.orden && pantalla.orden.renglones.length > 0 && <Card title="Según la orden de preparación"
       subtitle={`Orden ${ESTADO_ORDEN[pantalla.orden.estado].label.toLowerCase()}: es una referencia, no se carga sola.`}>
@@ -187,4 +187,9 @@ function Formulario({ pantalla, catalogo, alRegistrar }: { pantalla: PantallaPre
       <p>Este traspaso no cuenta como consumo y no se edita después de registrar.</p>
     </Dialog>}
   </div>;
+}
+
+function nombreEstado(codigo: string): string {
+  const estado = ESTADO_POR_CODIGO[codigo as keyof typeof ESTADO_POR_CODIGO];
+  return estado ? ESTADOS[estado].label.toLowerCase() : codigo.toLowerCase().replaceAll('_', ' ');
 }

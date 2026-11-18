@@ -63,6 +63,8 @@ export interface TableColumn<T> {
   header: string;
   numeric?: boolean;
   width?: string;
+  /** En celular, con la tabla apilada: el dato que se destaca en cada tarjeta. */
+  principal?: boolean;
   render?: (row: T) => ReactNode;
 }
 
@@ -74,12 +76,14 @@ export interface TableProps<T> {
   onRowClick?: (row: T) => void;
   empty?: string;
   className?: string;
+  /** En celular cada renglón se muestra como una tarjeta (la primera columna es el título); en la computadora no cambia. */
+  apilada?: boolean;
 }
 
-export function Table<T extends object>({ columns, rows, caption, dense, onRowClick, empty = 'Sin resultados', className }: TableProps<T>) {
+export function Table<T extends object>({ columns, rows, caption, dense, onRowClick, empty = 'Sin resultados', className, apilada }: TableProps<T>) {
   return (
     <div className={cx('v-table-wrap', className)}>
-      <table className={cx('v-table', dense && 'v-table--dense')}>
+      <table className={cx('v-table', dense && 'v-table--dense', apilada && 'v-table--apilada')}>
         {caption && <caption className="v-sr">{caption}</caption>}
         <thead>
           <tr>
@@ -99,7 +103,8 @@ export function Table<T extends object>({ columns, rows, caption, dense, onRowCl
                 onKeyDown={onRowClick ? (e) => { if (e.key === 'Enter') onRowClick(fila); } : undefined}
               >
                 {columns.map((c) => (
-                  <td key={c.key} className={c.numeric ? 'numeral-sm v-num' : 'body-sm'}>
+                  <td key={c.key} className={cx(c.numeric ? 'numeral-sm v-num' : 'body-sm', c.principal && 'v-table__principal')}
+                    data-label={apilada ? c.header : undefined}>
                     {c.render ? c.render(fila) : (fila as Record<string, ReactNode>)[c.key]}
                   </td>
                 ))}

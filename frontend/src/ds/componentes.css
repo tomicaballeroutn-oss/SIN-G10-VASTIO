@@ -214,6 +214,23 @@ h2.h2, h3.h3, h3.h4 { margin: 0; color: var(--ink); }
 .v-num { text-align: right !important; }
 .v-table__empty { text-align: center; padding: var(--space-8) !important; }
 
+/* Tabla apilada: en celular cada renglón es una tarjeta; la primera celda es el título y la principal se destaca. */
+@media (max-width: 767.98px) {
+  .v-table-wrap:has(.v-table--apilada) { overflow: visible; background: none; border: 0; }
+  .v-table--apilada thead { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }
+  .v-table--apilada, .v-table--apilada tbody { display: block; }
+  .v-table--apilada tbody tr { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--space-2) var(--space-4); padding: var(--space-4); margin-bottom: var(--space-3); background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius-lg); }
+  .v-table--apilada tbody tr:hover { background: var(--surface); }
+  .v-table--apilada td, .v-table--dense.v-table--apilada td { display: flex; flex-direction: column; gap: 2px; padding: 0; border: 0; text-align: left !important; }
+  .v-table--apilada td::before { content: attr(data-label); font-family: var(--font-sans); font-size: 0.75rem; line-height: 1.3; color: var(--ink-muted); }
+  .v-table--apilada td:first-child { grid-column: 1 / -1; font-weight: 600; font-size: 1rem; }
+  .v-table--apilada td:first-child::before { content: none; }
+  .v-table--apilada td.v-table__principal { grid-column: 1 / -1; flex-direction: row; justify-content: space-between; align-items: baseline; padding: var(--space-2) 0; border-bottom: 1px solid var(--line); font-size: 1.25rem; }
+  .v-table--apilada td.v-table__principal::before { font-size: 0.875rem; color: var(--ink); }
+  .v-table--apilada td.v-table__empty { grid-column: 1 / -1; text-align: center !important; padding: var(--space-6) !important; }
+  .v-table--apilada td.v-table__empty::before { content: none; }
+}
+
 /* ---------- Tabs ---------- */
 .v-tabs { display: flex; flex-wrap: wrap; gap: var(--space-1); }
 .v-tab { display: inline-flex; align-items: center; gap: var(--space-2); height: var(--control-md); padding: 0 var(--space-4); border: 0; background: none; color: var(--ink-muted); cursor: pointer; white-space: nowrap; -webkit-tap-highlight-color: transparent;

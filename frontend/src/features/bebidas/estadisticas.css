@@ -13,6 +13,11 @@
   .estadisticas__filtros { grid-template-columns: repeat(3, minmax(0, 1fr)); }
   .estadisticas__indicadores { grid-template-columns: repeat(4, minmax(0, 1fr)); }
 }
-.estadisticas__tabla .v-table { min-width: 64rem; }
-.estadisticas__tabla .v-table th { white-space: normal; vertical-align: bottom; }
-.estadisticas__tabla .v-table th:first-child { min-width: 10rem; }
+@media (min-width: 768px) {
+  .estadisticas__tabla .v-table { min-width: 64rem; }
+  .estadisticas__tabla .v-table th { white-space: normal; vertical-align: bottom; }
+  .estadisticas__tabla .v-table th:first-child { min-width: 10rem; }
+}
+@media (max-width: 767.98px) {
+  .estadisticas__desplazar { display: none; }
+}

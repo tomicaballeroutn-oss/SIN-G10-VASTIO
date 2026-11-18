@@ -85,16 +85,19 @@ it.each([null, 0])('sin invitados válidos (%s) no presenta un cociente', async 
   expect(screen.getByText(/Falta la asistencia real por segmento/)).toBeInTheDocument();
 });
 
-it('distingue falta de cierre de consumo cero y permite actualizar', async () => {
-  let cerrado = false;
-  backend(['COMPRAS'], () => cerrado ? json(200, CONSUMO) : problema(409, 'EVENTO_NO_CERRADO', 'Pendiente de cierre'));
-  const persona = userEvent.setup();
+it('distingue falta de cierre de consumo cero y ofrece ir al cierre', async () => {
+  backend(['COMPRAS'], () => problema(409, 'EVENTO_NO_CERRADO', 'Pendiente de cierre'));
   montar('/eventos/5?pestana=consumo');
   expect(await screen.findByText('Consumo pendiente de cierre')).toBeInTheDocument();
   expect(screen.queryByText('Evento cerrado sin consumo')).not.toBeInTheDocument();
-  cerrado = true;
-  await persona.click(screen.getByRole('button', { name: 'Actualizar consumo' }));
-  expect(await screen.findByRole('table', { name: 'Consumo por bebida' })).toBeInTheDocument();
+  expect(screen.getByRole('button', { name: 'Ir al cierre del evento' })).toBeInTheDocument();
+});
+
+it('sin acceso a Barra no ofrece ir al cierre', async () => {
+  backend(['ADMINISTRACION'], () => problema(409, 'EVENTO_NO_CERRADO', 'Pendiente de cierre'));
+  montar('/eventos/5?pestana=consumo');
+  expect(await screen.findByText('Consumo pendiente de cierre')).toBeInTheDocument();
+  expect(screen.queryByRole('button', { name: 'Ir al cierre del evento' })).not.toBeInTheDocument();
 });
 
 it('muestra errores y permite reintentar', async () => {

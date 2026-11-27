@@ -39,11 +39,9 @@ public class CatalogoService {
     private final TipoSegmentoAsistenciaRepository segmentos;
     private final CategoriaServicioRepository categorias;
     private final MotivoRepository motivos;
-    private final org.springframework.context.ApplicationEventPublisher cambios;
 
     public CatalogoService(SalonRepository salones, TurnoRepository turnos, TipoEventoRepository tiposEvento,
-            TipoSegmentoAsistenciaRepository segmentos, CategoriaServicioRepository categorias, MotivoRepository motivos, org.springframework.context.ApplicationEventPublisher cambios) {
-        this.cambios = cambios;
+            TipoSegmentoAsistenciaRepository segmentos, CategoriaServicioRepository categorias, MotivoRepository motivos) {
         this.salones = salones;
         this.turnos = turnos;
         this.tiposEvento = tiposEvento;
@@ -70,7 +68,6 @@ public class CatalogoService {
             throw repetido("Ya hay un salón con ese nombre.");
         }
         salon.actualizar(nombre, capacidad, activo);
-        cambios.publishEvent(new ar.edu.utn.vastio.comun.CatalogoCambiado());
         return salon;
     }
 
@@ -96,7 +93,6 @@ public class CatalogoService {
                     "El turno no puede empezar y terminar a la misma hora. Revisá el horario.");
         }
         turno.actualizar(nombre, horaInicio, horaFin);
-        cambios.publishEvent(new ar.edu.utn.vastio.comun.CatalogoCambiado());
         return turno;
     }
 
@@ -126,7 +122,6 @@ public class CatalogoService {
             throw repetido("Ya hay un tipo de evento con ese nombre.");
         }
         tipo.actualizar(nombre, usaSegmentos, activo);
-        cambios.publishEvent(new ar.edu.utn.vastio.comun.CatalogoCambiado());
         return tipo;
     }
 

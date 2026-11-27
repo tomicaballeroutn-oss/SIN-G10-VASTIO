@@ -123,12 +123,6 @@ public class NotificacionService {
         return recibidas.marcarTodasLeidas(usuarioId, OffsetDateTime.now());
     }
 
-    @Transactional
-    public void resolverCalendar(long eventoId) { notificaciones.resolverCalendar(eventoId); }
-
-    @Transactional
-    public void silenciarCalendar() { notificaciones.silenciarCalendar(); }
-
     public List<Notificacion> delEvento(long eventoId) {
         return notificaciones.findByEventoIdOrderByIdAsc(eventoId);
     }

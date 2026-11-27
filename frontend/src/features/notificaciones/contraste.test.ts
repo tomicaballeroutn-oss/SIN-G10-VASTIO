@@ -18,7 +18,7 @@ describe('M-08 · contraste WCAG de íconos informativos (mínimo 3:1)', () => {
     const [base, dark] = tokens.split('[data-theme="dark"]');
     const superficies = colores(oscuro ? dark : base);
     const [claro, noche] = css.split('[data-theme="dark"]');
-    const paleta = { ...colores(oscuro ? noche : claro), 'calendar-pendiente': superficies.warning };
+    const paleta = colores(oscuro ? noche : claro);
     for (const [tipo, hex] of Object.entries(paleta)) {
       it(`${oscuro ? 'oscuro' : 'claro'}: ${tipo}, leído, hover y sin leer`, () => {
         const icono = rgb(hex);
@@ -31,6 +31,6 @@ describe('M-08 · contraste WCAG de íconos informativos (mínimo 3:1)', () => {
         expect(contraste(icono, fondo)).toBeGreaterThanOrEqual(3);
       });
     }
-    it(`cubre diez tokens en ${oscuro ? 'oscuro' : 'claro'}`, () => expect(Object.keys(paleta)).toHaveLength(10));
+    it(`cubre nueve tokens en ${oscuro ? 'oscuro' : 'claro'}`, () => expect(Object.keys(paleta)).toHaveLength(9));
   }
 });

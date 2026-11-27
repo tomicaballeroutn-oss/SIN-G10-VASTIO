@@ -20,7 +20,6 @@ const ICONO: Record<TipoNotificacion, IconName> = {
   CANCELACION: 'calendar-x',
   PLANNER_ASIGNADA: 'user-plus',
   ALERTA_STOCK: 'triangle-alert',
-  CALENDAR_PENDIENTE: 'calendar-clock',
   ASISTENCIA_REAL: 'users',
   ORDEN_PREPARACION: 'clipboard-list',
 };
@@ -36,7 +35,6 @@ const COLOR: Record<TipoNotificacion, string> = {
   CANCELACION: 'cancelacion',
   PLANNER_ASIGNADA: 'planner-asignada',
   ALERTA_STOCK: 'alerta-stock',
-  CALENDAR_PENDIENTE: 'calendar-pendiente',
   ASISTENCIA_REAL: 'asistencia-real',
   ORDEN_PREPARACION: 'orden-preparacion',
 };

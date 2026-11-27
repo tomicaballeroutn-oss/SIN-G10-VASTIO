@@ -1,7 +1,7 @@
 import { expect, test } from '@playwright/test';
 
 test.use({ channel: process.env.E2E_BROWSER_CHANNEL });
-const tipos = ['EVENTO_NUEVO', 'SENA', 'CONTRATO', 'CONFIRMACION', 'MODIFICACION', 'REPROGRAMACION', 'CANCELACION', 'PLANNER_ASIGNADA', 'ALERTA_STOCK', 'CALENDAR_PENDIENTE'];
+const tipos = ['EVENTO_NUEVO', 'SENA', 'CONTRATO', 'CONFIRMACION', 'MODIFICACION', 'REPROGRAMACION', 'CANCELACION', 'PLANNER_ASIGNADA', 'ALERTA_STOCK'];
 
 for (const { tema, sistema } of [
   { tema: 'claro', sistema: 'dark' },
@@ -34,9 +34,9 @@ for (const { tema, sistema } of [
     await page.getByRole('tab', { name: 'Todas', exact: true }).click();
     const botones = page.locator('.avisos__aviso');
     await expect(botones).toHaveCount(tipos.length * 2);
-    const calendar = page.locator('.avisos__aviso--calendar-pendiente');
-    await expect(calendar).toHaveCount(2);
-    await expect(calendar.filter({ hasText: 'Sin leer:' })).toHaveCount(1);
+    const reprogramacion = page.locator('.avisos__aviso--reprogramacion');
+    await expect(reprogramacion).toHaveCount(2);
+    await expect(reprogramacion.filter({ hasText: 'Sin leer:' })).toHaveCount(1);
     const contrastes: unknown[] = [];
     for (const hover of [false, true]) {
       for (const boton of await botones.all()) {
@@ -66,10 +66,8 @@ for (const { tema, sistema } of [
         contrastes.push({ hover, ...resultado });
       }
     }
-    // Diez tipos reales, nueve trazos: Calendar y reprogramación comparten calendar-clock.
-    // El mensaje explícito conserva su distinción sin depender del color.
     const trazos = await botones.locator('svg').evaluateAll((icons) => icons.filter((_, i) => i % 2 === 0).map((el) => el.innerHTML));
-    expect(new Set(trazos).size).toBe(9);
+    expect(new Set(trazos).size).toBe(tipos.length);
     await expect(page.locator('.avisos__aviso.is-nuevo .v-sr').first()).toHaveText('Sin leer: ');
     await expect(page.locator('.avisos__aviso:not(.is-nuevo) .avisos__punto')).toHaveCount(0);
     await info.attach('contrastes', { body: JSON.stringify(contrastes, null, 2), contentType: 'application/json' });

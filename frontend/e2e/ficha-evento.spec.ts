@@ -57,9 +57,9 @@ test('Hora particular: primer guardado del control nativo y limpieza sin consult
   expect(pedidosCalendar).toEqual([]);
 });
 
-test('un aviso histórico de Calendar se puede leer y abre la ficha interna', async ({ page }) => {
+test('un aviso de reprogramación se puede leer y abre la ficha interna', async ({ page }) => {
   const ficha = fichaDePrueba();
-  const mensaje = `Exportar a Google Calendar: ${ficha.codigo}.`;
+  const mensaje = `Evento reprogramado: ${ficha.codigo}.`;
   const pedidosCalendar = registrarPedidosCalendar(page);
 
   await page.route('**/api/v1/**', async (route) => {
@@ -70,7 +70,7 @@ test('un aviso histórico de Calendar se puede leer y abre la ficha interna', as
     } });
     if (ruta === '/notificaciones/sin-leer') return route.fulfill({ json: { cantidad: 1 } });
     if (ruta === '/notificaciones') return route.fulfill({ json: {
-      notificaciones: [{ id: 9, tipo: 'CALENDAR_PENDIENTE', mensaje, eventoId: ficha.id, fechaHora: ficha.fechaCreacion, leida: false }],
+      notificaciones: [{ id: 9, tipo: 'REPROGRAMACION', mensaje, eventoId: ficha.id, fechaHora: ficha.fechaCreacion, leida: false }],
       pagina: 0, hayMas: false, sinLeer: 1,
     } });
     if (ruta === '/notificaciones/9/lectura') return route.fulfill({ status: 204 });
@@ -80,7 +80,7 @@ test('un aviso histórico de Calendar se puede leer y abre la ficha interna', as
 
   await page.goto('/notificaciones');
   const aviso = page.getByRole('button').filter({ hasText: mensaje });
-  await expect(aviso).toHaveClass(/\bavisos__aviso--calendar-pendiente\b/);
+  await expect(aviso).toHaveClass(/\bavisos__aviso--reprogramacion\b/);
   await expect(aviso).toContainText('Sin leer:');
   const lectura = page.waitForRequest((pedido) =>
     new URL(pedido.url()).pathname === '/api/v1/notificaciones/9/lectura' && pedido.method() === 'POST');

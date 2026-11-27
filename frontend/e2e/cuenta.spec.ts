@@ -3,34 +3,37 @@ import { expect, test } from '@playwright/test';
 test.use({ channel: process.env.E2E_BROWSER_CHANNEL });
 
 for (const rol of ['DIRECCION', 'COORDINACION']) {
-  test(`primer ingreso de ${rol}: Calendar queda bloqueado hasta renovar la sesión`, async ({ page }) => {
+  test(`primer ingreso de ${rol}: Usuarios queda bloqueado hasta renovar la sesión`, async ({ page }) => {
     let inicial = true;
     let cambios = 0;
-    const consultas: string[] = [];
-    const escriturasCalendar: string[] = [];
+    const consultas: Array<{ ruta: string; metodo: string; autorizacion: string | undefined }> = [];
     await page.route('**/api/v1/**', async (route) => {
-      const ruta = new URL(route.request().url()).pathname.replace('/api/v1', '');
-      const metodo = route.request().method();
+      const pedido = route.request();
+      const ruta = new URL(pedido.url()).pathname.replace('/api/v1', '');
       if (ruta === '/auth/refresh') return route.fulfill({ json: {
-        tokenAcceso: 'token-sintetico', tokenAccesoVence: '2099-01-01T00:00:00Z',
+        tokenAcceso: inicial ? 'token-inicial' : 'token-renovado', tokenAccesoVence: '2099-01-01T00:00:00Z',
         minutosExpiracionSesion: 60, minutosAvisoExpiracion: 5,
         usuario: { id: 1, nombreCompleto: 'Cuenta inicial', nombreUsuario: 'inicial', roles: [rol], debeCambiarContrasena: inicial },
       } });
       if (ruta === '/cuenta/contrasena') {
+        expect(pedido.method()).toBe('POST');
+        expect(pedido.headers().authorization).toBe('Bearer token-inicial');
         cambios++;
         inicial = false;
         return route.fulfill({ status: 204 });
       }
-      consultas.push(ruta);
-      if (ruta.includes('/calendar') && metodo !== 'GET') escriturasCalendar.push(ruta);
+      consultas.push({ ruta, metodo: pedido.method(), autorizacion: pedido.headers().authorization });
       if (ruta === '/notificaciones/sin-leer') return route.fulfill({ json: { cantidad: 0 } });
-      return route.fulfill({ json: [] });
+      if (ruta === '/notificaciones') return route.fulfill({ json: { notificaciones: [], pagina: 0, hayMas: false, sinLeer: 0 } });
+      if (ruta === '/usuarios') return route.fulfill({ json: [] });
+      return route.fulfill({ status: 404, json: { detail: 'No encontramos lo que buscás' } });
     });
-    await page.goto('/calendar/pendientes');
+    await page.goto('/usuarios');
     await expect(page).toHaveURL(/\/mi-cuenta$/);
     await expect(page.getByText('Elegí tu contraseña')).toBeVisible();
     await expect(page.locator('nav[aria-label="Navegación principal"]')).toHaveCount(0);
     expect(consultas).toEqual([]);
+
     await page.getByLabel('Contraseña actual', { exact: true }).fill('inicial-prueba');
     await page.getByLabel('Contraseña nueva', { exact: true }).fill('nueva-contrasena');
     await page.getByLabel('Repetí la contraseña nueva', { exact: true }).fill('nueva-contrasena');
@@ -39,12 +42,15 @@ for (const rol of ['DIRECCION', 'COORDINACION']) {
     expect(cambios).toBe(1);
     await expect(page.locator('nav[aria-label="Navegación principal"]')).toHaveCount(2);
     await expect(page.getByRole('navigation', { name: 'Navegación principal' }).first()).toBeVisible();
-    await page.goto('/calendar/pendientes');
-    await expect(page.getByRole('heading', { name: 'Pendientes de Google Calendar', exact: true })).toBeVisible();
-    await expect(page.getByText('No hay pendientes de Google Calendar', { exact: true })).toBeVisible();
-    expect(consultas).toContain('/calendar/pendientes');
-    expect(consultas).toContain('/notificaciones/sin-leer');
-    expect(escriturasCalendar).toEqual([]);
+
+    await page.goto('/usuarios');
+    await expect(page.getByRole('heading', { name: 'Usuarios y perfiles', exact: true })).toBeVisible();
+    await expect(page.getByText('No hay usuarios con esos filtros.')).toBeVisible();
+    expect(consultas).toEqual(expect.arrayContaining([
+      { ruta: '/usuarios', metodo: 'GET', autorizacion: 'Bearer token-renovado' },
+      { ruta: '/notificaciones/sin-leer', metodo: 'GET', autorizacion: 'Bearer token-renovado' },
+    ]));
+    expect(consultas.every(({ metodo }) => metodo === 'GET')).toBe(true);
   });
 }
 

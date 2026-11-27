@@ -209,7 +209,6 @@ function ContenidoFicha({ ficha, alCambiar }: { ficha: Ficha; alCambiar: (ficha:
         />
       )}
 
-      {/* M-06 oculta temporalmente: EstadoGoogleCalendar se conserva para reactivación. */}
 
       <Tabs
         label="Secciones de la ficha"

@@ -7,6 +7,8 @@ Proyecto Integrador de Seminario Integrador (UTN FRC, Grupo 10, 3K2, 2026). Sist
 
 Los une la entidad **Evento**. El objetivo del negocio es **conocer qué consume cada evento, no vigilar al personal**. El sistema maneja cantidades, no dinero: la única excepción es el importe de la seña.
 
+La agenda es interna. [M-06 fue retirada](docs/mejoras/m-06-google-calendar.md) y los documentos de esa integración se conservan como antecedentes. Para bases existentes, ver la [actualización a V21](docs/operacion/despliegue.md#actualización-a-v21).
+
 ## Antes de escribir código, leé
 
 | Documento | Para qué |

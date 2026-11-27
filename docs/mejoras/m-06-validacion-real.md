@@ -1,6 +1,6 @@
 # M-06 — Validación real en entorno aislado (29/10/2026)
 
-> Evidencia histórica del ciclo autorizado, complementaria al [diagnóstico OAuth](m-06-diagnostico-red-google.md).
+> **Antecedente histórico de [M-06, RETIRADO](m-06-google-calendar.md).** Evidencia del ciclo autorizado de esa fecha, complementaria al [diagnóstico OAuth](m-06-diagnostico-red-google.md). Sus resultados no acreditan el retiro de la publicación de prueba pendiente en el cierre actual.
 > Las referencias a PR, commits y pruebas pendientes describen cada momento del ensayo.
 > Para el estado de integración y seguimiento al 30/10/2026, ver [conversación del PR #59](https://github.com/tomicaballeroutn-oss/SIN-G10-VASTIO/pull/59#issuecomment-6530479112).
 

@@ -1,7 +1,10 @@
-# M-06 — Publicación manual en Google Calendar
+# M-06 — Publicación manual en Google Calendar (RETIRADO)
 
-> **Estado temporal:** integración oculta en el frontend. La ficha no monta el componente, el menú no ofrece pendientes y la ruta de pendientes no se registra. El código de integración permanece conservado. Para desactivar las operaciones externas, mantener `VASTIO_CALENDAR_HABILITADO=false` en el entorno real del backend y reiniciarlo. No utilizar `docker-compose.calendar.yml`, ya que habilita la integración explícitamente. No se modifican las migraciones ni los datos históricos. Los tests anteriores de UI quedan pausados y se agregan verificaciones del estado oculto.
+El equipo decidió retirar M-06. El cliente nunca usó esta integración de Vastio en operaciones reales. Se retiraron sus componentes de frontend y backend, sus endpoints, el SDK y su configuración. [V21](../../backend/src/main/resources/db/migration/V21__remove_google_calendar.sql) elimina los objetos y datos exclusivos del esquema vigente y conserva intactas las migraciones históricas. La agenda interna sigue funcionando con sus propios eventos, turnos y salones.
 
+La [guía de actualización a V21](../operacion/despliegue.md#actualización-a-v21) registra el estado de las bases originales y los pendientes externos.
+
+> **Antecedente histórico.** Las secciones siguientes describen la implementación retirada. Sus rutas, variables, permisos y pasos de prueba ya no son vigentes. No ejecutar las instrucciones históricas ni recrear el override Docker eliminado.
 
 ## 1. Objetivo y alcance
 
@@ -49,7 +52,7 @@ Todas estas rutas exigen DIRECCION o COORDINACION mediante `@PreAuthorize`, y el
 
 El navegador envía intención e ID Vastio; en la aceptación de un conflicto también el ETag revisado. No recibe ni elige credenciales/destino. Los errores Google se traducen a `ProblemDetail`: conflicto 409, entrada ausente/eliminada 410, datos inválidos 422, cuota 429, red 504, respuesta inválida 502, configuración/autorización/disponibilidad 503. El 401 de Google nunca se devuelve como expiración del login de Vastio. POST y PUT conservan el mismo coordinador idempotente: los rótulos expresan intención de UI, pero ambos reconcilian la identidad estable antes de escribir. Separarlos duplicaría recuperación y permitiría carreras innecesarias.
 
-## 6. Configuración
+## 6. Configuración histórica
 
 Por defecto `VASTIO_CALENDAR_HABILITADO=false`: el backend arranca sin archivo de credenciales y no conecta a Google. La cola captura cambios, pero no proyecta nuevos avisos. Los GET devuelven pendiente NINGUNA, capacidades falsas y listado vacío; el historial e identidades se conservan. Al iniciar desactivado se resuelven avisos Calendar anteriores y se restablece su clave de deduplicación; el barrido reintenta esa limpieza si falla. V14 conserva sus registros históricos y V15 no emite avisos masivos.
 
@@ -64,13 +67,7 @@ Variables para una instalación habilitada:
 
 Timeouts: `vastio.calendar.conexion-ms=5000`, `lectura-ms=10000`; configurables de 100 a 30000 ms. Se aplican tanto a Calendar como al transporte de obtención de tokens OAuth. El transporte OAuth desactiva redirecciones, reintentos y logging de peticiones; la estrategia de reintentos de la biblioteca de autenticación también está desactivada. Cada intento manual reconcilia antes de escribir y tiene un número acotado de solicitudes. Ante cuota/caída, esperar antes de solicitar otro intento; no mantener un bucle de reintentos desde el navegador. Son límites de conexión/lectura, no un deadline global que incluya DNS.
 
-En Docker utilizar el override optativo:
-
-```sh
-docker compose -f docker-compose.prod.yml -f docker-compose.calendar.yml --env-file .env.prod up -d --build
-```
-
-El override requiere `VASTIO_CALENDAR_CREDENCIALES_HOST` apuntando a un archivo existente fuera del checkout y lo monta de solo lectura en `/run/secrets/vastio-calendar.json`. El compose base sigue sin activar Calendar. No copiar claves en el Dockerfile, en `src/main/resources`, en variables `VITE_*` ni en la imagen.
+El override histórico `docker-compose.calendar.yml` se combinaba con el Compose de producción. Usaba `VASTIO_CALENDAR_CREDENCIALES_HOST` para montar de solo lectura un archivo externo en `/run/secrets/vastio-calendar.json`. El override y las variables se eliminaron.
 
 ## 7. Credenciales y revocación
 

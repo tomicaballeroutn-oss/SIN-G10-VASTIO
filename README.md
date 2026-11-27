@@ -6,6 +6,7 @@ Proyecto Integrador · Seminario Integrador · UTN Facultad Regional Córdoba ·
 
 - Guía de desarrollo y convenciones: [`CLAUDE.md`](CLAUDE.md)
 - Documentación funcional: [`docs/`](docs)
+- [Actualización a V21 y retiro de M-06](docs/operacion/despliegue.md#actualización-a-v21) para bases existentes.
 - Actualización a V9: [resguardo y aprobación manual antes del despliegue](docs/historico/eliminacion-proveedores-despliegue.md).
 - Base local con el seed anterior: [recrear únicamente una base de desarrollo descartable](docs/operacion/despliegue.md#recrear-la-base-de-desarrollo-descartable).
 - Sistema de diseño y prototipos: [`design/`](design)

@@ -1,4 +1,8 @@
-# M-08 — Notificaciones e integración con Google Calendar
+# M-08 — Revisión histórica de notificaciones
+
+En V21, el panel conserva los avisos comerciales y sus indicadores de lectura. El contrato tiene 11 tipos comerciales. La prueba de contraste cubre nueve tokens de color en ambos temas. Las pruebas de lectura y acceso a la ficha usan un aviso de reprogramación.
+
+> **Antecedente histórico.** Los resultados, mediciones y capturas siguientes corresponden a la revisión de M-08 con [M-06, RETIRADO](m-06-google-calendar.md). El tipo `CALENDAR_PENDIENTE` y sus estilos ya no forman parte del contrato vigente.
 
 ## Alcance y contrato
 

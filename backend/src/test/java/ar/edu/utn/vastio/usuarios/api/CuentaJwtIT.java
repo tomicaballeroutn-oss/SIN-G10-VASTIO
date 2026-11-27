@@ -23,14 +23,12 @@ import org.springframework.security.oauth2.jwt.*;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.test.context.TestPropertySource;
 import ar.edu.utn.vastio.*;
 import ar.edu.utn.vastio.usuarios.dominio.*;
 import ar.edu.utn.vastio.usuarios.infraestructura.UsuarioRepository;
 
 @PruebaDeIntegracion
 @Transactional
-@TestPropertySource(properties = "vastio.calendar.habilitado=false")
 class CuentaJwtIT {
     @Autowired MockMvc mvc;
     @Autowired Personas personas;
@@ -43,7 +41,7 @@ class CuentaJwtIT {
     @BeforeEach void datos() { usuario = personas.de(RolCodigo.DIRECCION); usuarios.flush(); }
 
     @ParameterizedTest @EnumSource(RolCodigo.class)
-    void elCambioObligatorioProtegeCalendarYElRefreshConservaSusRoles(RolCodigo rol) throws Exception {
+    void elCambioObligatorioProtegeLaApiYElRefreshConservaSusRoles(RolCodigo rol) throws Exception {
         Usuario cuenta = personas.de(rol);
         cuenta.setDebeCambiarContrasena(true);
         usuarios.saveAndFlush(cuenta);
@@ -51,25 +49,38 @@ class CuentaJwtIT {
                 .content("{\"nombreUsuario\":\"" + cuenta.getNombreUsuario() + "\",\"contrasena\":\"" + Personas.CONTRASENA + "\"}"))
                 .andExpect(status().isOk()).andReturn().getResponse();
         String inicial = "Bearer " + com.jayway.jsonpath.JsonPath.read(ingreso.getContentAsString(), "$.tokenAcceso");
-        // El filtro debe denegar antes del controller, incluso solicitudes de escritura o lectura remota.
-        for (var solicitud : List.of(get("/api/v1/calendar/pendientes"), get("/api/v1/eventos/1/calendar"),
-                post("/api/v1/eventos/1/calendar"), put("/api/v1/eventos/1/calendar"), delete("/api/v1/eventos/1/calendar"),
-                post("/api/v1/eventos/1/calendar/verificacion"), post("/api/v1/eventos/1/calendar/reconciliacion"),
+        // El filtro debe denegar lecturas y escrituras protegidas antes del controlador.
+        for (var solicitud : List.of(get("/api/v1/usuarios"), get("/api/v1/eventos"),
+                post("/api/v1/eventos"), put("/api/v1/eventos/1"), post("/api/v1/eventos/1/reprogramacion"),
+                post("/api/v1/eventos/1/cancelacion"), put("/api/v1/usuarios/1"),
                 get("/api/v1/notificaciones/sin-leer"))) {
             mvc.perform(solicitud.header(HttpHeaders.AUTHORIZATION, inicial)).andExpect(status().isForbidden());
         }
         mvc.perform(post("/api/v1/cuenta/contrasena").header(HttpHeaders.AUTHORIZATION, inicial)
                 .contentType(MediaType.APPLICATION_JSON).content(CAMBIO)).andExpect(status().isNoContent());
-        mvc.perform(get("/api/v1/calendar/pendientes").header(HttpHeaders.AUTHORIZATION, inicial))
+        mvc.perform(get("/api/v1/usuarios").header(HttpHeaders.AUTHORIZATION, inicial))
                 .andExpect(status().isForbidden());
         var renovada = mvc.perform(post("/api/v1/auth/refresh").cookie(ingreso.getCookie("vastio_refresco")))
-                .andExpect(status().isOk()).andExpect(jsonPath("$.usuario.debeCambiarContrasena").value(false))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.usuario.debeCambiarContrasena").value(false))
+                .andExpect(jsonPath("$.usuario.roles[0]").value(rol.name()))
                 .andReturn().getResponse();
         String acceso = "Bearer " + com.jayway.jsonpath.JsonPath.read(renovada.getContentAsString(), "$.tokenAcceso");
         mvc.perform(get("/api/v1/notificaciones/sin-leer").header(HttpHeaders.AUTHORIZATION, acceso))
                 .andExpect(status().isOk());
-        mvc.perform(get("/api/v1/calendar/pendientes").header(HttpHeaders.AUTHORIZATION, acceso))
+        mvc.perform(get("/api/v1/usuarios").header(HttpHeaders.AUTHORIZATION, acceso))
                 .andExpect(rol == RolCodigo.DIRECCION || rol == RolCodigo.COORDINACION ? status().isOk() : status().isForbidden());
+    }
+
+    @Test
+    void lasRutasRetiradasDeCalendarNoEstanRegistradas() throws Exception {
+        String acceso = personas.bearer(usuario);
+        for (var solicitud : List.of(get("/api/v1/calendar/pendientes"), get("/api/v1/eventos/1/calendar"),
+                post("/api/v1/eventos/1/calendar"), put("/api/v1/eventos/1/calendar"),
+                delete("/api/v1/eventos/1/calendar"), post("/api/v1/eventos/1/calendar/verificacion"),
+                post("/api/v1/eventos/1/calendar/reconciliacion"))) {
+            mvc.perform(solicitud.header(HttpHeaders.AUTHORIZATION, acceso)).andExpect(status().isNotFound());
+        }
     }
 
     String token(String subject, Object marca, String tipo, boolean vencido) {

@@ -48,9 +48,9 @@ afterEach(() => {
 });
 
 describe('UI-22 · notificaciones', () => {
-  it.each(['DIRECCION', 'COORDINACION'] satisfies Rol[])('el aviso Calendar de %s conserva color, lectura y ficha sin escribir en Google', async (rol) => {
+  it.each(['DIRECCION', 'COORDINACION'] satisfies Rol[])('un aviso de reprogramación para %s conserva color, lectura y ficha', async (rol) => {
     const aviso: Notificacion = {
-      id: 77, tipo: 'CALENDAR_PENDIENTE', mensaje: 'Google Calendar pendiente: Bruno y Martina',
+      id: 77, tipo: 'REPROGRAMACION', mensaje: 'Evento reprogramado: Bruno y Martina',
       eventoId: 5, fechaHora: '2026-10-30T10:00:00-03:00', leida: false,
     };
     const fetchMock = backendFalso(sesionDe([rol]), ({ metodo, ruta }) => {
@@ -64,8 +64,8 @@ describe('UI-22 · notificaciones', () => {
     const router = montar('/eventos');
     await usuario.click(await screen.findByRole('button', { name: 'Notificaciones, 1 sin leer' }));
     const panel = screen.getByRole('dialog', { name: 'Notificaciones' });
-    const boton = await within(panel).findByRole('button', { name: /Google Calendar pendiente/ });
-    expect(boton).toHaveClass('avisos__aviso--calendar-pendiente', 'is-nuevo');
+    const boton = await within(panel).findByRole('button', { name: /Evento reprogramado: Bruno y Martina/ });
+    expect(boton).toHaveClass('avisos__aviso--reprogramacion', 'is-nuevo');
     expect(boton.querySelector(':scope > svg.v-icon')).not.toBeNull();
     expect(boton).toHaveTextContent(/^Sin leer:/);
     await usuario.click(boton);

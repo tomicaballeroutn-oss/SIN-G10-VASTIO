@@ -70,6 +70,8 @@ El resto de los usuarios se crea desde la aplicación (historia «Administrar us
 
 ## 4. Actualizar a una versión nueva
 
+Si la base existente está en V19 o V20, seguir la [actualización a V21](#actualización-a-v21) antes de ejecutar el arranque.
+
 ```bash
 cd vastio && git pull
 docker compose -f docker-compose.prod.yml --env-file .env.prod up -d --build
@@ -110,6 +112,17 @@ E2E_URL=https://localhost E2E_IGNORAR_CERTIFICADO=1 E2E_USUARIO=direccion E2E_CO
 ```
 
 No correrlo en la misma máquina donde ya hay algo escuchando en los puertos 80 o 443.
+
+## Actualización a V21
+
+1. Identificar la base y la última versión exitosa en `flyway_schema_history`. Para V19 → V21, Flyway aplica V20 (requisitos de seña) y luego V21. Para V20 → V21, aplica solo V21. También se verificó la instalación desde cero hasta V21.
+2. Detener los procesos que escriben en la base existente. Tomar un [respaldo de PostgreSQL y del legajo](#5-respaldos) y verificar la restauración en un destino aislado antes de arrancar el backend nuevo. Si corresponde identificar la publicación externa pendiente, conservar esa referencia en el respaldo con acceso restringido.
+3. Arrancar el backend actualizado con las plantillas vigentes y el Compose del entorno (`docker-compose.yml` para desarrollo o `docker-compose.prod.yml` para el ambiente de prueba). Los endpoints, variables y el override de [M-06, RETIRADO](../mejoras/m-06-google-calendar.md) quedaron fuera del despliegue.
+4. Comprobar que Flyway validó el historial y aplicó V21. Verificar agenda, ficha de eventos y avisos comerciales (`/api/v1/agenda`, `/api/v1/eventos/{id}` y `/api/v1/notificaciones`). [V21](../../backend/src/main/resources/db/migration/V21__remove_google_calendar.sql) borra las tablas, funciones y triggers exclusivos de Calendar, los avisos de ese tipo y sus destinatarios. Conserva los datos comerciales, sus avisos y las migraciones históricas.
+
+**Estado al cierre de la auditoría.** V21 se verificó en bases descartables. Sigue pendiente aplicarla sobre las bases locales originales `vastio-db` y `vastio-calendar-db`.
+
+**Pendientes externos.** Una publicación de prueba figura como `EXPORTADO` en el registro histórico. Un operador autorizado debe identificarla, retirarla en el calendario de prueba y confirmar el resultado. Después corresponde revisar y revocar los accesos, permisos y claves exclusivos de M-06. La aplicación de V21 solo afecta la base local. El retiro externo y la revocación siguen pendientes.
 
 ## Actualización V9: operación previa obligatoria
 
@@ -178,7 +191,7 @@ cd backend
 .\mvnw.cmd spring-boot:run '-Dspring-boot.run.profiles=dev'
 ```
 
-Flyway ejecuta V1–V9 sobre la base vacía; después el seed actual, si se habilitó con `VASTIO_DEMO_CONTRASENA`, carga la demo sin proveedores. No se necesita ni se instala un recibo para una base vacía.
+Flyway ejecuta todas las migraciones disponibles hasta V21 sobre la base vacía. Después, si se habilitó `VASTIO_DEMO_CONTRASENA`, el seed actual carga la demo sin proveedores. V9 no requiere recibo para una base vacía.
 
 ### 3. Verificar el nuevo esquema
 
@@ -190,4 +203,4 @@ docker exec $idDb psql -X -U $usuarioDb -d $base -c 'SELECT version, description
 docker exec $idDb psql -X -U $usuarioDb -d $base -c "SELECT to_regclass('public.proveedor') IS NULL AS sin_tabla, NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema = 'public' AND ((table_name = 'bebida' AND column_name = 'proveedor_habitual_id') OR (table_name = 'ingreso' AND column_name = 'proveedor_id'))) AS sin_relaciones;"
 ```
 
-Deben aparecer las nueve versiones exitosas, la última `9 / eliminar proveedores / true`, y `sin_tabla = true`, `sin_relaciones = true`. Confirmar además arranque sin errores de Flyway/Hibernate y acceso a catálogo, inventario e ingresos. Si no se cumple, conservar el log y revisar la conexión; no editar migraciones históricas ni desactivar Flyway.
+Deben aparecer las 21 versiones exitosas, incluida V9, y `sin_tabla = true`, `sin_relaciones = true`. Confirmar además arranque sin errores de Flyway/Hibernate y acceso a catálogo, inventario e ingresos. Si no se cumple, conservar el log y revisar la conexión. No editar migraciones históricas ni desactivar Flyway.

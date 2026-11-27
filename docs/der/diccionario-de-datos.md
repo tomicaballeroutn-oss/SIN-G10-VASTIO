@@ -1,6 +1,8 @@
 # Vastio — Modelo de datos y diccionario de datos
 
-Modelo operativo actualizado a V13. Los PNG `DER_1` y `DER_2` son referencias históricas del DER v2. [DER_3_bebida.png](DER_3_bebida.png) fue regenerado desde PostgreSQL posterior a V9, con [fuente editable DOT](DER_3_bebida.dot). Ver [alcance y reproducción del módulo B](modelo-bebida-v9.md) y [resguardo antes de V9](../historico/eliminacion-proveedores-despliegue.md).
+Diccionario con base en V13 y actualización de las notificaciones por el retiro de M-06 en V21. Los PNG `DER_1` y `DER_2` son referencias históricas del DER v2. [DER_3_bebida.png](DER_3_bebida.png) fue regenerado desde PostgreSQL posterior a V9, con [fuente editable DOT](DER_3_bebida.dot). Ver [alcance y reproducción del módulo B](modelo-bebida-v9.md) y [resguardo antes de V9](../historico/eliminacion-proveedores-despliegue.md).
+
+El esquema V21 conserva 42 tablas de la aplicación. Retira `publicacion_calendar`, `operacion_calendar`, `calendar_seguimiento` y sus objetos exclusivos, así como los avisos `CALENDAR_PENDIENTE` y sus destinatarios. Las tablas comerciales de agenda y la función de auditoría `fn_solo_insercion` se conservan. Ver [actualización a V21](../operacion/despliegue.md#actualización-a-v21).
 
 Motor: PostgreSQL. Convenciones: nombres en `snake_case` y en español; claves primarias sustitutas (`bigint` generado para tablas transaccionales, `smallint` para catálogos); importes en `numeric(14,2)`, en la moneda que indica su columna de moneda (el único es el de la seña, en ARS o USD sin conversión desde V11: el sistema no maneja precios ni costos); fechas y horas en `timestamptz`; cantidades de bebida en `numeric(10,2)` expresadas siempre en **botellas** (unidad base). Los estados y tipos fijos se modelan como `varchar` con restricción `CHECK`, no como tablas, porque el comportamiento del sistema depende de ellos y no son configurables.
 
@@ -377,16 +379,17 @@ Cambio de unidad de un evento. Conserva la programación original. No cambia el 
 
 #### NOTIFICACION
 
-Aviso generado por un cambio de evento.
+Aviso interno de un evento o del circuito de bebidas.
 
 | Campo | Tipo | Clave | Nulo | Descripción / valores posibles |
 |---|---|---|---|---|
 | `notificacion_id` | bigint | PK | NO | Identificador. |
 | `evento_id` | bigint | FK | SÍ | → evento. El aviso lleva a su ficha. |
-| `tipo` | varchar(30) |  | NO | EVENTO_NUEVO · SENA · CONTRATO · CONFIRMACION · MODIFICACION · REPROGRAMACION · CANCELACION · PLANNER_ASIGNADA · ALERTA_STOCK. |
+| `tipo` | varchar(30) |  | NO | EVENTO_NUEVO · SENA · CONTRATO · CONFIRMACION · MODIFICACION · REPROGRAMACION · CANCELACION · PLANNER_ASIGNADA · ALERTA_STOCK · ASISTENCIA_REAL · ORDEN_PREPARACION. |
 | `mensaje` | varchar(255) |  | NO | Texto visible. |
 | `usuario_origen_id` | bigint | FK | SÍ | → usuario. Null si la generó el sistema. |
 | `fecha_hora` | timestamptz |  | NO | Default now(). |
+| `resuelta` | boolean |  | NO | Predeterminado false. Los avisos resueltos quedan fuera del listado y del contador de no leídos. La lectura se registra por destinatario. |
 
 #### NOTIFICACION_DESTINATARIO
 

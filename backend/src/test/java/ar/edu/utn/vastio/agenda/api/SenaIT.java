@@ -113,6 +113,11 @@ class SenaIT {
                 .andExpect(jsonPath("$.acciones.modificar").value(true))
                 .andExpect(jsonPath("$.historial[?(@.estadoNuevo == 'SENADO')].estadoAnterior", hasItem("PRE_RESERVA")))
                 .andExpect(jsonPath("$.historial[?(@.estadoNuevo == 'SENADO')].usuario.nombre", hasItem("Lucía Ferreyra")));
+
+        entityManager.flush();
+        var guardado = jdbc.queryForMap("SELECT estado, importe_sena FROM evento WHERE evento_id = ?", preReserva);
+        assertThat(guardado).containsEntry("estado", "SENADO");
+        assertThat((java.math.BigDecimal) guardado.get("importe_sena")).isEqualByComparingTo("150000.50");
     }
 
     @Test

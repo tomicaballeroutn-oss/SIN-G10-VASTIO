@@ -106,6 +106,11 @@ class CatalogoIT {
                 {"nombre":"Mediodía","horaInicio":"13:00","horaFin":"01:00"}""")
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.cruzaMedianoche").value(true));
+
+        leer("/turnos", personas.bearer(RolCodigo.COORDINACION))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$[?(@.codigo == 'mediodia')].horaInicio", hasItem("13:00:00")))
+                .andExpect(jsonPath("$[?(@.codigo == 'mediodia')].horaFin", hasItem("01:00:00")));
     }
 
     @Test

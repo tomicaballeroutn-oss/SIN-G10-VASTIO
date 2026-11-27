@@ -83,6 +83,9 @@ class CancelacionIT {
                         hasItem("Desistimiento del cliente: Se mudan a Mendoza")));
         entityManager.flush();
 
+        assertThat(jdbc.queryForObject("SELECT estado FROM evento WHERE evento_id = ?", String.class, evento))
+                .isEqualTo("CANCELADO");
+
         // La unidad vuelve a estar disponible: se puede pre-reservar de nuevo.
         mvc.perform(post("/api/v1/eventos").header(HttpHeaders.AUTHORIZATION, personas.bearer(lucia))
                         .contentType(MediaType.APPLICATION_JSON).content("""

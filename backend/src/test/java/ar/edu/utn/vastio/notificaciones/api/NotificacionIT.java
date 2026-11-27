@@ -96,6 +96,31 @@ class NotificacionIT {
     }
 
     @Test
+    void leerUnAvisoComercialNoLoResuelveYLosResueltosSiguenOcultos() throws Exception {
+        Usuario direccion = personas.de(RolCodigo.DIRECCION);
+        Usuario coordinacion = personas.de(RolCodigo.COORDINACION);
+        long pendiente = aviso(TipoNotificacion.SENA, "Seña registrada de prueba", direccion, coordinacion);
+        long resuelto = aviso(TipoNotificacion.REPROGRAMACION, "Reprogramación resuelta de prueba", direccion);
+        jdbc.update("UPDATE notificacion SET resuelta = true WHERE notificacion_id = ?", resuelto);
+        entityManager.clear();
+
+        listar(direccion, false, 0).andExpect(status().isOk())
+                .andExpect(jsonPath("$.notificaciones[*].id", contains((int) pendiente)))
+                .andExpect(jsonPath("$.notificaciones[0].tipo").value("SENA"))
+                .andExpect(jsonPath("$.sinLeer").value(1));
+        mvc.perform(post("/api/v1/notificaciones/{id}/lectura", pendiente)
+                        .header(HttpHeaders.AUTHORIZATION, personas.bearer(direccion)))
+                .andExpect(status().isNoContent());
+
+        listar(direccion, false, 0).andExpect(jsonPath("$.notificaciones[0].leida").value(true))
+                .andExpect(jsonPath("$.sinLeer").value(0));
+        listar(coordinacion, true, 0).andExpect(jsonPath("$.notificaciones[*].id", contains((int) pendiente)))
+                .andExpect(jsonPath("$.sinLeer").value(1));
+        assertThat(jdbc.queryForObject("SELECT resuelta FROM notificacion WHERE notificacion_id = ?",
+                Boolean.class, pendiente)).isFalse();
+    }
+
+    @Test
     void nadieMarcaUnAvisoQueNoEsSuyo() throws Exception {
         long ajeno = aviso(TipoNotificacion.CONFIRMACION, "Evento confirmado: C", nicolas);
 

@@ -86,6 +86,8 @@ class ReprogramacionIT {
         Map<String, Object> fila = jdbc.queryForMap("SELECT unidad_anterior_id, unidad_nueva_id, motivo_id FROM reprogramacion WHERE evento_id = ?", contratado);
         assertThat(fila.get("unidad_anterior_id")).isEqualTo(escenario.unidad("avril", FECHA, "noche"));
         assertThat(fila.get("unidad_nueva_id")).isEqualTo(escenario.unidad("club", NUEVA, "noche"));
+        assertThat(jdbc.queryForObject("SELECT unidad_id FROM evento WHERE evento_id = ?", Long.class, contratado))
+                .isEqualTo(fila.get("unidad_nueva_id"));
     }
 
     @Test

@@ -10,7 +10,7 @@ Complejo privado de salones de eventos en Córdoba con unos 20 años de operaci�
 
 ## El problema
 
-No falta digitalización: falta un **modelo de datos común**. Hoy hay un Google Calendar compartido (se carga después de concretar la venta), planillas de compras y existencias, un cuaderno de barra en papel. Nada comparte un identificador de evento, así que:
+El relevamiento inicial identificó la falta de un **modelo de datos común**. La organización usaba un Google Calendar compartido (se cargaba después de concretar la venta), planillas de compras y existencias y un cuaderno de barra en papel. Esas herramientas no compartían un identificador de evento, así que:
 
 - La fecha en negociación no está representada y dos vendedoras pueden ofrecer la misma.
 - Nadie sabe cuánto consumió cada evento: la encargada de barra retira cajas, lo anota en papel y devuelve el sobrante sin verificación.
@@ -48,6 +48,8 @@ Entre noviembre y diciembre: cena hasta las 00:00 y fiesta de 00:00 a 05:00 con 
 ## Fuera de alcance
 
 Precios y costos (salvo el importe de la seña), bebidas sin alcohol (por ahora), hielo, vajilla y cristalería, decoración, facturación y contabilidad, pagos reales, integración en línea con la plataforma de tickets, gestión gastronómica, personal, consumo por unidad servida, canal público para el cliente. Notificaciones por WhatsApp: expansión futura.
+
+La publicación de eventos en Google Calendar quedó fuera del alcance vigente tras el [retiro de M-06](../mejoras/m-06-google-calendar.md). Vastio gestiona su agenda interna de forma independiente.
 
 ## Piloto
 

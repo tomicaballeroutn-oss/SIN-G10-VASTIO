@@ -26,11 +26,11 @@ El modelo actual no ofrece un reset que cambie false→true después del primer 
 
 Una firma inválida recibe 401 con el código genérico existente `SESION_VENCIDA`, también usado para expiración y otros JWT inválidos. Ese código indica que la sesión no es utilizable, no demuestra que la causa sea temporal. Se conserva el contrato de recuperación del cliente; no se exponen detalles criptográficos ni se admite el token rechazado.
 
-## Interacción con Google Calendar
+## Primer ingreso en rutas protegidas
 
-La restricción de primer ingreso se aplica también a las consultas y operaciones de Calendar y al contador de notificaciones. Cambiar la contraseña no habilita el token anterior: el cliente debe renovar la sesión. La renovación conserva los roles y los endpoints Calendar siguen reservados a Dirección y Coordinación, sin ampliar permisos al resto de los perfiles.
+La restricción de primer ingreso se aplica a las consultas y escrituras protegidas, incluido el contador de notificaciones. Después de cambiar la contraseña, el token anterior sigue restringido hasta renovar la sesión. La renovación conserva los roles y cada endpoint aplica sus propios permisos.
 
-`CuentaJwtIT` verifica esta matriz con JWT reales, cambio propio y refresh; la integración Calendar se mantiene desactivada en ese contexto de prueba. Los E2E de cuenta comprueban que una visita inicial a Pendientes de Google Calendar redirige a Mi cuenta sin consultar Calendar ni notificaciones, y que después de renovar se recuperan navegación y consultas autorizadas, sin escrituras externas.
+`CuentaJwtIT` verifica la matriz con JWT reales, cambio propio y renovación. Los E2E de cuenta comprueban que intentar abrir Usuarios con una contraseña inicial redirige a Mi cuenta sin consultar usuarios ni notificaciones. Después de renovar, Dirección y Coordinación recuperan la navegación y las consultas autorizadas.
 
 ## Alcance de la medición SQL
 

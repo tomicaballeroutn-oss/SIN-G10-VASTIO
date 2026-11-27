@@ -1,5 +1,7 @@
 # M-06 — Correcciones de la revisión del PR #51
 
+> **Antecedente histórico de [M-06, RETIRADO](m-06-google-calendar.md).** Este registro corresponde al PR #51. No ejecutar sus pasos de configuración, pruebas externas ni integración.
+
 ## 1. Estado inicial verificado (29/10/2026)
 
 - Revisión [Albert, CHANGES_REQUESTED](https://github.com/tomicaballeroutn-oss/SIN-G10-VASTIO/pull/51#pullrequestreview-5690180622).

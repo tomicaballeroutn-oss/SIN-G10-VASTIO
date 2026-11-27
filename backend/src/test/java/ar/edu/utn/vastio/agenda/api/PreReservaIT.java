@@ -91,8 +91,8 @@ class PreReservaIT {
         entityManager.flush();
 
         Map<String, Object> evento = jdbc.queryForMap(
-                "SELECT e.vendedora_id, c.nombre AS cliente, c.telefono FROM evento e JOIN cliente c USING (cliente_id) WHERE evento_id = ?", id);
-        assertThat(evento).containsEntry("vendedora_id", lucia.getId())
+                "SELECT e.estado, e.vendedora_id, c.nombre AS cliente, c.telefono FROM evento e JOIN cliente c USING (cliente_id) WHERE evento_id = ?", id);
+        assertThat(evento).containsEntry("estado", "PRE_RESERVA").containsEntry("vendedora_id", lucia.getId())
                 .containsEntry("cliente", "Delfina Ríos")
                 .containsEntry("telefono", "351 555-1234");
 

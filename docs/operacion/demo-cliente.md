@@ -146,7 +146,6 @@ Casos ya cargados para mostrar sin hacerlos en vivo:
 
 - **Usuarios y perfiles**: alta, perfiles combinables y baja (lo que la persona registró se conserva).
 - **Parámetros**: salones, turnos, tipos de evento, segmentos de asistencia, categorías de servicio, motivos y generales.
-- **Pendientes de Google Calendar**: la publicación de los eventos en el calendario. Solo funciona si el ambiente tiene configurada la cuenta de Google; en la demo local, mostrarlo solo como pantalla.
 
 ## Cierre de la reunión
 
